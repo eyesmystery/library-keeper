@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#BFCCB8" />
+  <meta id="metaDescription" name="description" content="أمين مكتبة ثلاث، يساعدك تختار كتابًا متوفرًا الآن." />
+  <title>أمين مكتبة ثلاث</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section id="welcome" class="welcome-screen brand-pattern" aria-labelledby="welcomeTitle">
+      <div class="welcome-top"><button id="welcomeLangBtn" class="language-button" type="button" aria-label="Switch to English">EN</button></div>
+      <div class="welcome-main">
+        <div class="brand-signature">
+          <img class="brand-mark" src="/static/assets/thalath-logo-brown.png" alt="مكتبة ثلاث" />
+          <p id="brandTagline">مكتبة • مجتمع • مقهى</p>
+        </div>
+        <div class="welcome-copy">
+          <p class="kicker"><span aria-hidden="true"></span><span id="welcomeKicker">أمين مكتبتك في ثلاث</span></p>
+          <h1 id="welcomeTitle">وش ودّك<br />تقرأ اليوم؟</h1>
+          <p id="welcomeBody">سولف معي عن مزاجك، وألقى لك كتابًا من الموجود عندنا.</p>
+        </div>
+        <div class="start-card">
+          <p id="startNote">تقدر تبدأ بكلمة، شعور، أو آخر كتاب عجبك.</p>
+          <button id="startBtn" class="start-button" type="button"><span id="startLabel">سولف معي عن مزاجك</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+        </div>
+        <p class="welcome-steps"><span id="stepDiscover">اكتشف</span><span id="stepAsk">اسأل</span><span id="stepRead">اقرأ</span></p>
+      </div>
+    </section>
+
+    <section id="chat" class="chat-screen" aria-labelledby="chatTitle" hidden>
+      <header class="app-header">
+        <button id="newChatBtn" class="header-action" type="button">جديدة</button>
+        <div class="header-brand"><img src="/static/assets/thalath-logo-brown.png" alt="ثلاث" /><span id="chatTitle">أمين المكتبة</span></div>
+        <button id="chatLangBtn" class="language-button header-language" type="button" aria-label="Switch to English">EN</button>
+      </header>
+      <p id="testBanner" class="notice test-banner" role="note" hidden>وضع الاختبار مفعّل: هذي المحادثة تنحفظ عشان نراجعها ونحسّن المساعد.</p>
+      <div id="chatLog" class="chat-log" role="log" aria-live="polite" aria-relevant="additions" aria-label="المحادثة"></div>
+      <div class="composer-area">
+        <div id="chips" class="chips" aria-label="ردود مقترحة"></div>
+        <form id="composer" class="composer" autocomplete="off">
+          <label id="chatInputLabel" class="sr-only" for="chatInput">اكتب رسالتك لأمين المكتبة</label>
+          <textarea id="chatInput" rows="1" maxlength="500" placeholder="اكتب رسالتك هنا…"></textarea>
+          <button id="sendBtn" class="send-button" type="submit" aria-label="إرسال">
+            <svg id="sendIcon" width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <span id="sendSpinner" class="button-spinner" hidden aria-hidden="true"></span>
+          </button>
+        </form>
+        <p id="trustNote" class="trust-note">ما نطلب اسمك، والمحادثة تنمسح لما تبدأ من جديد.</p>
+      </div>
+    </section>
+
+    <section id="bookDetail" class="detail-screen" aria-labelledby="dTitle" hidden>
+      <div class="detail-head brand-pattern">
+        <header class="detail-header">
+          <button id="backBtn" class="detail-back" type="button">رجوع</button>
+          <img src="/static/assets/thalath-logo-brown.png" alt="ثلاث" />
+          <button id="detailLangBtn" class="language-button header-language" type="button" aria-label="Switch to English">EN</button>
+        </header>
+        <div id="detailCover" class="detail-cover" aria-hidden="true"><span id="dInitial"></span><img id="dCoverImg" alt="" hidden /></div>
+      </div>
+      <div class="detail-body">
+        <h2 id="dTitle"></h2>
+        <p id="dAuthor" class="detail-author"></p>
+        <div class="trait-line"><span id="dGenre"></span><strong id="dPages"></strong></div>
+        <div class="trait-line"><span id="readerLabel">حسب القرّاء</span><strong id="dTraits">اختيار قريب من وصفك</strong></div>
+        <div id="dOriginBox" class="trait-line" hidden><span id="languageLabel">اللغة</span><strong id="dOrigin"></strong></div>
+        <p id="dSummary" class="detail-summary" dir="auto" hidden></p>
+        <p id="dReason" class="detail-reason"></p>
+        <div class="shelf-card"><div><span id="findLabel">بتلقاه في</span><strong id="dShelf"></strong></div><span class="location-mark" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.4 7-12a7 7 0 1 0-14 0c0 6.6 7 12 7 12Z" stroke="currentColor" stroke-width="1.8" /><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.8" /></svg></span></div>
+        <button id="wantBtn" class="want-button" type="button">أبغى هذا الكتاب</button>
+        <p class="stock-note"><span aria-hidden="true"></span><strong id="dStock"></strong><span id="dPrice"></span></p>
+      </div>
+    </section>
+
+    <section id="feedback" class="feedback-screen brand-pattern" aria-labelledby="feedbackTitle" hidden>
+      <button id="feedbackLangBtn" class="language-button feedback-language" type="button" aria-label="Switch to English">EN</button>
+      <img class="feedback-logo" src="/static/assets/thalath-logo-brown.png" alt="ثلاث" />
+      <div class="feedback-card">
+        <div class="success-mark" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.5 3.2 3.2L18 7.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg></div>
+        <h2 id="feedbackTitle">اختيار جميل</h2>
+        <p id="selectedLocation">ستجد الكتاب في الموقع الموضح، ويمكن لموظف المكتبة مساعدتك.</p>
+        <p id="feedbackQuestion" class="feedback-question">هل كانت التوصية مناسبة؟</p>
+        <div class="feedback-actions"><button id="feedbackPerfect" class="feedback-button" type="button" data-value="perfect">مناسبة جدًا</button><button id="feedbackClose" class="feedback-button" type="button" data-value="close">قريبة</button><button id="feedbackNo" class="feedback-button" type="button" data-value="no">غير مناسبة</button></div>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

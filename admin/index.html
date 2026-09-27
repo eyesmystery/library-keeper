@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>لوحة الإدارة — مكتبة ثلاث</title>
+  <style>
+    @font-face{font-family:MarkaziText;src:url("/static/assets/MarkaziText.ttf") format("truetype");font-weight:400 700;font-display:swap}
+    /* Thalath identity (docs/visual-style.md): sage, coral, brown on paper */
+    :root{--sage:#BFCCB8;--sage-deep:#ADB7A7;--sage-soft:#E4EADF;--coral:#D8614A;--brown:#3B1F14;--canvas:#F7F3EC;--surface:#FFFCF7;--ink:#3B1F14;--muted:#756B65;--line:#E4DCD2;--primary:#3B1F14;--primary-hover:#24120B;--primary-soft:#E4EADF;--accent:#D8614A;--accent-soft:#F7E0D9;--danger:#A8321F;--danger-soft:#F9E3DE;--info:#3f566a;--info-soft:#e6ecf1;--weak:#8b918e;--weak-soft:#efede8;--shadow-sm:0 1px 2px rgba(59,31,20,.06),0 6px 20px rgba(59,31,20,.05);--shadow-lg:0 20px 55px rgba(59,31,20,.16);--font:MarkaziText,"SF Arabic","Noto Sans Arabic","Geeza Pro",Tahoma,system-ui,sans-serif}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.6;font-size-adjust:.5}
+    button,input,select{font:inherit}
+    [hidden]{display:none!important}
+    :focus-visible{outline:3px solid rgba(216,97,74,.6);outline-offset:2px}
+    header{position:sticky;top:0;z-index:20;background:var(--sage);color:var(--ink);box-shadow:0 2px 12px rgba(59,31,20,.1)}
+    .brand{display:flex;align-items:center;gap:10px;margin:0;font-size:18px;font-weight:600}.brand img{display:block;width:76px;height:auto}.brand span{padding-inline-start:10px;border-inline-start:1px solid rgba(59,31,20,.25)}
+    .bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;max-width:1180px;margin:0 auto;padding:12px 20px}
+    h1{margin:0;font-size:19px}
+    .tabs{display:flex;flex-wrap:wrap;gap:6px;max-width:100%}
+    .tab{min-height:44px;padding:6px 18px;border:1px solid rgba(59,31,20,.22);border-radius:999px;background:transparent;color:var(--ink);font-weight:700;cursor:pointer}
+    .tab:hover{background:rgba(255,252,247,.45)}
+    .tab[aria-selected="true"]{background:var(--brown);color:var(--surface);border-color:var(--brown)}
+    .visitor-link{margin-inline-start:auto;color:var(--ink);font-size:15px}
+    main{max-width:1180px;margin:0 auto;padding:20px 20px 60px}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+    .stat{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;text-align:right;color:var(--ink)}
+    .stat:hover{border-color:var(--primary)}
+    .stat b{display:block;font-size:24px;line-height:1.3;color:var(--primary)}
+    .stat span{font-size:12px;color:var(--muted)}
+    .stat.warn b{color:var(--danger)}
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+    .toolbar input,.toolbar select{min-height:44px;padding:6px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .toolbar input{flex:1 1 240px}
+    .legend{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:0 0 16px;font-size:12px;color:var(--muted)}
+    .count{font-size:13px;color:var(--muted);margin:0 0 10px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+    .book{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;padding:14px;border:1px solid rgba(59,31,20,.1);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm);text-align:right;color:var(--ink);cursor:pointer;transition:border-color .15s,transform .15s}
+    .book:hover{border-color:rgba(59,31,20,.35);transform:translateY(-1px)}
+    .book.off{opacity:.62}
+    .cover{display:grid;width:54px;aspect-ratio:2/3;place-items:center;border-radius:7px 10px 10px 7px;background:var(--c,var(--primary));color:#fff;font-size:20px;font-weight:800;box-shadow:inset -4px 0 0 rgba(255,255,255,.12)}
+    .book .t{display:block;font-size:15px;font-weight:800;line-height:1.5}
+    .author{display:block;margin:0 0 6px;color:var(--muted);font-size:12px}
+    .meta{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+    .m{padding:1px 8px;border-radius:999px;background:#f1eee6;color:#5f6763;font-size:11px;font-weight:650}
+    .status{padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700}
+    .status.needs_review{background:var(--accent-soft);color:#7a4c32}
+    .status.approved,.status.enriched{background:var(--primary-soft);color:var(--primary)}
+    .status.pending{background:var(--weak-soft);color:var(--weak)}
+    .status.off{background:var(--danger-soft);color:var(--danger)}
+    .book>span:not(.cover){display:block;min-width:0}
+    .chips{display:flex;flex-wrap:wrap;gap:5px}
+    .chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:650;border:1px solid transparent}
+    .chip.confirmed{background:var(--primary-soft);color:var(--primary);border-color:rgba(59,31,20,.2)}
+    .chip.impression{background:var(--accent-soft);color:#7a4c32}
+    .chip.weak{background:var(--weak-soft);color:var(--weak)}
+    .chip.conflict{background:var(--danger-soft);color:var(--danger)}
+    .chip.derived{background:var(--info-soft);color:var(--info)}
+    .foot{display:block;margin-top:8px;font-size:11px;color:var(--muted)}
+    .empty-note{font-size:12px;color:var(--danger)}
+    /* detail sheet */
+    .backdrop{position:fixed;inset:0;z-index:30;background:rgba(24,35,31,.35)}
+    .sheet{position:fixed;inset-block:0;inset-inline-end:0;z-index:31;width:min(760px,100%);overflow-y:auto;background:var(--canvas);box-shadow:var(--shadow-lg);animation:slide .2s ease-out}
+    @keyframes slide{from{transform:translateX(-24px);opacity:0}}
+    .sheet-head{position:sticky;top:0;z-index:2;display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:14px;align-items:center;padding:18px 20px;background:var(--primary);color:#fff}
+    .sheet-head .cover{width:64px}
+    img.cover{display:block;height:auto;object-fit:cover;background:var(--line)}
+    .cover-row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}.cover-big{width:120px;aspect-ratio:2/3;border-radius:8px;object-fit:cover;background:var(--line);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+    .cover-none{display:grid;width:120px;aspect-ratio:2/3;place-items:center;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font-size:13px;text-align:center;padding:8px}
+    .cover-actions{display:flex;flex-direction:column;gap:8px;min-width:180px}.cover-actions label.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;cursor:pointer}
+    .cover-actions input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
+    textarea#fSummary{width:100%;min-height:96px;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;line-height:1.7;resize:vertical}
+    .sheet-head h2{margin:0;font-size:21px;line-height:1.4}
+    .sheet-head p{margin:2px 0 0;color:rgba(255,255,255,.75);font-size:13px}
+    .close{min-width:44px;min-height:44px;border:1px solid rgba(255,255,255,.3);border-radius:12px;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+    .sheet-body{padding:18px 20px 40px}
+    section.block{margin-bottom:16px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+    section.block h3{margin:0 0 12px;font-size:16px;color:var(--primary)}
+    .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+    .fact{padding:10px 12px;border-radius:12px;background:#f3f0e8}
+    .fact span{display:block;font-size:11px;color:var(--muted)}
+    .fact b{font-size:14px}
+    .fact b.unknown{color:var(--weak);font-weight:600}
+    .inv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end}
+    .inv label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+    .inv input[type=number],.inv input[type=text],.inv select{width:100%;min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .switch{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}
+    .switch input{width:22px;height:22px}
+    .btn{min-height:44px;padding:8px 18px;border:0;border-radius:12px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer}
+    .btn:hover{background:var(--primary-hover)}
+    .btn.secondary{background:var(--primary-soft);color:var(--primary)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .state{font-size:12px;color:var(--muted)}
+    .state.error{color:var(--danger)}
+    .attr{padding:12px 0;border-top:1px solid #ece7dc}
+    .attr:first-of-type{border-top:0;padding-top:0}
+    .attr-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
+    .attr-head h4{margin:0;min-width:110px;font-size:14px}
+    .card-val{font-size:13px;color:var(--muted)}
+    .ev{display:grid;gap:4px;margin:6px 0 0;padding:10px 12px;border-radius:12px;background:#faf8f3;border:1px solid #efeae0}
+    .ev-top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:12px;color:var(--muted)}
+    .meter{display:inline-block;width:70px;height:6px;border-radius:999px;background:#e8e3d8;overflow:hidden;vertical-align:middle}
+    .meter i{display:block;height:100%;background:var(--primary)}
+    .ev-sum{margin:0;font-size:13px;line-height:1.7}
+    .ev-links{display:flex;flex-wrap:wrap;gap:4px 14px}.ev-links a,.sources a{font-size:12px;color:var(--info)}.sources a{direction:ltr;unicode-bidi:isolate;word-break:break-all}
+    .warn{font-size:12px;color:var(--danger);font-weight:700}
+    .no-ev{margin:0;font-size:12px;color:var(--weak)}
+    .sources{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+    /* settings */
+    .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:18px}
+    .panel h2{margin:0 0 4px;font-size:17px;color:var(--primary)}
+    .panel p.hint{margin:0 0 12px;font-size:13px;color:var(--muted)}
+    .row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:10px}
+    .row>div{min-width:0;max-width:100%}.row select,.row input{max-width:100%}
+    .row label{display:block;font-size:12px;color:var(--muted)}
+    .row select,.wide{min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .wide{width:280px;max-width:100%}
+    .prov-list{display:grid;gap:10px}
+    .prov{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+    .prov-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:14px}
+    .prov-head b{min-width:150px}
+    .prov-note{font-size:12px;color:var(--muted)}
+    .prov-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .prov-row input{flex:1 1 240px;min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .prov-state{font-size:12px}
+    .prov-state.good{color:var(--success,#2f6b52)}
+    .prov-state.bad{color:var(--danger)}
+    .dot{display:inline-block;width:9px;height:9px;margin-inline-end:6px;border-radius:50%;background:#c9c3b6}
+    .dot.on{background:#2f6b52}
+    .test-out{white-space:pre-wrap;font-size:13px;background:#f3f0e8;border-radius:12px;padding:12px;margin:0}
+    .tbl{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden}
+    .tbl th,.tbl td{padding:7px 9px;border-bottom:1px solid #eee8dc;text-align:right;white-space:nowrap}
+    .tbl th{background:#f3f0e8;color:var(--muted);font-weight:700}
+    .tbl td.ignored,.tbl th.ignored{color:#b3b7b4}
+    .tbl th.mapped{background:var(--primary-soft);color:var(--primary)}
+    details.plist{margin-top:10px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    details.plist summary{min-height:44px;padding:10px 14px;cursor:pointer;font-weight:700;font-size:14px}
+    details.plist ul{margin:0;padding:0 14px 12px 14px;list-style:none;display:grid;gap:5px;font-size:13px;max-height:320px;overflow:auto}
+    .diff{color:var(--muted);font-size:12px}
+    .chip.rejected{background:#f0eeea;color:#9a9e9b;text-decoration:line-through}
+    .ev.is-rejected{opacity:.6}
+    .ev-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+    .mini{min-height:44px;padding:4px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:12px;font-weight:700;cursor:pointer}
+    .mini.ok{border-color:rgba(59,31,20,.35);color:var(--primary)}
+    .mini.no{color:var(--danger)}
+    .mini:hover{background:var(--primary-soft)}
+    .mini:disabled{opacity:.5;cursor:wait}
+    .attr-edit{display:flex;gap:6px;align-items:center;margin-inline-start:auto}
+    .attr-edit select{min-height:44px;padding:2px 8px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:12px}
+    .review-bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:6px;padding:10px 12px;border-radius:12px;background:var(--primary-soft);font-size:12px;color:var(--primary)}
+    .review-bar input{min-height:44px;padding:4px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;margin-inline-start:6px}
+    .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+    .chip.rewaa{background:var(--info-soft);color:var(--info)}
+    @media(max-width:560px){.bar{padding:10px 14px}main{padding:14px 14px 50px}.sheet-body{padding:14px}.sheet-head{padding:14px}}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+    .auth{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:var(--canvas,#f6f2e9)}
+    .auth-card{width:min(100%,380px);background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 20px 55px rgba(24,35,31,.13)}
+    .auth-card h2{margin:0 0 6px;color:var(--primary)}
+    .auth-card label{display:block;margin:12px 0 4px;font-size:13px;color:var(--muted)}
+    .auth-card input{width:100%;min-height:44px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .auth-card .btn{width:100%;margin-top:16px}
+    .auth-err{min-height:18px;margin:10px 0 0;color:#9d3f36;font-size:13px}
+    .who{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:15px}
+    .who button{min-height:44px;padding:6px 12px;border:1px solid rgba(59,31,20,.3);border-radius:10px;background:transparent;color:var(--ink);cursor:pointer}
+    .users td,.users th{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);font-size:13px}
+    .users button{min-height:44px}
+    .usage b{font-size:20px}
+    .off{opacity:.55}
+    /* statistics */
+    .st-head{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between;margin:4px 0 16px}
+    .st-head h2{margin:0;font-size:26px}.st-head .diff{margin:2px 0 0;max-width:620px}
+    .seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--line);border-radius:22px;background:var(--surface)}
+    .seg button{min-height:44px;padding:4px 14px;border:0;border-radius:999px;background:transparent;color:var(--ink);font-weight:600;cursor:pointer}
+    .seg button[aria-pressed="true"]{background:var(--brown);color:var(--surface)}
+    .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:14px}
+    .kpi{padding:16px 18px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm)}
+    .kpi .label{display:block;color:var(--muted);font-size:15px}
+    .kpi b{display:block;margin:2px 0;font-size:40px;line-height:1.1;font-weight:700;color:var(--ink)}
+    .kpi .sub{font-size:14px;color:var(--muted)}.kpi .up{color:#3E6E35}.kpi .down{color:var(--danger)}
+    .panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:14px}
+    .panel-card{padding:16px 18px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm);min-width:0}
+    .panel-card h3{margin:0 0 4px;font-size:20px}.panel-card>.diff{display:block;margin:0 0 12px}
+    .panel-card.span-all{grid-column:1/-1}
+    .days{display:flex;align-items:flex-end;gap:2px;height:160px;padding-top:20px;border-bottom:1px solid var(--line);direction:ltr}
+    .days .d{position:relative;flex:1 1 0;display:flex;align-items:flex-end;height:100%;min-width:3px;cursor:default}
+    .days .d i{display:block;width:100%;border-radius:4px 4px 0 0;background:#5E7F57}
+    .days .d:hover i,.days .d:focus i{background:var(--brown)}
+    .days .d em{position:absolute;bottom:calc(var(--h) + 3px);left:50%;transform:translateX(-50%);font-style:normal;font-size:13px;color:var(--ink);white-space:nowrap}
+    .days-axis{display:flex;justify-content:space-between;margin-top:4px;color:var(--muted);font-size:13px}
+    .tip{position:fixed;z-index:60;padding:6px 10px;border-radius:10px;background:var(--brown);color:var(--surface);font-size:14px;pointer-events:none;box-shadow:var(--shadow-lg)}
+    .satbar{display:flex;gap:2px;height:22px;margin:6px 0 10px;overflow:hidden;border-radius:6px;background:var(--line)}
+    .satbar span{display:block;height:100%}
+    .sat-legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:15px}.sat-legend i{display:inline-block;width:11px;height:11px;margin-inline-end:6px;border-radius:3px;vertical-align:middle}
+    .hbars{display:grid;gap:9px}
+    .hbar{display:grid;grid-template-columns:minmax(90px,150px) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:15px}
+    .hbar .track{height:12px;border-radius:4px;background:var(--sage-soft);overflow:hidden}
+    .hbar .fill{height:100%;border-radius:4px;background:#5E7F57}
+    .hbar .n{min-width:3ch;text-align:left;font-variant-numeric:tabular-nums}
+    .table-scroll{overflow-x:auto}
+    .rank{width:100%;border-collapse:collapse;font-size:15px}
+    .rank th{padding:6px 8px;border-bottom:1px solid var(--line);color:var(--muted);font-weight:600;text-align:right;white-space:nowrap}
+    .rank td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+    .rank .bk{display:flex;align-items:center;gap:10px;min-width:190px}.rank .bk .cover{width:34px;font-size:15px;flex:none}
+    .rank .bk b{display:block;line-height:1.3}.rank .bk small{color:var(--muted)}
+    .rank .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+    .pill{display:inline-block;min-width:26px;margin-inline-end:3px;padding:0 7px;border-radius:999px;font-size:13px;text-align:center;color:#fff}
+    .pill.p{background:#5A8F4E}.pill.c{background:#C8A13E;color:var(--brown)}.pill.n{background:#D8614A}
+    .empty-note{padding:26px;border:1px dashed var(--line);border-radius:16px;color:var(--muted);text-align:center}
+    .list-plain{margin:0;padding:0;list-style:none}.list-plain li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:15px}
+
+    /* library sections */
+    .sec-list{display:grid;gap:10px}
+    .sec{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--canvas)}
+    .sec.on{border-color:rgba(94,127,87,.55);background:#F1F5EE}
+    .sec-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .sec-top input[type=text]{flex:1 1 240px;min-height:44px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .sec-top .switch{min-height:44px}
+    .sec-del{min-height:44px;padding:4px 12px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--danger);cursor:pointer}
+    .sec-genres{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+    .gchip{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:4px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:15px;cursor:pointer}
+    .gchip input{accent-color:var(--brown)}
+    .gchip.taken{opacity:.45}
+    /* about */
+    .about p{margin:0 0 10px;line-height:1.8;max-width:760px}
+    .about ul{margin:0 0 12px;padding-inline-start:20px;line-height:1.9;max-width:760px}
+    .credit{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:15px}
+    .credit img{display:block;width:120px;height:auto}
+    /* trial QR */
+    .qr-row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+    .qr-box{display:grid;width:220px;min-height:220px;place-items:center;border:1px solid var(--line);border-radius:16px;background:#fff;padding:8px}
+    .qr-box svg{display:block;width:100%;height:auto}
+    .qr-info{flex:1 1 260px}.qr-info p{margin:0 0 10px}
+    .qr-status{font-weight:700}.qr-status.ok{color:#3E6E35}.qr-status.bad{color:var(--danger)}
+    #qrPrint{display:none}
+    @media print{
+      @page{size:A5;margin:12mm}
+      body{background:#fff}
+      body>*:not(#qrPrint){display:none!important}
+      #qrPrint{display:flex!important;flex-direction:column;align-items:center;justify-content:center;min-height:180mm;text-align:center;color:#3B1F14}
+      #qrPrint .qp-logo{width:62mm;height:auto}
+      #qrPrint .qp-kicker{margin:3mm 0 8mm;font-size:13pt}
+      #qrPrint h1{margin:0 0 2mm;font-size:30pt}
+      #qrPrint .qp-sub{margin:0 0 8mm;font-size:14pt}
+      #qrPrint .qp-code{width:78mm}#qrPrint .qp-code svg{display:block;width:100%;height:auto}
+      #qrPrint .qp-note{margin-top:8mm;font-size:10pt;color:#756B65}
+    }
+  </style>
+</head>
+<body>
+  <div id="qrPrint" aria-hidden="true">
+    <img class="qp-logo" src="/static/assets/thalath-logo-brown.png" alt="" />
+    <p class="qp-kicker">وجهتك الثقافية</p>
+    <h1>جرّب أمين المكتبة</h1>
+    <p class="qp-sub">امسح الرمز بكاميرا جوالك، وقل له وش ودّك تقرأ</p>
+    <div id="qpCode" class="qp-code"></div>
+    <p class="qp-note">نسخة تجريبية</p>
+  </div>
+  <header>
+    <div class="bar">
+      <h1 class="brand"><img src="/static/assets/thalath-logo-brown.png" alt="ثلاث" /><span>لوحة الإدارة</span></h1>
+      <nav class="tabs" role="tablist" aria-label="أقسام الإدارة">
+        <button class="tab" role="tab" id="tabBooks" aria-selected="true" aria-controls="booksView">الكتب</button>
+        <button class="tab" role="tab" id="tabStats" aria-selected="false" aria-controls="statsView">الإحصاءات</button>
+        <button class="tab" role="tab" id="tabImport" aria-selected="false" aria-controls="importView">استيراد من رواء</button>
+        <button class="tab" role="tab" id="tabSettings" aria-selected="false" aria-controls="settingsView">الإعدادات</button>
+      </nav>
+      <a class="visitor-link" href="/" target="_blank" rel="noopener">واجهة الزائر ↗</a>
+      <div class="who" id="who" hidden><span id="whoName"></span>
+        <button id="pwBtn" type="button">كلمة المرور</button><button id="logoutBtn" type="button">خروج</button></div>
+    </div>
+  </header>
+
+  <div id="auth" class="auth" hidden>
+    <form id="authForm" class="auth-card" autocomplete="on">
+      <h2 id="authTitle">دخول الإدارة</h2>
+      <p id="authHint" class="hint" style="margin:0;color:var(--muted);font-size:13px"></p>
+      <div id="setupName" hidden><label for="aName">اسمك الظاهر</label><input id="aName" autocomplete="name" maxlength="60" /></div>
+      <div id="loginFields">
+        <label for="aUser">اسم المستخدم</label><input id="aUser" dir="ltr" autocomplete="username" maxlength="32" />
+        <label for="aPass">كلمة المرور</label><input id="aPass" type="password" dir="ltr" autocomplete="current-password" />
+      </div>
+      <div id="setupPass2" hidden><label for="aPass2">أعد كلمة المرور</label><input id="aPass2" type="password" dir="ltr" autocomplete="new-password" /></div>
+      <div id="pwFields" hidden>
+        <label for="pCur">كلمة المرور الحالية</label><input id="pCur" type="password" dir="ltr" autocomplete="current-password" />
+        <label for="pNew">كلمة المرور الجديدة</label><input id="pNew" type="password" dir="ltr" autocomplete="new-password" />
+      </div>
+      <button class="btn" id="authBtn" type="submit">دخول</button>
+      <button class="btn secondary" id="authCancel" type="button" hidden>إلغاء</button>
+      <p id="authErr" class="auth-err" role="alert"></p>
+    </form>
+  </div>
+
+  <main>
+    <div id="booksView" role="tabpanel" aria-labelledby="tabBooks">
+      <div id="stats" class="stats" aria-label="ملخص الكتالوج"></div>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="ابحث بالعنوان أو المؤلف أو الرف…" aria-label="بحث" />
+        <select id="genreFilter" aria-label="التصنيف"><option value="">كل التصنيفات</option></select>
+        <select id="viewFilter" aria-label="تصفية">
+          <option value="all">كل الكتب</option>
+          <option value="confirmed">فيها صفات مؤكدة</option>
+          <option value="conflict">فيها تعارض</option>
+          <option value="noreviews">بدون مراجعات</option>
+          <option value="nocover">بدون غلاف</option>
+          <option value="nosummary">بدون نبذة</option>
+          <option value="off">موقوفة عن الظهور</option>
+          <option value="out">نافدة</option>
+        </select>
+      </div>
+      <div class="legend" aria-label="دليل الألوان">
+        <span class="chip confirmed">مؤكد</span> ثقة ٨٥٪ فأكثر (٥ مراجعات أو أكثر)، يُذكر للزائر
+        <span class="chip impression">انطباع</span> ٦٥–٨٤٪، للترتيب فقط
+        <span class="chip weak">ضعيف</span> أقل من ٦٥٪، يُعامل كغير معروف
+        <span class="chip conflict">متعارض</span> المصادر مختلفة، لا يُستخدم حتى يُراجع
+        <span class="chip derived">محسوب</span> مشتق من بيانات أخرى
+      </div>
+      <p id="count" class="count" role="status">جاري تحميل الكتب…</p>
+      <div id="grid" class="grid"></div>
+    </div>
+
+    <div id="statsView" role="tabpanel" aria-labelledby="tabStats" hidden>
+      <div class="st-head">
+        <div><h2>توجهات القرّاء ورضاهم</h2>
+          <p class="diff">من استخدام الزوار للتطبيق. البيانات مجهولة: ما نحفظ كلام الزائر ولا هويته، واختيار الكتاب ما يغيّر المخزون.</p></div>
+        <div class="seg" role="group" aria-label="الفترة">
+          <button type="button" data-days="7">٧ أيام</button><button type="button" data-days="30" aria-pressed="true">٣٠ يوم</button>
+          <button type="button" data-days="90">٩٠ يوم</button><button type="button" data-days="365">سنة</button><button type="button" data-days="0">الكل</button>
+        </div>
+      </div>
+      <p id="stState" class="state" role="status"></p>
+      <div id="stBody"></div>
+    </div>
+
+    <div id="importView" role="tabpanel" aria-labelledby="tabImport" hidden>
+      <section class="panel" aria-labelledby="impTitle">
+        <h2 id="impTitle">١. ارفع ملف التصدير من رواء</h2>
+        <p class="hint">صدّر قائمة المنتجات من رواء بصيغة Excel (xlsx) أو CSV وارفعها هنا. ما يتغير شي قبل ما تشوف المعاينة وتضغط «تطبيق».</p>
+        <div class="row">
+          <input id="impFile" type="file" accept=".csv,.xlsx,.txt,.tsv" class="wide" aria-label="ملف التصدير" />
+          <button id="impUpload" class="btn" type="button">قراءة الملف</button>
+          <span id="impState" class="state" role="status"></span>
+        </div>
+        <p id="lastSync" class="hint" style="margin:0"></p>
+      </section>
+
+      <section id="mapPanel" class="panel" aria-labelledby="mapTitle" hidden>
+        <h2 id="mapTitle">٢. اختر الأعمدة اللي نحتاجها</h2>
+        <p class="hint">اخترنا تلقائيًا الأعمدة الأقرب؛ غيّرها إذا لزم. أي عمود ما تختاره (مثل نوع الضريبة وفئة المنتج) يتم تجاهله.</p>
+        <div id="mapFields" class="inv"></div>
+        <div style="overflow-x:auto;margin-top:14px"><table id="sampleTable" class="tbl"></table></div>
+        <div class="row" style="margin-top:14px">
+          <label class="switch" style="color:var(--ink)"><input id="missingZero" type="checkbox" checked /> الكتب اللي مو موجودة في الملف تصير نافدة (الكمية ٠)</label>
+        </div>
+        <button id="impPlan" class="btn" type="button">معاينة التغييرات</button>
+      </section>
+
+      <section id="planPanel" class="panel" aria-labelledby="planTitle" hidden>
+        <h2 id="planTitle">٣. راجع التغييرات قبل التطبيق</h2>
+        <div id="planStats" class="stats"></div>
+        <p id="planWarn" class="warn" hidden></p>
+        <div id="planLists"></div>
+        <div class="row" style="margin-top:12px">
+          <button id="impApply" class="btn" type="button">تطبيق على الكتالوج</button>
+          <span id="applyState" class="state" role="status"></span>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="histTitle">
+        <h2 id="histTitle">سجل الاستيراد</h2>
+        <div style="overflow-x:auto"><table id="histTable" class="tbl"></table></div>
+      </section>
+    </div>
+
+    <div id="settingsView" role="tabpanel" aria-labelledby="tabSettings" hidden>
+      <section class="panel" aria-labelledby="qrTitle">
+        <h2 id="qrTitle">رمز التجربة (QR)</h2>
+        <p class="hint">يمسحه الطاقم بكاميرا الجوال فتفتح صفحة الزائر مباشرة. الجوال لازم يكون على نفس شبكة الواي فاي اللي عليها هذا الجهاز، والسيرفر مشغّل بوضع التجربة: <b>trial_server.command</b> على ماك أو <b>trial_server.bat</b> على ويندوز.</p>
+        <div class="qr-row">
+          <div id="qrBox" class="qr-box" aria-live="polite"></div>
+          <div class="qr-info">
+            <p id="qrStatus" class="qr-status"></p>
+            <p class="diff">الرابط: <b id="qrUrl" dir="ltr"></b></p>
+            <p class="diff">إذا تغيّر عنوان الجهاز في الشبكة (مثلًا بعد إعادة تشغيل الراوتر) يتغيّر الرمز؛ افتح هذي الصفحة واطبعه من جديد.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <button id="qrPrintBtn" class="btn" type="button">اطبع لوحة الرمز</button>
+              <button id="qrPngBtn" class="btn secondary" type="button">نزّل الرمز كصورة</button>
+              <button id="qrCopyBtn" class="btn secondary" type="button">انسخ الرابط</button>
+            </div>
+            <p id="qrCopyState" class="state" role="status"></p>
+          </div>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="secTitle">
+        <h2 id="secTitle">أقسام المكتبة</h2>
+        <p class="hint">ملف رواء ما فيه موقع للكتب، والموقع ما يُخترع. الترتيب: إذا كتب الموظف موقعًا للكتاب يظهر هو، وإلا يظهر القسم المفعّل اللي فيه تصنيف الكتاب، وإلا يُقال للزائر «اسأل موظف المكتبة». غيّر الأسماء لتطابق اللوحات الموجودة فعلًا في المكتبة، وفعّل القسم لما يكون جاهزًا.</p>
+        <p id="secSummary" class="diff"></p>
+        <div id="secList" class="sec-list"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
+          <button id="secAdd" class="btn secondary" type="button">إضافة قسم</button>
+          <button id="secSave" class="btn" type="button">حفظ الأقسام</button>
+        </div>
+        <p id="secState" class="state" role="status"></p>
+      </section>
+      <section class="panel" aria-labelledby="usersTitle">
+        <h2 id="usersTitle">الموظفون</h2>
+        <p class="hint">المدير يشوف كل شي. الموظف يشوف الكتب ويعدّل المخزون ويراجع الصفات فقط. الإيقاف ما يحذف سجل تعديلات الموظف.</p>
+        <div style="overflow-x:auto"><table class="tbl users" id="usersTable"></table></div>
+        <div class="inv" style="margin-top:12px">
+          <div><label for="nuName">الاسم الظاهر</label><input id="nuName" type="text" maxlength="60" /></div>
+          <div><label for="nuUser">اسم المستخدم (إنجليزي)</label><input id="nuUser" type="text" dir="ltr" maxlength="32" /></div>
+          <div><label for="nuRole">الدور</label><select id="nuRole"><option value="staff">موظف</option><option value="manager">مدير</option></select></div>
+          <div><label for="nuPass">كلمة مرور مؤقتة</label><input id="nuPass" type="text" dir="ltr" maxlength="64" /></div>
+          <button id="nuAdd" class="btn" type="button">إضافة</button>
+        </div>
+        <p id="usersState" class="state" role="status"></p>
+      </section>
+      <section class="panel" aria-labelledby="usageTitle">
+        <h2 id="usageTitle">الاستخدام اليومي للنموذج</h2>
+        <p class="hint">كل رد في المحادثة يستهلك استدعاءين تقريبًا. إذا خلص الحد اليومي، تكمل المحادثة بالنظام البديل بدون نموذج حتى اليوم التالي.</p>
+        <div id="usageStats" class="stats usage"></div>
+        <div class="row"><div><label for="capInput">الحد اليومي (استدعاءات)</label><input id="capInput" class="wide" type="number" min="0" step="50" /></div>
+          <button id="capSave" class="btn" type="button">حفظ</button><span id="capState" class="state" role="status"></span></div>
+      </section>
+      <section class="panel" aria-labelledby="auditTitle">
+        <h2 id="auditTitle">سجل التعديلات</h2>
+        <div style="overflow-x:auto;max-height:320px"><table class="tbl" id="auditTable"></table></div>
+      </section>
+      <section class="panel" aria-labelledby="llmTitle">
+        <h2 id="keysTitle">المزوّدين والمفاتيح</h2>
+        <p class="hint">الصق مفتاح الـ API واضغط حفظ. المفتاح ينحفظ على هذا الجهاز خارج مجلد المشروع (<span dir="ltr">~/.library_keeper/keys.json</span>)، وما يظهر هنا كامل أبدًا. الحفظ مسموح من نفس الجهاز فقط. إذا فيه مفتاح في Terminal فله الأولوية.</p>
+        <div id="providers" class="prov-list"></div>
+      </section>
+      <section class="panel" aria-labelledby="llmTitle">
+        <h2 id="llmTitle">نموذج المحادثة</h2>
+        <p class="hint">اختر المزوّد والنموذج اللي تستخدمه المحادثة، وجرّبه.</p>
+        <div class="row">
+          <div><label for="provider">المزوّد</label><select id="provider"></select></div>
+          <div><label for="model">النموذج</label><select id="model" class="wide" dir="ltr"></select>
+            <input id="modelCustom" class="wide" dir="ltr" placeholder="اكتب اسم النموذج" aria-label="اسم نموذج آخر" hidden />
+            <p id="modelHint" class="hint" hidden></p></div>
+          <button id="saveLlm" class="btn" type="button">حفظ</button>
+          <span id="llmState" class="state" role="status"></span>
+        </div>
+        <div class="row">
+          <div><label for="testMsg">تجربة سريعة</label><input id="testMsg" class="wide" value="ما أبغى شي حزين، أبغى رواية تونّسني" /></div>
+          <button id="runTest" class="btn secondary" type="button">جرّب</button>
+        </div>
+        <pre id="testOut" class="test-out" hidden></pre>
+      </section>
+      <section class="panel" aria-labelledby="tlTitle">
+        <h2 id="tlTitle">وضع الاختبار</h2>
+        <p class="hint">لما يكون مفعّل، كل محادثة في واجهة الزائر تنحفظ في <span dir="ltr">data/test_logs</span> (كلام الزائر، رد النموذج، الكتب، الوقت) عشان نراجعها. يظهر تنبيه للزائر. لا تفعّله وقت التشغيل الفعلي.</p>
+        <div class="row">
+          <label class="switch" style="color:var(--ink);font-size:14px"><input id="tlToggle" type="checkbox" /> حفظ المحادثات للاختبار</label>
+          <span id="tlState" class="state" role="status"></span>
+        </div>
+      </section>
+      <section class="panel about" aria-labelledby="aboutTitle">
+        <h2 id="aboutTitle">عن التطبيق</h2>
+        <p><b>أمين المكتبة الذكي</b> مساعد قراءة لمكتبة ثلاث. يفتحه الزائر من رمز QR على جواله بدون تحميل ولا تسجيل، ويسولف معه عن مزاجه ووقته وآخر كتاب عجبه، فيقترح عليه كتبًا متوفرة فعلًا في المكتبة مع سبب لكل اقتراح ومكانه في المكتبة.</p>
+        <ul>
+          <li>يقترح من كتب المكتبة المتوفرة فقط، والكتاب النافد ما يظهر للزائر.</li>
+          <li>صفات الكتب (المزاج، الإيقاع، الثقل، الفئة العمرية) مستخلصة من آراء القرّاء، ويقدر الموظف يراجعها ويصححها.</li>
+          <li>يدعم العربية والإنجليزية، ويشتغل حتى بدون نموذج ذكاء اصطناعي بفهم الكلمات.</li>
+          <li>لوحة إدارة للكتب والمخزون والأغلفة والأقسام، وإحصاءات لتوجهات القرّاء ورضاهم.</li>
+          <li>الخصوصية: ما يطلب اسم الزائر ولا يحفظ كلامه، والإحصاءات مجهولة.</li>
+        </ul>
+        <p class="diff">الإصدار ١٫٠ — نسخة تجريبية، سبتمبر ٢٠٢٦</p>
+        <div class="credit"><span>تطوير</span><img src="/static/assets/developer-logo.png" alt="إبراهيم" /></div>
+      </section>
+    </div>
+  </main>
+
+  <div id="backdrop" class="backdrop" hidden></div>
+  <aside id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sTitle" hidden></aside>
+
+  <script src="/static/assets/qr.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const COLORS = ['#3B1F14', '#5E7F57', '#B5533F', '#8A6A55', '#6F8A67', '#6B4A3A'];
+    const TIER_AR = { confirmed: 'مؤكد', impression: 'انطباع', weak: 'ضعيف', conflict: 'متعارض', derived: 'محسوب', rejected: 'محذوف' };
+    let catalog = [];
+    let lastFocus = null;
+
+    const esc = t => { const d = document.createElement('div'); d.textContent = String(t ?? ''); return d.innerHTML; };
+    const num = v => new Intl.NumberFormat('ar-SA', { maximumFractionDigits: 2 }).format(v);
+    const cover = b => b.cover_url ? `<img class="cover" src="${esc(b.cover_url)}" alt="" loading="lazy" />`
+      : `<span class="cover" style="--c:${COLORS[b.book_id % COLORS.length]}" aria-hidden="true">${esc([...String(b.title || 'ك')][0])}</span>`;
+    const COVER_SOURCES = { openlibrary: 'Open Library', goodreads: 'Goodreads', abjjad: 'أبجد', web: 'بحث في الإنترنت', staff: 'رفعها موظف' };
+    const host = u => { try { return new URL(u).hostname.replace('www.', ''); } catch (e) { return u; } };
+    const date = s => s ? new Date(s).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'short', day: 'numeric' }) : 'غير معروف';
+    const when = s => s ? new Date(s).toLocaleString('ar-SA-u-ca-gregory', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
+
+    // ---------------- tabs
+    function selectTab(which) {
+      const tabs = { books: ['tabBooks', 'booksView'], stats: ['tabStats', 'statsView'], import: ['tabImport', 'importView'], settings: ['tabSettings', 'settingsView'] };
+      Object.entries(tabs).forEach(([key, [tab, view]]) => {
+        $(tab).setAttribute('aria-selected', String(key === which)); $(view).hidden = key !== which;
+      });
+      if (which === 'settings') { loadTrial(); loadSections(); loadLlm(); loadTestlog(); loadUsers(); loadUsage(); loadAudit(); }
+      if (which === 'import') loadHistory();
+      if (which === 'stats') loadStats();
+      if (which === 'books') loadCatalog();
+    }
+    $('tabBooks').addEventListener('click', () => selectTab('books'));
+    $('tabImport').addEventListener('click', () => selectTab('import'));
+    $('tabStats').addEventListener('click', () => selectTab('stats'));
+    $('tabSettings').addEventListener('click', () => selectTab('settings'));
+
+    // ---------------- catalog list
+    async function loadCatalog() {
+      try {
+        const res = await fetch('/api/admin/catalog');
+        if (!res.ok) throw new Error(res.status);
+        catalog = await res.json();
+        const genres = [...new Set(catalog.map(b => b.genre).filter(Boolean))].sort();
+        $('genreFilter').innerHTML = '<option value="">كل التصنيفات</option>' + genres.map(g => `<option>${esc(g)}</option>`).join('');
+        renderStats(); renderGrid();
+      } catch (err) { $('count').textContent = 'تعذر تحميل الكتب.'; }
+    }
+
+    function renderStats() {
+      const s = [
+        ['all', catalog.length, 'إجمالي الكتب'],
+        ['visible', catalog.filter(b => b.active && b.quantity > 0).length, 'ظاهرة للزوار'],
+        ['confirmed', catalog.filter(b => b.counts.confirmed > 0).length, 'فيها صفات مؤكدة'],
+        ['review', catalog.filter(b => b.status === 'needs_review').length, 'تحتاج مراجعة'],
+        ['conflict', catalog.filter(b => b.counts.conflict > 0).length, 'فيها تعارض', true],
+        ['noreviews', catalog.filter(b => !b.has_reviews).length, 'بدون مراجعات', true],
+        ['nocover', catalog.filter(b => b.active && b.quantity > 0 && !b.cover_url).length, 'متوفرة بدون غلاف', true],
+      ];
+      $('stats').innerHTML = s.map(([key, n, label, warn]) =>
+        `<button type="button" class="stat ${warn && n ? 'warn' : ''}" data-filter="${key}"><b>${num(n)}</b><span>${label}</span></button>`).join('');
+      $('stats').querySelectorAll('.stat').forEach(btn => btn.addEventListener('click', () => {
+        const map = { all: 'all', visible: 'all', confirmed: 'confirmed', review: 'all', conflict: 'conflict', noreviews: 'noreviews', nocover: 'nocover' };
+        $('viewFilter').value = map[btn.dataset.filter]; renderGrid();
+      }));
+    }
+
+    function renderGrid() {
+      const q = $('search').value.trim().toLowerCase();
+      const g = $('genreFilter').value, v = $('viewFilter').value;
+      const list = catalog.filter(b => {
+        if (q && ![b.title, b.author, b.shelf_location].some(x => String(x || '').toLowerCase().includes(q))) return false;
+        if (g && b.genre !== g) return false;
+        if (v === 'confirmed') return b.counts.confirmed > 0;
+        if (v === 'conflict') return b.counts.conflict > 0;
+        if (v === 'noreviews') return !b.has_reviews;
+        if (v === 'nocover') return !b.cover_url;
+        if (v === 'nosummary') return !b.has_summary;
+        if (v === 'off') return !b.active;
+        if (v === 'out') return !(b.quantity > 0);
+        return true;
+      });
+      $('count').textContent = `يعرض ${num(list.length)} من ${num(catalog.length)} كتاب`;
+      $('grid').innerHTML = list.map(b => {
+        const off = !b.active || !(b.quantity > 0);
+        const chips = b.highlights.map(h => `<span class="chip ${h.tier}" title="${TIER_AR[h.tier]} · ${Math.round(h.confidence * 100)}٪">${esc(h.label)}</span>`).join('');
+        return `<button type="button" class="book ${off ? 'off' : ''}" data-id="${b.book_id}" aria-label="فتح بطاقة ${esc(b.title)}">
+          ${cover(b)}
+          <span>
+            <span class="t">${esc(b.title)}</span>
+            <span class="author">${esc(b.author)}</span>
+            <span class="meta">
+              <span class="m">${esc(b.genre || '—')}</span>
+              <span class="m">${b.page_count ? num(b.page_count) + ' ص' : '؟ ص'}</span>
+              ${b.shelf_location ? `<span class="m">${esc(b.shelf_location)}</span>` : ''}
+              <span class="m">${num(b.quantity || 0)} نسخ · ${num(b.price || 0)} ر.س</span>
+              ${!b.active ? '<span class="status off">موقوف</span>' : (!(b.quantity > 0) ? '<span class="status off">نافد</span>' : '')}
+              <span class="status ${esc(b.status)}">${esc(b.status_label)}</span>
+              ${b.source === 'rewaa' ? '<span class="chip rewaa">من رواء</span>' : ''}
+            </span>
+            <span class="chips">${chips || (b.has_reviews ? '<span class="chip weak">لا صفات مزاج/لغة واضحة</span>' : '<span class="empty-note">ما لقينا مراجعات لهذا الكتاب</span>')}</span>
+            <span class="foot">${num(b.counts.confirmed)} مؤكدة · ${num(b.counts.impression)} انطباع · ${num(b.counts.conflict)} متعارضة · ${num(b.counts.weak)} ضعيفة</span>
+          </span>
+        </button>`;
+      }).join('') || '<p class="count">ما فيه كتب مطابقة.</p>';
+      $('grid').querySelectorAll('.book').forEach(el => el.addEventListener('click', () => openCard(Number(el.dataset.id))));
+    }
+    ['search', 'genreFilter', 'viewFilter'].forEach(id => $(id).addEventListener(id === 'search' ? 'input' : 'change', renderGrid));
+
+    // ---------------- book card sheet
+    async function openCard(id) {
+      lastFocus = document.activeElement;
+      $('sheet').innerHTML = '<div class="sheet-body">جاري تحميل البطاقة…</div>';
+      $('sheet').hidden = false; $('backdrop').hidden = false; document.body.style.overflow = 'hidden';
+      try {
+        const res = await fetch(`/api/admin/books/${id}`);
+        if (!res.ok) throw new Error(res.status);
+        renderCard(await res.json());
+      } catch (err) { $('sheet').innerHTML = '<div class="sheet-body">تعذر تحميل البطاقة. <button class="btn secondary" onclick="closeCard()">إغلاق</button></div>'; }
+    }
+
+    function closeCard() {
+      $('sheet').hidden = true; $('backdrop').hidden = true; document.body.style.overflow = '';
+      if (lastFocus) lastFocus.focus();
+    }
+    $('backdrop').addEventListener('click', closeCard);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('sheet').hidden) closeCard(); });
+
+    function factBox(label, value, unknownText = 'غير معروف') {
+      const has = value !== null && value !== undefined && value !== '';
+      return `<div class="fact"><span>${label}</span><b class="${has ? '' : 'unknown'}">${has ? esc(value) : unknownText}</b></div>`;
+    }
+
+    async function reviewAction(bookId, btn) {
+      const body = { action: btn.dataset.act };
+      if (btn.dataset.ev) body.evidence_id = Number(btn.dataset.ev);
+      if (body.action === 'set' || body.action === 'add') body.value = $('opt_' + btn.dataset.attr).value;
+      $('reviewState').className = 'state'; $('reviewState').textContent = 'جاري الحفظ…';
+      $('sheet').querySelectorAll('button.mini').forEach(x => { x.disabled = true; });
+      try {
+        const res = await fetch(`/api/admin/books/${bookId}/attributes/${btn.dataset.attr}`, { method: 'POST',
+          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error || res.status);
+        const top = $('sheet').scrollTop;
+        renderCard(d, true); $('sheet').scrollTop = top;
+        $('reviewState').textContent = 'تم الحفظ';
+        loadCatalog();
+      } catch (err) {
+        $('reviewState').className = 'state error'; $('reviewState').textContent = 'تعذر الحفظ: ' + err.message;
+        $('sheet').querySelectorAll('button.mini').forEach(x => { x.disabled = false; });
+      }
+    }
+
+    let cardLanguages = [];
+    function renderCard(d, keepScroll = false) {
+      if (d.languages) cardLanguages = d.languages;
+      const b = d.book;
+      const attrs = d.attributes.map(a => {
+        const cardVals = a.card.length ? a.card.map(c => esc(c.label)).join('، ') : 'غير معروف';
+        const evs = a.evidence.length ? a.evidence.map(e => `
+          <div class="ev ${e.rejected ? 'is-rejected' : ''}">
+            <div class="ev-top">
+              <span class="chip ${e.tier}">${esc(e.label)} · ${TIER_AR[e.tier]}</span>
+              ${e.site !== 'derived' ? `<span><span class="meter" aria-hidden="true"><i style="width:${Math.round((e.confidence || 0) * 100)}%"></i></span> ثقة ${num(Math.round((e.confidence || 0) * 100))}٪</span>` : ''}
+              <span>المصدر: <b>${esc(e.site_label)}</b></span>
+              ${e.site !== 'derived' ? `<span>${num(e.review_count || 0)} مراجعة</span>` : ''}
+              ${e.scope_label && e.site !== 'derived' ? `<span>${esc(e.scope_label)}</span>` : ''}
+              ${e.conflict ? '<span class="warn">⚠︎ المصادر متعارضة</span>' : ''}
+              ${e.verified ? '<span class="chip confirmed">معتمد من موظف</span>' : ''}
+            </div>
+            ${e.summary ? `<p class="ev-sum" dir="auto">${esc(e.summary)}</p>` : ''}
+            ${e.site === 'derived' ? '<div class="ev-actions"><span class="diff">قيمة محسوبة تلقائيًا؛ لتغييرها استخدم «تعيين».</span></div>' : `<div class="ev-actions">
+              ${e.rejected ? `<span class="diff">حذفها ${esc(e.rejected_by || 'موظف')} · ${date(e.rejected_at)}</span><button class="mini" data-act="restore" data-attr="${a.key}" data-ev="${e.evidence_id}">استرجاع</button>` :
+                `${!e.verified && e.value !== 'unknown' ? `<button class="mini ok" data-act="confirm" data-attr="${a.key}" data-ev="${e.evidence_id}">✓ تأكيد</button>` : ''}
+                 ${e.verified && e.verified_by ? `<span class="diff">أكّدها ${esc(e.verified_by)} · ${date(e.verified_at)}</span>` : ''}
+                 <button class="mini no" data-act="reject" data-attr="${a.key}" data-ev="${e.evidence_id}">✕ حذف</button>`}
+            </div>`}
+            ${e.urls.length ? `<div class="ev-links">${e.urls.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer"><bdi>${esc(host(u))}</bdi> ↗</a>`).join('')}</div>` : ''}
+          </div>`).join('') : '<p class="no-ev">لا توجد أدلة لهذه الصفة.</p>';
+        const control = `<div class="attr-edit"><label class="sr" for="opt_${a.key}">${a.kind === 'multi' ? 'إضافة قيمة' : 'تعيين قيمة'} لـ${esc(a.name)}</label>
+          <select id="opt_${a.key}">${a.options.map(o => `<option value="${o.value}">${esc(o.label)}</option>`).join('')}</select>
+          <button class="mini" data-act="${a.kind === 'multi' ? 'add' : 'set'}" data-attr="${a.key}">${a.kind === 'multi' ? '+ إضافة' : 'تعيين'}</button></div>`;
+        return `<div class="attr"><div class="attr-head"><h4>${esc(a.name)}</h4><span class="card-val">في البطاقة: <b>${cardVals}</b></span>${control}</div>${evs}</div>`;
+      }).join('');
+      $('sheet').innerHTML = `
+        <div class="sheet-head">
+          ${cover(b)}
+          <div><h2 id="sTitle">${esc(b.title)}</h2><p>${esc(b.author)} · <span class="status ${esc(d.profile.status)}">${esc(d.profile.status_label)}</span> · آخر إثراء: ${date(d.profile.last_enriched_at)}</p></div>
+          <button class="close" type="button" aria-label="إغلاق" id="closeBtn">✕</button>
+        </div>
+        <div class="sheet-body">
+          <section class="block"><h3>البيانات الأساسية</h3><div class="facts">
+            ${factBox('التصنيف', b.genre)}${factBox('عدد الصفحات (تقريبي)', b.page_count ? num(b.page_count) : null)}
+            ${factBox('الناشر', b.publisher)}${factBox('سنة النشر', b.publication_year)}
+            ${factBox('ISBN', b.isbn)}${factBox('الأصل واللغة', b.origin, 'غير معروف بعد')}
+            ${factBox('الباركود', b.barcode)}${factBox('رمز المنتج في رواء', b.rewaa_sku)}
+            ${factBox('المصدر', b.source === 'rewaa' ? 'رواء' : 'بيانات تجريبية')}${factBox('آخر مزامنة', b.last_synced_at ? date(b.last_synced_at) : null, 'لم تتم')}
+          </div></section>
+          <section class="block"><h3>المخزون والظهور</h3>
+            <div class="inv">
+              <div><label for="fPrice">السعر (ر.س)</label><input id="fPrice" type="number" min="0" step="0.5" value="${Number(b.price) || 0}" /></div>
+              <div><label for="fQty">الكمية</label><input id="fQty" type="number" min="0" step="1" value="${Number(b.quantity) || 0}" /></div>
+              <div><label for="fShelf">الموقع (اختياري)</label><input id="fShelf" type="text" maxlength="40" placeholder="مثلًا: رف ٣ – الطابق الأرضي" value="${esc(b.shelf_location || '')}" /></div>
+              <label class="switch"><input id="fActive" type="checkbox" ${b.active ? 'checked' : ''} /> يظهر للزوار</label>
+              <button id="saveInv" class="btn" type="button">حفظ</button>
+            </div>
+            <p class="diff" style="margin:8px 0 0">يظهر للزائر: <b>${b.location_kind === 'shelf' ? esc(b.location) + ' (مكتوب للكتاب)' : b.location_kind === 'section' ? esc(b.location) + ' (حسب قسم التصنيف)' : 'لا يظهر موقع، يُطلب من الزائر سؤال الموظف'}</b></p>
+            <p id="invState" class="state" role="status"></p>
+          </section>
+          <section class="block"><h3>الغلاف</h3>
+            <div class="cover-row">
+              ${b.cover_url ? `<img class="cover-big" src="${esc(b.cover_url)}" alt="غلاف ${esc(b.title)}" />` : '<div class="cover-none">لا يوجد غلاف بعد</div>'}
+              <div class="cover-actions">
+                <span class="diff">${b.cover_url ? 'المصدر: ' + esc(COVER_SOURCES[b.cover_source] || b.cover_source || '—') : 'يُبحث تلقائيًا في Open Library ثم Goodreads ثم أبجد.'}</span>
+                <button id="coverFetch" class="btn" type="button">ابحث عن غلاف تلقائيًا</button>
+                <label class="btn" for="coverFile">ارفع صورة الغلاف</label><input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp" />
+                ${b.cover_url ? '<button id="coverRemove" class="btn" type="button">احذف الغلاف</button>' : ''}
+              </div>
+            </div>
+            <p id="coverState" class="state" role="status"></p>
+          </section>
+          <section class="block"><h3>نبذة عن الكتاب</h3>
+            <p class="diff" style="margin:0 0 8px">جملتين أو ثلاث بكلامنا عن موضوع الكتاب، بدون نسخ من المواقع وبدون حرق. يستخدمها أمين المكتبة لتعريف الكتاب للزائر.</p>
+            <textarea id="fSummary" maxlength="700" dir="auto" aria-label="نبذة عن الكتاب">${esc(b.summary || '')}</textarea>
+            <div style="display:flex;gap:10px;align-items:center;margin-top:8px"><button id="saveSummary" class="btn" type="button">حفظ النبذة</button>
+              <span class="diff">${b.summary_source ? 'المصدر: ' + (String(b.summary_source).startsWith('http') ? `<a href="${esc(b.summary_source)}" target="_blank" rel="noopener noreferrer">${esc(host(b.summary_source))}</a>` : 'موظف') : ''}</span></div>
+            <p id="summaryState" class="state" role="status"></p>
+          </section>
+          <section class="block"><h3>لغة الكتاب</h3>
+            <div class="inv">
+              <div><label for="fLang">لغة هذه الطبعة</label><select id="fLang">${langOptions(b.language || 'ar', false)}</select></div>
+              <div><label for="fOrig">لغة الأصل</label><select id="fOrig">${langOptions(b.original_language || '', true)}</select></div>
+              <div><label for="fTrans">المترجم</label><input id="fTrans" type="text" maxlength="120" value="${esc(b.translator || '')}" /></div>
+              <button id="saveLang" class="btn" type="button">حفظ</button>
+            </div>
+            <p id="langState" class="state" role="status"></p>
+          </section>
+          <section class="block"><h3>الصفات القرائية (من مراجعات القرّاء)</h3>
+            <div class="review-bar">
+              <span>المراجعة اختيارية: أكّدت ${num(d.review.verified)} من ${num(d.review.total)} صفة. البطاقة تشتغل في التوصية حتى بدون مراجعة.</span>
+              <span>تُسجَّل المراجعة باسمك: <b>${esc(ME ? ME.name : '')}</b></span>
+            </div>
+            <p id="reviewState" class="state" role="status"></p>
+            ${attrs}</section>
+          <section class="block"><h3>كل المصادر المقروءة</h3>${d.sources.length ? `<ul class="sources">${d.sources.map(u => `<li><a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(decodeURI(u))}</a></li>`).join('')}</ul>` : '<p class="no-ev">لا توجد مصادر مسجلة.</p>'}</section>
+        </div>`;
+      $('closeBtn').addEventListener('click', closeCard);
+      if (!keepScroll) $('closeBtn').focus();
+      $('sheet').querySelectorAll('button.mini').forEach(btn => btn.addEventListener('click', () => reviewAction(b.book_id, btn)));
+      $('saveInv').addEventListener('click', () => saveInventory(b.book_id));
+      $('saveLang').addEventListener('click', () => saveLanguage(b.book_id));
+      $('saveSummary').addEventListener('click', () => saveSummary(b.book_id));
+      $('coverFetch').addEventListener('click', () => coverAction(b.book_id, 'fetch'));
+      $('coverFile').addEventListener('change', () => coverAction(b.book_id, 'upload'));
+      if ($('coverRemove')) $('coverRemove').addEventListener('click', () => coverAction(b.book_id, 'remove'));
+    }
+
+    async function reopenCard(id, stateId, text) {
+      const top = $('sheet').scrollTop;
+      renderCard(await (await fetch(`/api/admin/books/${id}`)).json(), true);
+      $('sheet').scrollTop = top; $(stateId).textContent = text; loadCatalog();
+    }
+
+    async function saveSummary(id) {
+      const st = $('summaryState'); st.textContent = 'جاري الحفظ…'; $('saveSummary').disabled = true;
+      try {
+        const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ summary: $('fSummary').value }) });
+        if (!res.ok) throw new Error();
+        await reopenCard(id, 'summaryState', 'تم الحفظ');
+      } catch (e) { st.textContent = 'تعذر الحفظ (الحد ٧٠٠ حرف)'; $('saveSummary').disabled = false; }
+    }
+
+    const COVER_ERRORS = { 'no cover found': 'ما لقينا غلاف في Open Library ولا Goodreads ولا أبجد. ارفعه يدويًا.',
+      'image too small or empty': 'الصورة صغيرة جدًا أو فارغة.', 'image larger than 5 MB': 'الصورة أكبر من ٥ ميجابايت.',
+      'not a JPEG, PNG or WebP image': 'الملف لازم يكون صورة JPG أو PNG أو WebP.', 'image dimensions too small': 'أبعاد الصورة صغيرة جدًا.' };
+    async function coverAction(id, action) {
+      const st = $('coverState');
+      st.textContent = action === 'fetch' ? 'جاري البحث… (قد يأخذ نصف دقيقة)' : action === 'upload' ? 'جاري الرفع…' : 'جاري الحذف…';
+      try {
+        let res;
+        if (action === 'upload') {
+          const file = $('coverFile').files[0]; if (!file) { st.textContent = ''; return; }
+          const form = new FormData(); form.append('file', file);
+          res = await fetch(`/api/admin/books/${id}/cover`, { method: 'POST', body: form });
+        } else if (action === 'fetch') res = await fetch(`/api/admin/books/${id}/cover/fetch`, { method: 'POST' });
+        else res = await fetch(`/api/admin/books/${id}/cover`, { method: 'DELETE' });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) { st.textContent = COVER_ERRORS[d.error] || 'تعذر تنفيذ العملية (تأكد من اتصال الإنترنت).'; return; }
+        await reopenCard(id, 'coverState', action === 'remove' ? 'تم حذف الغلاف' : 'تم حفظ الغلاف');
+      } catch (e) { st.textContent = 'تعذر تنفيذ العملية'; }
+    }
+
+    function langOptions(current, allowUnknown) {
+      const langs = (cardLanguages || []);
+      return (allowUnknown ? `<option value="" ${current ? '' : 'selected'}>غير معروف</option>` : '') +
+        langs.map(l => `<option value="${esc(l.value)}" ${l.value === current ? 'selected' : ''}>${esc(l.label)}</option>`).join('');
+    }
+
+    async function saveLanguage(id) {
+      const st = $('langState');
+      const body = { language: $('fLang').value, original_language: $('fOrig').value, translator: $('fTrans').value.trim() };
+      st.textContent = 'جاري الحفظ…'; $('saveLang').disabled = true;
+      try {
+        const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (!res.ok) throw new Error();
+        const top = $('sheet').scrollTop;
+        renderCard(await (await fetch(`/api/admin/books/${id}`)).json(), true);
+        $('sheet').scrollTop = top; $('langState').textContent = 'تم الحفظ';
+        loadCatalog();
+      } catch (e) { st.textContent = 'تعذر الحفظ'; }
+      finally { $('saveLang').disabled = false; }
+    }
+
+    async function saveInventory(id) {
+      const body = { price: parseFloat($('fPrice').value), quantity: parseInt($('fQty').value, 10),
+                     shelf_location: $('fShelf').value.trim(), active: $('fActive').checked ? 1 : 0 };
+      const st = $('invState'); st.className = 'state';
+      if (!Number.isFinite(body.price) || body.price < 0 || !Number.isInteger(body.quantity) || body.quantity < 0) {
+        st.textContent = 'قيمة غير صحيحة'; st.classList.add('error'); return;
+      }
+      st.textContent = 'جاري الحفظ…'; $('saveInv').disabled = true;
+      try {
+        const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (!res.ok) throw new Error(res.status);
+        st.textContent = 'تم الحفظ';
+        const item = catalog.find(b => b.book_id === id);
+        if (item) Object.assign(item, body);
+        renderStats(); renderGrid();
+      } catch (err) { st.textContent = 'تعذر الحفظ'; st.classList.add('error'); }
+      finally { $('saveInv').disabled = false; }
+    }
+
+    // ---------------- settings: model + test mode
+    let llmStatus = null;
+    const OTHER = '__other__';
+    function currentModel() {
+      return $('model').value === OTHER ? $('modelCustom').value.trim() : $('model').value;
+    }
+    function updateModelHint() {
+      const p = (llmStatus.providers || []).find(x => x.id === $('provider').value);
+      const opt = p && (p.model_options || []).find(o => o.value === $('model').value);
+      const other = $('model').value === OTHER;
+      $('modelCustom').hidden = !other;
+      let hint = '';
+      if (other) hint = 'اكتب الاسم بالضبط كما يظهر عند المزوّد.';
+      else if (opt) {
+        hint = esc(opt.note || '');
+        if (opt.installed === false && p.id === 'ollama')
+          hint += (hint ? ' — ' : '') + `غير مثبت، نفّذ في Terminal: <code dir="ltr">ollama pull ${esc(opt.value)}</code>`;
+      }
+      $('modelHint').innerHTML = hint; $('modelHint').hidden = !hint;
+    }
+    function fillModels() {
+      const p = (llmStatus.providers || []).find(x => x.id === $('provider').value);
+      const sel = $('model'); sel.replaceChildren();
+      const opts = p ? (p.model_options || []) : [];
+      const groups = {};
+      opts.forEach(o => {
+        const el = document.createElement('option'); el.value = o.value; el.textContent = o.label + (o.installed === false ? ' (غير مثبت)' : '');
+        if (o.group) {
+          if (!groups[o.group]) { groups[o.group] = document.createElement('optgroup'); groups[o.group].label = o.group; sel.appendChild(groups[o.group]); }
+          groups[o.group].appendChild(el);
+        } else sel.appendChild(el);
+      });
+      const other = document.createElement('option'); other.value = OTHER; other.textContent = 'نموذج آخر… (اكتب الاسم)'; sel.appendChild(other);
+      const saved = p && llmStatus.active && llmStatus.active.provider === p.id ? llmStatus.active.model : '';
+      const wanted = saved || (p && p.default_model) || (opts[0] && opts[0].value) || '';
+      if (wanted && opts.some(o => o.value === wanted)) { sel.value = wanted; $('modelCustom').value = ''; }
+      else if (wanted || !opts.length) { sel.value = OTHER; $('modelCustom').value = wanted; }
+      updateModelHint();
+    }
+    $('model').addEventListener('change', updateModelHint);
+    async function loadLlm() {
+      try {
+        llmStatus = await (await fetch('/api/admin/llm')).json();
+        renderProviders();
+        $('provider').innerHTML = '<option value="none">بدون ذكاء اصطناعي (كلمات فقط)</option>' +
+          llmStatus.providers.map(p => `<option value="${p.id}">${esc(p.label)}${p.configured ? '' : ' (غير جاهز)'}</option>`).join('');
+        $('provider').value = llmStatus.active ? llmStatus.active.provider : 'none';
+        fillModels();
+        $('llmState').textContent = llmStatus.forced_off ? 'الذكاء الاصطناعي مطفأ من Terminal' :
+          (llmStatus.active ? `المستخدم الآن: ${llmStatus.active.provider} · ${llmStatus.active.model}` : 'بدون ذكاء اصطناعي الآن');
+      } catch (err) { $('llmState').textContent = 'تعذر تحميل إعدادات النموذج'; }
+    }
+    function renderProviders() {
+      $('providers').innerHTML = llmStatus.providers.map(p => `
+        <div class="prov" data-pid="${p.id}">
+          <div class="prov-head"><span><span class="dot ${p.configured ? 'on' : ''}"></span><b>${esc(p.label)}</b></span>
+            <span class="prov-note">${esc(p.note)}${p.masked_key ? ` · <span dir="ltr">${esc(p.masked_key)}</span>` : ''}</span></div>
+          ${(p.id === 'ollama' || p.id === 'custom') ? `<div class="prov-row">
+            <input type="url" dir="ltr" data-field="url" value="${esc(p.address || '')}" placeholder="${p.id === 'ollama' ? 'http://localhost:11434' : 'https://example.com/v1'}" aria-label="عنوان ${esc(p.label)}" />
+            <button class="btn secondary" type="button" data-do="url">حفظ العنوان</button></div>` : ''}
+          ${p.uses_key ? `<div class="prov-row">
+            <input type="password" dir="ltr" autocomplete="off" data-field="key" placeholder="${p.masked_key ? 'مفتاح محفوظ ' + esc(p.masked_key) + ' — الصق مفتاح جديد لاستبداله' : (p.key_optional ? 'مفتاح (اختياري)' : 'الصق المفتاح هنا')}" aria-label="مفتاح ${esc(p.label)}" />
+            <button class="btn" type="button" data-do="key">حفظ المفتاح</button>
+            ${p.key_source === 'saved' ? '<button class="btn secondary" type="button" data-do="delkey">حذف المفتاح</button>' : ''}</div>` : ''}
+          <div class="prov-row"><button class="btn secondary" type="button" data-do="ping">اختبار الاتصال</button><span class="prov-state" role="status"></span></div>
+        </div>`).join('');
+      $('providers').querySelectorAll('button[data-do]').forEach(btn => btn.addEventListener('click', () => providerAction(btn)));
+    }
+    async function providerAction(btn) {
+      const box = btn.closest('.prov'); const pid = box.dataset.pid; const st = box.querySelector('.prov-state');
+      const act = btn.dataset.do; st.className = 'prov-state'; st.textContent = 'جاري…'; btn.disabled = true;
+      try {
+        let res, d;
+        if (act === 'key' || act === 'delkey') {
+          const key = act === 'key' ? box.querySelector('[data-field=key]').value.trim() : '';
+          if (act === 'key' && !key) throw new Error('الصق المفتاح أولًا');
+          res = await fetch('/api/admin/llm/key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider: pid, key }) });
+        } else if (act === 'url') {
+          res = await fetch('/api/admin/llm/endpoint', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ provider: pid, url: box.querySelector('[data-field=url]').value.trim() }) });
+        } else {
+          const model = ($('provider').value === pid && currentModel()) || '';
+          res = await fetch('/api/admin/llm/ping', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider: pid, model }) });
+          d = await res.json();
+          if (!res.ok || !d.ok) throw new Error(d.error || res.status);
+          st.className = 'prov-state good'; st.textContent = `✓ يشتغل (${d.seconds} ث)`; btn.disabled = false; return;
+        }
+        d = await res.json();
+        if (!res.ok) throw new Error(d.error || res.status);
+        await loadLlm();
+        const again = document.querySelector(`.prov[data-pid="${pid}"] .prov-state`);
+        if (again) { again.className = 'prov-state good'; again.textContent = act === 'delkey' ? 'تم حذف المفتاح' : 'تم الحفظ'; }
+      } catch (err) { st.className = 'prov-state bad'; st.textContent = 'تعذر: ' + err.message; btn.disabled = false; }
+    }
+    $('provider').addEventListener('change', fillModels);
+    $('saveLlm').addEventListener('click', async () => {
+      $('llmState').textContent = 'جاري الحفظ…';
+      try {
+        const res = await fetch('/api/admin/llm', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: $('provider').value, model: currentModel() }) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || res.status);
+        await loadLlm();
+      } catch (err) { $('llmState').textContent = 'تعذر الحفظ: ' + err.message; }
+    });
+    $('runTest').addEventListener('click', async () => {
+      const out = $('testOut'); out.hidden = false; out.textContent = 'جاري التجربة…'; $('runTest').disabled = true;
+      try {
+        const d = await (await fetch('/api/admin/llm/test', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: $('testMsg').value }) })).json();
+        const lines = [`الطريقة: ${d.understanding === 'ai' ? 'ذكاء اصطناعي (' + d.provider + ' · ' + d.model + ')' : 'كلمات فقط'} — ${d.seconds} ث`, '', d.reply, ''];
+        (d.books || []).forEach(b => lines.push(`• ${b.title}: ${b.reason}`));
+        if (d.debug && d.debug.why) lines.push('', 'السبب: ' + d.debug.why);
+        out.textContent = lines.join('\n');
+      } catch (err) { out.textContent = 'تعذرت التجربة'; }
+      finally { $('runTest').disabled = false; }
+    });
+    async function loadTestlog() {
+      try {
+        const d = await (await fetch('/api/admin/testlog')).json();
+        $('tlToggle').checked = d.enabled; $('tlToggle').disabled = d.production;
+        $('tlState').textContent = d.production ? 'معطّل في وضع النشر' : `${d.enabled ? 'مفعّل' : 'مطفي'} · المحفوظ: ${d.conversations} محادثة، ${d.turns} رسالة`;
+      } catch (err) { $('tlState').textContent = 'تعذر تحميل حالة وضع الاختبار'; }
+    }
+    $('tlToggle').addEventListener('change', async () => {
+      $('tlState').textContent = 'جاري الحفظ…';
+      try {
+        const res = await fetch('/api/admin/testlog', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: $('tlToggle').checked }) });
+        if (!res.ok) throw new Error((await res.json()).error || res.status);
+      } catch (err) { $('tlState').textContent = 'تعذر الحفظ: ' + err.message; }
+      loadTestlog();
+    });
+
+    // ---------------- Rewaa import
+    let imp = null;
+    const FIELD_ORDER = ['title', 'barcode', 'sku', 'author', 'price', 'quantity', 'shelf'];
+    function currentMapping() {
+      const m = {};
+      FIELD_ORDER.forEach(f => { const v = $('map_' + f).value; if (v !== '') m[f] = Number(v); });
+      return m;
+    }
+    function renderSample() {
+      const m = currentMapping(); const used = new Map(Object.entries(m).map(([f, i]) => [i, imp.fields[f].label]));
+      const head = imp.headers.map((h, i) => `<th class="${used.has(i) ? 'mapped' : 'ignored'}">${esc(h)}${used.has(i) ? `<br><small>← ${esc(used.get(i))}</small>` : '<br><small>يُتجاهل</small>'}</th>`).join('');
+      const body = imp.sample.map(r => `<tr>${r.map((c, i) => `<td class="${used.has(i) ? '' : 'ignored'}">${esc(c)}</td>`).join('')}</tr>`).join('');
+      $('sampleTable').innerHTML = `<thead><tr>${head}</tr></thead><tbody>${body}</tbody>`;
+    }
+    $('impUpload').addEventListener('click', async () => {
+      const file = $('impFile').files[0];
+      if (!file) { $('impState').textContent = 'اختر ملف أولًا'; return; }
+      $('impState').textContent = 'جاري قراءة الملف…'; $('planPanel').hidden = true;
+      const fd = new FormData(); fd.append('file', file);
+      try {
+        const res = await fetch('/api/admin/import/upload', { method: 'POST', body: fd });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error || res.status);
+        imp = d;
+        $('impState').textContent = `تمت القراءة: ${num(d.row_count)} صف، ${num(d.headers.length)} عمود`;
+        $('mapFields').innerHTML = FIELD_ORDER.map(f => `<div><label for="map_${f}">${esc(d.fields[f].label)}${d.fields[f].required ? ' *' : ''}</label>
+          <select id="map_${f}" class="wide" style="width:100%"><option value="">— لا يوجد —</option>${d.headers.map((h, i) => `<option value="${i}" ${d.suggested[f] === i ? 'selected' : ''}>${esc(h)}</option>`).join('')}</select></div>`).join('');
+        FIELD_ORDER.forEach(f => $('map_' + f).addEventListener('change', renderSample));
+        renderSample(); $('mapPanel').hidden = false;
+      } catch (err) { $('impState').textContent = 'تعذر: ' + err.message; }
+    });
+    function listBlock(title, items, fmt, open = false) {
+      if (!items.length) return '';
+      return `<details class="plist" ${open ? 'open' : ''}><summary>${title} (${num(items.length)})</summary><ul>${items.slice(0, 300).map(i => `<li>${fmt(i)}</li>`).join('')}${items.length > 300 ? '<li class="diff">… والباقي</li>' : ''}</ul></details>`;
+    }
+    const FIELD_AR = { price: 'السعر', quantity: 'الكمية', shelf_location: 'الرف', barcode: 'الباركود', rewaa_sku: 'رمز رواء' };
+    $('impPlan').addEventListener('click', async () => {
+      $('applyState').textContent = '';
+      try {
+        const res = await fetch('/api/admin/import/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ upload_id: imp.upload_id, mapping: currentMapping(), missing_mode: $('missingZero').checked ? 'zero' : 'report' }) });
+        const p = await res.json();
+        if (!res.ok) throw new Error(p.error || res.status);
+        const zero = $('missingZero').checked;
+        $('planStats').innerHTML = [[p.new.length, 'كتب جديدة'], [p.updated.length, 'تحديثات'], [p.unchanged.length, 'بدون تغيير'],
+          [p.missing.length, zero ? 'بتصير نافدة' : 'مو موجودة في الملف', zero], [p.invalid.length, 'صفوف فيها مشكلة', true]]
+          .map(([n, l, w]) => `<div class="stat ${w && n ? 'warn' : ''}"><b>${num(n)}</b><span>${l}</span></div>`).join('');
+        $('planWarn').hidden = !p.match_warning; $('planWarn').textContent = p.match_warning || '';
+        $('planLists').innerHTML =
+          listBlock('كتب جديدة بتنضاف (بطاقتها بانتظار الإثراء)', p.new, i => `<b>${esc(i.title)}</b> <span class="diff">${esc(i.author || 'مؤلف غير معروف')} · ${i.price ?? '—'} ر.س · كمية ${i.quantity ?? '—'} ${i.barcode ? '· ' + esc(i.barcode) : ''}</span>`, true) +
+          listBlock('تحديثات على كتب موجودة', p.updated, i => `<b>${esc(i.title)}</b> <span class="diff">(مطابقة ب${esc(i.matched_by)}) ${Object.entries(i.changes).map(([k, [a, b]]) => `${FIELD_AR[k] || k}: ${esc(a ?? '—')} ← ${esc(b)}`).join(' · ')}</span>${i.note ? `<br><span class="diff">⚠︎ ${esc(i.note)}</span>` : ''}`, true) +
+          listBlock('صفوف فيها مشكلة (ما بتنضاف)', p.invalid, i => `سطر ${num(i.row)}: <b>${esc(i.title || '—')}</b> <span class="warn">${esc(i.problems.join('، '))}</span>`, true) +
+          listBlock(zero ? 'كتب بتصير نافدة لأنها مو في الملف' : 'كتب في الكتالوج مو موجودة في الملف (ما بتتغير)', p.missing, i => `${esc(i.title)} <span class="diff">${i.source === 'rewaa' ? 'من رواء' : 'بيانات تجريبية'} · كمية ${num(i.quantity || 0)}</span>`) +
+          listBlock('بدون تغيير', p.unchanged, i => `${esc(i.title)}${i.note ? ` <span class="diff">⚠︎ ${esc(i.note)}</span>` : ''}`);
+        $('impApply').dataset.armed = ''; $('impApply').textContent = 'تطبيق على الكتالوج';
+        $('planPanel').hidden = false; $('planPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) { $('impState').textContent = 'تعذرت المعاينة: ' + err.message; }
+    });
+    $('impApply').addEventListener('click', async () => {
+      if (!$('impApply').dataset.armed) { $('impApply').dataset.armed = '1'; $('impApply').textContent = 'متأكد؟ اضغط مرة ثانية للتطبيق'; return; }
+      $('impApply').disabled = true; $('applyState').textContent = 'جاري التطبيق…';
+      try {
+        const res = await fetch('/api/admin/import/apply', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ upload_id: imp.upload_id, mapping: currentMapping(), missing_mode: $('missingZero').checked ? 'zero' : 'report' }) });
+        const r = await res.json();
+        if (!res.ok) throw new Error(r.error || res.status);
+        $('applyState').textContent = `تم: ${num(r.added)} جديد، ${num(r.updated)} تحديث، ${num(r.marked_out_of_stock)} صارت نافدة، ${num(r.invalid)} صف متجاهل`;
+        $('mapPanel').hidden = true; imp = null; $('impFile').value = '';
+        loadHistory();
+      } catch (err) { $('applyState').textContent = 'تعذر التطبيق: ' + err.message; }
+      finally { $('impApply').disabled = false; $('impApply').dataset.armed = ''; $('impApply').textContent = 'تطبيق على الكتالوج'; }
+    });
+    async function loadHistory() {
+      try {
+        const h = await (await fetch('/api/admin/import/history')).json();
+        $('lastSync').textContent = h.length ? `آخر مزامنة: ${date(h[0].applied_at)} (${esc(h[0].file_name || '')})` : 'ما تمت أي مزامنة من رواء للحين.';
+        $('histTable').innerHTML = h.length ? `<thead><tr><th>التاريخ</th><th>الملف</th><th>صفوف</th><th>جديد</th><th>تحديث</th><th>بدون تغيير</th><th>مو في الملف</th><th>صارت نافدة</th><th>مشاكل</th></tr></thead><tbody>${h.map(r => `<tr><td>${date(r.applied_at)}</td><td>${esc(r.file_name || '')}</td><td>${num(r.rows_read)}</td><td>${num(r.added)}</td><td>${num(r.updated)}</td><td>${num(r.unchanged)}</td><td>${num(r.missing)}</td><td>${num(r.marked_out_of_stock)}</td><td>${num(r.invalid)}</td></tr>`).join('')}</tbody>` : '<tbody><tr><td>لا يوجد سجل بعد.</td></tr></tbody>';
+      } catch (err) { $('lastSync').textContent = 'تعذر تحميل السجل'; }
+    }
+
+    // ---------------- accounts (sign-in, roles, CSRF)
+    let ME = null, CSRF = null, authMode = 'login';
+    const rawFetch = window.fetch.bind(window);
+    window.fetch = async (url, opts = {}) => {
+      opts = { ...opts };
+      if (opts.method && opts.method !== 'GET' && CSRF) opts.headers = { ...(opts.headers || {}), 'X-CSRF-Token': CSRF };
+      const res = await rawFetch(url, opts);
+      const u = String(url);
+      if (res.status === 401 && u.startsWith('/api/admin') && !u.startsWith('/api/admin/session') && !u.startsWith('/api/admin/login') && !u.startsWith('/api/admin/me')) showAuth('login');
+      return res;
+    };
+    function showAuth(mode, hint) {
+      authMode = mode;
+      const setup = mode === 'setup', pw = mode === 'password';
+      $('authTitle').textContent = setup ? 'إنشاء حساب المدير' : pw ? 'تغيير كلمة المرور' : 'دخول الإدارة';
+      $('authHint').textContent = hint || (setup ? 'أول مرة: أنشئ حسابك كمدير. تقدر تضيف الموظفين بعدها من الإعدادات.' : '');
+      $('setupName').hidden = !setup; $('setupPass2').hidden = !setup; $('loginFields').hidden = pw; $('pwFields').hidden = !pw;
+      $('aPass').autocomplete = setup ? 'new-password' : 'current-password';
+      $('authBtn').textContent = setup ? 'إنشاء الحساب' : pw ? 'حفظ' : 'دخول';
+      $('authCancel').hidden = !pw; $('authErr').textContent = '';
+      $('auth').hidden = false;
+      (setup ? $('aName') : pw ? $('pCur') : $('aUser')).focus();
+    }
+    function signedIn(d) {
+      ME = d.user; CSRF = d.csrf;
+      $('auth').hidden = true; $('who').hidden = false;
+      $('whoName').textContent = `${ME.name} · ${ME.role_label}`;
+      const manager = ME.role === 'manager';
+      $('tabImport').hidden = !manager; $('tabSettings').hidden = !manager; $('tabStats').hidden = !manager;
+      ['aPass', 'aPass2', 'pCur', 'pNew'].forEach(id => { $(id).value = ''; });
+    }
+    $('authForm').addEventListener('submit', async e => {
+      e.preventDefault(); $('authErr').textContent = ''; $('authBtn').disabled = true;
+      try {
+        let url, body;
+        if (authMode === 'setup') {
+          if ($('aPass').value !== $('aPass2').value) throw new Error('كلمتا المرور غير متطابقتين');
+          url = '/api/admin/setup'; body = { name: $('aName').value.trim(), username: $('aUser').value.trim(), password: $('aPass').value };
+        } else if (authMode === 'password') {
+          url = '/api/admin/me/password'; body = { current: $('pCur').value, new: $('pNew').value };
+        } else {
+          url = '/api/admin/login'; body = { username: $('aUser').value.trim(), password: $('aPass').value };
+        }
+        const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error || res.status);
+        const wasLogin = authMode !== 'password';
+        signedIn(d);
+        if (wasLogin) selectTab('books');
+      } catch (err) { $('authErr').textContent = err.message; }
+      finally { $('authBtn').disabled = false; }
+    });
+    $('authCancel').addEventListener('click', () => { $('auth').hidden = true; });
+    $('pwBtn').addEventListener('click', () => showAuth('password'));
+    $('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method: 'POST' }); ME = null; CSRF = null; $('who').hidden = true; showAuth('login');
+    });
+    async function boot() {
+      const res = await rawFetch('/api/admin/session');
+      const d = await res.json();
+      if (res.ok) { signedIn(d); loadCatalog(); return; }
+      if (d.needs_setup) showAuth(d.setup_allowed ? 'setup' : 'login',
+        d.setup_allowed ? '' : 'ما فيه حسابات بعد. افتح هذي الصفحة من جهاز المكتبة نفسه لإنشاء حساب المدير.');
+      else showAuth('login');
+    }
+
+    // ---------------- users, usage, audit (manager)
+    async function loadUsers() {
+      try {
+        const d = await (await fetch('/api/admin/users')).json();
+        $('usersTable').innerHTML = `<thead><tr><th>الاسم</th><th>المستخدم</th><th>الدور</th><th>آخر دخول</th><th>الحالة</th><th></th></tr></thead><tbody>${d.users.map(u => `
+          <tr class="${u.active ? '' : 'off'}"><td>${esc(u.display_name)}</td><td dir="ltr">${esc(u.username)}</td>
+          <td>${u.role === 'manager' ? 'مدير' : 'موظف'}</td><td>${when(u.last_login_at)}</td>
+          <td>${u.active ? 'فعّال' : 'موقوف'}</td>
+          <td><button class="btn secondary" data-uid="${u.user_id}" data-do="${u.active ? 'off' : 'on'}" type="button">${u.active ? 'إيقاف' : 'تفعيل'}</button>
+              <button class="btn secondary" data-uid="${u.user_id}" data-do="reset" type="button">كلمة مرور جديدة</button>
+              <button class="btn secondary" data-uid="${u.user_id}" data-do="role" data-role="${u.role === 'manager' ? 'staff' : 'manager'}" type="button">${u.role === 'manager' ? 'اجعله موظف' : 'اجعله مدير'}</button></td></tr>`).join('')}</tbody>`;
+        $('usersTable').querySelectorAll('button[data-uid]').forEach(b => b.addEventListener('click', () => userAction(b)));
+      } catch (e) { $('usersState').textContent = 'تعذر تحميل الموظفين'; }
+    }
+    async function userAction(b) {
+      const uid = b.dataset.uid, act = b.dataset.do;
+      let body;
+      if (act === 'off') body = { active: false };
+      else if (act === 'on') body = { active: true };
+      else if (act === 'role') body = { role: b.dataset.role };
+      else {
+        const pw = prompt('كلمة المرور المؤقتة الجديدة (8 أحرف أو أكثر، حروف وأرقام):');
+        if (!pw) return; body = { password: pw };
+      }
+      const res = await fetch(`/api/admin/users/${uid}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const d = await res.json();
+      $('usersState').textContent = res.ok ? 'تم الحفظ' : 'تعذر: ' + (d.error || res.status);
+      loadUsers(); loadAudit();
+    }
+    $('nuAdd').addEventListener('click', async () => {
+      const body = { name: $('nuName').value.trim(), username: $('nuUser').value.trim(), role: $('nuRole').value, password: $('nuPass').value };
+      const res = await fetch('/api/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const d = await res.json();
+      $('usersState').textContent = res.ok ? `تمت إضافة ${body.name}. أعطه اسم المستخدم وكلمة المرور المؤقتة، ويغيّرها من زر «كلمة المرور».` : 'تعذر: ' + (d.error || res.status);
+      if (res.ok) { ['nuName', 'nuUser', 'nuPass'].forEach(id => { $(id).value = ''; }); loadUsers(); loadAudit(); }
+    });
+    async function loadUsage() {
+      try {
+        const u = await (await fetch('/api/admin/usage')).json();
+        const t = u.today;
+        $('usageStats').innerHTML = [['استدعاءات اليوم', `${num(t.model_calls)} / ${num(u.cap)}`], ['التوكنز', num(t.tokens)],
+          ['ردود بالنظام البديل', num(t.fallback_turns)], ['ردود بعد انتهاء الحد', num(t.capped_turns)], ['طلبات مرفوضة (ضغط)', num(t.rate_limited)]]
+          .map(([l, v]) => `<div class="stat"><span>${l}</span><b>${v}</b></div>`).join('') +
+          (u.capped ? '<p class="warn">انتهى الحد اليومي: المحادثة تشتغل الآن بدون نموذج.</p>' : '');
+        $('capInput').value = u.cap;
+      } catch (e) { $('usageStats').textContent = 'تعذر تحميل الاستخدام'; }
+    }
+    $('capSave').addEventListener('click', async () => {
+      const res = await fetch('/api/admin/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ daily_model_calls: Number($('capInput').value) }) });
+      $('capState').textContent = res.ok ? 'تم الحفظ' : 'قيمة غير صحيحة'; loadUsage(); loadAudit();
+    });
+    const AUDIT_LABELS = { 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف',
+      'user.password_changed': 'تغيير كلمة المرور', 'book.update': 'تعديل كتاب', 'card.confirm': 'تأكيد صفة', 'card.reject': 'حذف صفة',
+      'card.restore': 'استرجاع صفة', 'card.set': 'تعيين صفة', 'card.add': 'إضافة صفة', 'model.set': 'تغيير النموذج',
+      'key.saved': 'حفظ مفتاح', 'key.deleted': 'حذف مفتاح', 'endpoint.set': 'تغيير عنوان مزوّد', 'import.apply': 'استيراد من رواء',
+      'testmode.set': 'وضع الاختبار', 'budget.set': 'تغيير الحد اليومي' };
+    async function loadAudit() {
+      try {
+        const rows = await (await fetch('/api/admin/audit')).json();
+        $('auditTable').innerHTML = rows.length ? `<thead><tr><th>الوقت</th><th>المستخدم</th><th>العملية</th><th>الهدف</th><th>التفاصيل</th></tr></thead><tbody>${rows.slice(0, 100).map(r => `<tr><td>${when(r.at)}</td><td dir="ltr">${esc(r.username || '')}</td><td>${esc(AUDIT_LABELS[r.action] || r.action)}</td><td>${esc(r.target || '')}</td><td dir="auto" style="font-size:11px">${esc(r.details || '')}</td></tr>`).join('')}</tbody>` : '<tbody><tr><td>لا يوجد سجل بعد.</td></tr></tbody>';
+      } catch (e) { $('auditTable').innerHTML = '<tbody><tr><td>تعذر التحميل</td></tr></tbody>'; }
+    }
+
+    // ---------------- statistics (manager): reading trends and satisfaction
+    let statDays = 30;
+    const SAT = [['perfect', 'مناسبة جدًا', '#5A8F4E'], ['close', 'قريبة', '#C8A13E'], ['no', 'غير مناسبة', '#D8614A']];
+    const pct = v => v == null ? '—' : num(v) + '٪';
+    const shortDay = d => new Date(d + 'T12:00:00').toLocaleDateString('ar-SA-u-ca-gregory', { day: 'numeric', month: 'short' });
+    document.querySelectorAll('.seg button').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      statDays = Number(btn.dataset.days); loadStats();
+    }));
+    async function loadStats() {
+      $('stState').textContent = 'جاري التحميل…';
+      try {
+        const d = await (await fetch(`/api/admin/stats?days=${statDays}`)).json();
+        $('stState').textContent = '';
+        renderInsights(d);
+      } catch (e) { $('stState').textContent = 'تعذر تحميل الإحصاءات'; }
+    }
+    function delta(now, before, unit) {
+      if (before == null || now == null) return '';
+      const diff = now - before;
+      if (!diff) return '<span class="sub">مثل الفترة السابقة</span>';
+      return `<span class="sub ${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '▲' : '▼'} ${num(Math.abs(diff))}${unit} عن الفترة السابقة</span>`;
+    }
+    function bookCell(b) {
+      return `<div class="bk">${cover(b)}<div><b>${esc(b.title)}</b><small>${esc(b.author || '')}${b.quantity > 0 && b.active ? '' : ' · غير متوفر الآن'}</small></div></div>`;
+    }
+    function pills(b) {
+      return b.ratings ? `<span class="pill p" title="مناسبة جدًا">${num(b.perfect)}</span><span class="pill c" title="قريبة">${num(b.close)}</span><span class="pill n" title="غير مناسبة">${num(b.no)}</span>` : '<span class="diff">—</span>';
+    }
+    function renderInsights(d) {
+      const t = d.totals, s = d.satisfaction, prev = d.previous;
+      if (!t.shown && !t.chosen && !s.total) {
+        $('stBody').innerHTML = '<div class="empty-note">ما فيه بيانات لهذي الفترة بعد. تبدأ الأرقام تظهر لما الزوار يستخدمون المحادثة ويختارون كتبًا.</div>';
+        return;
+      }
+      const kpis = `<div class="kpis">
+        <div class="kpi"><span class="label">كتب اختارها الزوار</span><b>${num(t.chosen)}</b>${prev ? delta(t.chosen, prev.chosen, '') : ''}</div>
+        <div class="kpi"><span class="label">رضا الزوار عن التوصية</span><b>${pct(s.satisfied_pct)}</b>
+          <span class="sub">${s.total ? `«مناسبة جدًا» ${pct(s.perfect_pct)} · من ${num(s.total)} تقييم` : 'ما فيه تقييمات بعد'}</span>
+          ${prev && s.satisfied_pct != null && prev.satisfaction.satisfied_pct != null ? delta(s.satisfied_pct, prev.satisfaction.satisfied_pct, ' نقطة') : ''}</div>
+        <div class="kpi"><span class="label">مرات اقتراح الكتب</span><b>${num(t.shown)}</b><span class="sub">نسبة الاختيار من الاقتراحات ${pct(t.choice_rate_pct)}</span></div>
+        <div class="kpi"><span class="label">قيّموا بعد الاختيار</span><b>${pct(t.rated_pct)}</b><span class="sub">${num(t.rated)} تقييم</span></div>
+      </div>`;
+      const max = Math.max(1, ...d.daily.map(x => x.chosen));
+      const peak = d.daily.reduce((a, x) => x.chosen > a.chosen ? x : a, d.daily[0] || { chosen: 0 });
+      const days = `<div class="panel-card span-all"><h3>الاختيارات يوميًا</h3><span class="diff">عدد مرات ضغط «أبغى هذا الكتاب» في كل يوم${peak && peak.chosen ? ` · أعلى يوم: ${shortDay(peak.day)} (${num(peak.chosen)})` : ''}</span>
+        <div class="days" role="img" aria-label="الاختيارات يوميًا">${d.daily.map(x => {
+          const h = Math.round(100 * x.chosen / max);
+          const tip = `${shortDay(x.day)}: ${num(x.chosen)} اختيار · ${num(x.shown)} اقتراح · ${num(x.perfect + x.close + x.no)} تقييم`;
+          return `<span class="d" tabindex="0" data-tip="${esc(tip)}" style="--h:${h}%"><i style="height:${h}%"></i>${x === peak && x.chosen ? `<em>${num(x.chosen)}</em>` : ''}</span>`;
+        }).join('')}</div>
+        <div class="days-axis"><span>${d.daily.length ? shortDay(d.daily[d.daily.length - 1].day) : ''}</span><span>${d.daily.length ? shortDay(d.daily[0].day) : ''}</span></div></div>`;
+      const satTotal = Math.max(1, s.total);
+      const sat = `<div class="panel-card"><h3>رضا العميل</h3><span class="diff">تقييم الزائر بعد ما يختار كتابًا: هل كانت التوصية مناسبة؟</span>
+        ${s.total ? `<div class="satbar" role="img" aria-label="توزيع التقييمات">${SAT.map(([k, , c]) => s.counts[k] ? `<span style="width:${100 * s.counts[k] / satTotal}%;background:${c}" title="${num(s.counts[k])}"></span>` : '').join('')}</div>
+        <div class="sat-legend">${SAT.map(([k, label, c]) => `<span><i style="background:${c}"></i>${label}: <b>${num(s.counts[k])}</b> (${pct(Math.round(100 * s.counts[k] / satTotal))})</span>`).join('')}</div>` : '<p class="diff">ما فيه تقييمات في هذي الفترة.</p>'}
+        ${d.recent_ratings.length ? `<h3 style="margin-top:16px;font-size:17px">آخر التقييمات</h3><ul class="list-plain">${d.recent_ratings.slice(0, 8).map(r => {
+          const m = SAT.find(x => x[0] === r.rating);
+          return `<li><span>${esc(r.title || 'كتاب غير محدد')}</span><span><span class="pill ${r.rating === 'perfect' ? 'p' : r.rating === 'close' ? 'c' : 'n'}">${m ? m[1] : r.rating}</span> <span class="diff">${date(String(r.created_at).replace(' ', 'T') + (String(r.created_at).includes('+') ? '' : 'Z'))}</span></span></li>`;
+        }).join('')}</ul>` : ''}</div>`;
+      const gmax = Math.max(1, ...d.genres.map(g => g.chosen));
+      const genres = `<div class="panel-card"><h3>التصنيفات الأكثر اختيارًا</h3><span class="diff">عدد الاختيارات لكل تصنيف (وعدد مرات الاقتراح)</span>
+        ${d.genres.length ? `<div class="hbars">${d.genres.map(g => `<div class="hbar"><span>${esc(g.genre)}</span><span class="track"><span class="fill" style="display:block;width:${100 * g.chosen / gmax}%"></span></span><span class="n">${num(g.chosen)} <span class="diff">/ ${num(g.shown)}</span></span></div>`).join('')}</div>` : '<p class="diff">ما فيه بيانات.</p>'}</div>`;
+      const top = `<div class="panel-card span-all"><h3>الكتب الأكثر اختيارًا</h3><span class="diff">مرتبة حسب عدد الاختيارات. «نسبة الاختيار» = اختيارات ÷ مرات الاقتراح.</span>
+        ${d.top_books.length ? `<div class="table-scroll"><table class="rank"><thead><tr><th>#</th><th>الكتاب</th><th>التصنيف</th><th>اختيارات</th><th>اقتُرح</th><th>نسبة الاختيار</th><th>التقييمات</th></tr></thead><tbody>
+        ${d.top_books.map((b, i) => `<tr><td class="num">${num(i + 1)}</td><td>${bookCell(b)}</td><td>${esc(b.genre || '—')}</td><td class="num"><b>${num(b.chosen)}</b></td><td class="num">${num(b.shown)}</td><td class="num">${pct(b.choice_rate_pct)}</td><td class="num">${pills(b)}</td></tr>`).join('')}
+        </tbody></table></div>` : '<p class="diff">ما اختار الزوار كتبًا في هذي الفترة.</p>'}</div>`;
+      const low = `<div class="panel-card"><h3>توصيات تحتاج مراجعة</h3><span class="diff">كتب قيّمها ٣ زوار أو أكثر، و٤٠٪ منهم أو أكثر قالوا «غير مناسبة». غالبًا صفاتها في البطاقة تحتاج تصحيح.</span>
+        ${d.low_rated.length ? `<ul class="list-plain">${d.low_rated.map(b => `<li><span>${esc(b.title)}</span><span>${pills(b)}</span></li>`).join('')}</ul>` : '<p class="diff">لا يوجد.</p>'}</div>`;
+      const cold = `<div class="panel-card"><h3>يُقترح كثيرًا ولا يُختار</h3><span class="diff">كتب اقتُرحت ٥ مرات أو أكثر ولم يخترها أحد.</span>
+        ${d.shown_not_chosen.length ? `<ul class="list-plain">${d.shown_not_chosen.map(b => `<li><span>${esc(b.title)}</span><span class="num">اقتُرح ${num(b.shown)}</span></li>`).join('')}</ul>` : '<p class="diff">لا يوجد.</p>'}</div>`;
+      $('stBody').innerHTML = kpis + `<div class="panels">${days}${sat}${genres}${top}${low}${cold}</div>`;
+      $('stBody').querySelectorAll('.days .d').forEach(el => {
+        const show = () => { let tip = $('stTip'); if (!tip) { tip = document.createElement('div'); tip.id = 'stTip'; tip.className = 'tip'; document.body.appendChild(tip); }
+          tip.textContent = el.dataset.tip; const r = el.getBoundingClientRect(); tip.hidden = false;
+          tip.style.top = Math.max(8, r.top - 44) + 'px'; tip.style.left = Math.min(window.innerWidth - tip.offsetWidth - 8, Math.max(8, r.left + r.width / 2 - tip.offsetWidth / 2)) + 'px'; };
+        const hide = () => { if ($('stTip')) $('stTip').hidden = true; };
+        el.addEventListener('mouseenter', show); el.addEventListener('focus', show);
+        el.addEventListener('mouseleave', hide); el.addEventListener('blur', hide);
+      });
+    }
+
+    // ---------------- library sections (manager)
+    let SECTIONS = [], GENRES = [];
+    async function loadSections() {
+      try {
+        const d = await (await fetch('/api/admin/sections')).json();
+        SECTIONS = d.sections.map(x => ({ name: x.name, genres: [...x.genres], active: x.active })); GENRES = d.genres;
+        $('secSummary').textContent = `${num(d.without_location)} من ${num(d.available_books)} كتاب متوفر بدون موقع يظهر للزائر · ${num(d.typed_locations)} كتاب له موقع مكتوب`;
+        renderSections();
+      } catch (e) { $('secState').textContent = 'تعذر تحميل الأقسام'; }
+    }
+    function renderSections() {
+      const owner = {}; SECTIONS.forEach((x, i) => x.genres.forEach(g => { owner[g] = i; }));
+      const free = GENRES.filter(g => owner[g.genre] === undefined).map(g => g.genre);
+      $('secList').innerHTML = SECTIONS.map((x, i) => `<div class="sec ${x.active ? 'on' : ''}" data-i="${i}">
+          <div class="sec-top"><input type="text" maxlength="60" value="${esc(x.name)}" aria-label="اسم القسم" data-f="name" />
+            <label class="switch"><input type="checkbox" data-f="active" ${x.active ? 'checked' : ''} /> مفعّل ويظهر للزوار</label>
+            <button type="button" class="sec-del" data-f="del">حذف</button></div>
+          <div class="sec-genres">${GENRES.map(g => {
+            const mine = owner[g.genre] === i, taken = owner[g.genre] !== undefined && !mine;
+            return `<label class="gchip ${taken ? 'taken' : ''}" title="${taken ? 'موجود في ' + esc(SECTIONS[owner[g.genre]].name) : ''}"><input type="checkbox" data-g="${esc(g.genre)}" ${mine ? 'checked' : ''} ${taken ? 'disabled' : ''} />${esc(g.genre)} <span class="diff">${num(g.books)}</span></label>`;
+          }).join('')}</div></div>`).join('') || '<p class="diff">لا توجد أقسام.</p>';
+      if (free.length) $('secList').insertAdjacentHTML('beforeend', `<p class="diff">تصنيفات بدون قسم: ${free.map(esc).join('، ')}</p>`);
+      $('secList').querySelectorAll('.sec').forEach(el => {
+        const i = Number(el.dataset.i);
+        el.querySelector('[data-f=name]').addEventListener('input', e => { SECTIONS[i].name = e.target.value; });
+        el.querySelector('[data-f=active]').addEventListener('change', e => { SECTIONS[i].active = e.target.checked; el.classList.toggle('on', e.target.checked); });
+        el.querySelector('[data-f=del]').addEventListener('click', () => { SECTIONS.splice(i, 1); renderSections(); });
+        el.querySelectorAll('[data-g]').forEach(cb => cb.addEventListener('change', () => {
+          const g = cb.dataset.g; SECTIONS[i].genres = cb.checked ? [...SECTIONS[i].genres, g] : SECTIONS[i].genres.filter(x => x !== g); renderSections();
+        }));
+      });
+    }
+    $('secAdd').addEventListener('click', () => { SECTIONS.push({ name: 'قسم جديد', genres: [], active: false }); renderSections(); });
+    $('secSave').addEventListener('click', async () => {
+      const st = $('secState'); st.textContent = 'جاري الحفظ…'; $('secSave').disabled = true;
+      try {
+        const res = await fetch('/api/admin/sections', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sections: SECTIONS }) });
+        const d = await res.json();
+        if (!res.ok) { st.textContent = d.error || 'تعذر الحفظ'; return; }
+        st.textContent = 'تم الحفظ'; loadSections(); loadCatalog();
+      } catch (e) { st.textContent = 'تعذر الحفظ'; }
+      finally { $('secSave').disabled = false; }
+    });
+
+    // ---------------- trial QR code (manager)
+    async function loadTrial() {
+      try {
+        const res = await fetch('/api/admin/trial');
+        const st = $('qrStatus');
+        if (res.status === 404) {   // the page is newer than the running server
+          st.className = 'qr-status bad'; $('qrUrl').textContent = '—'; $('qrPrintBtn').disabled = $('qrPngBtn').disabled = $('qrCopyBtn').disabled = true;
+          $('qrBox').innerHTML = '<span class="diff">—</span>';
+          st.textContent = 'السيرفر الشغّال نسخة قديمة. سكّر نافذته وشغّله من جديد بوضع التجربة (trial_server)، ثم حدّث الصفحة.';
+          return;
+        }
+        const d = await res.json();
+        $('qrUrl').textContent = d.url || '—';
+        if (d.url) { const code = QR.svg(d.url); $('qrBox').innerHTML = code; $('qpCode').innerHTML = code; }
+        else $('qrBox').innerHTML = '<span class="diff">ما فيه عنوان شبكة</span>';
+        if (d.reachable) { st.className = 'qr-status ok'; st.textContent = 'جاهز: الجوالات على نفس الواي فاي تقدر تفتحه.'; }
+        else if (d.url) { st.className = 'qr-status bad'; st.textContent = 'السيرفر شغّال لهذا الجهاز فقط. سكّره وشغّله بوضع التجربة (trial_server) عشان تفتحه الجوالات.'; }
+        else { st.className = 'qr-status bad'; st.textContent = 'الجهاز مو متصل بشبكة. اتصل بالواي فاي ثم افتح الصفحة من جديد.'; }
+        $('qrPrintBtn').disabled = $('qrPngBtn').disabled = $('qrCopyBtn').disabled = !d.url;
+        TRIAL_URL = d.url;
+      } catch (e) { $('qrStatus').textContent = 'تعذر تحميل الرمز'; }
+    }
+    let TRIAL_URL = null;
+    $('qrPrintBtn').addEventListener('click', () => window.print());
+    $('qrPngBtn').addEventListener('click', () => {
+      // a PNG of the QR code (brown on white, quiet zone included) for sharing or other printouts
+      if (!TRIAL_URL) return;
+      const m = QR.matrix(TRIAL_URL), scale = 20, quiet = 4, n = (m.length + quiet * 2) * scale;
+      const c = document.createElement('canvas'); c.width = c.height = n;
+      const g = c.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, n, n); g.fillStyle = '#3B1F14';
+      m.forEach((row, y) => row.forEach((v, x) => { if (v) g.fillRect((x + quiet) * scale, (y + quiet) * scale, scale, scale); }));
+      const a = document.createElement('a'); a.download = 'qr-amin-almaktaba.png'; a.href = c.toDataURL('image/png'); a.click();
+    });
+    $('qrCopyBtn').addEventListener('click', async () => {
+      if (!TRIAL_URL) return;
+      try { await navigator.clipboard.writeText(TRIAL_URL); $('qrCopyState').textContent = 'تم نسخ الرابط'; }
+      catch (e) { $('qrCopyState').textContent = 'انسخه يدويًا: ' + TRIAL_URL; }
+    });
+
+    boot();
+  </script>
+</body>
+</html>
