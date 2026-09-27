@@ -124,4 +124,4 @@ Then from a phone on the same Wi-Fi, open the address printed in the server wind
 - `fetch_covers.command` (macOS) or `python scripts/fetch_covers.py --limit 20`: fetch book covers (needs internet).
 - `python scripts/backup_db.py` / `python scripts/restore_db.py --list`: manual backup and restore (a backup is also made at every start).
 
-Guide for staff (Arabic, with the evaluation form): `docs/دليل-تجربة-أمين-المكتبة.pdf`
+Guide for staff (Arabic): `docs/دليل-تجربة-أمين-المكتبة.pdf`
