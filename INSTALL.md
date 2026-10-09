@@ -84,12 +84,39 @@ gh release download --repo eyesmystery/library-keeper --pattern "*windows.zip"
   - ماك: `backend/venv/bin/python scripts/restore_db.py --latest`
 - الكتالوج كله في ملف واحد `data/library.db`، والأغلفة في `data/covers`.
 
-## ٨. التحديث إلى إصدار جديد
+## ٨. التحديث إلى إصدار جديد (بدون فقد تعديلاتكم)
 
-1. شغّل `backup_now` وأوقف السيرفر.
-2. نزّل الحزمة الجديدة وفكها في مجلد جديد.
-3. إذا عدّلتم بيانات على جهازكم (حسابات، كتب، فعاليات): انسخ `data/library.db` ومجلدي `data/covers` و`data/event_images` من المجلد القديم إلى الجديد فوق الموجود. إن لم تعدّلوا شيئًا فاستعملوا قاعدة الحزمة الجديدة لأنها الأحدث.
-4. شغّل من المجلد الجديد. احتفظ بالمجلد القديم أسبوعًا.
+الحزمة الكاملة تستبدل كل شيء، فلا تُستعمل لتحديث تطبيق يعمل. للتحديث ملف خاص في صفحة الإصدارات اسمه `ThalathSmart-update-….zip` (نحو 65 ميغابايت، واحد للنظامين):
+
+1. أغلق نافذة السيرفر.
+2. فك الملف، وانقل المجلد الناتج (`ThalathSmart-update-…`) إلى **داخل** مجلد التطبيق، بجانب `start_library`.
+3. انقر مرتين على `install_update.bat` (ويندوز) أو `install_update.command` (ماك؛ أول مرة: زر أيمن ثم «فتح»).
+4. انتظر علامة ✓ ثم شغّل التطبيق من `start_library` كالعادة.
+
+ماذا يفعل التحديث:
+
+| البيانات | ماذا يحصل لها |
+|---|---|
+| حسابات الموظفين وكلمات المرور، الإعدادات، نموذج الذكاء الاصطناعي ومفتاحه | تبقى كما هي |
+| الفعاليات وصورها، أقسام المكتبة | تبقى كما هي |
+| الكميات، الأسعار، مواقع الرفوف، الباركود، وما استوردتموه من «رواء» | تبقى كما هي |
+| بلاغات الزوار، ملاحظات الموظفين وطلباتهم، سجل العمليات، الإحصاءات، النسخ الاحتياطية | تبقى كما هي |
+| ملفات التطبيق | تُستبدل بالجديدة (القديمة تُحفظ في `backups/before_update_…/code`) |
+| بيانات الكتب والمؤلفين والجوائز وآراء القراء | تُدمج حقلًا بحقل (الشرح تحت) |
+| الأغلفة | يُضاف الجديد ويُحدَّث ما لم ترفعوا بديلًا له |
+
+قاعدة الدمج لكل حقل، بالمقارنة مع ما كان في آخر نسخة ثبّتموها:
+
+- لم تعدّلوه: تُكتب قيمة التحديث.
+- عدّلتموه والتحديث لم يغيّره: تبقى قيمتكم.
+- عدّلتموه والتحديث غيّره أيضًا: تبقى قيمتكم، ويُسجَّل التعارض في التقرير.
+- كتاب أضفتموه أو حذفتموه: يبقى كما قررتم. كتاب حذفه التحديث («ليس كتابًا») يُحذف عندكم مع بقائه في «المحذوفات»، إلا إذا كنتم عدّلتموه.
+
+بعد كل تحديث يُكتب تقرير في مجلد `updates` (ملف ‎.md‎ وملف ‎.json‎). إذا قالت الشاشة إن فيه حقولًا احتفظنا بقيمتكم فيها، فأرسلوا التقرير إلى إبراهيم ليراجع التعارض.
+
+الأمان: لا يتغير شيء إلا بعد نجاح الدمج في نسخة جانبية. إن توقف التحديث بخطأ يبقى التطبيق كما كان. ونسخة القاعدة قبل التحديث في `backups/before_update_…/library.db`.
+
+للتجربة بلا أي تغيير (من الطرفية داخل مجلد التطبيق): `backend/venv/bin/python ThalathSmart-update-…/apply_update.py --dry-run` (ويندوز: `backend\venv-win\Scripts\python.exe`). يكتب التقرير فقط.
 
 ## ٩. إذا حصلت مشكلة
 
@@ -120,13 +147,16 @@ cd backend && LIBRARY_KEEPER_HOST=0.0.0.0 ./venv/bin/python app.py
 على ويندوز: `py -3 -m venv backend\venv-win` ثم `backend\venv-win\Scripts\python -m pip install -r backend\requirements.txt` ثم من داخل `backend`: `set LIBRARY_KEEPER_HOST=0.0.0.0` و `venv-win\Scripts\python app.py`. احذف سطر `LIBRARY_KEEPER_HOST` للتشغيل على الجهاز نفسه فقط.
 
 - الاختبارات: `backend/venv/bin/python tests/run_all.py`
-- بناء حزمتي التحميل من مجلد عمل فيه القاعدة الحية: `backend/venv/bin/python scripts/make_release.py --version "0.9.6 beta" --no-user` (يكتب في `release/`).
+- بناء حزمتي التحميل وملف التحديث من مجلد عمل فيه القاعدة الحية (يكتب في `release/`):
+  `backend/venv/bin/python scripts/make_release.py --version "0.9.7 beta" --no-user --update-from release/<الحزمة الكاملة السابقة>.zip`
+  الخيار `--update-from` يُكرَّر لكل إصدار سابق قد يكون مثبّتًا في المكتبة.
 - لا ترفع `data/library.db` ولا `backups/` ولا `data/test_logs/` ولا `data/llm_settings.json` ولا أي ملف مفاتيح؛ كلها في `.gitignore`.
 
 ## Install in English
 
 Thalath Smart is a small Flask + SQLite web app (port 8802). No build step, no Node, no Docker.
 
+0. **Updating an existing installation?** Do not use the full package (it replaces everything). Download `ThalathSmart-update-….zip`, stop the server, unzip it and move the folder INSIDE the app folder, then double-click `install_update.bat` / `install_update.command`. Accounts, settings, events, stock and activity stay; code is replaced; the catalog is merged field by field (a field the library changed is kept, conflicts go to `updates/update_report_*.md`). Dry run: `python ThalathSmart-update-…/apply_update.py --dry-run` with the app's Python.
 1. Download the package for your system from [Releases](https://github.com/eyesmystery/library-keeper/releases/latest) (`…-windows.zip` or `…-mac.zip`, about 490 MB; the repository is private, so sign in first, or use `gh release download --repo eyesmystery/library-keeper --pattern "*mac.zip"`). Unzip it to a permanent folder.
 2. Install Python 3.9+ (Windows: tick "Add python.exe to PATH").
 3. Double-click `start_library.bat` (Windows) or `start_library.command` (macOS; right-click → Open the first time). The first start creates a virtual environment and needs internet. Allow Python on private networks when the system asks.

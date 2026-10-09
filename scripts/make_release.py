@@ -24,6 +24,16 @@ published on GitHub, 2026-10-09) no account stays at all: the first start asks f
 account, so no password hash leaves this computer. Books, cards, evidence,
 authors, sections, relations, import history and the deleted-books list are kept as they are.
 The live database is never touched.
+
+Updates (2026-10-09). A full package replaces everything on the library's computer. With
+--update-from <an earlier full package .zip> (may be given several times) a third, small file is also
+written: ThalathSmart-update-<version>-<time>-<commit>.zip, one file for both systems. Its installer
+(scripts/apply_update.py, copied into the package) keeps the library's accounts, settings, events,
+stock and activity, replaces the code and merges the catalog row by row against the catalog the
+library installed last time. For that, every full package now carries data/catalog_base.db (the
+catalog as shipped, with the list of cover files), and ids of rows created in the library start at
+1,000,000,000. The update holds only the covers that are new or changed since the earlier packages,
+and a base catalog for each of them (for installations made before catalog_base.db existed).
 """
 import argparse
 import datetime
@@ -34,7 +44,11 @@ import sqlite3
 import stat
 import subprocess
 import sys
+import tempfile
 import zipfile
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import apply_update  # noqa: E402  (catalog file, id ranges and the installer itself)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "release")
@@ -186,6 +200,166 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 "$ROOT/scripts/ensure_venv.sh" || exit 1
 "$ROOT/backend/venv/bin/python" "$ROOT/scripts/backup_db.py" --reason manual
 """
+
+# ---------------------------------------------------------------- update package (both systems)
+WIN_UPDATE = r"""@echo off
+rem Thalath Smart - install this update. Accounts, settings, events and stock stay; the catalog is merged.
+chcp 65001 >nul
+setlocal
+set "UPD=%~dp0"
+set "APP=%~dp0.."
+set "PYTHONUTF8=1"
+if not exist "%APP%\data\library.db" goto :noapp
+set "PYW=%APP%\backend\venv-win\Scripts\python.exe"
+if not exist "%PYW%" goto :nopy
+"%PYW%" "%UPD%apply_update.py" --app "%APP%" --update "%UPD%."
+echo.
+pause
+exit /b 0
+:noapp
+echo This update folder must be INSIDE the Thalath Smart folder, next to start_library.bat.
+echo Move the whole update folder there, then run install_update.bat again.
+pause
+exit /b 1
+:nopy
+echo The app's Python environment was not found.
+echo Start the app once with start_library.bat, close its window, then run install_update.bat again.
+pause
+exit /b 1
+"""
+
+MAC_UPDATE = r"""#!/bin/zsh
+# ثلاث الذكي — تثبيت هذا التحديث. الحسابات والإعدادات والفعاليات والمخزون تبقى؛ الكتالوج يُدمج.
+UPD="$(cd "$(dirname "$0")" && pwd)"
+APP="$(dirname "$UPD")"
+if [ ! -f "$APP/data/library.db" ]; then
+  echo "ضع مجلد التحديث داخل مجلد «ثلاث الذكي» (بجانب start_library.command) ثم شغّل هذا الملف من جديد."; exit 1
+fi
+PY="$APP/backend/venv/bin/python"
+if [ ! -x "$PY" ]; then
+  echo "لم أجد بيئة بايثون الخاصة بالتطبيق. شغّل التطبيق مرة واحدة من start_library.command ثم أغلقه وأعد المحاولة."; exit 1
+fi
+"$PY" "$UPD/apply_update.py" --app "$APP" --update "$UPD"
+"""
+
+
+def update_guide(version, counts, n_covers, from_versions):
+    return f"""<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ثلاث الذكي — تحديث {version}</title><style>{GUIDE_CSS}</style></head><body><main>
+<h1>ثلاث الذكي — تحديث إلى {version}</h1>
+<p class="lead">تحديث فقط: لا يمسح شيئًا مما أضفتموه. فيه الكود الجديد، وتحديث كتالوج {counts['books']:,} كتابًا، و{n_covers:,} غلافًا جديدًا أو معدّلًا.</p>
+
+<h2>الخطوات</h2>
+<ol>
+<li>أغلق نافذة السيرفر (التطبيق يجب أن يكون متوقفًا أثناء التحديث).</li>
+<li>انقل هذا المجلد كاملًا إلى <b>داخل</b> مجلد «ثلاث الذكي»، بجانب ملف <code>start_library</code>.</li>
+<li>انقر مرتين على <code>install_update.bat</code> (ويندوز) أو <code>install_update.command</code> (ماك؛ أول مرة: زر أيمن ثم «فتح»).</li>
+<li>انتظر حتى تظهر علامة ✓ ثم شغّل التطبيق من <code>start_library</code> كالعادة.</li>
+</ol>
+
+<h2>ما الذي يبقى كما هو</h2>
+<ul>
+<li>حسابات الموظفين وكلمات المرور، والإعدادات ونموذج الذكاء الاصطناعي ومفتاحه.</li>
+<li>الفعاليات وصورها، وأقسام المكتبة.</li>
+<li>الكميات والأسعار ومواقع الرفوف، وكل ما استوردتموه من «رواء».</li>
+<li>بلاغات الزوار، وملاحظات الموظفين وطلباتهم، والإحصاءات.</li>
+<li>أي حقل في بيانات كتاب عدّلتموه بأنفسكم، وأي غلاف رفعتموه.</li>
+</ul>
+
+<h2>ما الذي يتغيّر</h2>
+<ul>
+<li>ملفات التطبيق (الصفحات والسيرفر).</li>
+<li>بيانات الكتب التي لم تعدّلوها: النبذات، الأنواع، المؤلفون، الجوائز، آراء القراء، والأغلفة.</li>
+</ul>
+
+<div class="note">بعد التحديث يُكتب تقرير في مجلد <code>updates</code> داخل مجلد التطبيق. إذا ذكرت الشاشة أن فيه حقولًا احتفظنا
+بقيمتكم فيها مع أن التحديث فيه قيمة أخرى، فأرسلوا ملف التقرير إلى إبراهيم.</div>
+
+<h2>إذا حصلت مشكلة</h2>
+<ul>
+<li>لا يتغير شيء إلا بعد نجاح الدمج. إن توقف التحديث بخطأ فالتطبيق كما كان: انسخ السطر الظاهر وأرسله.</li>
+<li>نسخة من القاعدة والملفات القديمة تُحفظ في <code>backups/before_update_…</code>.</li>
+<li>«السيرفر يعمل الآن»: أغلق نافذة السيرفر ثم أعد تشغيل ملف التحديث.</li>
+</ul>
+<p class="lead">يصلح هذا التحديث لمن عنده أي إصدار سابق{(' (جُهّز خصوصًا لـ ' + '، '.join(from_versions) + ')') if from_versions else ''}.</p>
+</main></body></html>
+"""
+
+
+def read_package(zip_path, work):
+    """An earlier full package -> (its version, path of its database copied out, {cover name: sha1})."""
+    import hashlib
+    covers, version, db = {}, None, None
+    with zipfile.ZipFile(zip_path) as z:
+        for info in z.infolist():
+            parts = info.filename.split("/")
+            rest = "/".join(parts[1:])
+            if rest == "VERSION":
+                version = z.read(info).decode("utf-8").strip()
+            elif rest == "data/library.db":
+                db = os.path.join(work, "prev_%d.db" % len(os.listdir(work)))
+                with z.open(info) as src, open(db, "wb") as out:
+                    shutil.copyfileobj(src, out, 1024 * 1024)
+            elif rest.startswith("data/covers/") and not info.is_dir():
+                h = hashlib.sha1()
+                with z.open(info) as src:
+                    for chunk in iter(lambda: src.read(1024 * 1024), b""):
+                        h.update(chunk)
+                covers[parts[-1]] = h.hexdigest()
+    if not version or not db:
+        raise SystemExit(f"{zip_path}: not a full package (no VERSION or data/library.db inside)")
+    return version, db, covers
+
+
+def build_update(stage, version, info, counts, from_zips, zip_path):
+    """The small update package, made from the staged full package (before the platform files are added)."""
+    up = os.path.join(OUT, "_update")
+    if os.path.exists(up):
+        shutil.rmtree(up)
+    payload = os.path.join(up, "payload")
+    for part in ("backend", "frontend", "admin", "scripts"):
+        copy_tree(os.path.join(stage, part), os.path.join(payload, part))
+    for name in ("VERSION", "BUILD.json"):
+        shutil.copy2(os.path.join(stage, name), os.path.join(payload, name))
+    win, mac = os.path.join(payload, "start", "windows"), os.path.join(payload, "start", "mac")
+    for name, text in (("start_library.bat", WIN_START), ("start_this_computer_only.bat", WIN_LOCAL),
+                       ("install_autostart.bat", WIN_AUTOSTART), ("remove_autostart.bat", WIN_REMOVE),
+                       ("backup_now.bat", WIN_BACKUP), (os.path.join("scripts", "daily_backup.bat"), WIN_DAILY)):
+        write(os.path.join(win, name), text, crlf=True)
+    with open(os.path.join(ROOT, "scripts", "ensure_venv.bat"), encoding="utf-8") as f:
+        write(os.path.join(win, "scripts", "ensure_venv.bat"), f.read(), crlf=True)
+    for name, text in (("start_library.command", MAC_START), ("start_this_computer_only.command", MAC_LOCAL),
+                       ("backup_now.command", MAC_BACKUP)):
+        write(os.path.join(mac, name), text, executable=True)
+    os.makedirs(os.path.join(mac, "scripts"), exist_ok=True)
+    for x in ("ensure_venv.sh", "install_daily_backup.command"):
+        shutil.copy2(os.path.join(ROOT, "scripts", x), os.path.join(mac, "scripts", x))
+        os.chmod(os.path.join(mac, "scripts", x), 0o755)
+    shutil.copy2(os.path.join(stage, "data", "catalog_base.db"), os.path.join(up, "catalog.db"))
+    shutil.copy2(os.path.join(ROOT, "scripts", "apply_update.py"), os.path.join(up, "apply_update.py"))
+    covers_dir = os.path.join(stage, "data", "covers")
+    now = apply_update.cover_manifest(covers_dir)
+    need, from_versions = set(), []
+    os.makedirs(os.path.join(up, "bases"))
+    with tempfile.TemporaryDirectory() as work:
+        for zp in from_zips:
+            prev_version, prev_db, prev_covers = read_package(zp, work)
+            from_versions.append(prev_version)
+            apply_update.build_catalog(prev_db, os.path.join(up, "bases", version_tag(prev_version) + ".db"),
+                                       {"version": prev_version, "from_package": os.path.basename(zp)}, prev_covers)
+            need |= {name for name, sha in now.items() if prev_covers.get(name) != sha}
+    os.makedirs(os.path.join(up, "covers"))
+    for name in sorted(need):
+        shutil.copy2(os.path.join(covers_dir, name), os.path.join(up, "covers", name))
+    write(os.path.join(up, "install_update.bat"), WIN_UPDATE, crlf=True)
+    write(os.path.join(up, "install_update.command"), MAC_UPDATE, executable=True)
+    write(os.path.join(up, "README-UPDATE-AR.html"), update_guide(version, counts, len(need), from_versions))
+    check_clean(up)
+    size = zip_stage(up, zip_path, f"ThalathSmart-update-{version_tag(version)}")
+    shutil.rmtree(up)
+    return {"path": os.path.relpath(zip_path, ROOT), "mb": round(size / 1e6, 1), "covers": len(need), "from": from_versions}
+
 
 # ---------------------------------------------------------------- Arabic install guide
 GUIDE_CSS = """
@@ -360,6 +534,8 @@ def clean_database(dest, keep_user):
                     out.execute(f'DELETE FROM "{t}"')
                     if "sqlite_sequence" in tables:
                         out.execute("DELETE FROM sqlite_sequence WHERE name = ?", (t,))
+        with out:   # rows the library creates get ids from 1,000,000,000 up (see apply_update.py)
+            apply_update.raise_sequences(out)
         out.execute("VACUUM")
         ok = out.execute("PRAGMA integrity_check").fetchone()[0]
         if ok != "ok":
@@ -375,7 +551,7 @@ def clean_database(dest, keep_user):
         out.close()
 
 
-def build_common(stage, version, keep_user, model):
+def build_common(stage, version, keep_user, model, info=None):
     if os.path.exists(stage):
         shutil.rmtree(stage)
     os.makedirs(stage)
@@ -392,6 +568,9 @@ def build_common(stage, version, keep_user, model):
     # pictures of the library's events (2026-10-08): the events themselves stay in the database
     if os.path.isdir(os.path.join(ROOT, "data", "event_images")):
         copy_tree(os.path.join(ROOT, "data", "event_images"), os.path.join(stage, "data", "event_images"))
+    # the catalog as shipped: the base of the library's next update
+    apply_update.build_catalog(os.path.join(stage, "data", "library.db"), os.path.join(stage, "data", "catalog_base.db"),
+                               dict(info or {}, version=version), os.path.join(stage, "data", "covers"))
     write(os.path.join(stage, "data", "llm_settings.json"),
           json.dumps({"provider": "ollama", "model": model, "test_log": False}, ensure_ascii=False, indent=1) + "\n")
     write(os.path.join(stage, "VERSION"), version + "\n")
@@ -478,6 +657,8 @@ def main():
     ap.add_argument("--keep-user", default="ibrahim")
     ap.add_argument("--no-user", action="store_true",
                     help="keep no account at all (copies published on GitHub); the first start asks for a manager account")
+    ap.add_argument("--update-from", action="append", default=[], metavar="ZIP",
+                    help="an earlier full package; also build the small update package for installations of it (repeatable)")
     ap.add_argument("--model", default=None, help="Ollama model written to data/llm_settings.json (default: the current one)")
     args = ap.parse_args()
     model = args.model
@@ -491,10 +672,13 @@ def main():
     when = riyadh_now()
     ref, dirty = git_ref()
     stage = os.path.join(OUT, "_stage")
-    counts = build_common(stage, args.version, None if args.no_user else args.keep_user, model)
-    write(os.path.join(stage, "BUILD.json"),
-          json.dumps(build_info(args.version, when, ref, dirty), ensure_ascii=False, indent=1) + "\n")
-    made = {}
+    info = build_info(args.version, when, ref, dirty)
+    counts = build_common(stage, args.version, None if args.no_user else args.keep_user, model, info)
+    write(os.path.join(stage, "BUILD.json"), json.dumps(info, ensure_ascii=False, indent=1) + "\n")
+    made, update = {}, None
+    if args.update_from:
+        name = "ThalathSmart-update-%s-%s-%s%s.zip" % (tag, when.strftime("%Y%m%d-%H%M"), ref, "-dirty" if dirty else "")
+        update = build_update(stage, args.version, info, counts, args.update_from, os.path.join(OUT, name))
     for platform in ("windows", "mac"):
         for f in os.listdir(stage):  # start files of the other platform are removed before each zip
             if f.endswith((".bat", ".command", ".html")):
@@ -528,8 +712,9 @@ def main():
         zip_path = os.path.join(OUT, release_name(args.version, platform, when, ref, dirty))
         made[platform] = (zip_path, zip_stage(stage, zip_path, f"ThalathSmart-{tag}"))
     shutil.rmtree(stage)
-    print(json.dumps({"version": args.version, "model": model, "build": build_info(args.version, when, ref, dirty), **counts,
-                      "files": {k: {"path": os.path.relpath(v[0], ROOT), "mb": round(v[1] / 1e6, 1)} for k, v in made.items()}},
+    print(json.dumps({"version": args.version, "model": model, "build": info, **counts,
+                      "files": {k: {"path": os.path.relpath(v[0], ROOT), "mb": round(v[1] / 1e6, 1)} for k, v in made.items()},
+                      "update": update},
                      ensure_ascii=False, indent=1))
     return 0
 
