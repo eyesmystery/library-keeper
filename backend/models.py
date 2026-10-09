@@ -44,6 +44,16 @@ SUGGESTED_SECTIONS = [
 ]
 
 
+
+def _add_column(conn, table, column, column_type):
+    """ALTER TABLE … ADD COLUMN that tolerates another process adding it first (several processes
+    starting on an unmigrated copy at once failed with «duplicate column name», QA2 2026-10-09)."""
+    try:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_type}")
+    except sqlite3.OperationalError as e:
+        if "duplicate column" not in str(e):
+            raise
+
 def _migrate_schema(conn: sqlite3.Connection) -> None:
     """Add schema columns/tables that older databases may lack.
 
@@ -77,6 +87,13 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         "format": "TEXT",
         "genres": "TEXT",
         "emotional_weight": "TEXT",
+        # Card version 2 (approved 2026-09-28, docs/book-profile-schema.md §12)
+        "style_complexity": "TEXT",
+        "opening_grip": "TEXT",
+        "narrative_structure": "TEXT",
+        "practicality": "TEXT",
+        "prior_knowledge": "TEXT",
+        "series_dependency": "TEXT",
     }
     existing = {
         row["name"]
@@ -84,13 +101,15 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
     }
     for column, column_type in profile_additions.items():
         if column not in existing:
-            conn.execute(f"ALTER TABLE book_profiles ADD COLUMN {column} {column_type}")
+            _add_column(conn, "book_profiles", column, column_type)
 
     # Optional staff review (2026-09-25): soft-delete keeps the history (PRD §26)
     ev_cols = {row["name"] for row in conn.execute("PRAGMA table_info(attribute_evidence)")}
-    for column, column_type in {"rejected": "INTEGER DEFAULT 0", "rejected_at": "TEXT", "rejected_by": "TEXT"}.items():
+    for column, column_type in {"rejected": "INTEGER DEFAULT 0", "rejected_at": "TEXT", "rejected_by": "TEXT",
+                                # content-warning detail, card v2 §12.4
+                                "severity": "INTEGER", "frequency": "TEXT", "note_ar": "TEXT"}.items():
         if column not in ev_cols:
-            conn.execute(f"ALTER TABLE attribute_evidence ADD COLUMN {column} {column_type}")
+            _add_column(conn, "attribute_evidence", column, column_type)
 
     # Rewaa inventory sync (approved 2026-09-25): identifiers + provenance on books
     book_additions = {
@@ -112,11 +131,96 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         "summary": "TEXT",
         "summary_source": "TEXT",
         "summary_updated_at": "TEXT",
+        # Card version 2 book-level fields (approved 2026-09-28, docs/book-profile-schema.md §12.2)
+        "hook": "TEXT",                 # one spoiler-free sentence, own words
+        "subjects": "TEXT",             # JSON list: what the book is about
+        "setting": "TEXT",              # place/era when it matters
+        "subgenres": "TEXT",            # JSON list
+        "series_name": "TEXT",
+        "series_position": "INTEGER",
+        "learning_outcomes": "TEXT",    # knowledge books: what the reader comes away with
+        "research_status": "TEXT",      # matched | needs_confirmation | not_found | not_a_book
+        "research_note": "TEXT",
+        "research_candidates": "TEXT",  # JSON list of possible matches for staff to choose from (2026-09-28)
+        "research_note_ar": "TEXT",     # the note rewritten in Arabic for staff, shown in «تأكيد هوية الكتاب» (2026-10-04)
+        "researched_at": "TEXT",
+        # Target age of children's / young readers' books (Ibrahim 2026-10-09 «اضف البحث لكتب الاطفال»):
+        # the youngest and oldest age the book is meant for, where it comes from, and a short note
+        "age_min": "INTEGER",
+        "age_max": "INTEGER",
+        "age_source": "TEXT",
+        "age_note": "TEXT",
     }
     existing_books = {row["name"] for row in conn.execute("PRAGMA table_info(books)")}
     for column, column_type in book_additions.items():
         if column not in existing_books:
-            conn.execute(f"ALTER TABLE books ADD COLUMN {column} {column_type}")
+            _add_column(conn, "books", column, column_type)
+    # Relations between books (card v2 §12.5, approved 2026-09-28; see backend/relations.py)
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS book_relations (
+            relation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_book_id INTEGER NOT NULL,
+            target_book_id INTEGER NOT NULL,
+            relation_type TEXT NOT NULL,
+            reason_ar TEXT,
+            confidence REAL,
+            source TEXT NOT NULL DEFAULT 'computed',
+            created_at TEXT,
+            FOREIGN KEY (source_book_id) REFERENCES books(book_id) ON DELETE CASCADE,
+            FOREIGN KEY (target_book_id) REFERENCES books(book_id) ON DELETE CASCADE
+        )
+        """
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_relations_source ON book_relations(source_book_id)")
+    # Author profiles (approved 2026-09-30; see backend/authors.py and docs/author-profile-proposal.md).
+    # books.author stays the display string; these tables never replace it.
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS authors (
+            author_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name_ar TEXT NOT NULL,
+            name_latin TEXT,
+            aliases TEXT NOT NULL DEFAULT '[]',
+            origin TEXT,
+            known_for TEXT NOT NULL DEFAULT '[]',
+            formats TEXT NOT NULL DEFAULT '[]',
+            subgenres TEXT NOT NULL DEFAULT '[]',
+            moods TEXT NOT NULL DEFAULT '[]',
+            pace TEXT,
+            typical_length TEXT,
+            themes TEXT NOT NULL DEFAULT '[]',
+            audience TEXT,
+            style_note_ar TEXT,
+            catalog_style TEXT,
+            research_status TEXT NOT NULL DEFAULT 'pending',
+            research_note TEXT,
+            confidence REAL,
+            source_urls TEXT NOT NULL DEFAULT '[]',
+            researched_at TEXT,
+            staff_verified INTEGER NOT NULL DEFAULT 0,
+            verified_by TEXT,
+            verified_at TEXT,
+            created_at TEXT,
+            updated_at TEXT
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS book_authors (
+            book_id INTEGER NOT NULL,
+            author_id INTEGER NOT NULL,
+            role TEXT NOT NULL CHECK (role IN ('author', 'translator', 'illustrator', 'editor')),
+            position INTEGER NOT NULL DEFAULT 0,
+            source TEXT NOT NULL DEFAULT 'parsed',
+            PRIMARY KEY (book_id, author_id, role),
+            FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE,
+            FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
+        )
+        """
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_book_authors_author ON book_authors(author_id)")
     # Library sections by category (approved 2026-09-27; see backend/sections.py). Rewaa has no
     # location column, so a book's location is: the shelf a staff member typed, else the active
     # section of its category, else nothing (the visitor is told to ask a staff member).
@@ -163,7 +267,7 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
     if conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='feedback'").fetchone():
         fb_cols = {row["name"] for row in conn.execute("PRAGMA table_info(feedback)")}
         if "choice_id" not in fb_cols:
-            conn.execute("ALTER TABLE feedback ADD COLUMN choice_id INTEGER")
+            _add_column(conn, "feedback", "choice_id", "INTEGER")
     # Staff accounts + audit log (approved 2026-09-27; see backend/auth.py)
     conn.execute(
         """
@@ -207,6 +311,29 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         )
         """
     )
+    # Manually deleted non-book products, restorable (2026-09-30; see backend/deleted_books.py)
+    import deleted_books
+    deleted_books.ensure_table(conn)
+    # Visitor reports about a book's information and visitor suggestions (2026-10-03; see backend/visitor_notes.py)
+    import visitor_notes
+    visitor_notes.ensure_table(conn)
+    import confirmations  # local import: confirmations imports this module
+    confirmations.ensure_table(conn)
+    # Awards and screen adaptations of books and authors (2026-10-08; see backend/honors.py)
+    import honors
+    honors.ensure_table(conn)
+    # Questions the chat could not answer from our data (2026-10-08; see backend/open_questions.py)
+    import open_questions
+    open_questions.ensure_table(conn)
+    # Edits staff ask for in a book's card (2026-10-08; see backend/staff_notes.py)
+    import staff_notes
+    staff_notes.ensure_table(conn)
+    # Library events shown on the visitor start page (2026-10-08; see backend/events.py)
+    import events
+    events.ensure_table(conn)
+    # Meaning-search vectors of the books (2026-10-08; see backend/embeddings.py)
+    import embeddings
+    embeddings.ensure_table(conn)
     conn.execute("CREATE INDEX IF NOT EXISTS idx_books_barcode ON books(barcode)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_books_rewaa_sku ON books(rewaa_sku)")
     conn.execute(
@@ -300,7 +427,12 @@ def seed_books() -> None:
         books = json.load(f)
     conn = get_connection()
     existing = conn.execute("SELECT COUNT(*) AS c FROM books").fetchone()["c"]
-    if existing > 0:
+    # Never re-seed prototype books once a real Rewaa catalog has been imported (2026-09-28).
+    try:
+        imported = conn.execute("SELECT COUNT(*) AS c FROM import_runs").fetchone()["c"]
+    except sqlite3.OperationalError:
+        imported = 0
+    if existing > 0 or imported > 0:
         conn.close()
         return
     for book in books:
@@ -357,13 +489,13 @@ def get_profile_cards() -> dict:
         try:
             evidence_rows = conn.execute(
                 """SELECT book_id, attribute_name, attribute_value, confidence,
-                          human_verified, conflict_seen, COALESCE(rejected, 0) AS rejected, source_site
+                          human_verified, conflict_seen, COALESCE(rejected, 0) AS rejected, source_site, severity
                    FROM attribute_evidence"""
             ).fetchall()
-        except sqlite3.OperationalError:  # database not yet migrated (no `rejected` column)
+        except sqlite3.OperationalError:  # database not yet migrated (no `rejected`/`severity` column)
             evidence_rows = conn.execute(
                 """SELECT book_id, attribute_name, attribute_value, confidence,
-                          human_verified, conflict_seen, 0 AS rejected, source_site
+                          human_verified, conflict_seen, 0 AS rejected, source_site, NULL AS severity
                    FROM attribute_evidence"""
             ).fetchall()
     except sqlite3.OperationalError:
@@ -380,8 +512,13 @@ def get_profile_cards() -> dict:
             "perceived_length": row["perceived_length"],
             "use_cases": _load_json_list(row["use_cases"]),
             "age_suitability": row["age_suitability"],
+            "format": row["format"],  # children / young_adult decide who a book may be offered to (2026-10-04)
             "sensitive_content": _load_json_list(row["sensitive_content"]),
+            "themes": _load_json_list(row["themes"]) if "themes" in row.keys() else [],
             "confidence": {},
+            # content warning -> severity 1..3 (card v2 §12.4); None (= unknown) when any usable
+            # row has no severity
+            "severity": {},
         }
     for ev in evidence_rows:
         card = cards.get(ev["book_id"])
@@ -400,6 +537,12 @@ def get_profile_cards() -> dict:
             # Derived values (reader level from other attributes, length from an
             # approximate page count) are ranking hints, never quoted as confirmed.
             conf = min(conf, 0.75)
+        if ev["attribute_name"] == "sensitive_content":
+            sev = ev["severity"] if isinstance(ev["severity"], int) else None
+            if key[1] in card["severity"] and (card["severity"][key[1]] is None or sev is None):
+                card["severity"][key[1]] = None
+            else:
+                card["severity"][key[1]] = max(card["severity"].get(key[1]) or 0, sev) if sev is not None else None
         prev = card["confidence"].get(key)
         if prev is None or conf > prev[0] or (conf == prev[0] and verified and not prev[1]):
             card["confidence"][key] = (conf, verified)
@@ -427,7 +570,8 @@ def get_book(book_id: int) -> Optional[sqlite3.Row]:
 
 def update_book(book_id: int, fields: dict) -> None:
     allowed = {"price", "quantity", "shelf_location", "active", "cover_url", "language", "original_language",
-               "translator", "cover_source", "cover_updated_at", "summary", "summary_source", "summary_updated_at"}
+               "translator", "cover_source", "cover_updated_at", "summary", "summary_source", "summary_updated_at",
+               "age_min", "age_max", "age_source"}
     updates = {k: v for k, v in fields.items() if k in allowed}
     if not updates:
         return

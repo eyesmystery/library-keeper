@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+"""Stand-in for the Codex CLI used by tests/test_codex.py (no network, no login)."""
+import json, os, sys
+args = sys.argv[1:]
+log = os.environ.get("FAKE_CODEX_LOG")
+if args[:1] == ["--version"]:
+    print("codex-cli " + os.environ.get("FAKE_CODEX_VERSION", "0.162.0")); sys.exit(0)
+if args[:2] == ["login", "status"]:
+    if os.environ.get("FAKE_CODEX_LOGGED_OUT"):
+        print("Not logged in"); sys.exit(1)
+    print("Logged in using ChatGPT"); sys.exit(0)
+if args and args[0] == "exec":
+    prompt = sys.stdin.read()
+    schema = json.load(open(args[args.index("--output-schema") + 1]))
+    out = args[args.index("-o") + 1]
+    if log:
+        with open(log, "a") as f:
+            f.write(json.dumps({"argv": args, "prompt_len": len(prompt), "schema": schema,
+                                "cwd": os.getcwd()}, ensure_ascii=False) + "\n")
+    if os.environ.get("FAKE_CODEX_UNSUPPORTED"):
+        print('ERROR: {"type":"error","status":400,"error":{"message":"The model is not supported when using Codex with a ChatGPT account."}}', file=sys.stderr); sys.exit(1)
+    if os.environ.get("FAKE_CODEX_FAIL"):
+        print("boom", file=sys.stderr); sys.exit(3)
+    props = schema.get("properties", {})
+    if "intent" in props:
+        ans = {"intent": "recommend", "preferences": {"genres": ["رواية"]}, "mentioned_titles": [], "wants_new_options": False}
+    elif "reply" in props:
+        import re
+        ids = [int(x) for x in re.findall(r'"id": (\d+)', prompt)][:2]
+        ans = {"reply": "هذي رواية متوفرة.", "show_book_ids": ids, "suggestions": ["غيرها"]}
+    else:
+        ans = {"ok": True}
+    open(out, "w").write(json.dumps(ans, ensure_ascii=False))
+    sys.exit(0)
+sys.exit(2)

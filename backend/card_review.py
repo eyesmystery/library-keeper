@@ -18,9 +18,14 @@ from models import get_connection
 
 SINGLE = ["format", "perceived_length", "language_difficulty", "pace", "emotional_weight", "reader_level",
           "age_suitability"]
+# Card version 2 single-valued attributes (approved 2026-09-28, schema §12.3)
+V2_SINGLE = ["style_complexity", "opening_grip", "ending_tone", "narrative_structure", "practicality",
+             "prior_knowledge", "series_dependency"]
+SINGLE = SINGLE + V2_SINGLE
 MULTI = ["genres", "moods", "use_cases", "sensitive_content"]
 FORMATS = ["novel", "short_stories", "biography", "history", "thought", "psychology", "self_dev",
-           "science", "poetry", "play", "travel", "religious", "children", "young_adult", "business", "other"]
+           "science", "poetry", "play", "travel", "religious", "children", "young_adult", "business",
+           "comics", "essays", "criticism", "arts", "sociology", "other"]
 ALLOWED = {
     "format": FORMATS, "genres": FORMATS,
     "perceived_length": ["very_short", "short", "medium", "long", "very_long"],
@@ -34,7 +39,14 @@ ALLOWED = {
                   "practical_learning", "quick_read", "slump_recovery"],
     "age_suitability": ["children", "young_adult", "adult", "all_ages"],
     "sensitive_content": ["violence", "sexual_content", "strong_language", "horror", "substance_use",
-                          "self_harm", "religious_controversy", "political", "none"],
+                          "self_harm", "religious_controversy", "political", "grief", "none"],
+    "style_complexity": ["direct", "literary", "philosophical", "experimental"],
+    "opening_grip": ["fast", "slow"],
+    "ending_tone": ["happy", "uplifting", "bittersweet", "sad", "open", "shocking"],
+    "narrative_structure": ["linear", "interwoven", "multiple_voices", "letters", "essays"],
+    "practicality": ["theoretical", "practical", "exercises", "personal_experience"],
+    "prior_knowledge": ["none", "some", "specialist"],
+    "series_dependency": ["standalone", "standalone_start", "requires_previous"],
 }
 ACTIONS = ("confirm", "reject", "restore", "set", "add")
 
@@ -126,6 +138,8 @@ def recompute_card(conn, book_id):
          json.dumps(card["use_cases"]),
          card["age_suitability"] if card["age_suitability"] != "unknown" else None,
          json.dumps(card["sensitive_content"]), status, book_id))
+    conn.execute(f"UPDATE book_profiles SET {', '.join(a + ' = ?' for a in V2_SINGLE)} WHERE book_id = ?",
+                 (*[card[a] if card[a] != "unknown" else None for a in V2_SINGLE], book_id))
 
 
 def _insert_staff_row(conn, book_id, attr, value, reviewer, now):

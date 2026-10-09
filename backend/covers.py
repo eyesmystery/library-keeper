@@ -19,6 +19,8 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+
+import net
 from datetime import datetime, timezone
 
 from models import get_connection
@@ -105,6 +107,9 @@ def check_image(data):
     size = image_size(data, kind)
     if size and (size[0] < MIN_WIDTH or size[1] < MIN_WIDTH):
         raise CoverError("image dimensions too small")
+    if size and size[0] > size[1] * 1.6:
+        # e.g. Abjjad's 1200x630 share banner (cover small in the middle); even landscape children's books stay below 1.6
+        raise CoverError("wide banner image, not a book cover")
     return kind
 
 
@@ -161,8 +166,9 @@ def has_local_cover(book):
 # ---------------------------------------------------------------- fetching
 def http_get(url, timeout=15):
     """-> (final_url, bytes). Raises urllib errors. Replaced in tests."""
+    url = urllib.parse.quote(url, safe=":/?#[]@!$&'()*+,;=%~")  # non-ASCII paths (Arabic slugs) -> %-encoded
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "ar,en;q=0.8"})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
+    with urllib.request.urlopen(req, timeout=timeout, context=net.ssl_context()) as resp:
         return resp.geturl(), resp.read(MAX_BYTES + 1)
 
 
@@ -222,7 +228,7 @@ def _image_from_page(page_url, page, book, placeholder_hints):
     img = _meta(page, "og:image")
     if not img or any(h in img.lower() for h in placeholder_hints):
         return None
-    img = urllib.parse.urljoin(page_url, img)
+    img = small_variant(urllib.parse.urljoin(page_url, img))
     _, data = http_get(img)
     check_image(data)
     return data, img
@@ -292,6 +298,16 @@ def fetch_cover(book, sources=AUTO_SOURCES):
     return None
 
 
+_AMAZON_IMG = re.compile(r"^(https://[^/]*media-amazon\.com/images/.+?/[^/._]+)(\._[^/]*_)?(\.(?:jpe?g|png|webp))$", re.I)
+
+
+def small_variant(url):
+    """Covers only need to be recognisable (approved 2026-09-28): ask Goodreads/Amazon image
+    hosts for a ~300 px wide copy instead of the original (some originals exceed 5 MB)."""
+    m = _AMAZON_IMG.match(url or "")
+    return f"{m.group(1)}._SX300_{m.group(3)}" if m else url
+
+
 def source_from_url(url):
     host = urllib.parse.urlparse(url or "").netloc.lower()
     if "openlibrary" in host:
@@ -303,9 +319,68 @@ def source_from_url(url):
     return "web"
 
 
+_BOOK_PAGE = re.compile(r"^https?://(www\.)?(goodreads\.com/(\w+/)?book/show/|abjjad\.com/book/)", re.I)
+# Arabic bookshop / publisher product pages seen during research (2026-09-29): their og:image is
+# the product (cover) photo. Only product-page paths, never search or listing pages.
+# Left out: neelwafurat.com (cover loaded by script, no og:image) and aseeralkotb (script challenge page).
+_SHOP_PAGE = re.compile(r"^https?://(www\.)?(thebookhome\.com/product/|"
+                        r"ceresbookshop\.com/|antoineonline\.com/|kotobon\.com/|"
+                        r"mahrousaeg\.com/|takweenkw\.com/|diwanegypt\.com/product/|jamalon\.com/|"
+                        r"elainpublishinghouse\.com/books/)", re.I)
+
+
+def is_book_page(url):
+    """A researched book page whose image can be read (Goodreads/Abjjad or a known bookshop product page)."""
+    return bool(_BOOK_PAGE.match(url or "") or _SHOP_PAGE.match(url or ""))
+
+
+def image_from_book_page(url):
+    """A researched Goodreads/Abjjad book page -> its og:image URL (the page was matched during
+    research, so no title check here). Raises CoverError when the page has no usable image."""
+    last = ""
+    for attempt in range(2):  # Goodreads sometimes serves a stripped page; one polite retry
+        if attempt:
+            time.sleep(PAGE_RETRY_DELAY)
+        final, raw = http_get(url)
+        page = raw.decode("utf-8", "replace")
+        img = _page_image(page)
+        if img:
+            return urllib.parse.urljoin(final, img)
+        last = f"{len(raw) // 1024} KB, title «{_page_title(page)[:60]}»"
+    raise CoverError(f"no cover image on the book page ({last})")
+
+
+PAGE_RETRY_DELAY = 4.0
+_PLACEHOLDERS = ("nophoto", "no-cover", "no-image", "placeholder", "/default", "logo", "sitedefult")
+_BOOK_IMG = re.compile(r'https://[^"\'\s<>]*(?:compressed\.photo\.goodreads\.com/books|i\.gr-assets\.com/images/S/compressed\.photo\.goodreads\.com/books|images-na\.ssl-images-amazon\.com/images/S/compressed\.photo\.goodreads\.com/books)/[^"\'\s<>]+\.(?:jpe?g|png|webp)', re.I)
+
+
+def _page_image(page):
+    """Cover URL of a book page: og:image, then JSON-LD "image", then the first Goodreads book-cover URL."""
+    candidates = [_meta(page, "og:image")]
+    m = re.search(r'"image"\s*:\s*"(https?:[^"]+)"', page)
+    candidates.append(m and m.group(1).replace("\\/", "/"))
+    m = _BOOK_IMG.search(page)
+    candidates.append(m and m.group(0))
+    for img in candidates:
+        if img and not any(h in img.lower() for h in _PLACEHOLDERS):
+            return html.unescape(img)
+    return None
+
+
 def save_from_url(book_id, url):
-    """Download a cover found during research (web search) and store it locally."""
+    """Download a cover found during research (an image URL, or the researched Goodreads/Abjjad
+    book page, whose og:image is used) and store it locally."""
     if not re.match(r"^https?://", url or ""):
         raise CoverError("not an http(s) URL")
-    _, data = http_get(url)
+    if is_book_page(url):
+        url = image_from_book_page(url)
+    small = small_variant(url)
+    try:
+        _, data = http_get(small)
+        check_image(data)
+    except (CoverError, urllib.error.URLError, OSError):
+        if small == url:
+            raise
+        _, data = http_get(url)  # the small variant is not offered: fall back to the original
     return save_cover(book_id, data, source_from_url(url))

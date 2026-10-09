@@ -23,6 +23,8 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+
+import net
 from collections import OrderedDict
 
 SETTINGS_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "llm_settings.json")
@@ -67,6 +69,12 @@ PROVIDERS = {
                "url": None,  # built from the saved Ollama address or OLLAMA_BASE_URL
                "key_env": None, "default_model": "",
                "suggested_models": []},
+    # Ollama's own cloud through its API (key from ollama.com/settings/keys), no Ollama app needed
+    # on the computer (Ibrahim 2026-10-09). OpenAI-compatible endpoint; names have no ":cloud".
+    "ollama_cloud": {"label": "Ollama Cloud (API بمفتاح)", "kind": "openai",
+                     "url": "https://ollama.com/v1/chat/completions",
+                     "key_env": "OLLAMA_API_KEY", "default_model": "deepseek-v4.1-flash",
+                     "suggested_models": ["deepseek-v4.1-flash", "kimi-k3", "glm-5.3", "gpt-oss:120b", "gemma4:31b"]},
     # ChatGPT sign-in through the official Codex CLI (no API key). The app never reads the
     # login token: it runs `codex exec`, which uses the user's own `codex login`.
     "codex": {"label": "ChatGPT عبر Codex (بدون مفتاح API)", "kind": "codex",
@@ -92,7 +100,7 @@ OLLAMA_ARABIC = [
     ("aya-expanse:8b", "على الجهاز · 5GB · خفيف، العربية من لغاته الرسمية"),
     ("hf.co/tiiuae/Falcon-H1-Arabic-7B-Instruct-GGUF", "على الجهاز · 5GB · مخصص للعربية (TII)"),
 ]
-ORDER = ["anthropic", "openai", "gemini", "openrouter", "codex", "ollama", "custom"]
+ORDER = ["anthropic", "openai", "gemini", "openrouter", "codex", "ollama", "ollama_cloud", "custom"]
 # providers that are never picked automatically (only when chosen in the admin page)
 EXPLICIT_ONLY = ("ollama", "codex")
 
@@ -108,6 +116,11 @@ last_call = {}
 call_hook = None
 # (provider, model) pairs that rejected response_format=json_schema; they use json_object instead.
 _schema_unsupported = set()
+# Provider model lists change much less often than chats. Keep successful lists
+# briefly so opening the settings page does not spend rate limit on every visit.
+_model_list_cache = {}
+MODEL_LIST_TTL = 600
+MODEL_LIST_LIMIT = 250
 
 
 def structured_mode():
@@ -190,6 +203,7 @@ def set_key(pid, key):
         data[pid] = key
     _write_secrets(data)
     _cache.clear()
+    _model_list_cache.pop(pid, None)
 
 
 def get_key(pid):
@@ -222,6 +236,7 @@ def set_endpoint(pid, url):
         raise ValueError("العنوان لازم يبدأ بـ http:// أو https://")
     update_settings(**{("ollama_base_url" if pid == "ollama" else "custom_base_url"): url})
     _cache.clear()
+    _model_list_cache.pop(pid, None)
 
 
 # ---------------------------------------------------------------- Codex CLI (ChatGPT sign-in)
@@ -260,6 +275,82 @@ def codex_login_status(max_age=60):
             value = (False, "تعذر تشغيل Codex")
     _codex_status.update(at=now, value=value)
     return value
+
+
+# The model list in ~/.codex/models_cache.json is written by the newest Codex on the Mac
+# (the Codex app updates itself), but the app runs the `codex` command, which npm does not
+# update. An older command refuses the newer models ("not supported when using Codex with a
+# ChatGPT account", 2026-10-09: CLI 0.154.0, list from 0.162.0), so the settings page warns.
+CODEX_UPDATE_CMD = "npm install -g @openai/codex@latest"
+_codex_version = {"at": 0.0, "value": None}
+
+
+def _version_tuple(text):
+    m = re.search(r"(\d+)\.(\d+)\.(\d+)", text or "")
+    return tuple(int(x) for x in m.groups()) if m else None
+
+
+def _codex_cache():
+    root = os.environ.get("CODEX_HOME") or os.path.expanduser("~/.codex")
+    try:
+        with open(os.path.join(root, "models_cache.json"), encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def codex_cli_version(max_age=300):
+    """Version of the installed `codex` command ('0.162.0'), or None."""
+    now = time.time()
+    if _codex_version["value"] is not None and now - _codex_version["at"] < max_age:
+        return _codex_version["value"] or None
+    value = ""
+    path = codex_path()
+    if path:
+        try:
+            r = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=10)
+            v = _version_tuple(r.stdout + r.stderr)
+            value = ".".join(map(str, v)) if v else ""
+        except (OSError, subprocess.SubprocessError):
+            value = ""
+    _codex_version.update(at=now, value=value)
+    return value or None
+
+
+def codex_update_needed():
+    """(cli_version, list_version) when the command is older than the model list, else None."""
+    cli = codex_cli_version()
+    listed = str(_codex_cache().get("client_version") or "")
+    if _version_tuple(cli) and _version_tuple(listed) and _version_tuple(cli) < _version_tuple(listed):
+        return cli, listed
+    return None
+
+
+def codex_model_options():
+    """Models advertised by the signed-in Codex installation.
+
+    Codex maintains this non-secret cache for its own model picker. Reading it
+    keeps Library Keeper aligned with the same account without touching login
+    tokens or requiring a separate OpenAI API key.
+    """
+    data = _codex_cache()
+    visible = []
+    for item in data.get("models", []) if isinstance(data, dict) else []:
+        if not isinstance(item, dict) or item.get("visibility") != "list":
+            continue
+        slug = str(item.get("slug") or "").strip()
+        if not slug:
+            continue
+        visible.append((item.get("priority", 9999), slug,
+                        str(item.get("display_name") or slug).strip()))
+    visible.sort(key=lambda row: (row[0], row[1]))
+    options = [{"value": "default", "label": "تلقائي (اختيار Codex)",
+                "group": "اختيار تلقائي", "installed": True}]
+    options.extend({"value": slug, "label": f"{label} · {slug}" if label != slug else slug,
+                    "group": "متاحة في Codex", "installed": True}
+                   for _, slug, label in visible)
+    return options
 
 
 def _strict_schema(schema):
@@ -308,6 +399,11 @@ def _codex_complete(model, system, msgs, schema, timeout):
         except OSError as e:
             raise LLMError(f"codex could not start: {e}") from e
         if r.returncode != 0:
+            if "not supported when using Codex" in (r.stderr or "") + (r.stdout or ""):
+                old = codex_update_needed()
+                raise LLMError(f"النموذج {model} مرفوض في Codex بحساب ChatGPT"
+                               + (f" — برنامج Codex قديم ({old[0]})، حدّثه في Terminal: {CODEX_UPDATE_CMD}" if old
+                                  else " — اختر نموذجًا آخر من القائمة"))
             tail = re.sub(r"\s+", " ", (r.stderr or r.stdout or "")[-200:])
             raise LLMError(f"codex exit {r.returncode}: {tail}")
         try:
@@ -336,6 +432,123 @@ def ollama_models(timeout=1.5):
         return [m.get("name") for m in data.get("models", []) if m.get("name")]
     except (urllib.error.URLError, OSError, ValueError, TimeoutError):
         return None
+
+
+def _models_url(pid):
+    if pid == "openai":
+        return "https://api.openai.com/v1/models"
+    if pid == "anthropic":
+        return "https://api.anthropic.com/v1/models?limit=1000"
+    if pid == "gemini":
+        return "https://generativelanguage.googleapis.com/v1beta/openai/models"
+    if pid == "openrouter":
+        return "https://openrouter.ai/api/v1/models"
+    if pid == "ollama_cloud":
+        return "https://ollama.com/v1/models"
+    if pid == "ollama":
+        return _ollama_base() + "/api/tags"
+    if pid == "custom":
+        base = (_read_settings().get("custom_base_url") or "").rstrip("/")
+        if base.endswith("/chat/completions"):
+            base = base[:-len("/chat/completions")]
+        return base if base.endswith("/models") else base + "/models"
+    return None
+
+
+def _model_headers(pid):
+    if pid in ("ollama", "codex"):
+        return {}
+    key = get_key(pid)
+    if pid not in ("custom", "ollama_cloud") and not key:  # Ollama Cloud lists its models without a key
+        raise LLMError("أضف مفتاح المزوّد أولًا")
+    if pid == "anthropic":
+        return {"x-api-key": key, "anthropic-version": "2023-06-01"}
+    return {"Authorization": "Bearer " + key} if key else {}
+
+
+def _text_model(pid, item):
+    """Hide models that clearly cannot answer the app's text chat request."""
+    model_id = str(item.get("id") or item.get("name") or "").lower()
+    if not model_id:
+        return False
+    if pid == "openrouter":
+        outputs = (item.get("architecture") or {}).get("output_modalities")
+        return not outputs or "text" in outputs
+    blocked = ("embedding", "whisper", "tts", "dall-e", "imagen", "veo", "moderation",
+               "transcribe", "realtime", "native-audio", "computer-use", "aqa", "live")
+    return not any(word in model_id for word in blocked)
+
+
+def _model_options(pid, items):
+    if pid in ("openai", "gemini", "openrouter"):
+        items = sorted(items, key=lambda x: x.get("created", 0) or 0, reverse=True)
+    options, seen = [], set()
+    for item in items:
+        if not isinstance(item, dict) or not _text_model(pid, item):
+            continue
+        value = str(item.get("id") or item.get("name") or "").strip()
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        label = str(item.get("display_name") or item.get("name") or value).strip()
+        if label != value:
+            label = f"{label} — {value}"
+        options.append({"value": value, "label": label, "group": "متاحة من حسابك", "installed": True})
+    return options
+
+
+def list_provider_models(pid, refresh=False, timeout=8):
+    """Fetch the models visible to the configured provider account.
+
+    Secrets stay server-side. Only successful results are cached, and callers can
+    explicitly bypass the ten-minute cache with refresh=True.
+    """
+    if pid not in PROVIDERS:
+        raise ValueError("unknown provider")
+    if pid == "codex":
+        options = codex_model_options()
+        return {"models": options, "total": len(options), "truncated": False, "cached": False}
+    cached = _model_list_cache.get(pid)
+    if not refresh and cached and time.time() - cached[0] < MODEL_LIST_TTL:
+        return {**cached[1], "cached": True}
+    url = _models_url(pid)
+    if not url or (pid == "custom" and url == "/models"):
+        raise LLMError("أضف عنوان المزوّد أولًا")
+    req = urllib.request.Request(url, headers={"accept": "application/json", **_model_headers(pid)}, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout, context=net.ssl_context()) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        raise LLMError(f"المزوّد رفض طلب النماذج (HTTP {e.code})") from e
+    except (urllib.error.URLError, OSError, ValueError, TimeoutError) as e:
+        raise LLMError("تعذر تحميل النماذج من المزوّد") from e
+    items = data.get("models", []) if pid == "ollama" else data.get("data", [])
+    if not isinstance(items, list):
+        raise LLMError("رد المزوّد ما يحتوي قائمة نماذج صالحة")
+    if pid == "ollama":
+        installed = [str(item.get("name") or "").strip() for item in items if isinstance(item, dict)]
+        installed = [name for name in installed if name]
+        installed_set = set(installed)
+        options = ([{"value": name, "label": name, "group": "مثبتة على جهازك", "installed": True}
+                    for name in installed]
+                   + [{"value": name, "label": name, "note": note, "group": "مقترحة للعربية",
+                       "installed": False, "hint": f"غير مثبت: نفّذ في Terminal  ollama pull {name}"}
+                      for name, note in OLLAMA_ARABIC if name not in installed_set])
+    else:
+        options = _model_options(pid, items)
+    if pid == "ollama_cloud":
+        notes = {re.sub(r"[:-]cloud$", "", n): note.replace("سحابي · ", "") for n, note in OLLAMA_ARABIC if "cloud" in n}
+        for o in options:
+            o["group"] = "متاحة في Ollama Cloud"
+            if o["value"] in notes:
+                o["note"] = notes[o["value"]]
+    if not options:
+        raise LLMError("المزوّد ما رجّع نماذج محادثة متاحة")
+    total = len(options)
+    result = {"models": options[:MODEL_LIST_LIMIT], "total": total,
+              "truncated": total > MODEL_LIST_LIMIT, "cached": False}
+    _model_list_cache[pid] = (time.time(), result)
+    return result
 
 
 def get_active():
@@ -395,6 +608,13 @@ def status():
             ready, note = codex_login_status()
             entry["configured"] = ready
             entry["note"] = note + " — للتجربة الشخصية فقط، مو للزوار"
+            entry["model_options"] = codex_model_options()
+            entry["version"] = codex_cli_version() if ready else None
+            old = codex_update_needed() if ready else None
+            if old:
+                entry["warning"] = (f"برنامج Codex على الجهاز إصدار {old[0]}، وقائمة النماذج من إصدار {old[1]}: "
+                                    "النماذج الأحدث تظهر في القائمة لكنها ما تشتغل حتى تحدّثه.")
+                entry["update_command"] = CODEX_UPDATE_CMD
         elif pid == "custom":
             entry["address"] = (_read_settings().get("custom_base_url") or "")
             entry["configured"] = has_key(pid)
@@ -402,7 +622,7 @@ def status():
         else:
             entry["configured"] = has_key(pid)
             entry["note"] = {"terminal": "المفتاح من Terminal", "saved": "المفتاح محفوظ من الصفحة"}.get(
-                entry["key_source"], "أضف المفتاح")
+                entry["key_source"], "أنشئ مفتاحًا من ollama.com/settings/keys والصقه هنا" if pid == "ollama_cloud" else "أضف المفتاح")
         if "model_options" not in entry:
             entry["model_options"] = [{"value": m, "label": m, "group": None, "installed": True}
                                       for m in entry["suggested_models"]]
@@ -419,7 +639,7 @@ def _post(url, body, headers, timeout):
     req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"),
                                  headers={"content-type": "application/json", **headers}, method="POST")
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with urllib.request.urlopen(req, timeout=timeout, context=net.ssl_context()) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         detail = ""
@@ -509,7 +729,7 @@ def complete_json(system, messages, schema, max_tokens=700, active=None):
     msgs = _normalize_messages(messages)
     if not msgs:
         raise LLMError("no user message")
-    timeout = float(os.environ.get("LIBRARY_KEEPER_LLM_TIMEOUT", "30" if pid in ("ollama", "custom") else "15"))
+    timeout = float(os.environ.get("LIBRARY_KEEPER_LLM_TIMEOUT", "30" if pid in ("ollama", "ollama_cloud", "custom") else "15"))
     started = time.time()
     last_call.clear()
     last_call.update(provider=pid, model=model, ok=False, retried=False, first_error=None, format=None, ms=None,
@@ -540,6 +760,18 @@ def _usage(data):
     if not isinstance(u, dict):
         return None
     return {k: u.get(k) for k in ("prompt_tokens", "completion_tokens", "input_tokens", "output_tokens") if k in u}
+
+
+def _add_usage(u):
+    """Add one provider answer's token counts to last_call. A call that needs a corrective retry
+    gets two answers and both are billed, so they are summed, not replaced (audit 2026-10-02)."""
+    last_call["attempts"] = last_call.get("attempts", 0) + 1
+    if not u:
+        return
+    total = dict(last_call.get("usage") or {})
+    for k, v in u.items():
+        total[k] = (total.get(k) or 0) + v if isinstance(v, int) else total.get(k, v)
+    last_call["usage"] = total
 
 
 def _complete_json(p, pid, model, system, msgs, schema, max_tokens, timeout):
@@ -574,7 +806,7 @@ def _complete_json(p, pid, model, system, msgs, schema, max_tokens, timeout):
     if use_schema:
         body["response_format"] = {"type": "json_schema",
                                    "json_schema": {"name": "answer", "schema": schema, "strict": False}}
-    elif pid in ("openai", "ollama"):
+    elif pid in ("openai", "ollama", "ollama_cloud"):
         body["response_format"] = {"type": "json_object"}
     last_call["format"] = "json_schema" if use_schema else body.get("response_format", {}).get("type", "prompt")
     if pid == "ollama":
@@ -602,7 +834,7 @@ def _complete_json(p, pid, model, system, msgs, schema, max_tokens, timeout):
             if b.get("response_format", {}).get("type") == "json_schema" and str(e).startswith("HTTP 400"):
                 _schema_unsupported.add((pid, model))
                 b = dict(b)
-                if pid in ("openai", "ollama"):
+                if pid in ("openai", "ollama", "ollama_cloud"):
                     b["response_format"] = {"type": "json_object"}
                 else:
                     b.pop("response_format", None)
@@ -610,7 +842,7 @@ def _complete_json(p, pid, model, system, msgs, schema, max_tokens, timeout):
                 data = _post(url, b, headers, timeout)
             else:
                 raise
-        last_call["usage"] = _usage(data)
+        _add_usage(_usage(data))
         try:
             return data["choices"][0]["message"]["content"] or ""
         except (KeyError, IndexError, TypeError):
@@ -625,9 +857,13 @@ def _complete_json(p, pid, model, system, msgs, schema, max_tokens, timeout):
         last_call["first_error"] = str(first)[:160]
         retry = dict(body)
         if (pid, model) in _schema_unsupported:
-            retry["response_format"] = {"type": "json_object"} if pid in ("openai", "ollama") else None
+            retry["response_format"] = {"type": "json_object"} if pid in ("openai", "ollama", "ollama_cloud") else None
             if retry["response_format"] is None:
                 retry.pop("response_format")
+        if pid in ("ollama", "ollama_cloud"):
+            # a reasoning model sometimes thinks through its whole budget and returns nothing
+            # (2 of 26 turns, 2026-10-07); the second try answers without the thinking phase
+            retry["reasoning_effort"] = "none"
         retry["messages"] = body["messages"] + [
             {"role": "assistant", "content": text[:2000]},
             {"role": "user", "content": "Your previous reply was not a valid JSON object. "
@@ -638,7 +874,8 @@ def _complete_json(p, pid, model, system, msgs, schema, max_tokens, timeout):
 # ---------------------------------------------------------------- vocabulary
 
 GENRES = ["رواية", "قصص قصيرة", "أطفال", "يافعين", "تطوير ذاتي", "علم نفس", "مسرحية", "أدب",
-          "سيرة ذاتية", "سيرة نبوية", "تاريخ", "دين", "فكر", "علوم", "أعمال", "شعر", "أدب رحلات"]
+          "سيرة ذاتية", "سيرة نبوية", "تاريخ", "دين", "فكر", "علوم", "أعمال", "شعر", "أدب رحلات",
+          "قصص مصورة", "مقالات ونصوص", "نقد أدبي", "فنون وسينما", "علم اجتماع"]
 AUDIENCES = ["children", "young_adult", "adult"]
 SENSITIVE = ["violence", "sexual_content", "strong_language", "horror", "substance_use", "self_harm",
              "religious_controversy", "political"]
@@ -649,6 +886,11 @@ WEIGHTS = ["light", "medium", "heavy", "intense"]
 USE_CASES = ["habit_start", "light_reading", "coffee", "travel", "gift", "book_club",
              "discussion", "practical_learning", "quick_read", "slump_recovery"]
 LEVELS = ["beginner", "regular", "advanced"]
+# language the work was originally written in (same codes as books.original_language)
+# prizes the visitor may ask for (backend/honors.py keys); "any" = any prize (2026-10-08)
+AWARD_KEYS = ["ipaf", "booker", "intl_booker", "nobel", "zayed", "katara", "mahfouz", "sharjah", "pulitzer", "goncourt", "any"]
+ORIGIN_LANGS = ["ar", "en", "fr", "es", "de", "ru", "it", "pt", "ja", "zh", "ko", "tr", "fa", "ur", "hi",
+                "sv", "no", "da", "nl", "pl", "cs", "hu", "el", "grc", "he", "la", "bs"]
 
 
 def _arr(values):
@@ -659,6 +901,7 @@ PREFS_SCHEMA = {
     "type": "object",
     "properties": {
         "genres": _arr(GENRES),
+        "subgenres": {"type": "array", "items": {"type": "string"}},
         "length": {"type": "string", "enum": ["short", "long", "any"]},
         "moods_include": _arr(MOODS), "moods_exclude": _arr(MOODS),
         "pace": _arr(PACES),
@@ -667,12 +910,18 @@ PREFS_SCHEMA = {
         "authors": {"type": "array", "items": {"type": "string"}},
         "title_keywords": {"type": "array", "items": {"type": "string"}},
         "unsupported_requests": {"type": "array", "items": {"type": "string"}},
+        "original_languages": _arr(ORIGIN_LANGS),
+        "translated": {"type": "string", "enum": ["yes", "no", "any"]},
+        "awards": _arr(AWARD_KEYS),
+        "award_year": {"type": "integer"},
+        "adaptation": {"type": "string", "enum": ["film", "series", "screen", "none"]},
         "audience": {"type": "string", "enum": AUDIENCES + ["any"]},
         "avoid_content": _arr(SENSITIVE),
     },
-    "required": ["genres", "length", "moods_include", "moods_exclude", "pace", "weight_include",
+    "required": ["genres", "subgenres", "length", "moods_include", "moods_exclude", "pace", "weight_include",
                  "weight_exclude", "use_cases", "reader_level", "authors", "title_keywords",
-                 "unsupported_requests", "audience", "avoid_content"],
+                 "unsupported_requests", "original_languages", "translated", "awards", "award_year", "adaptation",
+                 "audience", "avoid_content"],
 }
 
 PREFS_RULES = """Preference rules:
@@ -680,11 +929,16 @@ PREFS_RULES = """Preference rules:
 - Respect negation: "ما أبغى شي حزين" / "مو حزين" / "بدون حزن" -> moods_exclude ["sad"].
 - Dialect: "يونّس/تونّس/وناسة/يضحك" -> funny (+ light weight); "يشد/ما ينترك/ما أنام منه" -> suspenseful + fast pace; "يريح/يروق/يفتح النفس" -> comforting/warm/uplifting + light weight; "ثقيل/يوجع/مؤلم" -> heavy; "خفيف/مع القهوة" -> light weight, light_reading/coffee; "أبدأ القراءة/أول كتاب/مبتدئ" -> habit_start + beginner; "هدية" -> gift.
 - length: "short" for قصير/ما يكون طويل, "long" for طويل/ملحمة, else "any".
-- genres only if named or clearly implied (رواية/قصة -> رواية; شعر/ديوان -> شعر; فلسفة -> فكر).
+- genres only if named or clearly implied (رواية/قصة -> رواية; شعر/ديوان -> شعر; فلسفة -> فكر; علم الاجتماع -> علم اجتماع; كوميكس/مانغا/رواية مصورة -> قصص مصورة; مقالات/رسائل/نصوص نثرية -> مقالات ونصوص; نقد أدبي/كتب عن الكتابة والقراءة -> نقد أدبي; سينما/موسيقى/فنون -> فنون وسينما).
 - authors: names as written. title_keywords: only for a specific title.
+- subgenres: ONLY subgenres explicitly requested by the visitor, in Arabic (fantasy -> فانتازيا). Never infer a subgenre from an author's name, including requests for similar books. These are supported fields. Include only positive wishes, never negated ones.
 - audience: who will read it. "children" for a child up to 12 (طفل/ولدي الصغير/بنتي عمرها 8/قصص أطفال/ابتدائي); "young_adult" for 13-17 (مراهق/ولدي في المتوسط أو الثانوي/يافعين/عمره 15); "adult" only if an adult reader is stated; else "any".
 - avoid_content: content the visitor wants to avoid ("بدون عنف" -> violence; "ما فيه مشاهد جريئة/محترم للعائلة" -> sexual_content; "بدون رعب" -> horror).
-- unsupported_requests: short Arabic phrases for wishes these fields cannot express (a topic like "الغربة", a country, an era, "عربية غير مترجمة")."""
+- original_languages: codes of the language the work was ORIGINALLY written in, when the visitor asks for the literature of a language or nation: "مترجم من الإيطالية"/"رواية إيطالية"/"كاتب إيطالي" -> ["it"]; "أدب روسي" -> ["ru"]; "رواية يابانية" -> ["ja"]; "أدب لاتيني/أمريكا اللاتينية" -> ["es", "pt"]; "رواية عربية"/"كاتب عربي" -> ["ar"]. Codes: {ORIGIN_CODES}. In "أدب ياباني"/"الأدب الروسي" the word أدب means literature in general: do NOT set genres to "أدب" for it. A country as a TOPIC or setting ("كتاب عن اليابان", "تدور أحداثها في إيطاليا") is NOT a language: put it in unsupported_requests.
+- translated: "yes" when they ask for a translated work (مترجم/أدب مترجم/أدب عالمي); "no" when they ask for an Arabic original (عربي غير مترجم/مو مترجم); else "any".
+- awards: prizes the book (or its author) must have: "حائزة على جائزة"/"كتاب أخذ جائزة"/"روايات فائزة" -> ["any"]; "البوكر" -> ["ipaf", "booker"] (in Arabic it usually means the Arabic Booker, so both); "البوكر العربية"/"الجائزة العالمية للرواية العربية" -> ["ipaf"]; "البوكر الدولية" -> ["intl_booker"]; "نوبل" -> ["nobel"]; "جائزة الشيخ زايد" -> ["zayed"]; "كتارا" -> ["katara"]; "جائزة نجيب محفوظ" -> ["mahfouz"]; "جائزة الشارقة" -> ["sharjah"]; "بوليتزر" -> ["pulitzer"]; "غونكور" -> ["goncourt"]; another named prize -> ["any"] and its name in unsupported_requests. award_year: the year named with the prize ("البوكر ٢٠٢٢" -> 2022), else 0. A prize is never a subject: do not put it in unsupported_requests unless it is not in this list.
+- adaptation: "تحولت لفيلم"/"صار فيلم"/"عليها فيلم" -> "film"; "مسلسل" -> "series"; "فيلم أو مسلسل"/"انعرضت"/"تحولت لعمل" -> "screen"; else "none".
+- unsupported_requests: short Arabic phrases for wishes these fields cannot express. ALWAYS list first the SUBJECT the visitor wants to read about, one subject per item in 1-2 plain words as a book title would name it: "كتاب في تاريخ الأندلس" -> ["الأندلس"]; "أنظم وقتي وأترك التسويف" -> ["التسويف", "تنظيم الوقت"]; "خيال علمي عن الفضاء" -> ["الفضاء"]; "رواية عن الغربة" -> ["الغربة"]; a country as a topic -> its name; an era -> its name. A subject is searched in our books, so never skip it and never merge it with the genre word (not "تاريخ الأندلس"). Only subjects the visitor WANTS: something they reject ("ولا فيها موت", "بدون سياسة") is never listed here. Other wishes that no field expresses come after it. Never put the original language or translated/untranslated here.""".replace("{ORIGIN_CODES}", ", ".join(ORIGIN_LANGS))
 
 UNDERSTAND_SYSTEM = ("You interpret a library visitor's request (Arabic, often Saudi/Gulf dialect) for a "
                      "book-recommendation assistant. Output only the structured preferences.\n" + PREFS_RULES +
@@ -705,13 +959,19 @@ def clean_prefs(raw):
     length = raw.get("length")
     out = {
         "genres": pick("genres", GENRES),
+        "subgenres": strings("subgenres"),
         "length": length if length in ("short", "long") else None,
         "moods_include": pick("moods_include", MOODS), "moods_exclude": pick("moods_exclude", MOODS),
         "pace": pick("pace", PACES),
         "weight_include": pick("weight_include", WEIGHTS), "weight_exclude": pick("weight_exclude", WEIGHTS),
         "use_cases": pick("use_cases", USE_CASES), "reader_level": pick("reader_level", LEVELS),
         "authors": strings("authors"), "title_keywords": strings("title_keywords"),
-        "unsupported_requests": strings("unsupported_requests", 3),
+        "unsupported_requests": strings("unsupported_requests", 4),
+        "original_languages": pick("original_languages", ORIGIN_LANGS)[:4],
+        "translated": raw.get("translated") if raw.get("translated") in ("yes", "no") else None,
+        "awards": pick("awards", AWARD_KEYS)[:4],
+        "award_year": raw.get("award_year") if isinstance(raw.get("award_year"), int) and 1900 <= raw.get("award_year") <= 2100 else None,
+        "adaptation": raw.get("adaptation") if raw.get("adaptation") in ("film", "series", "screen") else None,
         "audience": raw.get("audience") if raw.get("audience") in AUDIENCES else None,
         "avoid_content": pick("avoid_content", SENSITIVE),
     }

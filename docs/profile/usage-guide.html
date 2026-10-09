@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>ثلاث الذكي — تعليمات الاستخدام</title>
+<style>
+  @font-face{font-family:MarkaziText;src:url("img/MarkaziText.ttf") format("truetype");font-weight:400 700}
+  @page{size:A4;margin:16mm 17mm 18mm}
+  :root{--brown:#3B1F14;--sage:#BFCCB8;--sage-soft:#E9EEE5;--coral:#D8614A;--paper:#F7F3EC;--muted:#756B65;--line:#E2D9CE}
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--brown);font-family:MarkaziText,"Noto Naskh Arabic",serif;font-size:14.5pt;line-height:1.65}
+  h1,h2,h3{margin:0;font-weight:700;line-height:1.25}
+  h2{display:flex;align-items:center;gap:9px;margin:0 0 9px;font-size:21pt;break-after:avoid}
+  h2 .n{display:inline-grid;width:30px;height:30px;place-items:center;border-radius:50%;background:var(--coral);color:#fff;font-size:14pt}
+  h3{margin:12px 0 5px;font-size:15.5pt;break-after:avoid}
+  p{margin:0 0 8px}
+  section{margin:0 0 20px}
+  .page{break-before:page}
+  .muted{color:var(--muted)}
+  .cover{display:flex;flex-direction:column;justify-content:space-between;height:258mm;padding:22mm 16mm;border-radius:22px;background:var(--sage)}
+  .cover img.logo{width:78mm}
+  .cover .tag{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:15pt}.cover .tag:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--coral)}
+  .cover h1{font-size:44pt;line-height:1.1;margin-bottom:8px}
+  .cover .sub{font-size:19pt;max-width:130mm}
+  .cover .meta{display:flex;justify-content:space-between;align-items:flex-end;font-size:13pt}
+  .credit{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12pt;color:var(--muted)}.credit img{width:30mm}
+  ol.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+  ol.steps li{position:relative;margin:0 0 7px;padding-inline-start:36px;break-inside:avoid}
+  ol.steps li:before{counter-increment:s;content:counter(s, arabic-indic);position:absolute;inset-inline-start:0;top:1px;display:grid;width:25px;height:25px;place-items:center;border-radius:8px;background:var(--brown);color:#fff;font-size:12pt}
+  ul{margin:0 0 8px;padding-inline-start:20px}ul li{margin:0 0 4px}
+  .box{padding:11px 15px;border-radius:14px;background:var(--sage-soft);break-inside:avoid;margin:0 0 10px}
+  .box.warn{background:#F8E4DE}
+  .box b.t{display:block;margin-bottom:3px}
+  table{width:100%;border-collapse:collapse;font-size:13pt;break-inside:auto}
+  th{padding:7px 9px;border-bottom:2px solid var(--brown);text-align:right;font-weight:700}
+  td{padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr{break-inside:avoid}
+  td.q{white-space:nowrap;font-weight:700}
+  td.en{direction:ltr;text-align:left;font-family:"Helvetica Neue",Arial,sans-serif;font-size:11.5pt}
+  .kbd{display:inline-block;padding:0 7px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:12.5pt}
+  .file{direction:ltr;unicode-bidi:embed;font-family:Menlo,Consolas,monospace;font-size:11pt;background:#fff;border:1px solid var(--line);border-radius:6px;padding:0 5px}
+  .rate td{height:27px;padding:4px 9px}.rate td.c{width:9mm;text-align:center;color:var(--muted);font-size:12pt;border-inline-start:1px solid var(--line)}
+  .lines{height:17mm;border:1px solid var(--line);border-radius:10px;margin:4px 0 10px}
+  .fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:0 0 12px}
+  .fields div{border-bottom:1px solid var(--brown);padding:14px 2px 2px;font-size:12pt;color:var(--muted)}
+  .foot{display:flex;justify-content:center;margin-top:6px}.foot .credit img{width:22mm}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div>
+    <img class="logo" src="img/thalath-smart.svg" alt="ثلاث الذكي" />
+    <div class="tag">مكتبة ثلاث — وجهتك الثقافية</div>
+  </div>
+  <div>
+    <h1>تعليمات<br />الاستخدام</h1>
+    <div class="sub">تشغيل «ثلاث الذكي» في المكتبة، واستخدامه اليومي للموظف والزائر.</div>
+  </div>
+  <div class="meta">
+    <span>الإصدار ٠٫٩ — نسخة تجريبية<br />أكتوبر ٢٠٢٦</span>
+    <div class="credit"><span>تطوير</span><img src="img/developer-logo.png" alt="إبراهيم" /></div>
+  </div>
+</div>
+
+<div class="page">
+<section>
+  <h2><span class="n">١</span>تجهيز الجهاز (مرة واحدة)</h2>
+  <ol class="steps">
+    <li>جهاز ويندوز أو ماك متصل بواي فاي المكتبة وموصول بالكهرباء. انسخ مجلد التطبيق كاملًا إلى مكان ثابت عليه (مثل المستندات)، ولا تشغّله من الملف المضغوط ولا من فلاش.</li>
+    <li>ثبّت Python 3 من <span class="file">python.org/downloads</span> (ويندوز: مع اختيار «Add python.exe to PATH»).</li>
+    <li>ثبّت تطبيق Ollama من <span class="file">ollama.com/download</span> وسجّل الدخول فيه بحسابك. نموذج المحادثة يعمل على خوادم Ollama، فيحتاج إنترنت وتسجيل الدخول، ولا يحتاج تنزيلًا كبيرًا.</li>
+  </ol>
+</section>
+
+<section>
+  <h2><span class="n">٢</span>تشغيل التطبيق</h2>
+  <ol class="steps">
+    <li>اضغط مرتين على <span class="file">start_library.bat</span> (ويندوز) أو <span class="file">start_library.command</span> (ماك). أول مرة يحتاج إنترنت ودقيقة تقريبًا.</li>
+    <li>إذا سأل الجهاز عن السماح لـ Python بالاتصال بالشبكة فاسمح له (ويندوز: على «الشبكات الخاصة»)؛ بدون هذا لا تصل الجوالات إلى التطبيق.</li>
+    <li>تفتح لوحة الإدارة في المتصفح. ادخل بحساب المدير، ثم أنشئ حسابات الموظفين من <b>الإعدادات</b> ← <b>الموظفون</b>.</li>
+    <li>من <b>الإعدادات</b> ← <b>نموذج المحادثة</b> تأكد أن Ollama يعمل، واضغط <span class="kbd">جرّب</span> وتأكد أن الرد يطلع.</li>
+    <li>خلّ الجهاز صاحي ونافذة التشغيل مفتوحة طول وقت الدوام. للإيقاف: أغلق النافذة.</li>
+  </ol>
+  <div class="box"><b class="t">تشغيل تلقائي ونسخ احتياطي</b>ويندوز: اضغط مرتين على <span class="file">install_autostart.bat</span> مرة واحدة، فيشتغل التطبيق عند دخول المستخدم وتُؤخذ نسخة احتياطية كل يوم ٣:١٥ فجرًا. ماك: <span class="file">scripts/install_daily_backup.command</span>. ولنسخة فورية: <span class="file">backup_now</span>.</div>
+  <div class="box"><b class="t">إذا انقطع النموذج؟</b>يكمل المساعد بالبحث بالكلمات وفهمه أبسط، وتظهر للزائر ملاحظة صغيرة بذلك. يرجع لوحده إذا رجع الإنترنت.</div>
+</section>
+</div>
+
+<div class="page">
+<section>
+  <h2><span class="n">٣</span>رمز QR</h2>
+  <ol class="steps">
+    <li>لوحة الإدارة ← <b>الإعدادات</b> ← <b>رمز التجربة (QR)</b>، وتأكد إن الحالة «جاهز».</li>
+    <li><span class="kbd">اطبع لوحة الرمز</span> أو <span class="kbd">نزّل الرمز كصورة</span> أو <span class="kbd">انسخ الرابط</span> وشاركه.</li>
+    <li>الرمز مربوط بعنوان الجهاز في الشبكة. الأفضل تثبيت العنوان من الراوتر ثم طباعة الرمز؛ وإذا ما تثبّت فاعرض الرمز على شاشة من نفس الصفحة، فيتغيّر المعروض مع العنوان.</li>
+  </ol>
+</section>
+
+<section>
+  <h2><span class="n">٤</span>طريقة استخدام الزائر</h2>
+  <ol class="steps">
+    <li>يتصل بواي فاي المكتبة ويمسح الرمز بكاميرا الجوال.</li>
+    <li>يضغط <span class="kbd">سولف معي عن مزاجك</span> ويكتب وش ودّه يقرأ.</li>
+    <li>يضغط على أي كتاب لتفاصيله، ثم <span class="kbd">أبغى هذا الكتاب</span> ويقيّم الاقتراح.</li>
+    <li>مكان الكتاب يدلّه عليه الموظف.</li>
+  </ol>
+  <h3>جرّبوا مثلًا</h3>
+  <ul>
+    <li>أبغى رواية تشد وما تكون حزينة</li>
+    <li>قصة لبنتي عمرها ٧ سنوات</li>
+    <li>كتاب عن تاريخ الأندلس</li>
+    <li>أحب ماركيز، عطني شي بنفس الجو</li>
+    <li>عندكم رواية الخيميائي؟</li>
+    <li>I want a funny novel <span class="muted">(بعد الضغط على EN)</span></li>
+  </ul>
+</section>
+</div>
+
+<div class="page">
+<section>
+  <h2><span class="n">٥</span>عمل الموظف اليومي</h2>
+  <table>
+    <tr><th style="width:36%">المهمة</th><th>أين وكيف</th></tr>
+    <tr><td class="q">بلاغات الزوار واقتراحاتهم</td><td>يرسلها الزائر من «فيه معلومة غلط؟ بلّغنا» أو «عندك اقتراح؟». تظهر في لوحة الإدارة تحت <b>بلاغات الزوار واقتراحاتهم</b>: اقرأها، صحّح المعلومة إن كانت خطأ، وعلّمها منجزة.</td></tr>
+    <tr><td class="q">تأكيد هوية كتاب</td><td>بعض الكتب عليها علامة «يحتاج تأكيد هويته». خذ النسخة من الرف وطابق العنوان والمؤلف والناشر مع المعروض: اختر المطابق، أو اكتب ما على الغلاف، أو «النسخة غير موجودة على الرف».</td></tr>
+    <tr><td class="q">تصحيح بيانات كتاب</td><td>من صفحة الكتاب في <b>المكتبة</b>: البيانات الأساسية، الغلاف، النبذة، لغة الكتاب. كل تعديل يُحفظ في <b>سجل التعديلات</b> باسم صاحبه.</td></tr>
+    <tr><td class="q">تحديث المخزون</td><td><b>استيراد من رواء</b>: ارفع ملف التصدير، اختر الأعمدة، وراجع التغييرات قبل التطبيق. الكتاب النافد يختفي من الترشيحات.</td></tr>
+    <tr><td class="q">متابعة الأداء</td><td><b>توجهات القرّاء ورضاهم</b>: الكتب الأكثر اختيارًا، رضا الزوار، وما يُقترح كثيرًا ولا يُختار.</td></tr>
+  </table>
+</section>
+
+<div class="box warn"><b class="t">ملاحظات على هذه النسخة</b>
+<ul style="margin:4px 0 0">
+  <li>مواقع الكتب على الرفوف لم تُدخل بعد؛ يظهر للزائر «موقعه عند الموظف».</li>
+  <li>المخزون والأسعار حسب آخر تصدير من رواء (٢٨ سبتمبر ٢٠٢٦).</li>
+  <li>ردود المساعد يكتبها نموذج ذكاء اصطناعي من بيانات كتبنا فقط، وقد تختلف صياغتها من مرة لأخرى.</li>
+</ul></div>
+<div class="foot" style="margin-top:22px"><div class="credit"><span>تطوير</span><img src="img/developer-logo.png" alt="إبراهيم" /></div></div>
+</div>
+
+</body>
+</html>

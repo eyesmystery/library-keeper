@@ -16,6 +16,7 @@ No third-party dependency: .xlsx is read with zipfile + xml.etree.
 """
 import csv
 import io
+from decimal import Decimal, InvalidOperation
 import re
 import secrets
 import time
@@ -23,6 +24,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
+import deleted_books
 from models import get_connection
 
 MAX_ROWS = 20000
@@ -35,6 +37,7 @@ FIELDS = {
     "barcode": {"label": "الباركود / ISBN", "required": False},
     "sku": {"label": "رمز المنتج (SKU)", "required": False},
     "author": {"label": "المؤلف", "required": False},
+    "publisher": {"label": "دار النشر", "required": False},
     "price": {"label": "سعر البيع", "required": False},
     "quantity": {"label": "الكمية المتوفرة", "required": False},
     "shelf": {"label": "الرف / الموقع", "required": False},
@@ -44,13 +47,29 @@ HINTS = {
     "title": ["اسم المنتج", "اسم الكتاب", "المنتج", "الاسم", "product name", "name", "title"],
     "barcode": ["باركود", "الباركود", "barcode", "isbn", "ean", "gtin"],
     "sku": ["sku", "رمز المنتج", "كود المنتج", "رمز", "product code", "code"],
-    "author": ["المؤلف", "مؤلف", "الكاتب", "author", "brand", "العلامه التجاريه"],
+    "author": ["المؤلف", "مؤلف", "الكاتب", "author"],
+    # In this library's Rewaa account the "Category" column holds the publisher (checked on the
+    # real export, 2026-09-28); it is never used as a genre. English "category" must match exactly
+    # so Arabic "فئة المنتج" (product type) is never mapped.
+    "publisher": ["دار النشر", "الناشر", "publisher", "=category"],
     "price": ["سعر البيع", "السعر", "سعر", "retail price", "selling price", "price"],
     "quantity": ["الكميه المتوفره", "الكميه", "المخزون", "كميه", "quantity", "qty", "stock", "on hand"],
     "shelf": ["الرف", "الموقع", "رف", "location", "shelf", "bin"],
 }
 # Headers that must never be auto-mapped (the user said these are not needed).
-IGNORE_HINTS = ["ضريب", "tax", "vat", "فئه", "category", "تكلفه", "cost", "مورد", "supplier"]
+IGNORE_HINTS = ["ضريب", "tax", "vat", "فئه", "category", "تكلفه", "cost", "مورد", "supplier",
+                "buy price", "wholesale", "online price", "سعر الشراء", "سعر الجمله"]
+
+# Non-book products sold in the same shop (cafe menu, stationery). Rows matching these are
+# excluded from the catalog and listed in the plan with the reason (2026-09-28).
+NON_BOOK_CATEGORY_WORDS = ["مشروبات", "drinks", "cafe", "كافيه", "الاضافات", "add-ons", "موهيتو", "mojito",
+                           "ماتشا", "matcha", "refreshers", "المنعشات", "ادوات مكتبيه", "stationery"]
+# Only for rows without a category: clear stationery / cafe names.
+NON_BOOK_NAME_RE = re.compile(
+    r"^(قلم|اقلام|طقم اقلام|مسطره|مقلمه|شنط|كروت هدايا|فواصل|ماء )|"
+    r"\b(sticky|sticker|marker|pencils?|pen|coffee|coffe|decaf|cake|notebook|planner)\b|كيك")
+_ARABIC_RE = re.compile(r"[\u0600-\u06FF]")
+_LATIN_RE = re.compile(r"[A-Za-z]")
 
 _ARABIC_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹٫٬", "01234567890123456789.,")
 
@@ -74,10 +93,77 @@ def norm_code(value):
     s = str(value or "").strip().translate(_ARABIC_DIGITS)
     if re.fullmatch(r"\d+\.0+", s):
         s = s.split(".")[0]
-    if re.fullmatch(r"\d(\.\d+)?[eE]\+\d+", s):
-        return ""  # precision already lost in the spreadsheet; do not guess
+    m = re.fullmatch(r"(\d)(?:\.(\d+))?[eE]\+?(\d+)", s)
+    if m:
+        # Scientific notation. Rewaa's CSV export writes codes this way with all significant
+        # digits (trailing zeros dropped: 3.2456789113E11 = 324567891130), so it is exact when
+        # at least 10 significant digits are present. Short forms such as Excel's display
+        # "9.78995E+12" have lost digits and are refused.
+        digits = m.group(1) + (m.group(2) or "")
+        exp = int(m.group(3))
+        if len(digits) > exp + 1 or exp + 1 > 15 or len(digits) < min(exp + 1, 10):
+            return ""
+        try:
+            s = str(int(Decimal(s)))
+        except InvalidOperation:
+            return ""
     s = re.sub(r"[^0-9Xx]", "", s).upper()
     return s if len(s) >= 6 else ""
+
+
+def norm_sku(value):
+    """Rewaa SKUs arrive as floats in CSV exports ("10170.0")."""
+    s = str(value or "").strip().translate(_ARABIC_DIGITS)
+    if re.fullmatch(r"\d+\.0+", s):
+        s = s.split(".")[0]
+    return s[:60]
+
+
+def is_isbn(code):
+    """True for a checksum-valid ISBN-13 (978/979) or ISBN-10. Rewaa's own internal barcodes are not."""
+    c = str(code or "")
+    if re.fullmatch(r"97[89]\d{10}", c):
+        total = sum(int(d) * (1 if i % 2 == 0 else 3) for i, d in enumerate(c[:12]))
+        return (10 - total % 10) % 10 == int(c[12])
+    if re.fullmatch(r"\d{9}[\dX]", c) and not c.startswith(("978", "979")):  # 978/979… of 10 digits = a cut ISBN-13
+        total = sum((10 - i) * (10 if d == "X" else int(d)) for i, d in enumerate(c))
+        return total % 11 == 0
+    return False
+
+
+def clean_title(text):
+    """Keep Rewaa's name as it is, only joining broken lines and extra spaces. Number-only
+    titles are real books (1984, 2666, 4321) that the CSV export wrote as floats ("1984.0")."""
+    t = re.sub(r"\s+", " ", str(text or "")).strip()
+    return t.split(".")[0] if re.fullmatch(r"\d+\.0+", t) else t
+
+
+def clean_publisher(text):
+    """The Category column holds publishers for Arabic books but genre labels ("Fiction",
+    "Manga (Fantasy)") for English imports; only real publisher names are kept."""
+    t = re.sub(r"\s+", " ", str(text or "")).strip()
+    if not t or _ARABIC_RE.search(t):
+        return t[:120]
+    return t[:120] if t.isupper() and len(t) <= 30 else ""
+
+
+def guess_language(title, isbn=""):
+    if _ARABIC_RE.search(title or ""):
+        return "ar"
+    if _LATIN_RE.search(title or "") or str(isbn).startswith(("9780", "9781")):  # 978-0/978-1 = English-language ISBNs
+        return "en"
+    return "ar"
+
+
+def non_book_reason(title, category, stock_managed):
+    cat = _norm_header(category)
+    if stock_managed is not None and _norm_header(stock_managed) in ("no", "لا", "false", "0"):
+        return "منتج بدون مخزون (قائمة الكافيه أو خدمة)"
+    if cat and any(w in cat for w in NON_BOOK_CATEGORY_WORDS):
+        return f"ليس كتابًا (الفئة: {category.strip()})"
+    if not cat and NON_BOOK_NAME_RE.search(_norm_header(title)):
+        return "ليس كتابًا (قرطاسية أو كافيه حسب الاسم)"
+    return None
 
 
 def parse_number(value):
@@ -195,10 +281,13 @@ def suggest_mapping(headers):
     for field in FIELDS:
         for hint in HINTS[field]:
             h = _norm_header(hint)
+            exact = h.startswith("=")
+            if exact:
+                h = h[1:]
             for i, name in enumerate(normalized):
-                if i in used or any(x in name for x in IGNORE_HINTS):
+                if i in used or (not exact and any(x in name for x in IGNORE_HINTS)):
                     continue
-                if name == h or h in name:
+                if name == h or (not exact and h in name):
                     mapping[field] = i
                     used.add(i)
                     break
@@ -246,14 +335,27 @@ def _clean_mapping(mapping, width):
     return out
 
 
+def _aux_columns(headers):
+    """Columns read automatically (never mapped by staff) to recognise non-book products."""
+    out = {}
+    for i, h in enumerate(headers):
+        n = _norm_header(h)
+        if "category" == n or n in ("الفئه", "التصنيف"):
+            out.setdefault("category", i)
+        if "stock management" in n or "اداره المخزون" in n or "تتبع المخزون" in n:
+            out.setdefault("stock_managed", i)
+    return out
+
+
 def _row_values(row, mapping):
     get = lambda f: row[mapping[f]].strip() if f in mapping else ""
     qty = parse_number(get("quantity")) if "quantity" in mapping else None
     price = parse_number(get("price")) if "price" in mapping else None
     return {
-        "title": get("title"), "author": get("author"),
+        "title": clean_title(get("title")), "author": get("author"),
+        "publisher": clean_publisher(get("publisher")) if "publisher" in mapping else "",
         "barcode": norm_code(get("barcode")) if "barcode" in mapping else "",
-        "sku": get("sku")[:60],
+        "sku": norm_sku(get("sku")),
         "price": price, "quantity": None if qty is None else int(max(qty, 0)),
         "shelf": get("shelf")[:20],
         "raw_price": get("price"), "raw_quantity": get("quantity"),
@@ -268,8 +370,10 @@ def build_plan(upload_id, mapping, missing_mode="zero"):
     conn = get_connection()
     try:
         books = [dict(r) for r in conn.execute("SELECT * FROM books")]
+        del_codes, del_skus, del_titles = deleted_books.import_skip_keys(conn)
     finally:
         conn.close()
+    del_titles = {norm_title(t) for t in del_titles}
     by_barcode = {b["barcode"]: b for b in books if b.get("barcode")}
     by_isbn = {norm_code(b.get("isbn")): b for b in books if norm_code(b.get("isbn"))}
     by_sku = {b["rewaa_sku"]: b for b in books if b.get("rewaa_sku")}
@@ -277,9 +381,19 @@ def build_plan(upload_id, mapping, missing_mode="zero"):
     for b in books:
         by_title.setdefault(norm_title(b["title"]), []).append(b)
 
-    new, updated, unchanged, invalid, seen_ids, seen_keys = [], [], [], [], set(), set()
+    aux = _aux_columns(up["headers"])
+    new, updated, unchanged, invalid, excluded, seen_ids, seen_keys = [], [], [], [], [], set(), set()
     for n, row in enumerate(up["rows"], start=2):
         v = _row_values(row, mapping)
+        reason = non_book_reason(v["title"], row[aux["category"]] if "category" in aux else "",
+                                 row[aux["stock_managed"]] if "stock_managed" in aux else None)
+        if reason:
+            excluded.append({"row": n, "title": v["title"], "reason": reason})
+            continue
+        if ((v["barcode"] and v["barcode"] in del_codes) or (v["sku"] and v["sku"] in del_skus)
+                or (not v["barcode"] and not v["sku"] and norm_title(v["title"]) in del_titles)):
+            excluded.append({"row": n, "title": v["title"], "reason": "محذوف يدويًا (ليس كتابًا) — يُسترجع من «المحذوفة»"})
+            continue
         problems = []
         if not v["title"]:
             problems.append("بدون اسم")
@@ -309,7 +423,8 @@ def build_plan(upload_id, mapping, missing_mode="zero"):
             if len(cands) == 1:
                 match, how = cands[0], "الاسم"
         if match is None:
-            new.append({"row": n, **{k: v[k] for k in ("title", "author", "barcode", "sku", "price", "quantity", "shelf")}})
+            new.append({"row": n, **{k: v[k] for k in ("title", "author", "publisher", "barcode", "sku", "price", "quantity", "shelf")},
+                        "isbn": v["barcode"] if is_isbn(v["barcode"]) else "", "language": guess_language(v["title"], v["barcode"] if is_isbn(v["barcode"]) else "")})
             continue
         if match["book_id"] in seen_ids:
             invalid.append({"row": n, "title": v["title"], "problems": [f"يطابق نفس كتاب سطر سابق ({match['title']})"]})
@@ -326,6 +441,8 @@ def build_plan(upload_id, mapping, missing_mode="zero"):
             changes["barcode"] = [None, v["barcode"]]
         if v["sku"] and not match.get("rewaa_sku"):
             changes["rewaa_sku"] = [None, v["sku"]]
+        if v["publisher"] and not match.get("publisher"):
+            changes["publisher"] = [None, v["publisher"]]
         note = None
         if norm_title(v["title"]) != norm_title(match["title"]):
             note = f"الاسم في رواء «{v['title']}» يختلف عن الكتالوج (ما يتغير تلقائيًا)"
@@ -340,7 +457,7 @@ def build_plan(upload_id, mapping, missing_mode="zero"):
         "file_name": up["file_name"], "rows_read": len(up["rows"]), "mapping": mapping,
         "match_warning": None if {"barcode", "sku"} & set(mapping) else
         "ما حددت عمود باركود أو رمز منتج؛ المطابقة بتكون بالاسم فقط وقد تكون أقل دقة.",
-        "new": new, "updated": updated, "unchanged": unchanged, "invalid": invalid,
+        "new": new, "updated": updated, "unchanged": unchanged, "invalid": invalid, "excluded": excluded,
         "missing": missing, "missing_mode": missing_mode,
     }
 
@@ -357,10 +474,11 @@ def apply_plan(upload_id, mapping, missing_mode="zero"):
         conn.execute("BEGIN")
         for item in plan["new"]:
             cur = conn.execute(
-                """INSERT INTO books (title, author, isbn, language, price, quantity, shelf_location,
+                """INSERT INTO books (title, author, publisher, isbn, language, price, quantity, shelf_location,
                                       active, barcode, rewaa_sku, source, last_synced_at)
-                   VALUES (?, ?, ?, 'ar', ?, ?, ?, 1, ?, ?, 'rewaa', ?)""",
-                (item["title"], item["author"] or "غير معروف", item["barcode"] or None,
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, 'rewaa', ?)""",
+                (item["title"], item["author"] or "غير معروف", item.get("publisher") or None,
+                 item.get("isbn") or None, item.get("language") or "ar",
                  item["price"] if item["price"] is not None else 0.0,
                  item["quantity"] if item["quantity"] is not None else 0,
                  item["shelf"] or None, item["barcode"] or None, item["sku"] or None, now))
@@ -394,7 +512,7 @@ def apply_plan(upload_id, mapping, missing_mode="zero"):
     _uploads.pop(upload_id, None)
     return {"applied_at": now, "added": len(plan["new"]), "updated": len(plan["updated"]),
             "unchanged": len(plan["unchanged"]), "missing": len(plan["missing"]),
-            "marked_out_of_stock": zeroed, "invalid": len(plan["invalid"])}
+            "marked_out_of_stock": zeroed, "invalid": len(plan["invalid"]), "excluded": len(plan["excluded"])}
 
 
 def history(limit=10):

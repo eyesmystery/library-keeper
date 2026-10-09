@@ -1,127 +1,145 @@
-# Installing Library Keeper (أمين المكتبة) — step by step
+# تثبيت «ثلاث الذكي» وتشغيله
 
-This file is written so that **a person or an AI coding agent** (Claude, ChatGPT/Codex, Cursor, Copilot, Gemini…) can install and start the app on a new computer without prior knowledge. Agents: follow the steps in order, run the verification commands, and report the results to the user in Arabic. Do not change any application code to make it start; if a step fails, use the troubleshooting table.
+*English summary for people and AI agents is at the end: [Install in English](#install-in-english).*
 
-## What it is
+التطبيق سيرفر صغير (Python و Flask وقاعدة SQLite) يعمل على جهاز واحد في المكتبة. الزوار يفتحونه من جوالاتهم على نفس الواي فاي، والموظفون يفتحون لوحة الإدارة من أي متصفح. لا يحتاج Node ولا Docker ولا قاعدة بيانات خارجية.
 
-A small web app: a Python/Flask server with an SQLite database. Visitors open it on their phones (by scanning a QR code) and chat with a reading assistant that suggests books from the library's catalog. Staff use an admin page on the same server.
+## المتطلبات
 
-- Server: `backend/app.py` (Flask 3.0.3, Werkzeug 3.0.3; nothing else to install)
-- Port: `8802`
-- Database: `data/library.db`, built automatically on first start from `data/catalog_snapshot.sql` (500 books). Never commit it.
-- No build step, no Node.js, no Docker, no external database.
+- ويندوز 10 أو 11، أو macOS 12 أو أحدث.
+- Python 3.9 أو أحدث.
+- إنترنت في أول تشغيل (لتثبيت Flask في بيئة محلية داخل المجلد)، ثم حسب نموذج الذكاء الاصطناعي الذي تختاره.
+- الجهاز والجوالات على نفس شبكة الواي فاي.
 
-## Requirements
+## ١. التحميل
 
-- macOS 12+ or Windows 10/11 (Linux also works from the command line)
-- Python 3.9 or newer
-  - macOS: `python3 --version`. If missing: install from https://www.python.org/downloads/ (or `brew install python`).
-  - Windows: `py -3 --version` or `python --version`. If missing: install from https://www.python.org/downloads/ and tick **"Add python.exe to PATH"** in the installer.
-- Internet on the first start only (to install Flask into a local virtual environment)
-- For the staff trial: the computer and the phones on the **same Wi-Fi network**
+افتح [صفحة الإصدارات](https://github.com/eyesmystery/library-keeper/releases/latest) ونزّل الملف المناسب: `…-windows.zip` أو `…-mac.zip` (نحو 490 ميغابايت). سجّل الدخول إلى GitHub أولًا، فالمستودع خاص.
 
-## 1. Get the files
+من الطرفية، لمن عنده GitHub CLI:
 
 ```
-git clone <this repository URL> library-keeper
+gh release download --repo eyesmystery/library-keeper --pattern "*mac.zip"
+gh release download --repo eyesmystery/library-keeper --pattern "*windows.zip"
+```
+
+فك الملف وانقل المجلد إلى مكان ثابت (مثل «المستندات»). لا تشغّله من داخل الملف المضغوط ولا من فلاش.
+
+## ٢. ويندوز
+
+1. ثبّت Python 3 من [python.org/downloads](https://www.python.org/downloads/) وفعّل **Add python.exe to PATH**.
+2. انقر مرتين على `start_library.bat`. إذا حذّر SmartScreen: «More info» ثم «Run anyway».
+3. أول مرة يجهّز بيئة بايثون (دقيقة تقريبًا). إذا سأل Windows هل تسمح لـ Python بالاتصال بالشبكة فاسمح على **الشبكات الخاصة**؛ بدون هذا لا تصل الجوالات.
+4. تفتح صفحة الإدارة في المتصفح: `http://127.0.0.1:8802/admin`.
+
+ملفات أخرى في المجلد:
+
+| الملف | ماذا يفعل |
+|---|---|
+| `start_this_computer_only.bat` | تشغيل على هذا الجهاز فقط، للفحص |
+| `backup_now.bat` | نسخة احتياطية الآن |
+| `install_autostart.bat` | تشغيل تلقائي عند دخول مستخدم Windows، ونسخة احتياطية يومية 03:15 |
+| `remove_autostart.bat` | التراجع عن التشغيل التلقائي |
+
+اجعل «السكون» عند التوصيل بالكهرباء = أبدًا (إعدادات Windows ← النظام ← الطاقة).
+
+## ٣. ماك
+
+1. تأكد من Python 3: `python3 --version` في Terminal. إن لم يكن موجودًا فثبّته من [python.org/downloads](https://www.python.org/downloads/).
+2. انقر مرتين على `start_library.command`. إذا منعه macOS: انقر عليه بالزر الأيمن ثم «فتح». وإن قال «permission denied» فاكتب مرة واحدة في Terminal داخل المجلد: `chmod +x *.command scripts/*.sh scripts/*.command`
+3. أول مرة يجهّز بيئة بايثون (دقيقة تقريبًا)، ثم تفتح صفحة الإدارة: `http://127.0.0.1:8802/admin`.
+
+ملفات أخرى: `start_this_computer_only.command` (هذا الجهاز فقط)، `backup_now.command` (نسخة احتياطية الآن)، `scripts/install_daily_backup.command` (نسخة يومية 03:15). ملف التشغيل يمنع سكون الجهاز ما دام السيرفر يعمل.
+
+## ٤. أول إعداد (مرة واحدة)
+
+1. صفحة الإدارة تطلب إنشاء **حساب المدير**: الاسم، اسم مستخدم بحروف إنجليزية، وكلمة مرور من 8 خانات على الأقل فيها حروف وأرقام. هذا النموذج يعمل من الجهاز الذي عليه السيرفر فقط.
+2. الإعدادات ← الموظفون: أضف حسابًا لكل موظف.
+3. الإعدادات ← الذكاء الاصطناعي: اختر النموذج واضغط «اختبار» (القسم التالي).
+4. الإعدادات ← رمز QR: اطبع الرمز أو اعرضه على شاشة.
+
+## ٥. نموذج الذكاء الاصطناعي
+
+| الخيار | الخطوات |
+|---|---|
+| **Ollama** (المضبوط في الحزمة: `deepseek-v4.1-flash:cloud`) | ثبّت التطبيق من [ollama.com/download](https://ollama.com/download)، افتحه وسجّل الدخول (من التطبيق أو بالأمر `ollama signin`). النماذج السحابية تحتاج إنترنت ولا تحتاج تنزيلًا كبيرًا؛ والنماذج المحلية تحتاج تنزيلًا وذاكرة كافية. |
+| **Ollama Cloud** | أنشئ مفتاحًا من [ollama.com/settings/keys](https://ollama.com/settings/keys) والصقه في صفحة الإعدادات. لا يحتاج تطبيق Ollama. |
+| **مفتاح API** | Claude أو ChatGPT أو Gemini أو OpenRouter أو مزوّد متوافق مع OpenAI: اختر المزوّد والصق المفتاح. |
+| **ChatGPT عبر Codex** | ثبّت Codex CLI وسجّل الدخول بالأمر `codex login`، ثم اختر «ChatGPT عبر Codex». |
+
+- المفاتيح تُحفظ في `~/.library_keeper/keys.json` خارج مجلد التطبيق، ولا تُرسل إلى المتصفح.
+- إذا لم يتصل النموذج يبقى التطبيق يعمل ويرشّح بالكلمات المفتاحية.
+- البحث بالمعنى يحتاج Ollama والنموذج `bge-m3` (الأمر: `ollama pull bge-m3`). بدونه يُتخطى بصمت.
+
+## ٦. الجوال ورمز QR
+
+- العنوان ورمز QR في: صفحة الإدارة ← الإعدادات ← رمز QR. العنوان هو عنوان الجهاز على الواي فاي، مثل `http://192.168.1.20:8802`.
+- الأفضل تثبيت عنوان الجهاز من الراوتر (DHCP reservation) ثم طباعة الرمز. إن لم يُثبَّت فاعرض الرمز على شاشة بدل طباعته، لأنه يتغير مع العنوان.
+- لا تفتح السيرفر على الإنترنت (لا port forwarding ولا أنفاق). هو للشبكة المحلية.
+
+## ٧. النسخ الاحتياطي والاسترجاع
+
+- نسخة احتياطية قبل كل تشغيل، تُحفظ في `backups/` (آخر 30 نسخة).
+- الاسترجاع: أوقف السيرفر ثم
+  - ويندوز: `backend\venv-win\Scripts\python.exe scripts\restore_db.py --latest`
+  - ماك: `backend/venv/bin/python scripts/restore_db.py --latest`
+- الكتالوج كله في ملف واحد `data/library.db`، والأغلفة في `data/covers`.
+
+## ٨. التحديث إلى إصدار جديد
+
+1. شغّل `backup_now` وأوقف السيرفر.
+2. نزّل الحزمة الجديدة وفكها في مجلد جديد.
+3. إذا عدّلتم بيانات على جهازكم (حسابات، كتب، فعاليات): انسخ `data/library.db` ومجلدي `data/covers` و`data/event_images` من المجلد القديم إلى الجديد فوق الموجود. إن لم تعدّلوا شيئًا فاستعملوا قاعدة الحزمة الجديدة لأنها الأحدث.
+4. شغّل من المجلد الجديد. احتفظ بالمجلد القديم أسبوعًا.
+
+## ٩. إذا حصلت مشكلة
+
+| العَرَض | الحل |
+|---|---|
+| الجوال لا يفتح العنوان | تأكد أنه على نفس الواي فاي، وأن Python مسموح له في جدار الحماية (ويندوز: الشبكات الخاصة)، وأن شبكة الضيوف لا تعزل الأجهزة. |
+| «السيرفر شغّال من قبل» | نافذة سيرفر أخرى مفتوحة؛ أغلقها ثم شغّل من جديد. |
+| `Python 3 is not installed` أو تعذر إنشاء البيئة | ثبّت Python ثم شغّل مرة ثانية. أول تشغيل يحتاج إنترنت. |
+| الردود بسيطة أو بلا ذكاء اصطناعي | الإعدادات ← الذكاء الاصطناعي ← «اختبار». مع Ollama: تأكد أنه مفتوح ومسجّل الدخول. |
+| نموذج إنشاء المدير يرفض | افتحه من الجهاز نفسه على `http://127.0.0.1:8802/admin`. |
+| نسيت كلمة المرور | لا تُسترجع من الصفحة. المدير يغيّر كلمات مرور الموظفين من الإعدادات ← الموظفون. |
+
+عند أي خطأ: انسخ آخر الأسطر في نافذة السيرفر، ومعها `backups/backup_log.txt` إن كان الخطأ في النسخ الاحتياطي.
+
+## للمطورين: التشغيل من المستودع
+
+المستودع فيه الكود فقط. القاعدة والأغلفة تؤخذ من حزمة الإصدار:
+
+```
+git clone https://github.com/eyesmystery/library-keeper.git
 cd library-keeper
-```
-
-(Or download the ZIP from GitHub and unzip it.)
-
-## 2. Start it
-
-There are two ways to start. **Trial mode** is the one used for the staff trial (phones can open it). **Local mode** is for this computer only.
-
-### macOS — double-click
-- Trial mode: `trial_server.command`
-- Local mode: `start_server.command`
-
-If macOS blocks the file ("cannot be opened because it is from an unidentified developer"): right-click → Open → Open. If it says permission denied, run once in Terminal inside the folder:
-```
-chmod +x *.command scripts/*.sh
-```
-
-### Windows — double-click
-- Trial mode: `trial_server.bat`
-- Local mode: `start_server.bat`
-
-If Windows SmartScreen warns: More info → Run anyway.
-
-### Any system — from a terminal (equivalent, useful for agents)
-macOS / Linux:
-```
+# انسخ مجلد data من حزمة الإصدار المفكوكة إلى هنا (data/library.db و data/covers و data/event_images)
 python3 -m venv backend/venv
 backend/venv/bin/pip install -r backend/requirements.txt
-backend/venv/bin/python scripts/catalog_snapshot.py build      # only if data/library.db does not exist yet
-cd backend && LIBRARY_KEEPER_HOST=0.0.0.0 ../backend/venv/bin/python app.py      # trial mode
+cd backend && LIBRARY_KEEPER_HOST=0.0.0.0 ./venv/bin/python app.py
 ```
-Windows (Command Prompt):
+
+على ويندوز: `py -3 -m venv backend\venv-win` ثم `backend\venv-win\Scripts\python -m pip install -r backend\requirements.txt` ثم من داخل `backend`: `set LIBRARY_KEEPER_HOST=0.0.0.0` و `venv-win\Scripts\python app.py`. احذف سطر `LIBRARY_KEEPER_HOST` للتشغيل على الجهاز نفسه فقط.
+
+- الاختبارات: `backend/venv/bin/python tests/run_all.py`
+- بناء حزمتي التحميل من مجلد عمل فيه القاعدة الحية: `backend/venv/bin/python scripts/make_release.py --version "0.9.6 beta" --no-user` (يكتب في `release/`).
+- لا ترفع `data/library.db` ولا `backups/` ولا `data/test_logs/` ولا `data/llm_settings.json` ولا أي ملف مفاتيح؛ كلها في `.gitignore`.
+
+## Install in English
+
+Thalath Smart is a small Flask + SQLite web app (port 8802). No build step, no Node, no Docker.
+
+1. Download the package for your system from [Releases](https://github.com/eyesmystery/library-keeper/releases/latest) (`…-windows.zip` or `…-mac.zip`, about 490 MB; the repository is private, so sign in first, or use `gh release download --repo eyesmystery/library-keeper --pattern "*mac.zip"`). Unzip it to a permanent folder.
+2. Install Python 3.9+ (Windows: tick "Add python.exe to PATH").
+3. Double-click `start_library.bat` (Windows) or `start_library.command` (macOS; right-click → Open the first time). The first start creates a virtual environment and needs internet. Allow Python on private networks when the system asks.
+4. Open `http://127.0.0.1:8802/admin` on the same computer and create the manager account (first run only; the package ships with no accounts).
+5. Settings → AI: choose a provider and press test. Options: the Ollama app (signed in; `:cloud` models need no large download), Ollama Cloud with an API key, an API key for Claude / ChatGPT / Gemini / OpenRouter / any OpenAI-compatible endpoint, or ChatGPT through the Codex CLI (`codex login`). Keys are stored outside the project in `~/.library_keeper/keys.json`. Without a model the app still answers with keyword matching.
+6. Settings → QR: phones on the same Wi-Fi scan the code.
+
+Verify (agents: run and report):
+
 ```
-py -3 -m venv backend\venv-win
-backend\venv-win\Scripts\python -m pip install -r backend\requirements.txt
-backend\venv-win\Scripts\python scripts\catalog_snapshot.py build
-cd backend
-set LIBRARY_KEEPER_HOST=0.0.0.0
-..\backend\venv-win\Scripts\python app.py
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8802/         # 200
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8802/admin    # 200
+curl -s http://127.0.0.1:8802/api/admin/session                        # "needs_setup": true before the manager account exists
 ```
-(Leave out the `LIBRARY_KEEPER_HOST` line for local mode.)
 
-The first start creates the virtual environment, builds `data/library.db` (message: `built data/library.db from snapshot (500 books, integrity=ok …)`) and makes a backup in `backups/`. In trial mode the window prints:
-```
-Trial mode - phones on the same Wi-Fi: http://192.168.x.x:8802/
-```
-**Keep this window open** while the app is in use. Closing it stops the server.
-
-When the operating system asks whether Python may accept incoming network connections: **Allow** (on Windows: allow on *Private* networks). Without this, phones cannot open the page.
-
-## 3. First-time setup (once)
-
-1. On the same computer open `http://127.0.0.1:8802/admin`.
-2. The page asks to create the **manager account** (name, username in English letters, password of at least 8 characters with letters and digits). This form only works from the computer running the server.
-3. Settings (الإعدادات) → **الموظفون**: add an account for each staff member.
-4. Settings → **رمز التجربة (QR)**: the status must say «جاهز». Print the QR card (اطبع لوحة الرمز), download it as an image, or copy the link.
-5. Optional — Settings → **نموذج المحادثة**: choose an AI model and press «اختبار». Without a model the app still works (keyword understanding, simpler replies). API keys are stored outside the project folder (`~/.library_keeper/`) and never in the repository.
-6. Optional — Settings → **أقسام المكتبة**: rename the sections to match the library and switch them on, so visitors see where a book is.
-
-## 4. Verify (agents: run these and report)
-
-With the server running, in a second terminal:
-```
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8802/            # expect 200 (visitor page)
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8802/admin       # expect 200 (admin page)
-curl -s http://127.0.0.1:8802/api/admin/session                           # expect "needs_setup": true before the manager account exists
-curl -s -X POST http://127.0.0.1:8802/api/chat -H "Content-Type: application/json" -d "{\"messages\":[{\"role\":\"user\",\"content\":\"أبغى رواية\"}]}"
-                                                                          # expect JSON with "reply" and a non-empty "books" list
-```
-(On Windows use `curl.exe` in PowerShell, or open the addresses in a browser.)
-
-Then from a phone on the same Wi-Fi, open the address printed in the server window (or scan the QR code): the welcome page «وش ودّك تقرأ اليوم؟» must appear.
-
-## 5. Troubleshooting
-
-| Symptom | Cause and fix |
-|---|---|
-| `python3`/`py` not found | Install Python 3 (see Requirements). On Windows reinstall with "Add python.exe to PATH". Close and reopen the terminal. |
-| `pip install` fails | No internet on the first start, or a proxy. Connect and start again. |
-| `Address already in use` / "The server is already running" | Another copy is running on port 8802. Close its window (or stop that process) and start again. |
-| Phone cannot open the page | Phone not on the same Wi-Fi; the server was started in local mode (use trial mode); the firewall prompt was denied (macOS: System Settings → Network → Firewall → allow Python; Windows: Windows Defender Firewall → Allow an app → Python, Private); the guest Wi-Fi isolates devices (use the staff Wi-Fi). |
-| QR panel says the server is an old version | The page is newer than the running server: close the server window, start trial mode again, refresh the page. |
-| QR panel says «ما فيه عنوان شبكة» | The computer is not on a network. Connect to the Wi-Fi and refresh. |
-| The address changed after a restart | The router gave the computer a new address: print the QR code again (or ask IT for a fixed address for this computer). |
-| Setup form refuses ("from this computer only") | Open the admin page on the computer running the server, at `http://127.0.0.1:8802/admin`. |
-| Replies are simple or repetitive | No AI model is working; the keyword mode is answering. Settings → نموذج المحادثة → اختبار. |
-
-## Rules for agents
-
-- Do not commit `data/library.db`, `backups/`, `data/test_logs/`, `data/llm_settings.json` or any key file (they are in `.gitignore`).
-- Do not expose the server to the internet (no port forwarding, no tunnels) — it is meant for the local Wi-Fi during this trial.
-- Do not modify application code or data to "fix" a start-up problem; report the error text instead.
-- Test mode (saving conversations) is off by default; only the manager switches it in Settings.
-
-## Other tools
-
-- `fetch_covers.command` (macOS) or `python scripts/fetch_covers.py --limit 20`: fetch book covers (needs internet).
-- `python scripts/backup_db.py` / `python scripts/restore_db.py --list`: manual backup and restore (a backup is also made at every start).
-
-Guide for staff (Arabic): `docs/دليل-تجربة-أمين-المكتبة.pdf`
+Rules for agents: do not change application code or data to fix a start-up problem, report the error text; never commit databases, backups, logs or keys; do not expose the server to the internet.

@@ -1,24 +1,23 @@
-# runtime data (never committed): database, backups, covers, logs, local settings, keys
-data/library.db
-data/*.db
-data/library.db.*
-*.db-journal
-*.db-wal
-*.db-shm
+# Runtime data (never committed): the catalog database, covers, event pictures, backups.
+# They come with the release packages (see README.md).
+data/*
+!data/seed_books.json
 backups/
-data/covers/
-data/test_logs/
-data/llm_settings.json
+release/
 reports/
+eval_results/
+# Local settings, visitor logs and anything that could hold keys
 .env
 *.key
 keys.json
-# Python environments
+secret_key
+# Python
 backend/venv/
 backend/venv-win/
 venv/
 __pycache__/
 *.pyc
+.pytest_cache/
 # OS / editors
 .DS_Store
 Thumbs.db

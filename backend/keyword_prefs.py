@@ -75,7 +75,8 @@ def negated(words, i):
     counted = 0
     for k in range(i - 1, max(-1, i - 9), -1):
         w = words[k]
-        if w in NEGATORS or (w.startswith("ما") and len(w) > 3 and w[2:] in NEG_BRIDGE):
+        if (w in NEGATORS or (w.startswith("ما") and len(w) > 3 and w[2:] in NEG_BRIDGE)
+                or (len(w) > 2 and w[0] in "وف" and w[1:] in NEGATORS)):   # «ولا أبغى شي رومانسي»
             return True
         if w not in NEG_BRIDGE:
             return False
@@ -91,14 +92,20 @@ EN_FREE = {"t", "s", "want", "anything", "too", "please", "really", "that", "is"
 
 GENRES = {  # more specific entries first: their words are consumed before "أدب" etc.
     "أدب رحلات": ["ادب رحلات", "ادب الرحلات", "رحلات"],
+    "قصص مصورة": ["قصص مصوره", "روايه مصوره", "روايات مصوره", "كوميكس", "مانغا", "مانجا", "comics", "comic", "manga",
+                  "graphic novel", "graphic novels"],
+    "مقالات ونصوص": ["مقالات", "مقاله", "نصوص نثريه", "رسائل", "essays"],
+    "نقد أدبي": ["نقد ادبي", "النقد الادبي", "دراسات ادبيه", "literary criticism"],
+    "فنون وسينما": ["سينما", "السينما", "فنون", "الفنون", "موسيقي", "الموسيقي", "cinema"],
     "رواية": ["روايه", "روايات", "قصه", "حكايه", "novel", "novels", "fiction", "story"],
     "قصص قصيرة": ["قصص قصيره", "مجموعه قصصيه", "short stories"],
     "أطفال": ["اطفال", "للاطفال", "قصص اطفال", "قصص للاطفال", "children", "children's", "kids"],
     "يافعين": ["يافعين", "لليافعين", "مراهقين", "young adult", "teen", "teens"],
     "تطوير ذاتي": ["تطوير ذات", "تطوير الذات", "تطوير ذاتي", "تحفيز", "عادات", "تنميه بشريه", "self help", "self development"],
+    "علم اجتماع": ["علم اجتماع", "علم الاجتماع", "sociology"],
     "علم نفس": ["علم نفس", "نفسيه", "علم النفس", "psychology"],
     "مسرحية": ["مسرحيه", "مسرحيات", "مسرح"],
-    "أدب": ["ادب", "مقالات", "خواطر"],
+    "أدب": ["ادب", "خواطر"],
     "سيرة ذاتية": ["سيره ذاتيه", "مذكرات", "سيرته", "حياته"],
     "سيرة نبوية": ["سيره نبويه", "السيره النبويه", "سيره الرسول", "نبوي"],
     "تاريخ": ["تاريخ", "تاريخي", "تاريخيه", "history"],
@@ -167,11 +174,35 @@ def is_greeting(message):
     return bool(words) and all(w in GREETING_WORDS for w in words)
 
 
+# Adjective forms only: a country name alone ("عن اليابان") is a topic, not a language.
+ORIGIN_LANGUAGES = {
+    "it": ["ايطالي", "ايطاليه", "الايطاليه", "الايطالي", "italian"], "ru": ["روسي", "روسيه", "الروسيه", "الروسي", "russian"],
+    "fr": ["فرنسي", "فرنسيه", "الفرنسيه", "الفرنسي", "french"], "ja": ["ياباني", "يابانيه", "اليابانيه", "الياباني", "japanese"],
+    "es": ["اسباني", "اسبانيه", "الاسبانيه", "الاسباني", "spanish"], "de": ["الماني", "المانيه", "الالمانيه", "الالماني", "german"],
+    "en": ["انجليزي", "انجليزيه", "الانجليزيه", "الانجليزي", "english"], "tr": ["تركي", "تركيه", "التركيه", "التركي", "turkish"],
+    "pt": ["برتغالي", "برتغاليه", "البرتغاليه", "البرتغالي", "portuguese"], "zh": ["صيني", "صينيه", "الصينيه", "الصيني", "chinese"],
+    "ko": ["كوري", "كوريه", "الكوريه", "الكوري", "korean"], "fa": ["فارسي", "فارسيه", "الفارسيه", "الفارسي", "persian"],
+}
+# «رواية عربية» = written in Arabic (audit 2026-10-05). Exact words only: «بالعربي» / «للعربية» speak of the
+# language of the copy, and so do the words after «باللغة» or "in".
+ARABIC_ORIGIN = {"عربي", "عربيه", "العربي", "العربيه", "arabic"}
+EDITION_BEFORE = {"باللغه", "اللغه", "بلغه", "للغه", "لغه", "in", "into", "to"}
+TRANSLATED = ["مترجم", "مترجمه", "المترجم", "المترجمه", "translated"]
+
+
+AWARD_WORDS = {"any": {normalize(w) for w in "جائزه جايزه جوائز جائزة حائزه حايزه فائزه فايزه".split()},
+               "nobel": {"نوبل"}, "booker_any": {"بوكر"}, "katara": {"كتارا"}, "pulitzer": {"بوليتزر"},
+               "goncourt": {"غونكور"}}
+SCREEN_WORDS = {"film": {normalize(w) for w in "فيلم فلم افلام فلما".split()},
+                "series": {normalize(w) for w in "مسلسل مسلسلات".split()}}
+
+
 def _empty():
     return {"genres": [], "length": None, "moods_include": [], "moods_exclude": [], "pace": [],
             "weight_include": [], "weight_exclude": [], "use_cases": [], "reader_level": [],
             "authors": [], "title_keywords": [], "unsupported_requests": [], "audience": None,
-            "avoid_content": []}
+            "avoid_content": [], "original_languages": [], "translated": None,
+            "awards": [], "award_year": None, "adaptation": None}
 
 
 def _parse_one(text, audience_fn=None):
@@ -236,6 +267,45 @@ def _parse_one(text, audience_fn=None):
                     used.add(i)
                     p["length"] = "short" if negated(words, i) else "long"
                     break
+    # literature of a language ("رواية إيطالية", "أدب روسي") and translated / not translated
+    for i, w in enumerate(words):  # exact forms only: "ايطاليا" (a country) must not match "ايطالي"
+        code = next((c for c, forms in ORIGIN_LANGUAGES.items() if _variants(w) & set(forms)), None)
+        if code is None and w in ARABIC_ORIGIN:
+            code = "ar"
+        if code and i > 0 and words[i - 1] in EDITION_BEFORE:
+            used.add(i)  # the language of the copy, not of the work
+            continue
+        if code and not negated(words, i):
+            used.add(i)
+            if code not in p["original_languages"]:
+                p["original_languages"].append(code)
+    for ph in TRANSLATED:
+        i = find_phrase(words, ph)
+        if i >= 0:
+            used.add(i)
+            p["translated"] = "no" if negated(words, i) else "yes"
+            break
+    # "روسية ... عربية" or "عربية مترجمة": Arabic there is the language of the copy
+    if "ar" in p["original_languages"] and (len(p["original_languages"]) > 1 or p["translated"] == "yes"):
+        p["original_languages"].remove("ar")
+    # prizes and screen adaptations (2026-10-08)
+    for i, w in enumerate(words):
+        forms = _variants(w)
+        key = next((k for k, f in AWARD_WORDS.items() if forms & f), None)
+        if key and not negated(words, i):
+            used.add(i)
+            for k in (["ipaf", "booker"] if key == "booker_any" else [key]):
+                if k not in p["awards"]:
+                    p["awards"].append(k)
+            if key != "any":
+                p["awards"] = [k for k in p["awards"] if k != "any"]
+        elif w.isdigit() and len(w) == 4 and 1900 <= int(w) <= 2100 and p["awards"]:
+            used.add(i)
+            p["award_year"] = int(w)
+        kind = next((k for k, f in SCREEN_WORDS.items() if forms & f), None)
+        if kind and not negated(words, i):
+            used.add(i)
+            p["adaptation"] = "screen" if p["adaptation"] and p["adaptation"] != kind else kind
     if any(find_phrase(words, ph) >= 0 for ph in BEGINNER):
         p["reader_level"].append("beginner")
     if any(find_phrase(words, ph) >= 0 for ph in ADVANCED):
@@ -248,7 +318,8 @@ def _parse_one(text, audience_fn=None):
     # words not understood may name a title or an author; they never become a mood
     p["title_keywords"] = [w for i, w in enumerate(words)
                            if i not in used and len(w) > 1 and w not in STOP and w not in NEGATORS
-                           and not w.isdigit()]
+                           and not w.isdigit() and not negated(words, i)   # «ولا فيها موت» is not a title word
+                           and not (len(w) > 2 and w[0] in "وف" and w[1:] in NEGATORS)]
     for k in p:
         if isinstance(p[k], list):
             p[k] = list(dict.fromkeys(p[k]))
@@ -272,6 +343,15 @@ def understand(messages, audience_fn=None):
             merged[inc] = [x for x in merged[inc] if x not in p[exc]] + [x for x in p[inc] if x not in merged[inc]]
         for k in ("pace", "use_cases", "reader_level", "avoid_content", "title_keywords"):
             merged[k] += [x for x in p[k] if x not in merged[k]]
+        if p["original_languages"]:
+            merged["original_languages"] = p["original_languages"]
+        if p["translated"]:
+            merged["translated"] = p["translated"]
+        if p["awards"]:
+            merged["awards"] = p["awards"]
+            merged["award_year"] = p["award_year"]
+        if p["adaptation"]:
+            merged["adaptation"] = p["adaptation"]
         if p["audience"]:
             merged["audience"] = p["audience"]
     merged["moods_include"] = [m for m in merged["moods_include"] if m not in merged["moods_exclude"]]
@@ -281,5 +361,6 @@ def understand(messages, audience_fn=None):
 
 def understood_anything(prefs):
     keys = ("genres", "moods_include", "moods_exclude", "pace", "weight_include", "weight_exclude",
-            "use_cases", "reader_level", "avoid_content")
-    return bool(prefs.get("length") or prefs.get("audience") or any(prefs.get(k) for k in keys))
+            "use_cases", "reader_level", "avoid_content", "original_languages", "awards")
+    return bool(prefs.get("length") or prefs.get("audience") or prefs.get("translated") or prefs.get("adaptation")
+                or any(prefs.get(k) for k in keys))

@@ -70,6 +70,8 @@
     .cover-none{display:grid;width:120px;aspect-ratio:2/3;place-items:center;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font-size:13px;text-align:center;padding:8px}
     .cover-actions{display:flex;flex-direction:column;gap:8px;min-width:180px}.cover-actions label.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;cursor:pointer}
     .cover-actions input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
+    #snText{width:100%;min-height:84px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font:inherit;color:var(--ink);line-height:1.7;resize:vertical}
+    #snList{display:grid;gap:10px;margin-top:12px}
     textarea#fSummary{width:100%;min-height:96px;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;line-height:1.7;resize:vertical}
     .sheet-head h2{margin:0;font-size:21px;line-height:1.4}
     .sheet-head p{margin:2px 0 0;color:rgba(255,255,255,.75);font-size:13px}
@@ -77,6 +79,18 @@
     .sheet-body{padding:18px 20px 40px}
     section.block{margin-bottom:16px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
     section.block h3{margin:0 0 12px;font-size:16px;color:var(--primary)}
+    .export-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:10px 0 4px}
+    .export-bar .btn{text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
+    .export-bar .diff{font-size:13px}
+    /* reader attributes folded inside the card: open on demand (Ibrahim, 2026-10-09) */
+    details.fold>summary{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;min-height:44px;cursor:pointer;list-style:none}
+    details.fold>summary::-webkit-details-marker{display:none}
+    details.fold>summary::before{content:"◂";color:var(--primary);font-size:13px;transition:transform .15s}
+    details.fold[open]>summary::before{transform:rotate(-90deg)}
+    details.fold>summary h3{margin:0}
+    details.fold>summary .fold-count{color:var(--muted);font-size:13px}
+    details.fold[open]>summary .fold-count{display:none}
+    details.fold[open]>summary{margin-bottom:12px}
     .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
     .fact{padding:10px 12px;border-radius:12px;background:#f3f0e8}
     .fact span{display:block;font-size:11px;color:var(--muted)}
@@ -90,6 +104,36 @@
     .btn{min-height:44px;padding:8px 18px;border:0;border-radius:12px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer}
     .btn:hover{background:var(--primary-hover)}
     .btn.secondary{background:var(--primary-soft);color:var(--primary)}
+    .btn.danger{background:var(--danger)}.btn.danger:hover{background:#86261a}
+    .notbook{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border:1px dashed rgba(168,50,31,.35);border-radius:14px;background:var(--surface)}
+    .notbook p{margin:0;font-size:14px;color:var(--muted)}
+    section.block.confirm{border:2px solid #E0B95A;background:#FBF1D6}
+    section.block.confirm h3{color:#6B4E00;display:flex;align-items:center;gap:8px}
+    section.block.confirm.answered{border-color:#8FA884;background:var(--primary-soft)}
+    section.block.confirm.answered h3{color:#3E6E35}
+    .confirm .cf-note{margin:0 0 12px;font-size:14px;color:var(--ink)}
+    .confirm .cf-opts{display:grid;gap:8px;margin:0 0 12px;padding:0;border:0}
+    .confirm .cf-opts legend{padding:0;margin-bottom:8px;font-size:14px;font-weight:700;color:#6B4E00}
+    .confirm .cf-opt{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1.5px solid #E0B95A;border-radius:12px;background:var(--surface);cursor:pointer;font-size:14px}
+    .confirm .cf-opt:has(input:checked){border-color:#6B4E00;background:#F5E3A8;font-weight:700}
+    .confirm .cf-opt:has(input:focus-visible){outline:3px solid #6B4E00;outline-offset:2px}
+    .confirm .cf-opt input{margin-top:3px;accent-color:#6B4E00}
+    .confirm .cf-opt small{display:block;font-weight:400;color:var(--muted)}
+    .confirm textarea{width:100%;min-height:72px;margin-top:6px;padding:10px 12px;border:1.5px solid #E0B95A;border-radius:12px;background:var(--surface);font:inherit;color:var(--ink)}
+    .confirm .btn.secondary{background:var(--surface);border:1.5px solid #8FA884}
+    .confirm .cf-acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+    .confirm .cf-done{margin:0 0 6px;font-size:15px}
+    .notbook.ask{border-style:solid;border-color:var(--danger);background:var(--danger-soft)}
+    .notbook.ask p{color:var(--ink)}
+    .notbook .acts{display:flex;gap:8px;flex-wrap:wrap}
+    .del-list{display:grid;gap:10px}
+    .org-row .ttl{display:block;padding:0;border:0;background:none;color:var(--ink);font:inherit;font-size:17px;font-weight:700;text-align:right;line-height:1.35;cursor:pointer}
+    .org-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .org-act select{min-height:44px;max-width:210px;padding:6px 10px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-size:13px}
+    @media(max-width:700px){.org-row{grid-template-columns:1fr}.org-act{justify-content:flex-start}}
+    .del-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+    .del-row b{display:block;font-size:17px;line-height:1.35}
+    .del-row span{font-size:13px;color:var(--muted)}
     .btn:disabled{opacity:.6;cursor:not-allowed}
     .state{font-size:12px;color:var(--muted)}
     .state.error{color:var(--danger)}
@@ -107,8 +151,114 @@
     .warn{font-size:12px;color:var(--danger);font-weight:700}
     .no-ev{margin:0;font-size:12px;color:var(--weak)}
     .sources{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+    /* «المكتبة» (2026-09-30): books + authors, three book views, grouping, chip filters */
+    .lib-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+    .lib-tabs{display:inline-flex;margin-bottom:16px}
+    .tab-n{display:inline-block;min-width:22px;margin-inline-start:4px;padding:0 7px;border-radius:999px;background:var(--sage-soft);color:var(--brown);font-size:13px;font-variant-numeric:tabular-nums}
+    .settings-tab[aria-selected="true"] .tab-n{background:rgba(255,252,247,.2);color:var(--surface)}
+    .lib-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:10px}
+    .lib-tools input[type=search]{flex:1 1 260px;min-height:44px;padding:6px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .tool{display:grid;gap:1px}.tool span{font-size:12px;color:var(--muted);padding-inline-start:4px}
+    .tool select{min-height:44px;max-width:210px;padding:6px 10px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .viewseg,.authorseg{margin-inline-start:auto}
+    .fchips{display:flex;flex-wrap:wrap;gap:6px 14px;margin:4px 0 12px}
+    .fgroup{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+    .fgroup>b{font-size:13px;color:var(--muted);font-weight:600;margin-inline-end:2px}
+    .fchip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:3px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font-size:14px;cursor:pointer}
+    .fchip small{color:var(--muted);font-variant-numeric:tabular-nums}
+    .fchip:hover{border-color:rgba(59,31,20,.4)}
+    .fchip[aria-pressed="true"]{background:var(--brown);border-color:var(--brown);color:var(--surface)}.fchip[aria-pressed="true"] small{color:rgba(255,252,247,.75)}
+    .legend-box{margin:0 0 10px}.legend-box summary{display:inline-block;min-height:32px;cursor:pointer;font-size:13px;color:var(--muted)}.legend-box .legend{margin:6px 0 4px}
+    .count-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}.count-row .count{margin:0}
+    .linkbtn{min-height:36px;padding:2px 10px;border:0;background:transparent;color:var(--coral);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+    .stat[aria-pressed="true"]{border-color:var(--brown);box-shadow:inset 0 0 0 1px var(--brown)}
+    /* groups */
+    .grp{margin-bottom:18px}
+    .grp-h{position:sticky;top:var(--hdr,68px);z-index:5;margin:0 0 10px;background:var(--canvas)}
+    .grp-h button{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:6px 4px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--brown);font-size:19px;font-weight:700;text-align:right;cursor:pointer}
+    .grp-h button:before{content:"▾";font-size:14px;color:var(--muted);transition:transform .16s}
+    .grp-h button[aria-expanded="false"]:before{transform:rotate(90deg)}
+    .grp-h .n{font-size:14px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+    .more{display:block;min-height:44px;margin:12px auto 0;padding:6px 22px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font-weight:700;cursor:pointer}
+    .more:hover{border-color:var(--brown)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+    .book .pub{color:var(--muted);font-size:12px}
+    .rs{padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;background:var(--weak-soft);color:var(--weak)}
+    .rs.matched{background:var(--primary-soft);color:#3E6E35}.rs.needs_confirmation{background:var(--accent-soft);color:#7a4c32}.rs.not_found,.rs.not_a_book{background:var(--danger-soft);color:var(--danger)}
+    /* list view */
+    .booklist{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:14px}
+    .booklist th{position:sticky;top:0;padding:8px 10px;background:#f3f0e8;color:var(--muted);font-weight:600;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+    .booklist td{padding:6px 10px;border-bottom:1px solid #eee8dc;vertical-align:middle}
+    .booklist tr:last-child td{border-bottom:0}
+    .booklist tbody tr{cursor:pointer}.booklist tbody tr:hover{background:#faf6ef}
+    .booklist tr.off td{opacity:.6}
+    .booklist .cover{width:30px;font-size:13px;border-radius:3px 5px 5px 3px}
+    .booklist .ttl{display:block;min-width:180px;padding:0;border:0;background:none;color:var(--ink);font-weight:700;text-align:right;line-height:1.4;cursor:pointer}
+    .booklist .sub{display:block;color:var(--muted);font-size:12px}
+    .booklist .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+    .flags{display:flex;gap:4px}.flag{display:inline-grid;width:22px;height:22px;place-items:center;border-radius:6px;font-size:12px;font-weight:700;background:var(--weak-soft);color:#b3ada4}.flag.on{background:var(--primary-soft);color:#3E6E35}
+    /* shelf view */
+    .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:22px 16px;padding:18px 16px 14px;border-radius:16px;background:linear-gradient(var(--surface),var(--surface)) padding-box;border:1px solid var(--line)}
+    .spine{display:flex;flex-direction:column;gap:6px;min-width:0;padding:0;border:0;background:none;color:var(--ink);text-align:right;cursor:pointer}
+    .spine .face{position:relative;display:block;width:100%;aspect-ratio:2/3;border-radius:4px 8px 8px 4px;overflow:hidden;background:var(--c,var(--brown));box-shadow:0 1px 0 rgba(59,31,20,.25),0 10px 18px -8px rgba(59,31,20,.45);transition:transform .16s}
+    .spine .face:after{position:absolute;inset:0 auto 0 0;width:7px;background:linear-gradient(90deg,rgba(0,0,0,.18),rgba(255,255,255,.08));content:"";pointer-events:none}
+    .spine:hover .face{transform:translateY(-3px)}
+    .spine img{display:block;width:100%;height:100%;object-fit:cover}
+    .spine .ph{display:flex;height:100%;flex-direction:column;justify-content:space-between;padding:12px 10px 10px 14px;color:#fff}
+    .spine .ph b{font-size:15px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+    .spine .ph small{font-size:11px;opacity:.75}
+    .spine .st{font-size:14px;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .spine .sa{margin-top:-4px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .spine.off .face{filter:grayscale(.7);opacity:.6}
+    .spine .tag{position:absolute;top:6px;inset-inline-start:6px;padding:0 7px;border-radius:999px;background:var(--danger);color:#fff;font-size:11px;font-weight:700}
+    /* authors */
+    .agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+    .acard{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;padding:14px;border:1px solid rgba(59,31,20,.1);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm);color:var(--ink);text-align:right;cursor:pointer;transition:border-color .15s,transform .15s}
+    .acard:hover{border-color:rgba(59,31,20,.35);transform:translateY(-1px)}
+    .avatar{display:grid;width:52px;height:52px;place-items:center;border-radius:50%;background:var(--c,var(--brown));color:#fff;font-size:22px;font-weight:700}
+    .acard .nm{display:block;font-size:17px;font-weight:700;line-height:1.35}
+    .latin{display:block;direction:ltr;unicode-bidi:isolate;text-align:right;color:var(--muted);font-size:12px}
+    .acard .ln{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+    .role{padding:1px 8px;border-radius:999px;background:#f1eee6;color:#5f6763;font-size:11px;font-weight:650}
+    .role.author{background:var(--sage-soft);color:var(--brown)}
+    .dupflag{padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:#7a4c32;font-size:11px;font-weight:700}
+    .okflag{padding:1px 8px;border-radius:999px;background:var(--primary-soft);color:#3E6E35;font-size:11px;font-weight:700}
+    .astyle{display:block;margin-top:6px;color:var(--muted);font-size:12px}
+    .aform{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+    .aform label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+    .aform input[type=text]{width:100%;min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .aform .full{grid-column:1/-1}
+    .abooks{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+    .abooks button{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);text-align:right;cursor:pointer}
+    .abooks button:hover{border-color:var(--brown)}
+    .abooks .cover{width:40px;font-size:15px}
+    .abooks small{display:block;color:var(--muted);font-size:12px}
+    .dups{display:grid;gap:8px}.dup{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 12px;border-radius:12px;background:var(--accent-soft)}
+    .dup b{flex:1 1 160px}
+    .merge-pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.merge-pick input{flex:1 1 220px;min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .merge-res{display:grid;gap:6px;margin-top:8px}
+    .sheet-head .avatar{background:rgba(255,252,247,.18)}
+    @media(max-width:700px){.viewseg,.authorseg{margin-inline-start:0}.tool select{max-width:none}.tool{flex:1 1 140px}.booklist .hide-sm{display:none}.shelf{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:18px 12px;padding:14px 12px}}
     /* settings */
+    .settings-tabs{display:flex;gap:6px;max-width:100%;margin:0 0 18px;padding:5px;overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-sm);scroll-snap-type:x proximity}
+    .settings-tab{flex:0 0 auto;min-height:44px;padding:6px 16px;border:1px solid transparent;border-radius:11px;background:transparent;color:var(--muted);font-weight:700;white-space:nowrap;cursor:pointer;scroll-snap-align:start}
+    .settings-tab:hover{background:var(--sage-soft);color:var(--ink)}
+    .settings-tab[aria-selected="true"]{background:var(--brown);color:var(--surface)}
+    .settings-pane>.panel:last-child{margin-bottom:0}
     .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:18px}
+    /* «الفعاليات» (2026-10-08) */
+    .ev-form{display:grid;gap:6px;max-width:720px}.ev-form>label{margin-top:8px;font-weight:600}
+    .ev-form input:not([type=file]),.ev-form textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}
+    .ev-form textarea{line-height:1.7;resize:vertical}
+    .ev-when{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.ev-when label{display:block;margin:8px 0 6px;font-weight:600}
+    .ev-book{position:relative}.ev-book-list{display:grid;margin-top:4px;border:1px solid var(--line);border-radius:10px;background:#fff;max-height:280px;overflow:auto}
+    .ev-book-list button{padding:10px 12px;border:0;border-bottom:1px solid var(--line);background:none;text-align:start;font:inherit;cursor:pointer}.ev-book-list button:hover{background:var(--primary-soft)}
+    .ev-picked{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--primary-soft)}
+    .ev-row{display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}.ev-row:last-child{border-bottom:0}
+    .ev-row img,.ev-noimg{width:76px;height:76px;border-radius:12px;object-fit:cover;background:var(--primary-soft);display:grid;place-items:center;font-size:28px}
+    .ev-row.dim{opacity:.6}.ev-info{display:grid;gap:3px;min-width:0}.ev-info p{margin:4px 0 0;font-size:13px;white-space:pre-line}
+    .ev-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.ev-actions .btn{min-height:36px;padding:6px 12px}
+    @media(max-width:640px){.ev-row{grid-template-columns:60px 1fr}.ev-row img,.ev-noimg{width:60px;height:60px}.ev-actions{grid-column:1/-1;justify-content:flex-start}}
     .panel h2{margin:0 0 4px;font-size:17px;color:var(--primary)}
     .panel p.hint{margin:0 0 12px;font-size:13px;color:var(--muted)}
     .row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:10px}
@@ -129,6 +279,27 @@
     .dot{display:inline-block;width:9px;height:9px;margin-inline-end:6px;border-radius:50%;background:#c9c3b6}
     .dot.on{background:#2f6b52}
     .test-out{white-space:pre-wrap;font-size:13px;background:#f3f0e8;border-radius:12px;padding:12px;margin:0}
+    /* settings → AI (2026-10-09, AISET): current model first, providers folded */
+    .ai-now{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:12px 14px;margin:6px 0 12px;border-radius:14px;background:var(--primary-soft)}
+    .ai-now .ai-model{font-size:18px;font-weight:700}
+    .ai-now .ai-model span{font-weight:400;color:var(--muted);font-size:14px}
+    .ai-now .ai-err{flex-basis:100%;font-size:13px;color:var(--danger)}
+    .ai-warn{display:grid;gap:8px;padding:10px 14px;margin:0 0 12px;border:1px solid #e3b7a9;border-radius:12px;background:var(--accent-soft);font-size:14px}
+    .ai-warn code{display:inline-block;padding:4px 8px;border-radius:8px;background:#fff;font-size:13px}
+    .ai-sub{margin:16px 0 6px;font-size:15px;color:var(--ink)}
+    .row .grow{flex:1 1 260px}.row .grow .wide{width:100%}
+    .state-line{margin:0 0 4px;min-height:1em}
+    details.prov{padding:0}
+    details.prov>summary{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;min-height:48px;padding:8px 14px;cursor:pointer;list-style:none}
+    details.prov>summary::-webkit-details-marker{display:none}
+    details.prov>summary::before{content:"◂";color:var(--primary);font-size:13px;transition:transform .15s}
+    details.prov[open]>summary::before{transform:rotate(-90deg)}
+    details.prov>summary b{min-width:0}
+    details.prov .prov-body{display:grid;gap:8px;padding:0 14px 12px}
+    .pill-now{padding:1px 10px;border-radius:999px;background:var(--brown);color:var(--surface);font-size:12px;font-weight:700}
+    details.prov-more{border:1px dashed var(--line);border-radius:14px}
+    details.prov-more>summary{min-height:44px;padding:10px 14px;cursor:pointer;font-size:14px;color:var(--muted)}
+    details.prov-more .prov-list{padding:0 10px 10px}
     .tbl{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden}
     .tbl th,.tbl td{padding:7px 9px;border-bottom:1px solid #eee8dc;text-align:right;white-space:nowrap}
     .tbl th{background:#f3f0e8;color:var(--muted);font-weight:700}
@@ -152,7 +323,7 @@
     .review-bar input{min-height:44px;padding:4px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;margin-inline-start:6px}
     .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
     .chip.rewaa{background:var(--info-soft);color:var(--info)}
-    @media(max-width:560px){.bar{padding:10px 14px}main{padding:14px 14px 50px}.sheet-body{padding:14px}.sheet-head{padding:14px}}
+    @media(max-width:560px){.bar{padding:10px 14px}main{padding:14px 14px 50px}.sheet-body{padding:14px}.sheet-head{padding:14px}.about-hero{padding:22px 20px 24px}.about-body{padding:22px 20px}.about-hero h2{font-size:30px}.about-lead{font-size:17px}.about-journey{grid-template-columns:1fr}.about-step:not(:last-child){border-inline-end:0;border-bottom:1px solid var(--line)}.about-facts{grid-template-columns:1fr}.about-facts>div:nth-child(odd),.about-facts>div:nth-child(even){padding-inline:4px;border-inline-start:0}.about-footer{align-items:flex-start}.credit{margin-inline-start:auto}}
     @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
     .auth{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:var(--canvas,#f6f2e9)}
     .auth-card{width:min(100%,380px);background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 20px 55px rgba(24,35,31,.13)}
@@ -167,6 +338,19 @@
     .users button{min-height:44px}
     .usage b{font-size:20px}
     .off{opacity:.55}
+    /* inbox: visitor reports and suggestions */
+    .tab-n.alert{background:var(--coral);color:#fff;font-weight:700}
+    .tab[aria-selected="true"] .tab-n.alert{background:var(--surface);color:var(--brown)}
+    .note-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 16px;align-items:start;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+    .note-row.done{background:transparent}
+    .note-row .nr-book{display:flex;gap:12px;align-items:flex-start;min-width:0}
+    .note-row .nr-book .cover{width:42px;flex:none;font-size:16px}
+    .note-row b{display:block;font-size:18px;line-height:1.35}
+    .note-row .nr-meta{display:block;margin-top:2px;font-size:13px;color:var(--muted)}
+    .note-row .nr-reason{display:inline-block;margin:6px 0 0;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:#7a2f1e;font-size:14px;font-weight:700}
+    .note-row .nr-text{margin:8px 0 0;font-size:16px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+    .note-row .nr-actions{display:flex;flex-direction:column;gap:8px}
+    @media(max-width:640px){.note-row{grid-template-columns:1fr}.note-row .nr-actions{flex-direction:row;flex-wrap:wrap}}
     /* statistics */
     .st-head{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between;margin:4px 0 16px}
     .st-head h2{margin:0;font-size:26px}.st-head .diff{margin:2px 0 0;max-width:620px}
@@ -222,10 +406,26 @@
     .gchip input{accent-color:var(--brown)}
     .gchip.taken{opacity:.45}
     /* about */
-    .about p{margin:0 0 10px;line-height:1.8;max-width:760px}
-    .about ul{margin:0 0 12px;padding-inline-start:20px;line-height:1.9;max-width:760px}
-    .credit{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:15px}
-    .credit img{display:block;width:120px;height:auto}
+    .panel.about{padding:0;overflow:hidden}
+    .about-hero{position:relative;isolation:isolate;padding:28px 30px 30px;background:var(--sage-soft)}
+    .about-hero:before{position:absolute;inset:0;z-index:-1;background:url('/static/assets/thalath-pattern.png') center/cover no-repeat;opacity:.045;content:"";pointer-events:none}
+    .about-topline{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:24px}
+    .about-brand{display:flex;align-items:center}.about-brand img{display:block;height:auto;object-fit:contain}.about-thalath{width:92px;aspect-ratio:1144/348}
+    .about-badge{padding:4px 12px;border:1px solid rgba(59,31,20,.18);border-radius:999px;background:rgba(255,252,247,.55);color:var(--brown);font-size:13px;font-weight:700}
+    .about-hero h2{margin:0 0 5px;color:var(--brown);font-size:34px;line-height:1.25}
+    .about-lead{max-width:680px;margin:0;color:#51453f;font-size:19px;line-height:1.75}
+    .about-body{padding:26px 30px 28px}
+    .about-body h3{margin:0 0 13px;color:var(--brown);font-size:20px}
+    .about-journey{display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:28px;border-block:1px solid var(--line)}
+    .about-step{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:18px 16px}.about-step:not(:last-child){border-inline-end:1px solid var(--line)}
+    .about-step>span{display:grid;width:30px;height:30px;place-items:center;border-radius:50%;background:var(--coral);color:var(--surface);font-size:14px;font-weight:700}
+    .about-step b{display:block;margin-bottom:2px;color:var(--brown);font-size:17px}.about-step p{margin:0;color:var(--muted);font-size:14px;line-height:1.65}
+    .about-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;border-top:1px solid var(--line)}
+    .about-facts>div{padding:15px 4px;border-bottom:1px solid var(--line)}.about-facts>div:nth-child(odd){padding-inline-end:24px}.about-facts>div:nth-child(even){padding-inline-start:24px;border-inline-start:1px solid var(--line)}
+    .about-facts dt{margin-bottom:2px;color:var(--brown);font-weight:700}.about-facts dd{margin:0;color:var(--muted);font-size:14px;line-height:1.65}
+    .about-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px;margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
+    .about-version span,.credit span{display:block;color:var(--muted);font-size:12px}.about-version b{font-size:15px}
+    .credit{display:flex;align-items:center;gap:12px;color:var(--muted)}.credit img{display:block;width:94px;height:auto}
     /* trial QR */
     .qr-row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
     .qr-box{display:grid;width:220px;min-height:220px;place-items:center;border:1px solid var(--line);border-radius:16px;background:#fff;padding:8px}
@@ -251,7 +451,7 @@
   <div id="qrPrint" aria-hidden="true">
     <img class="qp-logo" src="/static/assets/thalath-logo-brown.png" alt="" />
     <p class="qp-kicker">وجهتك الثقافية</p>
-    <h1>جرّب أمين المكتبة</h1>
+    <h1>جرّب ثلاث الذكي</h1>
     <p class="qp-sub">امسح الرمز بكاميرا جوالك، وقل له وش ودّك تقرأ</p>
     <div id="qpCode" class="qp-code"></div>
     <p class="qp-note">نسخة تجريبية</p>
@@ -260,7 +460,9 @@
     <div class="bar">
       <h1 class="brand"><img src="/static/assets/thalath-logo-brown.png" alt="ثلاث" /><span>لوحة الإدارة</span></h1>
       <nav class="tabs" role="tablist" aria-label="أقسام الإدارة">
-        <button class="tab" role="tab" id="tabBooks" aria-selected="true" aria-controls="booksView">الكتب</button>
+        <button class="tab" role="tab" id="tabBooks" aria-selected="true" aria-controls="booksView">المكتبة</button>
+        <button class="tab" role="tab" id="tabInbox" aria-selected="false" aria-controls="inboxView">البلاغات <span class="tab-n alert" id="inboxN" hidden></span></button>
+        <button class="tab" role="tab" id="tabEvents" aria-selected="false" aria-controls="eventsView">الفعاليات</button>
         <button class="tab" role="tab" id="tabStats" aria-selected="false" aria-controls="statsView">الإحصاءات</button>
         <button class="tab" role="tab" id="tabImport" aria-selected="false" aria-controls="importView">استيراد من رواء</button>
         <button class="tab" role="tab" id="tabSettings" aria-selected="false" aria-controls="settingsView">الإعدادات</button>
@@ -293,30 +495,153 @@
 
   <main>
     <div id="booksView" role="tabpanel" aria-labelledby="tabBooks">
-      <div id="stats" class="stats" aria-label="ملخص الكتالوج"></div>
-      <div class="toolbar">
-        <input id="search" type="search" placeholder="ابحث بالعنوان أو المؤلف أو الرف…" aria-label="بحث" />
-        <select id="genreFilter" aria-label="التصنيف"><option value="">كل التصنيفات</option></select>
-        <select id="viewFilter" aria-label="تصفية">
-          <option value="all">كل الكتب</option>
-          <option value="confirmed">فيها صفات مؤكدة</option>
-          <option value="conflict">فيها تعارض</option>
-          <option value="noreviews">بدون مراجعات</option>
-          <option value="nocover">بدون غلاف</option>
-          <option value="nosummary">بدون نبذة</option>
-          <option value="off">موقوفة عن الظهور</option>
-          <option value="out">نافدة</option>
-        </select>
+      <div class="lib-top">
+        <div class="settings-tabs lib-tabs" role="tablist" aria-label="أقسام المكتبة">
+          <button class="settings-tab" role="tab" id="libTabBooks" aria-selected="true" aria-controls="libBooks">الكتب <span class="tab-n" id="libNBooks"></span></button>
+          <button class="settings-tab" role="tab" id="libTabAuthors" aria-selected="false" aria-controls="libAuthors" tabindex="-1">المؤلفون <span class="tab-n" id="libNAuthors"></span></button>
+          <button class="settings-tab" role="tab" id="libTabTranslators" aria-selected="false" aria-controls="libAuthors" tabindex="-1">المترجمون <span class="tab-n" id="libNTranslators"></span></button>
+          <button class="settings-tab" role="tab" id="libTabOrigin" aria-selected="false" aria-controls="libOrigin" tabindex="-1">أصل الكتاب <span class="tab-n" id="libNOrigin"></span></button>
+          <button class="settings-tab" role="tab" id="libTabDeleted" aria-selected="false" aria-controls="libDeleted" tabindex="-1">المحذوفة <span class="tab-n" id="libNDeleted"></span></button>
+        </div>
       </div>
-      <div class="legend" aria-label="دليل الألوان">
-        <span class="chip confirmed">مؤكد</span> ثقة ٨٥٪ فأكثر (٥ مراجعات أو أكثر)، يُذكر للزائر
-        <span class="chip impression">انطباع</span> ٦٥–٨٤٪، للترتيب فقط
-        <span class="chip weak">ضعيف</span> أقل من ٦٥٪، يُعامل كغير معروف
-        <span class="chip conflict">متعارض</span> المصادر مختلفة، لا يُستخدم حتى يُراجع
-        <span class="chip derived">محسوب</span> مشتق من بيانات أخرى
+
+      <div id="libBooks" class="lib-pane" role="tabpanel" aria-labelledby="libTabBooks">
+        <div id="stats" class="stats" aria-label="ملخص الكتالوج"></div>
+        <div class="lib-tools">
+          <input id="search" type="search" placeholder="ابحث بالعنوان أو المؤلف أو الدار أو الرف…" aria-label="بحث في الكتب" />
+          <label class="tool"><span>التصنيف</span><select id="genreFilter"><option value="">الكل</option></select></label>
+          <label class="tool"><span>الدار</span><select id="publisherFilter"><option value="">الكل</option></select></label>
+          <label class="tool"><span>الترتيب</span><select id="sortBy">
+            <option value="complete">الأكثر اكتمالًا</option>
+            <option value="added">الأحدث إضافة</option>
+            <option value="researched">الأحدث بحثًا</option>
+            <option value="title">العنوان (أ–ي)</option>
+            <option value="author">المؤلف (أ–ي)</option>
+            <option value="qty">الكمية (الأكثر)</option>
+            <option value="price">السعر (الأعلى)</option>
+            <option value="pages">عدد الصفحات</option>
+          </select></label>
+          <label class="tool"><span>التجميع</span><select id="groupBy">
+            <option value="">بدون تجميع</option>
+            <option value="genre">التصنيف</option>
+            <option value="publisher">دار النشر</option>
+            <option value="research">حالة البحث</option>
+            <option value="stock">المخزون</option>
+            <option value="lang">لغة العمل</option>
+          </select></label>
+          <div class="seg viewseg" role="group" aria-label="شكل عرض الكتب">
+            <button type="button" data-view="cards" aria-pressed="true">بطاقات</button>
+            <button type="button" data-view="list" aria-pressed="false">قائمة</button>
+            <button type="button" data-view="shelf" aria-pressed="false">رفوف</button>
+          </div>
+        </div>
+        <div id="bookChips" class="fchips" aria-label="تصفية سريعة"></div>
+        <details class="legend-box"><summary>دليل ألوان الصفات</summary>
+          <div class="legend" aria-label="دليل الألوان">
+            <span class="chip confirmed">مؤكد</span> ثقة ٨٥٪ فأكثر (٥ مراجعات أو أكثر)، يُذكر للزائر
+            <span class="chip impression">انطباع</span> ٦٥–٨٤٪، للترتيب فقط
+            <span class="chip weak">ضعيف</span> أقل من ٦٥٪، يُعامل كغير معروف
+            <span class="chip conflict">متعارض</span> المصادر مختلفة، لا يُستخدم حتى يُراجع
+            <span class="chip derived">محسوب</span> مشتق من بيانات أخرى
+          </div>
+        </details>
+        <div class="count-row"><p id="count" class="count" role="status">جاري تحميل الكتب…</p><button type="button" id="clearBookFilters" class="linkbtn" hidden>مسح الفلاتر</button></div>
+        <div id="grid"></div>
       </div>
-      <p id="count" class="count" role="status">جاري تحميل الكتب…</p>
-      <div id="grid" class="grid"></div>
+
+      <div id="libAuthors" class="lib-pane" role="tabpanel" aria-labelledby="libTabAuthors" hidden>
+        <div id="authorStats" class="stats" aria-label="ملخص المؤلفين"></div>
+        <div class="lib-tools">
+          <input id="authorSearch" type="search" placeholder="ابحث باسم المؤلف أو المترجم (عربي أو لاتيني)…" aria-label="بحث في المؤلفين" />
+          <label class="tool"><span>الترتيب</span><select id="authorSort">
+            <option value="books">الأكثر كتبًا</option>
+            <option value="stock">الأكثر توفرًا</option>
+            <option value="researched">الأكثر كتبًا مبحوثة</option>
+            <option value="name">الاسم (أ–ي)</option>
+            <option value="recent">آخر تعديل</option>
+          </select></label>
+          <div class="seg authorseg" role="group" aria-label="شكل عرض المؤلفين">
+            <button type="button" data-view="cards" aria-pressed="true">بطاقات</button>
+            <button type="button" data-view="list" aria-pressed="false">قائمة</button>
+          </div>
+        </div>
+        <div id="authorChips" class="fchips" aria-label="تصفية المؤلفين"></div>
+        <div class="count-row"><p id="authorCount" class="count" role="status"></p><button type="button" id="clearAuthorFilters" class="linkbtn" hidden>مسح الفلاتر</button></div>
+        <div id="authorGrid"></div>
+      </div>
+
+      <div id="libOrigin" class="lib-pane" role="tabpanel" aria-labelledby="libTabOrigin" hidden>
+        <p class="diff" style="margin:0 0 12px">كتب ما نعرف بعد هل هي عربية الأصل أو مترجمة. اختر من الكتاب نفسه: «عربي الأصل»، أو لغة الأصل إذا كان مترجمًا. الاختيار يُحفظ مباشرة ويخرج الكتاب من القائمة، وتقدر تتراجع عن آخر اختيار. ما يتغير المخزون ولا أي شيء ثاني في الكتاب.</p>
+        <div class="lib-tools"><input id="originSearch" type="search" placeholder="ابحث بالعنوان أو المؤلف أو الدار…" aria-label="بحث في قائمة أصل الكتاب" /></div>
+        <div class="count-row"><p id="originCount" class="count" role="status"></p></div>
+        <div id="originList" class="del-list"></div>
+      </div>
+
+      <div id="libDeleted" class="lib-pane" role="tabpanel" aria-labelledby="libTabDeleted" hidden>
+        <p class="diff" style="margin:0 0 12px">منتجات حُذفت يدويًا من الكتالوج لأنها ليست كتبًا (ألعاب، مجموعات تعليمية…). ما تظهر للزوار ولا تدخل البحث، واستيراد رواء الأسبوعي يتجاهلها. لو انحذف شيء بالغلط استرجعه من هنا ويرجع بكل بياناته.</p>
+        <p id="delCount" class="count" role="status"></p>
+        <div id="delList" class="del-list"></div>
+      </div>
+    </div>
+
+    <div id="inboxView" role="tabpanel" aria-labelledby="tabInbox" hidden>
+      <div class="st-head">
+        <div><h2>بلاغات الزوار واقتراحاتهم</h2>
+          <p class="diff">الزائر يبلّغ من صفحة الكتاب إذا شاف معلومة غلط، ويرسل اقتراحه من المحادثة. مجهولة: ما نحفظ اسم الزائر ولا محادثته. البلاغ ما يغيّر الكتاب؛ صحّح البطاقة ثم اضغط «تمت المعالجة».</p></div>
+        <div class="seg" id="inboxStatus" role="group" aria-label="الحالة">
+          <button type="button" data-status="open" aria-pressed="true">مفتوحة</button><button type="button" data-status="done">تمت معالجتها</button><button type="button" data-status="all">الكل</button>
+        </div>
+      </div>
+      <div class="settings-tabs lib-tabs" role="tablist" aria-label="نوع الرسائل">
+        <button class="settings-tab" role="tab" id="inboxTabReport" aria-selected="true" aria-controls="inboxList">بلاغات الكتب <span class="tab-n" id="inboxNReport"></span></button>
+        <button class="settings-tab" role="tab" id="inboxTabSuggestion" aria-selected="false" aria-controls="inboxList" tabindex="-1">الاقتراحات <span class="tab-n" id="inboxNSuggestion"></span></button>
+        <button class="settings-tab" role="tab" id="inboxTabQuestions" aria-selected="false" aria-controls="inboxList" tabindex="-1">أسئلة بلا جواب <span class="tab-n" id="inboxNQuestions"></span></button>
+        <button class="settings-tab" role="tab" id="inboxTabStaff" aria-selected="false" aria-controls="inboxList" tabindex="-1" hidden>تعديلات الموظفين <span class="tab-n" id="inboxNStaff"></span></button>
+      </div>
+      <div class="export-bar">
+        <a id="inboxExport" class="btn secondary" href="/api/admin/inbox/export?status=open" download>تنزيل الكل في ملف (md)</a>
+        <span class="diff">البلاغات والاقتراحات والأسئلة بلا جواب وتعديلات الموظفين في ملف واحد، ترسله لإبراهيم أو تعالجه مع Claude.</span>
+      </div>
+      <p id="inboxState" class="count" role="status"></p>
+      <div id="inboxList" class="del-list" role="tabpanel"></div>
+    </div>
+
+    <!-- «الفعاليات» (Ibrahim, 2026-10-08): staff add events; upcoming ones show on the visitor start page -->
+    <div id="eventsView" role="tabpanel" aria-labelledby="tabEvents" hidden>
+      <section class="panel" aria-labelledby="evFormTitle">
+        <h2 id="evFormTitle">فعالية جديدة</h2>
+        <p class="hint">تظهر في الصفحة الأولى للتطبيق تحت «فعالياتنا» من لحظة الحفظ حتى نهاية يومها، ومن يضغط عليها تطلع له تفاصيلها.</p>
+        <div class="ev-form">
+          <label for="evTitle">اسم الفعالية</label>
+          <input id="evTitle" maxlength="120" autocomplete="off" />
+          <label for="evDesc">الوصف</label>
+          <textarea id="evDesc" maxlength="2000" rows="4"></textarea>
+          <div class="ev-when">
+            <div><label for="evDate">التاريخ</label><input id="evDate" type="date" /></div>
+            <div><label for="evTime">الوقت</label><input id="evTime" type="time" /></div>
+            <div><label for="evEnd">ينتهي الساعة <span class="state">(اختياري)</span></label><input id="evEnd" type="time" /></div>
+          </div>
+          <label for="evBookQ">عن كتاب من المكتبة <span class="state">(اختياري)</span></label>
+          <div class="ev-book">
+            <div id="evBookPicked" class="ev-picked" hidden></div>
+            <input id="evBookQ" placeholder="اكتب جزءًا من عنوان الكتاب أو اسم المؤلف" autocomplete="off" />
+            <div id="evBookList" class="ev-book-list" hidden></div>
+          </div>
+          <label for="evImage">صورة الفعالية أو الكتاب <span class="state">(اختياري، JPG أو PNG أو WebP حتى ٥ ميجابايت)</span></label>
+          <input id="evImage" type="file" accept="image/jpeg,image/png,image/webp" />
+          <p id="evImageNow" class="hint" hidden></p>
+          <p class="hint">إذا ما رفعت صورة والفعالية عن كتاب، تظهر صورة غلافه.</p>
+          <div class="row">
+            <button id="evSave" class="btn" type="button">حفظ الفعالية</button>
+            <button id="evCancel" class="btn secondary" type="button" hidden>إلغاء التعديل</button>
+            <span id="evState" class="state" role="status"></span>
+          </div>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="evListTitle">
+        <h2 id="evListTitle">الفعاليات</h2>
+        <div id="evList"></div>
+      </section>
     </div>
 
     <div id="statsView" role="tabpanel" aria-labelledby="tabStats" hidden>
@@ -366,6 +691,28 @@
         </div>
       </section>
 
+      <section class="panel" aria-labelledby="cxTitle">
+        <h2 id="cxTitle">ردود الموظفين على تأكيد هوية الكتب</h2>
+        <p id="cxCount" class="diff" style="margin:0 0 10px">جاري التحميل…</p>
+        <p style="margin:0 0 6px;font-weight:700">١. أعطِ الردود لـ Claude</p>
+        <p class="diff" style="margin:0 0 8px">انسخ الردود والصقها في محادثة المدير مع Claude (أو نزّلها ملفًا وأرفقه). Claude يرجّع لك ملف تصحيحات.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <button id="cxCopy" class="btn" type="button">نسخ الردود</button>
+          <button id="cxDownload" class="btn secondary" type="button">تنزيل ملف</button>
+          <span id="cxState" class="state" role="status"></span>
+        </div>
+        <p style="margin:18px 0 6px;font-weight:700">٢. طبّق تصحيحات Claude</p>
+        <p class="diff" style="margin:0 0 8px">الصق نص التصحيحات هنا أو اختر الملف، ثم «معاينة». ما يتغير شيء قبل ما تضغط «تطبيق»، وتُؤخذ نسخة احتياطية أولًا.</p>
+        <textarea id="cxText" dir="ltr" style="width:100%;min-height:90px" aria-label="نص التصحيحات من Claude" placeholder='{"format": "confirmation-corrections-1", ...}'></textarea>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px">
+          <label class="btn secondary" for="cxFile">اختر ملف التصحيحات</label><input id="cxFile" type="file" accept=".json,application/json" hidden />
+          <button id="cxPreview" class="btn" type="button">معاينة</button>
+          <button id="cxApply" class="btn" type="button" hidden>تطبيق التصحيحات</button>
+          <span id="cxPlanState" class="state" role="status"></span>
+        </div>
+        <div style="overflow-x:auto;margin-top:10px"><table id="cxPlan" class="tbl"></table></div>
+      </section>
+
       <section class="panel" aria-labelledby="histTitle">
         <h2 id="histTitle">سجل الاستيراد</h2>
         <div style="overflow-x:auto"><table id="histTable" class="tbl"></table></div>
@@ -373,6 +720,15 @@
     </div>
 
     <div id="settingsView" role="tabpanel" aria-labelledby="tabSettings" hidden>
+      <div class="settings-tabs" role="tablist" aria-label="أقسام الإعدادات" aria-orientation="horizontal">
+        <button class="settings-tab" id="setTabTrial" type="button" role="tab" aria-selected="true" aria-controls="settingsTrial">رمز QR</button>
+        <button class="settings-tab" id="setTabSections" type="button" role="tab" aria-selected="false" aria-controls="settingsSections" tabindex="-1">أقسام المكتبة</button>
+        <button class="settings-tab" id="setTabUsers" type="button" role="tab" aria-selected="false" aria-controls="settingsUsers" tabindex="-1">الموظفون</button>
+        <button class="settings-tab" id="setTabAi" type="button" role="tab" aria-selected="false" aria-controls="settingsAi" tabindex="-1">الذكاء الاصطناعي</button>
+        <button class="settings-tab" id="setTabAudit" type="button" role="tab" aria-selected="false" aria-controls="settingsAudit" tabindex="-1">سجل التعديلات</button>
+        <button class="settings-tab" id="setTabAbout" type="button" role="tab" aria-selected="false" aria-controls="settingsAbout" tabindex="-1">عن التطبيق</button>
+      </div>
+      <div id="settingsTrial" class="settings-pane" role="tabpanel" aria-labelledby="setTabTrial">
       <section class="panel" aria-labelledby="qrTitle">
         <h2 id="qrTitle">رمز التجربة (QR)</h2>
         <p class="hint">يمسحه الطاقم بكاميرا الجوال فتفتح صفحة الزائر مباشرة. الجوال لازم يكون على نفس شبكة الواي فاي اللي عليها هذا الجهاز، والسيرفر مشغّل بوضع التجربة: <b>trial_server.command</b> على ماك أو <b>trial_server.bat</b> على ويندوز.</p>
@@ -391,6 +747,8 @@
           </div>
         </div>
       </section>
+      </div>
+      <div id="settingsSections" class="settings-pane" role="tabpanel" aria-labelledby="setTabSections" hidden>
       <section class="panel" aria-labelledby="secTitle">
         <h2 id="secTitle">أقسام المكتبة</h2>
         <p class="hint">ملف رواء ما فيه موقع للكتب، والموقع ما يُخترع. الترتيب: إذا كتب الموظف موقعًا للكتاب يظهر هو، وإلا يظهر القسم المفعّل اللي فيه تصنيف الكتاب، وإلا يُقال للزائر «اسأل موظف المكتبة». غيّر الأسماء لتطابق اللوحات الموجودة فعلًا في المكتبة، وفعّل القسم لما يكون جاهزًا.</p>
@@ -402,6 +760,8 @@
         </div>
         <p id="secState" class="state" role="status"></p>
       </section>
+      </div>
+      <div id="settingsUsers" class="settings-pane" role="tabpanel" aria-labelledby="setTabUsers" hidden>
       <section class="panel" aria-labelledby="usersTitle">
         <h2 id="usersTitle">الموظفون</h2>
         <p class="hint">المدير يشوف كل شي. الموظف يشوف الكتب ويعدّل المخزون ويراجع الصفات فقط. الإيقاف ما يحذف سجل تعديلات الموظف.</p>
@@ -415,38 +775,42 @@
         </div>
         <p id="usersState" class="state" role="status"></p>
       </section>
+      </div>
+      <div id="settingsAi" class="settings-pane" role="tabpanel" aria-labelledby="setTabAi" hidden>
+      <section class="panel" aria-labelledby="llmTitle">
+        <h2 id="llmTitle">نموذج المحادثة</h2>
+        <p class="hint">النموذج اللي يفهم طلب الزائر ويصيغ الرد. الكتب نفسها تجي دائمًا من قاعدة البيانات.</p>
+        <div id="aiNow" class="ai-now" role="status" aria-live="polite"><span class="diff">جاري التحميل…</span></div>
+        <div id="aiWarn" class="ai-warn" role="alert" hidden></div>
+        <h3 class="ai-sub">تغيير النموذج</h3>
+        <div class="row">
+          <div><label for="provider">المزوّد</label><select id="provider"></select></div>
+          <div class="grow"><label for="model">النموذج</label><select id="model" class="wide" dir="ltr"></select>
+            <input id="modelCustom" class="wide" dir="ltr" placeholder="اكتب اسم النموذج" aria-label="اسم نموذج آخر" hidden /></div>
+          <button id="refreshModels" class="btn secondary" type="button">تحديث القائمة</button>
+          <button id="saveLlm" class="btn" type="button">حفظ</button>
+        </div>
+        <p id="modelHint" class="hint" hidden></p>
+        <p class="state-line"><span id="llmState" class="state" role="status"></span> <span id="modelsState" class="state" role="status"></span></p>
+        <h3 class="ai-sub">تجربة سريعة</h3>
+        <p class="hint">تجرّب النموذج المحفوظ برسالة زائر، وتشوف الرد والكتب والوقت.</p>
+        <div class="row">
+          <div class="grow"><label for="testMsg">رسالة الزائر</label><input id="testMsg" class="wide" value="ما أبغى شي حزين، أبغى رواية تونّسني" /></div>
+          <button id="runTest" class="btn secondary" type="button">جرّب</button>
+        </div>
+        <pre id="testOut" class="test-out" hidden></pre>
+      </section>
+      <section class="panel" aria-labelledby="keysTitle">
+        <h2 id="keysTitle">المزوّدون</h2>
+        <p class="hint">اضغط على المزوّد لتحفظ مفتاحه أو عنوانه أو تختبر الاتصال. المفاتيح تنحفظ على هذا الجهاز خارج مجلد المشروع (<span dir="ltr">~/.library_keeper/keys.json</span>) وما تظهر كاملة أبدًا، والحفظ مسموح من نفس الجهاز فقط. مفتاح Terminal له الأولوية.</p>
+        <div id="providers" class="prov-list"></div>
+      </section>
       <section class="panel" aria-labelledby="usageTitle">
-        <h2 id="usageTitle">الاستخدام اليومي للنموذج</h2>
+        <h2 id="usageTitle">الاستخدام اليومي</h2>
         <p class="hint">كل رد في المحادثة يستهلك استدعاءين تقريبًا. إذا خلص الحد اليومي، تكمل المحادثة بالنظام البديل بدون نموذج حتى اليوم التالي.</p>
         <div id="usageStats" class="stats usage"></div>
         <div class="row"><div><label for="capInput">الحد اليومي (استدعاءات)</label><input id="capInput" class="wide" type="number" min="0" step="50" /></div>
           <button id="capSave" class="btn" type="button">حفظ</button><span id="capState" class="state" role="status"></span></div>
-      </section>
-      <section class="panel" aria-labelledby="auditTitle">
-        <h2 id="auditTitle">سجل التعديلات</h2>
-        <div style="overflow-x:auto;max-height:320px"><table class="tbl" id="auditTable"></table></div>
-      </section>
-      <section class="panel" aria-labelledby="llmTitle">
-        <h2 id="keysTitle">المزوّدين والمفاتيح</h2>
-        <p class="hint">الصق مفتاح الـ API واضغط حفظ. المفتاح ينحفظ على هذا الجهاز خارج مجلد المشروع (<span dir="ltr">~/.library_keeper/keys.json</span>)، وما يظهر هنا كامل أبدًا. الحفظ مسموح من نفس الجهاز فقط. إذا فيه مفتاح في Terminal فله الأولوية.</p>
-        <div id="providers" class="prov-list"></div>
-      </section>
-      <section class="panel" aria-labelledby="llmTitle">
-        <h2 id="llmTitle">نموذج المحادثة</h2>
-        <p class="hint">اختر المزوّد والنموذج اللي تستخدمه المحادثة، وجرّبه.</p>
-        <div class="row">
-          <div><label for="provider">المزوّد</label><select id="provider"></select></div>
-          <div><label for="model">النموذج</label><select id="model" class="wide" dir="ltr"></select>
-            <input id="modelCustom" class="wide" dir="ltr" placeholder="اكتب اسم النموذج" aria-label="اسم نموذج آخر" hidden />
-            <p id="modelHint" class="hint" hidden></p></div>
-          <button id="saveLlm" class="btn" type="button">حفظ</button>
-          <span id="llmState" class="state" role="status"></span>
-        </div>
-        <div class="row">
-          <div><label for="testMsg">تجربة سريعة</label><input id="testMsg" class="wide" value="ما أبغى شي حزين، أبغى رواية تونّسني" /></div>
-          <button id="runTest" class="btn secondary" type="button">جرّب</button>
-        </div>
-        <pre id="testOut" class="test-out" hidden></pre>
       </section>
       <section class="panel" aria-labelledby="tlTitle">
         <h2 id="tlTitle">وضع الاختبار</h2>
@@ -456,19 +820,46 @@
           <span id="tlState" class="state" role="status"></span>
         </div>
       </section>
-      <section class="panel about" aria-labelledby="aboutTitle">
-        <h2 id="aboutTitle">عن التطبيق</h2>
-        <p><b>أمين المكتبة الذكي</b> مساعد قراءة لمكتبة ثلاث. يفتحه الزائر من رمز QR على جواله بدون تحميل ولا تسجيل، ويسولف معه عن مزاجه ووقته وآخر كتاب عجبه، فيقترح عليه كتبًا متوفرة فعلًا في المكتبة مع سبب لكل اقتراح ومكانه في المكتبة.</p>
-        <ul>
-          <li>يقترح من كتب المكتبة المتوفرة فقط، والكتاب النافد ما يظهر للزائر.</li>
-          <li>صفات الكتب (المزاج، الإيقاع، الثقل، الفئة العمرية) مستخلصة من آراء القرّاء، ويقدر الموظف يراجعها ويصححها.</li>
-          <li>يدعم العربية والإنجليزية، ويشتغل حتى بدون نموذج ذكاء اصطناعي بفهم الكلمات.</li>
-          <li>لوحة إدارة للكتب والمخزون والأغلفة والأقسام، وإحصاءات لتوجهات القرّاء ورضاهم.</li>
-          <li>الخصوصية: ما يطلب اسم الزائر ولا يحفظ كلامه، والإحصاءات مجهولة.</li>
-        </ul>
-        <p class="diff">الإصدار ١٫٠ — نسخة تجريبية، سبتمبر ٢٠٢٦</p>
-        <div class="credit"><span>تطوير</span><img src="/static/assets/developer-logo.png" alt="إبراهيم" /></div>
+      </div>
+      <div id="settingsAudit" class="settings-pane" role="tabpanel" aria-labelledby="setTabAudit" hidden>
+      <section class="panel" aria-labelledby="auditTitle">
+        <h2 id="auditTitle">سجل التعديلات</h2>
+        <div style="overflow-x:auto;max-height:320px"><table class="tbl" id="auditTable"></table></div>
       </section>
+      </div>
+      <div id="settingsAbout" class="settings-pane" role="tabpanel" aria-labelledby="setTabAbout" hidden>
+      <section class="panel about" aria-labelledby="aboutTitle">
+        <div class="about-hero">
+          <div class="about-topline">
+            <div class="about-brand">
+              <img class="about-thalath" src="/static/assets/thalath-logo-brown.png" alt="مكتبة ثلاث" />
+            </div>
+            <span class="about-badge">نسخة تجريبية</span>
+          </div>
+          <h2 id="aboutTitle">ثلاث الذكي</h2>
+          <p class="about-lead">يساعد الزائر يحوّل رغبته العامة إلى خيارات واضحة من الكتب المتوفرة فعلًا، مع سبب لكل اقتراح ومعلومة تدلّه على الكتاب داخل المكتبة.</p>
+        </div>
+        <div class="about-body">
+          <h3>رحلة الزائر</h3>
+          <div class="about-journey" role="list" aria-label="رحلة استخدام ثلاث الذكي في ثلاث خطوات">
+            <div class="about-step" role="listitem"><span>١</span><div><b>يسولف مع ثلاث الذكي</b><p>عن مزاجه، وقته، أو آخر كتاب عجبه.</p></div></div>
+            <div class="about-step" role="listitem"><span>٢</span><div><b>نبحث في الموجود</b><p>نستبعد النافد ونقارن طلبه ببطاقات الكتب.</p></div></div>
+            <div class="about-step" role="listitem"><span>٣</span><div><b>يختار بثقة</b><p>يشوف خيارات قليلة، وسبب الترشيح، ومكان الكتاب.</p></div></div>
+          </div>
+          <h3>مبني على الوضوح والثقة</h3>
+          <dl class="about-facts">
+            <div><dt>اقتراحات من المخزون</dt><dd>ما يظهر للزائر إلا كتاب متوفر ومفعّل في المكتبة.</dd></div>
+            <div><dt>بيانات قابلة للمراجعة</dt><dd>الموظف يراجع صفات الكتب ويصححها متى احتاج.</dd></div>
+            <div><dt>خصوصية من البداية</dt><dd>ما نطلب اسم الزائر، والإحصاءات مجهولة. حفظ المحادثات مخصص لوضع الاختبار فقط.</dd></div>
+            <div><dt>يستمر وقت التعطل</dt><dd>إذا تعذر النموذج، يكمل ثلاث الذكي بالنظام البديل بدل ما تتوقف التجربة.</dd></div>
+          </dl>
+          <footer class="about-footer">
+            <div class="about-version"><span>الإصدار الحالي</span><b id="aboutVersion">—</b></div>
+            <div class="credit"><span>تطوير</span><img src="/static/assets/developer-logo.png" alt="إبراهيم" /></div>
+          </footer>
+        </div>
+      </section>
+      </div>
     </div>
   </main>
 
@@ -477,6 +868,8 @@
 
   <script src="/static/assets/qr.js"></script>
   <script>
+    let ATTRS_OPEN = false;   // the reader-attributes fold stays as the staff member left it while the card redraws
+
     const $ = id => document.getElementById(id);
     const COLORS = ['#3B1F14', '#5E7F57', '#B5533F', '#8A6A55', '#6F8A67', '#6B4A3A'];
     const TIER_AR = { confirmed: 'مؤكد', impression: 'انطباع', weak: 'ضعيف', conflict: 'متعارض', derived: 'محسوب', rejected: 'محذوف' };
@@ -493,96 +886,672 @@
     const when = s => s ? new Date(s).toLocaleString('ar-SA-u-ca-gregory', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
 
     // ---------------- tabs
+    const SETTINGS_TABS = {
+      trial: ['setTabTrial', 'settingsTrial'], sections: ['setTabSections', 'settingsSections'],
+      users: ['setTabUsers', 'settingsUsers'], ai: ['setTabAi', 'settingsAi'],
+      audit: ['setTabAudit', 'settingsAudit'], about: ['setTabAbout', 'settingsAbout']
+    };
+    let currentSettingsTab = 'trial';
+    function selectSettingsTab(which, focus = false) {
+      if (!SETTINGS_TABS[which]) which = 'trial';
+      currentSettingsTab = which;
+      Object.entries(SETTINGS_TABS).forEach(([key, [tabId, panelId]]) => {
+        const selected = key === which;
+        $(tabId).setAttribute('aria-selected', String(selected));
+        $(tabId).tabIndex = selected ? 0 : -1;
+        $(panelId).hidden = !selected;
+      });
+      if (which === 'trial') loadTrial();
+      if (which === 'sections') loadSections();
+      if (which === 'users') loadUsers();
+      if (which === 'ai') { loadLlm(); loadTestlog(); loadUsage(); }
+      if (which === 'audit') loadAudit();
+      if (which === 'about') loadVersion();
+      if (focus) $(SETTINGS_TABS[which][0]).focus();
+    }
+    Object.entries(SETTINGS_TABS).forEach(([key, [tabId]]) => {
+      $(tabId).addEventListener('click', () => selectSettingsTab(key));
+      $(tabId).addEventListener('keydown', e => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+        e.preventDefault();
+        const keys = Object.keys(SETTINGS_TABS), at = keys.indexOf(key);
+        const next = e.key === 'Home' ? 0 : e.key === 'End' ? keys.length - 1 :
+          (at + (e.key === 'ArrowLeft' ? 1 : -1) + keys.length) % keys.length;
+        selectSettingsTab(keys[next], true);
+      });
+    });
+
     function selectTab(which) {
-      const tabs = { books: ['tabBooks', 'booksView'], stats: ['tabStats', 'statsView'], import: ['tabImport', 'importView'], settings: ['tabSettings', 'settingsView'] };
+      const tabs = { books: ['tabBooks', 'booksView'], inbox: ['tabInbox', 'inboxView'], events: ['tabEvents', 'eventsView'], stats: ['tabStats', 'statsView'], import: ['tabImport', 'importView'], settings: ['tabSettings', 'settingsView'] };
       Object.entries(tabs).forEach(([key, [tab, view]]) => {
         $(tab).setAttribute('aria-selected', String(key === which)); $(view).hidden = key !== which;
       });
-      if (which === 'settings') { loadTrial(); loadSections(); loadLlm(); loadTestlog(); loadUsers(); loadUsage(); loadAudit(); }
-      if (which === 'import') loadHistory();
+      if (which === 'settings') selectSettingsTab(currentSettingsTab);
+      if (which === 'import') { loadHistory(); loadConfirmCount(); }
       if (which === 'stats') loadStats();
+      if (which === 'events') loadEvents();
+      if (which === 'inbox') loadInbox(); else loadInboxCount();
       if (which === 'books') loadCatalog();
     }
     $('tabBooks').addEventListener('click', () => selectTab('books'));
     $('tabImport').addEventListener('click', () => selectTab('import'));
     $('tabStats').addEventListener('click', () => selectTab('stats'));
+    $('tabInbox').addEventListener('click', () => selectTab('inbox'));
     $('tabSettings').addEventListener('click', () => selectTab('settings'));
+    $('tabEvents').addEventListener('click', () => selectTab('events'));
 
-    // ---------------- catalog list
+    // ---------------- «الفعاليات» (2026-10-08): add / edit / hide / delete; picture; optional book
+    const ev = { editing: null, book: null, keepImage: false };
+    const evNorm = s => String(s || '').replace(/[\u064B-\u0652\u0640]/g, '').replace(/[إأآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').toLowerCase();
+    const evDay = d => { try { return new Intl.DateTimeFormat('ar-SA-u-ca-gregory', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(d + 'T12:00:00')); } catch (e) { return d; } };
+    const evClock = t => { if (!t) return ''; const [h, m] = t.split(':').map(Number); const pm = h >= 12; const h12 = ((h + 11) % 12) + 1; return `${num(h12)}:${String(m).padStart(2, '0').replace(/\d/g, x => '٠١٢٣٤٥٦٧٨٩'[x])} ${pm ? 'م' : 'ص'}`; };
+    function evShowBook() {
+      const box = $('evBookPicked');
+      box.hidden = !ev.book; $('evBookQ').hidden = !!ev.book;
+      box.innerHTML = ev.book ? `<span>📖 ${esc(ev.book.title)}${ev.book.author ? ' — ' + esc(ev.book.author) : ''}</span><button type="button" class="btn secondary" id="evBookClear">تغيير</button>` : '';
+      if (ev.book) $('evBookClear').addEventListener('click', () => { ev.book = null; evShowBook(); $('evBookQ').focus(); });
+    }
+    $('evBookQ').addEventListener('input', async () => {
+      const q = evNorm($('evBookQ').value.trim()), list = $('evBookList');
+      if (q.length < 2) { list.hidden = true; return; }
+      if (!catalog.length) await loadCatalog();
+      const hits = catalog.filter(b => evNorm(b.title).includes(q) || evNorm(b.author).includes(q)).slice(0, 8);
+      list.innerHTML = hits.length ? hits.map(b => `<button type="button" data-book="${b.book_id}">${esc(b.title)}<span class="state"> — ${esc(b.author || '')}${b.quantity ? '' : ' · غير متوفر'}</span></button>`).join('')
+        : '<p class="state" style="margin:6px">ما لقينا كتابًا بهذا الاسم</p>';
+      list.hidden = false;
+      list.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+        const b = catalog.find(x => String(x.book_id) === btn.dataset.book);
+        ev.book = b ? { book_id: b.book_id, title: b.title, author: b.author } : null;
+        list.hidden = true; $('evBookQ').value = ''; evShowBook();
+      }));
+    });
+    function evReset() {
+      ev.editing = null; ev.book = null;
+      ['evTitle', 'evDesc', 'evDate', 'evTime', 'evEnd', 'evBookQ', 'evImage'].forEach(id => { $(id).value = ''; });
+      $('evBookList').hidden = true; $('evImageNow').hidden = true;
+      $('evFormTitle').textContent = 'فعالية جديدة'; $('evSave').textContent = 'حفظ الفعالية'; $('evCancel').hidden = true;
+      evShowBook();
+    }
+    $('evCancel').addEventListener('click', () => { evReset(); $('evState').textContent = ''; });
+    async function evSave() {
+      const st = $('evState');
+      const body = { title: $('evTitle').value.trim(), description: $('evDesc').value.trim(), event_date: $('evDate').value,
+                     event_time: $('evTime').value, end_time: $('evEnd').value, book_id: ev.book ? ev.book.book_id : null };
+      $('evSave').disabled = true; st.textContent = 'جاري الحفظ…';
+      try {
+        const res = await fetch(ev.editing ? `/api/admin/events/${ev.editing}` : '/api/admin/events',
+          { method: ev.editing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) { st.textContent = d.error || 'تعذر الحفظ'; return; }
+        const id = ev.editing || d.event_id, file = $('evImage').files[0];
+        if (file) {
+          st.textContent = 'جاري رفع الصورة…';
+          const form = new FormData(); form.append('file', file);
+          const r2 = await fetch(`/api/admin/events/${id}/image`, { method: 'POST', body: form });
+          const d2 = await r2.json().catch(() => ({}));
+          if (!r2.ok) { st.textContent = `انحفظت الفعالية، لكن الصورة ما انرفعت: ${d2.error || 'خطأ'}`; evReset(); loadEvents(); return; }
+        }
+        st.textContent = ev.editing ? 'تم حفظ التعديل' : 'تمت إضافة الفعالية';
+        evReset(); loadEvents();
+      } catch (e) { st.textContent = 'تعذر الحفظ (تأكد من الاتصال)'; }
+      finally { $('evSave').disabled = false; }
+    }
+    $('evSave').addEventListener('click', evSave);
+    let evRows = [];
+    async function loadEvents() {
+      const box = $('evList');
+      try {
+        const res = await fetch('/api/admin/events');
+        if (!res.ok) throw new Error(res.status);
+        evRows = (await res.json()).events || [];
+      } catch (e) { box.innerHTML = '<p class="state">تعذر تحميل الفعاليات</p>'; return; }
+      if (!evRows.length) { box.innerHTML = '<p class="state">ما فيه فعاليات للحين. أضف أول فعالية من النموذج أعلاه.</p>'; return; }
+      box.innerHTML = evRows.map(e => {
+        const status = e.past ? 'انتهت' : e.active ? 'تظهر للزوار' : 'مخفية';
+        const when = evDay(e.event_date) + (e.event_time ? ' · ' + evClock(e.event_time) + (e.end_time ? ' – ' + evClock(e.end_time) : '') : '');
+        return `<article class="ev-row${e.past || !e.active ? ' dim' : ''}">
+          ${e.image_url ? `<img src="${esc(e.image_url)}" alt="" loading="lazy" />` : '<span class="ev-noimg" aria-hidden="true">🗓</span>'}
+          <div class="ev-info"><strong>${esc(e.title)}</strong><span class="state">${esc(when)} · ${status}</span>
+            ${e.book ? `<span class="state">عن كتاب: ${esc(e.book.title)}</span>` : ''}
+            ${e.description ? `<p>${esc(e.description)}</p>` : ''}</div>
+          <div class="ev-actions">
+            <button type="button" class="btn secondary" data-act="edit" data-ev="${e.event_id}">تعديل</button>
+            ${e.past ? '' : `<button type="button" class="btn secondary" data-act="toggle" data-ev="${e.event_id}">${e.active ? 'إخفاء' : 'إظهار'}</button>`}
+            ${e.own_image ? `<button type="button" class="btn secondary" data-act="noimg" data-ev="${e.event_id}">حذف الصورة</button>` : ''}
+            <button type="button" class="btn secondary" data-act="del" data-ev="${e.event_id}">حذف</button>
+          </div></article>`;
+      }).join('');
+      box.querySelectorAll('button[data-act]').forEach(btn => btn.addEventListener('click', () => evAction(btn.dataset.act, Number(btn.dataset.ev))));
+    }
+    async function evAction(act, id) {
+      const e = evRows.find(x => x.event_id === id); if (!e) return;
+      const st = $('evState');
+      if (act === 'edit') {
+        ev.editing = id;
+        $('evTitle').value = e.title; $('evDesc').value = e.description || ''; $('evDate').value = e.event_date;
+        $('evTime').value = e.event_time || ''; $('evEnd').value = e.end_time || ''; $('evImage').value = '';
+        ev.book = e.book ? { book_id: e.book.book_id, title: e.book.title, author: e.book.author } : null; evShowBook();
+        $('evImageNow').hidden = !e.own_image; $('evImageNow').textContent = 'للفعالية صورة الآن؛ اختر صورة جديدة إذا تبغى تغيّرها.';
+        $('evFormTitle').textContent = 'تعديل الفعالية'; $('evSave').textContent = 'حفظ التعديل'; $('evCancel').hidden = false;
+        $('evTitle').focus(); window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (act === 'del' && !confirm(`حذف «${e.title}»؟`)) return;
+      let res;
+      try {
+        if (act === 'del') res = await fetch(`/api/admin/events/${id}`, { method: 'DELETE' });
+        else if (act === 'noimg') res = await fetch(`/api/admin/events/${id}/image`, { method: 'DELETE' });
+        else res = await fetch(`/api/admin/events/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: e.title, description: e.description, event_date: e.event_date, event_time: e.event_time,
+                                 end_time: e.end_time, book_id: e.book_id, active: !e.active }) });
+        const d = await res.json().catch(() => ({}));
+        st.textContent = res.ok ? { del: 'تم حذف الفعالية', noimg: 'تم حذف الصورة', toggle: e.active ? 'أُخفيت عن الزوار' : 'صارت تظهر للزوار' }[act] : (d.error || 'تعذر التنفيذ');
+        if (res.ok && ev.editing === id && act === 'del') evReset();
+        loadEvents();
+      } catch (err) { st.textContent = 'تعذر التنفيذ'; }
+    }
+
+    // ---------------- «المكتبة»: books (cards / list / shelf, grouping, sorting, chip filters) + authors
+    const store = { get(k, d) { try { return localStorage.getItem('lk.lib.' + k) || d; } catch (e) { return d; } },
+                    set(k, v) { try { localStorage.setItem('lk.lib.' + k, v); } catch (e) {} } };
+    const PAGE = 60;
+    const RS_AR = { matched: 'مبحوث', needs_confirmation: 'يحتاج تأكيد هوية', not_found: 'غير موجود بالمصادر', not_a_book: 'ليس كتابًا', '': 'غير مبحوث' };
+    const ROLE_AR = { author: 'مؤلف', translator: 'مترجم', illustrator: 'رسّام', editor: 'محرّر' };
+    // Author style values shown in Arabic on the author sheet (2026-10-01)
+    const STYLE_AR = { novel: 'رواية', short_stories: 'قصص', biography: 'سيرة', history: 'تاريخ', thought: 'فكر', psychology: 'علم نفس', self_dev: 'تطوير ذات', science: 'علوم', poetry: 'شعر', play: 'مسرح', travel: 'رحلات', religious: 'دين', children: 'أطفال', young_adult: 'يافعين', business: 'اقتصاد وأعمال', comics: 'قصص مصورة', essays: 'مقالات ونصوص', criticism: 'نقد أدبي', arts: 'فنون وسينما', sociology: 'علم اجتماع', other: 'أخرى',
+      comforting: 'مريح', warm: 'دافئ', funny: 'مضحك', suspenseful: 'مشوّق', mysterious: 'غامض', inspiring: 'ملهم', contemplative: 'تأملي', romantic: 'رومانسي', tense: 'متوتر', dark: 'قاتم', sad: 'حزين', uplifting: 'مبهج',
+      fast: 'سريع', medium: 'متوسط', slow: 'بطيء', mixed: 'متنوع', short: 'قصير', long: 'طويل', very_long: 'طويل جدًا', adult: 'كبار', mixed_audience: 'متنوع' };
+    const AUTHOR_STATUS_AR = { researched: 'مكتمل البحث', thin: 'بحث جزئي', needs_sources: 'يحتاج مصادر', pending: 'بانتظار البحث' };
+    const styleAr = v => STYLE_AR[v] || v;
+    const sourceLabel = u => { try { const h = new URL(u).hostname.replace(/^www\./, ''); return h.includes('wikidata') ? 'ويكي بيانات' : h.includes('abjjad') ? 'أبجد' : h; } catch (e) { return u; } };
+    const lib = { view: store.get('view', 'cards'), aview: store.get('aview', 'cards'), chips: new Set(), achips: new Set(),
+                  shown: {}, collapsed: new Set(), pane: ['authors', 'translators', 'origin'].includes(store.get('pane', 'books')) ? store.get('pane', 'books') : 'books' };
+    let authorsList = null, peopleShown = null;
+    // «المؤلفون» and «المترجمون» (2026-10-03) share one pane; a person who only translates is listed under المترجمون only
+    function onPeople() { return lib.pane === 'authors' || lib.pane === 'translators'; }
+    const inStock = b => b.active && b.quantity > 0;
+    const langGroup = b => (b.language && b.language !== 'ar') ? 'كتب بلغة أجنبية'
+      : !b.original_language ? 'لغة العمل غير محددة' : b.original_language === 'ar' ? 'عمل عربي أصلي'
+      : String(b.origin || 'مترجم').split('،')[0];
+    const completeness = b => (b.cover_url ? 1 : 0) + (b.has_summary ? 1 : 0) + (b.research_status === 'matched' ? 2 : 0)
+      + (b.genre ? 1 : 0) + Math.min(3, b.counts.confirmed + b.counts.impression * .5);
+    const BOOK_CHIPS = [
+      ['البحث', [['matched', 'مبحوث', b => b.research_status === 'matched'], ['needs_confirmation', 'يحتاج تأكيد', b => b.research_status === 'needs_confirmation'],
+                 ['unresearched', 'غير مبحوث', b => !b.research_status], ['review', 'تحتاج مراجعة', b => b.status === 'needs_review']]],
+      ['المخزون', [['instock', 'متوفر', inStock], ['out', 'نافد', b => b.active && !(b.quantity > 0)], ['off', 'موقوف', b => !b.active]]],
+      ['البيانات', [['nocover', 'بدون غلاف', b => !b.cover_url], ['nosummary', 'بدون نبذة', b => !b.has_summary],
+                   ['confirmed', 'صفات مؤكدة', b => b.counts.confirmed > 0], ['conflict', 'صفات اختلف فيها القرّاء', b => b.counts.conflict > 0],
+                   ['noreviews', 'بدون مراجعات', b => !b.has_reviews]]],
+      ['اللغة', [['arabic', 'عربي أصلي', b => b.original_language === 'ar' && b.language === 'ar'],
+                ['translated', 'مترجم', b => b.language === 'ar' && b.original_language && b.original_language !== 'ar'],
+                ['foreign', 'بلغة أجنبية', b => b.language && b.language !== 'ar']]]
+    ];
+    const CHIP_FN = Object.fromEntries(BOOK_CHIPS.flatMap(([g, list]) => list.map(([k, , fn]) => [k, [g, fn]])));
+    const GROUPS = {
+      genre: b => b.genre || 'بدون تصنيف', publisher: b => b.publisher || 'دار غير معروفة',
+      research: b => RS_AR[b.research_status || ''] || b.research_status,
+      stock: b => !b.active ? 'موقوف عن الظهور' : b.quantity > 0 ? 'متوفر' : 'نافد', lang: langGroup
+    };
+    const GROUP_ORDER = { research: ['مبحوث', 'يحتاج تأكيد هوية', 'غير موجود بالمصادر', 'ليس كتابًا', 'غير مبحوث'],
+                          stock: ['متوفر', 'نافد', 'موقوف عن الظهور'] };
+    const SORTS = {
+      added: (a, b) => b.book_id - a.book_id,
+      researched: (a, b) => String(b.researched_at || '').localeCompare(String(a.researched_at || '')) || b.book_id - a.book_id,
+      complete: (a, b) => completeness(b) - completeness(a) || a.title.localeCompare(b.title, 'ar'),
+      title: (a, b) => String(a.title).localeCompare(String(b.title), 'ar'),
+      author: (a, b) => String(a.author || '').localeCompare(String(b.author || ''), 'ar') || String(a.title).localeCompare(String(b.title), 'ar'),
+      qty: (a, b) => (b.quantity || 0) - (a.quantity || 0), price: (a, b) => (b.price || 0) - (a.price || 0),
+      pages: (a, b) => (b.page_count || 0) - (a.page_count || 0)
+    };
+
+    function selectLibPane(which, focus = false, load = true) {
+      lib.pane = which; store.set('pane', which);
+      if (!LIB_PANES.some(([k]) => k === which)) which = 'books';
+      lib.pane = which;
+      LIB_PANES.forEach(([k, t]) => { $(t).setAttribute('aria-selected', String(k === which)); $(t).tabIndex = k === which ? 0 : -1; });
+      const [, curTab, curPane] = LIB_PANES.find(([k]) => k === which);
+      new Set(LIB_PANES.map(([, , p]) => p)).forEach(p => { $(p).hidden = p !== curPane; });
+      $(curPane).setAttribute('aria-labelledby', curTab);
+      if (onPeople()) {
+        if (peopleShown !== which) { peopleShown = which; lib.achips.clear(); lib.shown.__authors = 0; $('authorSearch').value = ''; }
+        renderAuthors();
+        if (load) loadAuthors();
+      }
+      if (which === 'origin') renderOrigin();
+      if (which === 'deleted' && load) { delNote = ''; loadDeleted(); }
+      if (focus) $(LIB_PANES.find(([k]) => k === which)[1]).focus();
+    }
+    const LIB_PANES = [['books', 'libTabBooks', 'libBooks'], ['authors', 'libTabAuthors', 'libAuthors'], ['translators', 'libTabTranslators', 'libAuthors'], ['origin', 'libTabOrigin', 'libOrigin'], ['deleted', 'libTabDeleted', 'libDeleted']];
+    LIB_PANES.forEach(([k, t]) => {
+      $(t).addEventListener('click', () => selectLibPane(k));
+      $(t).addEventListener('keydown', e => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+        e.preventDefault();
+        const i = LIB_PANES.findIndex(([x]) => x === lib.pane), n = LIB_PANES.length;
+        const j = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : (i + (e.key === 'ArrowLeft' ? 1 : n - 1)) % n;  // RTL: left = next
+        selectLibPane(LIB_PANES[j][0], true);
+      });
+    });
+
+    // ---------------- «أصل الكتاب» (2026-10-04): staff pick Arabic original / translated for books with no original language
+    const ORIGIN_LANGS = [['en', 'الإنجليزية'], ['fr', 'الفرنسية'], ['es', 'الإسبانية'], ['de', 'الألمانية'], ['ru', 'الروسية'], ['it', 'الإيطالية'],
+      ['pt', 'البرتغالية'], ['ja', 'اليابانية'], ['zh', 'الصينية'], ['ko', 'الكورية'], ['tr', 'التركية'], ['fa', 'الفارسية'], ['ur', 'الأردية'],
+      ['hi', 'الهندية'], ['sv', 'السويدية'], ['no', 'النرويجية'], ['da', 'الدنماركية'], ['nl', 'الهولندية'], ['pl', 'البولندية'], ['cs', 'التشيكية'],
+      ['hu', 'المجرية'], ['el', 'اليونانية'], ['grc', 'اليونانية القديمة'], ['he', 'العبرية'], ['la', 'اللاتينية'], ['bs', 'البوسنية'],
+      ['other', 'مترجم، اللغة غير معروفة']];
+    const originPending = b => b.active && (b.language || 'ar') === 'ar' && !b.original_language && b.research_status !== 'not_a_book';
+    let originNote = null;   // {text, id} of the last choice, for «تراجع»
+    function renderOrigin() {
+      const all = (catalog || []).filter(originPending);
+      $('libNOrigin').textContent = all.length ? num(all.length) : '';
+      if (lib.pane !== 'origin') return;
+      const q = $('originSearch').value.trim().toLowerCase();
+      const list = all.filter(b => !q || [b.title, b.author, b.publisher].some(x => String(x || '').toLowerCase().includes(q)))
+        .sort((a, b) => (inStock(b) - inStock(a)) || String(a.title).localeCompare(String(b.title), 'ar'));
+      const lim = lib.shown.__origin || PAGE * 2;
+      $('originCount').innerHTML = (originNote ? `${esc(originNote.text)} <button type="button" class="linkbtn" id="originUndo">تراجع</button> · ` : '')
+        + (all.length ? `${num(list.length)} من ${num(all.length)} كتاب بانتظار الاختيار` : 'ما فيه كتب بانتظار تحديد الأصل.');
+      $('originList').innerHTML = list.slice(0, lim).map(b => `<div class="del-row org-row" data-oid="${b.book_id}">
+          <div><button type="button" class="ttl" data-bid="${b.book_id}">${esc(b.title)}</button>
+            <span>${esc(b.author || '')}${b.publisher ? ' · ' + esc(b.publisher) : ''}${b.translated ? ' · له مترجم مسجّل' : ''}${inStock(b) ? '' : ' · غير متوفر الآن'}</span></div>
+          <div class="org-act"><button type="button" class="mini ok" data-org="ar">عربي الأصل</button>
+            <select data-orgsel aria-label="مترجم عن أي لغة: ${esc(b.title)}"><option value="">مترجم عن…</option>${ORIGIN_LANGS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></div></div>`).join('')
+        + (list.length > lim ? `<button type="button" class="more" id="moreOrigin">عرض المزيد (باقي ${num(list.length - lim)})</button>` : '');
+      $('originList').querySelectorAll('[data-bid]').forEach(el => el.addEventListener('click', () => openCard(Number(el.dataset.bid))));
+      $('originList').querySelectorAll('[data-org]').forEach(el => el.addEventListener('click', () => setOrigin(Number(el.closest('[data-oid]').dataset.oid), 'ar', el)));
+      $('originList').querySelectorAll('[data-orgsel]').forEach(el => el.addEventListener('change', () => { if (el.value) setOrigin(Number(el.closest('[data-oid]').dataset.oid), el.value, el); }));
+      if ($('moreOrigin')) $('moreOrigin').addEventListener('click', () => { lib.shown.__origin = lim + PAGE * 2; renderOrigin(); });
+      if ($('originUndo')) $('originUndo').addEventListener('click', () => setOrigin(originNote.id, '', $('originUndo')));
+    }
+    async function setOrigin(id, value, el) {
+      const b = (catalog || []).find(x => x.book_id === id);
+      if (!b) return;
+      el.disabled = true;
+      try {
+        const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ original_language: value }) });
+        if (!res.ok) throw new Error();
+        b.original_language = value || null;
+        const lang = (ORIGIN_LANGS.find(([v]) => v === value) || [])[1];
+        originNote = value ? { id, text: `«${b.title}»: ${value === 'ar' ? 'عربي الأصل' : value === 'other' ? 'مترجم (اللغة غير معروفة)' : 'مترجم عن ' + lang}.` } : null;
+        renderStats(); renderGrid(); renderOrigin();
+      } catch (e) { el.disabled = false; if (el.tagName === 'SELECT') el.value = ''; $('originCount').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
+    }
+    $('originSearch').addEventListener('input', () => { lib.shown.__origin = 0; renderOrigin(); });
+
+    // ---------------- deleted products («ليس كتابًا»), restorable
+    let deletedList = null, delNote = '';
+    async function loadDeleted(quiet = false) {
+      try {
+        const res = await fetch('/api/admin/books/deleted');
+        if (!res.ok) throw new Error(res.status);
+        deletedList = await res.json();
+        $('libNDeleted').textContent = deletedList.length ? num(deletedList.length) : '';
+        if (!quiet) renderDeleted();
+      } catch (err) { if (!quiet) $('delCount').textContent = 'تعذر تحميل المحذوفة.'; }
+    }
+    function renderDeleted(msg) {
+      const list = deletedList || [];
+      $('delCount').textContent = msg || delNote || (list.length ? `${num(list.length)} منتج محذوف` : 'ما فيه شيء محذوف.');
+      $('delList').innerHTML = list.map(d => `<div class="del-row">
+          <div><b>${esc(d.title)}</b>
+            <span>${esc(d.reason_label)} · حذفه ${esc(d.deleted_by || '—')} · ${date(d.deleted_at)}${d.barcode ? ' · باركود <bdi>' + esc(d.barcode) + '</bdi>' : ''}${d.rewaa_sku ? ' · رمز رواء <bdi>' + esc(d.rewaa_sku) + '</bdi>' : ''}</span></div>
+          <button type="button" class="btn secondary" data-restore="${d.deletion_id}">استرجاع</button></div>`).join('');
+      $('delList').querySelectorAll('[data-restore]').forEach(b => b.addEventListener('click', () => restoreDeleted(Number(b.dataset.restore), b)));
+    }
+    async function restoreDeleted(id, btn) {
+      btn.disabled = true; btn.textContent = 'جاري الاسترجاع…';
+      try {
+        const res = await fetch(`/api/admin/books/deleted/${id}/restore`, { method: 'POST' });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(d.error || 'تعذر الاسترجاع');
+        delNote = `رجع «${d.title}» للكتب.`; await loadDeleted(); loadCatalog();
+      } catch (e) { btn.disabled = false; btn.textContent = 'استرجاع'; $('delCount').textContent = e.message || 'تعذر الاسترجاع'; }
+    }
+
     async function loadCatalog() {
       try {
         const res = await fetch('/api/admin/catalog');
         if (!res.ok) throw new Error(res.status);
         catalog = await res.json();
-        const genres = [...new Set(catalog.map(b => b.genre).filter(Boolean))].sort();
-        $('genreFilter').innerHTML = '<option value="">كل التصنيفات</option>' + genres.map(g => `<option>${esc(g)}</option>`).join('');
-        renderStats(); renderGrid();
+        const byCount = key => { const c = {}; catalog.forEach(b => { if (b[key]) c[b[key]] = (c[b[key]] || 0) + 1; });
+          return Object.entries(c).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ar')); };
+        const keepG = $('genreFilter').value, keepP = $('publisherFilter').value;
+        $('genreFilter').innerHTML = '<option value="">الكل</option>' + byCount('genre').map(([g, n]) => `<option value="${esc(g)}">${esc(g)} (${num(n)})</option>`).join('');
+        $('publisherFilter').innerHTML = '<option value="">الكل</option>' + byCount('publisher').map(([g, n]) => `<option value="${esc(g)}">${esc(g)} (${num(n)})</option>`).join('');
+        $('genreFilter').value = keepG; $('publisherFilter').value = keepP;
+        $('libNBooks').textContent = num(catalog.length);
+        renderStats(); renderGrid(); renderOrigin();
+        loadAuthors(!onPeople());
+        loadDeleted(lib.pane !== 'deleted');
       } catch (err) { $('count').textContent = 'تعذر تحميل الكتب.'; }
     }
 
     function renderStats() {
       const s = [
-        ['all', catalog.length, 'إجمالي الكتب'],
-        ['visible', catalog.filter(b => b.active && b.quantity > 0).length, 'ظاهرة للزوار'],
-        ['confirmed', catalog.filter(b => b.counts.confirmed > 0).length, 'فيها صفات مؤكدة'],
-        ['review', catalog.filter(b => b.status === 'needs_review').length, 'تحتاج مراجعة'],
-        ['conflict', catalog.filter(b => b.counts.conflict > 0).length, 'فيها تعارض', true],
-        ['noreviews', catalog.filter(b => !b.has_reviews).length, 'بدون مراجعات', true],
-        ['nocover', catalog.filter(b => b.active && b.quantity > 0 && !b.cover_url).length, 'متوفرة بدون غلاف', true],
+        ['', catalog.length, 'إجمالي الكتب'],
+        ['instock', catalog.filter(inStock).length, 'ظاهرة للزوار'],
+        ['matched', catalog.filter(b => b.research_status === 'matched').length, 'مبحوثة'],
+        ['unresearched', catalog.filter(b => !b.research_status).length, 'غير مبحوثة'],
+        ['needs_confirmation', catalog.filter(b => b.research_status === 'needs_confirmation').length, 'تحتاج تأكيد هوية', true],
+        ['conflict', catalog.filter(b => b.counts.conflict > 0).length, 'صفات اختلف فيها القرّاء', true],
+        ['nocover', catalog.filter(b => inStock(b) && !b.cover_url).length, 'متوفرة بدون غلاف', true],
       ];
+      const one = [...lib.chips].filter(k => k !== 'instock');
       $('stats').innerHTML = s.map(([key, n, label, warn]) =>
-        `<button type="button" class="stat ${warn && n ? 'warn' : ''}" data-filter="${key}"><b>${num(n)}</b><span>${label}</span></button>`).join('');
+        `<button type="button" class="stat ${warn && n ? 'warn' : ''}" data-chip="${key}" aria-pressed="${key ? (key === 'instock' ? lib.chips.size === 1 && lib.chips.has(key) : one.length === 1 && one[0] === key) : !lib.chips.size}"><b>${num(n)}</b><span>${label}</span></button>`).join('');
       $('stats').querySelectorAll('.stat').forEach(btn => btn.addEventListener('click', () => {
-        const map = { all: 'all', visible: 'all', confirmed: 'confirmed', review: 'all', conflict: 'conflict', noreviews: 'noreviews', nocover: 'nocover' };
-        $('viewFilter').value = map[btn.dataset.filter]; renderGrid();
+        lib.chips.clear();
+        if (btn.dataset.chip) lib.chips.add(btn.dataset.chip);
+        if (btn.dataset.chip === 'nocover') lib.chips.add('instock');
+        lib.shown = {}; renderStats(); renderGrid();
       }));
     }
 
-    function renderGrid() {
+    function filteredBooks() {
       const q = $('search').value.trim().toLowerCase();
-      const g = $('genreFilter').value, v = $('viewFilter').value;
-      const list = catalog.filter(b => {
-        if (q && ![b.title, b.author, b.shelf_location].some(x => String(x || '').toLowerCase().includes(q))) return false;
+      const g = $('genreFilter').value, p = $('publisherFilter').value;
+      const active = {};
+      lib.chips.forEach(k => { if (CHIP_FN[k]) (active[CHIP_FN[k][0]] ||= []).push(CHIP_FN[k][1]); });
+      return catalog.filter(b => {
+        if (q && ![b.title, b.author, b.publisher, b.shelf_location, b.barcode].some(x => String(x || '').toLowerCase().includes(q))) return false;
         if (g && b.genre !== g) return false;
-        if (v === 'confirmed') return b.counts.confirmed > 0;
-        if (v === 'conflict') return b.counts.conflict > 0;
-        if (v === 'noreviews') return !b.has_reviews;
-        if (v === 'nocover') return !b.cover_url;
-        if (v === 'nosummary') return !b.has_summary;
-        if (v === 'off') return !b.active;
-        if (v === 'out') return !(b.quantity > 0);
-        return true;
+        if (p && b.publisher !== p) return false;
+        // chips in the same group widen (OR); different groups narrow (AND)
+        return Object.values(active).every(fns => fns.some(fn => fn(b)));
       });
-      $('count').textContent = `يعرض ${num(list.length)} من ${num(catalog.length)} كتاب`;
-      $('grid').innerHTML = list.map(b => {
-        const off = !b.active || !(b.quantity > 0);
-        const chips = b.highlights.map(h => `<span class="chip ${h.tier}" title="${TIER_AR[h.tier]} · ${Math.round(h.confidence * 100)}٪">${esc(h.label)}</span>`).join('');
-        return `<button type="button" class="book ${off ? 'off' : ''}" data-id="${b.book_id}" aria-label="فتح بطاقة ${esc(b.title)}">
-          ${cover(b)}
-          <span>
-            <span class="t">${esc(b.title)}</span>
-            <span class="author">${esc(b.author)}</span>
-            <span class="meta">
-              <span class="m">${esc(b.genre || '—')}</span>
-              <span class="m">${b.page_count ? num(b.page_count) + ' ص' : '؟ ص'}</span>
-              ${b.shelf_location ? `<span class="m">${esc(b.shelf_location)}</span>` : ''}
-              <span class="m">${num(b.quantity || 0)} نسخ · ${num(b.price || 0)} ر.س</span>
-              ${!b.active ? '<span class="status off">موقوف</span>' : (!(b.quantity > 0) ? '<span class="status off">نافد</span>' : '')}
-              <span class="status ${esc(b.status)}">${esc(b.status_label)}</span>
-              ${b.source === 'rewaa' ? '<span class="chip rewaa">من رواء</span>' : ''}
-            </span>
-            <span class="chips">${chips || (b.has_reviews ? '<span class="chip weak">لا صفات مزاج/لغة واضحة</span>' : '<span class="empty-note">ما لقينا مراجعات لهذا الكتاب</span>')}</span>
-            <span class="foot">${num(b.counts.confirmed)} مؤكدة · ${num(b.counts.impression)} انطباع · ${num(b.counts.conflict)} متعارضة · ${num(b.counts.weak)} ضعيفة</span>
-          </span>
-        </button>`;
-      }).join('') || '<p class="count">ما فيه كتب مطابقة.</p>';
-      $('grid').querySelectorAll('.book').forEach(el => el.addEventListener('click', () => openCard(Number(el.dataset.id))));
     }
-    ['search', 'genreFilter', 'viewFilter'].forEach(id => $(id).addEventListener(id === 'search' ? 'input' : 'change', renderGrid));
+
+    function renderChips() {
+      $('bookChips').innerHTML = BOOK_CHIPS.map(([group, list]) =>
+        `<div class="fgroup" role="group" aria-label="${group}"><b>${group}</b>${list.map(([k, label, fn]) =>
+          `<button type="button" class="fchip" data-k="${k}" aria-pressed="${lib.chips.has(k)}">${label} <small>${num(catalog.filter(fn).length)}</small></button>`).join('')}</div>`).join('');
+      $('bookChips').querySelectorAll('.fchip').forEach(btn => btn.addEventListener('click', () => {
+        const k = btn.dataset.k; lib.chips.has(k) ? lib.chips.delete(k) : lib.chips.add(k);
+        lib.shown = {}; renderStats(); renderGrid();
+      }));
+    }
+
+    const rsBadge = b => `<span class="rs ${esc(b.research_status || '')}">${esc(RS_AR[b.research_status || ''] || b.research_status)}</span>${b.confirmation_answered ? ' <span class="okflag">ردّ الموظف</span>' : ''}`;
+    function bookCard(b) {
+      const off = !inStock(b);
+      const chips = b.highlights.map(h => `<span class="chip ${h.tier}" title="${TIER_AR[h.tier]} · ${Math.round(h.confidence * 100)}٪">${esc(h.label)}</span>`).join('');
+      return `<button type="button" class="book ${off ? 'off' : ''}" data-bid="${b.book_id}" aria-label="فتح بطاقة ${esc(b.title)}">
+        ${cover(b)}
+        <span>
+          <span class="t">${esc(b.title)}</span>
+          <span class="author">${esc(b.author)}${b.publisher ? `، <span class="pub">${esc(b.publisher)}</span>` : ''}</span>
+          <span class="meta">
+            <span class="m">${esc(b.genre || 'بدون تصنيف')}</span>
+            ${b.page_count ? `<span class="m">${num(b.page_count)} ص</span>` : ''}
+            ${b.shelf_location ? `<span class="m">${esc(b.shelf_location)}</span>` : ''}
+            <span class="m">${num(b.quantity || 0)} نسخ، ${num(b.price || 0)} ر.س</span>
+            ${!b.active ? '<span class="status off">موقوف</span>' : (!(b.quantity > 0) ? '<span class="status off">نافد</span>' : '')}
+            ${rsBadge(b)}
+            ${b.status !== 'pending' ? `<span class="status ${esc(b.status)}">${esc(b.status_label)}</span>` : ''}
+          </span>
+          <span class="chips">${chips || (b.has_reviews ? '<span class="chip weak">لا صفات مزاج/لغة واضحة</span>' : '')}</span>
+          ${b.has_reviews ? `<span class="foot">${num(b.counts.confirmed)} مؤكدة، ${num(b.counts.impression)} انطباع، ${num(b.counts.conflict)} متعارضة، ${num(b.counts.weak)} ضعيفة</span>` : ''}
+        </span>
+      </button>`;
+    }
+    function bookRow(b) {
+      return `<tr class="${inStock(b) ? '' : 'off'}" data-bid="${b.book_id}">
+        <td>${cover(b)}</td>
+        <td><button type="button" class="ttl" data-bid="${b.book_id}">${esc(b.title)}</button><span class="sub">${esc(b.author)}</span></td>
+        <td class="hide-sm">${esc(b.genre || '—')}</td>
+        <td class="hide-sm">${esc(b.publisher || '—')}</td>
+        <td class="num">${num(b.quantity || 0)}${!b.active ? ' <span class="status off">موقوف</span>' : ''}</td>
+        <td class="num hide-sm">${num(b.price || 0)}</td>
+        <td>${rsBadge(b)}</td>
+        <td class="hide-sm"><span class="flags"><span class="flag ${b.cover_url ? 'on' : ''}" title="الغلاف">غ</span><span class="flag ${b.has_summary ? 'on' : ''}" title="النبذة">ن</span><span class="flag ${b.counts.confirmed ? 'on' : ''}" title="صفات مؤكدة">ص</span></span></td>
+      </tr>`;
+    }
+    function bookSpine(b) {
+      const face = b.cover_url ? `<img src="${esc(b.cover_url)}" alt="" loading="lazy" />`
+        : `<span class="ph"><b>${esc(b.title)}</b><small>${esc(b.author && b.author !== 'غير معروف' ? b.author : (b.publisher || ''))}</small></span>`;
+      return `<button type="button" class="spine ${inStock(b) ? '' : 'off'}" data-bid="${b.book_id}" aria-label="فتح بطاقة ${esc(b.title)}">
+        <span class="face" style="--c:${COLORS[b.book_id % COLORS.length]}">${face}${!b.active ? '<span class="tag">موقوف</span>' : !(b.quantity > 0) ? '<span class="tag">نافد</span>' : ''}</span>
+        <span class="st">${esc(b.title)}</span><span class="sa">${esc(b.author)}</span>
+      </button>`;
+    }
+    function renderItems(list) {
+      if (lib.view === 'list') return `<div class="table-scroll"><table class="booklist"><thead><tr><th><span class="sr">الغلاف</span></th><th>الكتاب</th><th class="hide-sm">التصنيف</th><th class="hide-sm">الدار</th><th>الكمية</th><th class="hide-sm">السعر</th><th>البحث</th><th class="hide-sm">البيانات</th></tr></thead><tbody>${list.map(bookRow).join('')}</tbody></table></div>`;
+      if (lib.view === 'shelf') return `<div class="shelf">${list.map(bookSpine).join('')}</div>`;
+      return `<div class="grid">${list.map(bookCard).join('')}</div>`;
+    }
+
+    function renderGrid() {
+      renderChips();
+      const list = filteredBooks().sort(SORTS[$('sortBy').value] || SORTS.added);
+      const filtered = lib.chips.size || $('search').value.trim() || $('genreFilter').value || $('publisherFilter').value;
+      $('clearBookFilters').hidden = !filtered;
+      $('count').textContent = `يعرض ${num(list.length)} من ${num(catalog.length)} كتاب`;
+      document.querySelectorAll('.viewseg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === lib.view)));
+      const gkey = $('groupBy').value;
+      let groups = [['', list]];
+      if (gkey) {
+        const m = new Map();
+        list.forEach(b => { const k = GROUPS[gkey](b); if (!m.has(k)) m.set(k, []); m.get(k).push(b); });
+        const order = GROUP_ORDER[gkey];
+        groups = [...m.entries()].sort((a, b) => order ? order.indexOf(a[0]) - order.indexOf(b[0]) : b[1].length - a[1].length || a[0].localeCompare(b[0], 'ar'));
+      }
+      $('grid').innerHTML = !list.length ? '<p class="empty-note">ما فيه كتب مطابقة. جرّب تمسح بعض الفلاتر.</p>' : groups.map(([name, items]) => {
+        const lim = lib.shown[name] || PAGE, open = !lib.collapsed.has(gkey + ':' + name);
+        const body = open ? renderItems(items.slice(0, lim)) + (items.length > lim ? `<button type="button" class="more" data-g="${esc(name)}">عرض المزيد (باقي ${num(items.length - lim)})</button>` : '') : '';
+        return gkey ? `<section class="grp"><h3 class="grp-h"><button type="button" aria-expanded="${open}" data-g="${esc(name)}">${esc(name)} <span class="n">${num(items.length)}</span></button></h3>${body}</section>` : body;
+      }).join('');
+      $('grid').querySelectorAll('[data-bid]').forEach(el => el.addEventListener('click', e => { e.stopPropagation(); openCard(Number(el.dataset.bid)); }));
+      $('grid').querySelectorAll('.more').forEach(el => el.addEventListener('click', () => { lib.shown[el.dataset.g] = (lib.shown[el.dataset.g] || PAGE) + PAGE * 2; renderGrid(); }));
+      $('grid').querySelectorAll('.grp-h button').forEach(el => el.addEventListener('click', () => {
+        const k = gkey + ':' + el.dataset.g; lib.collapsed.has(k) ? lib.collapsed.delete(k) : lib.collapsed.add(k); renderGrid();
+      }));
+    }
+    const resetBooks = () => { lib.shown = {}; renderStats(); renderGrid(); };
+    $('search').addEventListener('input', resetBooks);
+    ['genreFilter', 'publisherFilter', 'sortBy', 'groupBy'].forEach(id => $(id).addEventListener('change', () => {
+      if (id === 'sortBy' || id === 'groupBy') store.set(id, $(id).value);
+      resetBooks();
+    }));
+    $('sortBy').value = store.get('sortBy', 'complete'); if (!$('sortBy').value) $('sortBy').value = 'complete';
+    $('groupBy').value = store.get('groupBy', ''); if ($('groupBy').selectedIndex < 0) $('groupBy').value = '';
+    document.querySelectorAll('.viewseg button').forEach(b => b.addEventListener('click', () => { lib.view = b.dataset.view; store.set('view', lib.view); renderGrid(); }));
+    $('clearBookFilters').addEventListener('click', () => {
+      lib.chips.clear(); $('search').value = ''; $('genreFilter').value = ''; $('publisherFilter').value = ''; resetBooks();
+    });
+    const setHdr = () => document.documentElement.style.setProperty('--hdr', (document.querySelector('header')?.offsetHeight || 68) + 'px');
+    setHdr(); window.addEventListener('resize', setHdr);
+
+    // ---------------- authors (list, detail sheet, simple edits, merging a duplicate spelling)
+    const PEOPLE = {
+      authors: { keep: a => !a.roles.translator || Object.keys(a.roles).length > 1, books: a => a.books, stock: a => a.in_stock, researched: a => a.researched,
+                 search: 'ابحث باسم المؤلف (عربي أو لاتيني)…', of: 'المؤلفين', unit: 'اسم' },
+      translators: { keep: a => a.roles.translator, books: a => a.roles.translator || 0, stock: a => (a.role_stock || {}).translator ?? a.in_stock,
+                     researched: a => (a.role_researched || {}).translator ?? a.researched,
+                     search: 'ابحث باسم المترجم (عربي أو لاتيني)…', of: 'المترجمين', unit: 'مترجم' }
+    };
+    const ppl = () => PEOPLE[lib.pane === 'translators' ? 'translators' : 'authors'];
+    const AUTHOR_CHIPS = [
+      ['الدور', [['author', 'مؤلف', a => a.roles.author], ['translator', 'مترجم', a => a.roles.translator],
+                ['illustrator', 'رسّام', a => a.roles.illustrator], ['editor', 'محرّر', a => a.roles.editor]]],
+      ['الحالة', [['instock', 'لهم كتب متوفرة', a => ppl().stock(a) > 0], ['styled', 'لهم أسلوب محسوب', a => a.style],
+                 ['many', 'أكثر من كتاب', a => ppl().books(a) > 1], ['dups', 'تهجئة ثانية محتملة', a => a.duplicates.length], ['verified', 'مؤكد من الموظف', a => a.verified]]]
+    ];
+    const ACHIP_FN = Object.fromEntries(AUTHOR_CHIPS.flatMap(([g, list]) => list.map(([k, , fn]) => [k, [g, fn]])));
+    const ASORTS = {
+      books: (a, b) => ppl().books(b) - ppl().books(a) || a.name.localeCompare(b.name, 'ar'), stock: (a, b) => ppl().stock(b) - ppl().stock(a) || ppl().books(b) - ppl().books(a),
+      researched: (a, b) => ppl().researched(b) - ppl().researched(a) || ppl().books(b) - ppl().books(a), name: (a, b) => a.name.localeCompare(b.name, 'ar'),
+      recent: (a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || ''))
+    };
+    const initial = n => [...String(n || '؟').replace(/^ال(?=\S{2})/, '')][0];
+    const styleLine = s => s ? [...(s.subgenres || []), ...(s.moods || []), ...(s.formats || [])].slice(0, 4).join(' · ') : '';
+    const bookWord = n => n === 1 ? 'كتاب' : n === 2 ? 'كتابان' : n <= 10 ? 'كتب' : 'كتابًا';
+
+    async function loadAuthors(quiet = false) {
+      try {
+        const res = await fetch('/api/admin/authors');
+        if (!res.ok) throw new Error(res.status);
+        authorsList = await res.json();
+        $('libNAuthors').textContent = num(authorsList.filter(PEOPLE.authors.keep).length);
+        $('libNTranslators').textContent = num(authorsList.filter(PEOPLE.translators.keep).length);
+        if (!quiet) renderAuthors();
+      } catch (err) { if (!quiet) $('authorCount').textContent = 'تعذر تحميل الأسماء.'; }
+    }
+    function renderAuthors() {
+      if (!authorsList) return;
+      const P = ppl(), tr = lib.pane === 'translators';
+      const all = authorsList.filter(P.keep);
+      const chipGroups = AUTHOR_CHIPS.map(([g, list]) => [g, list.filter(([k]) => !(tr && k === 'translator')).map(([k, label, fn]) => [k, tr && k === 'author' ? 'مؤلف أيضًا' : !tr && k === 'translator' ? 'مترجم أيضًا' : label, fn])]);
+      $('authorSearch').placeholder = P.search; $('authorSearch').setAttribute('aria-label', 'بحث في ' + P.of);
+      $('authorStats').setAttribute('aria-label', 'ملخص ' + P.of); $('authorChips').setAttribute('aria-label', 'تصفية ' + P.of);
+      const st = tr
+        ? [['', all.length, 'كل المترجمين'], ['instock', all.filter(a => P.stock(a) > 0).length, 'لهم كتب متوفرة'],
+           ['many', all.filter(a => P.books(a) > 1).length, 'ترجموا أكثر من كتاب'], ['author', all.filter(a => a.roles.author).length, 'مترجمون ومؤلفون'],
+           ['dups', all.filter(a => a.duplicates.length).length, 'تهجئات تحتاج مراجعة', true]]
+        : [['', all.length, 'كل الأسماء'], ['author', all.filter(a => a.roles.author).length, 'مؤلفون'],
+           ['instock', all.filter(a => P.stock(a) > 0).length, 'لهم كتب متوفرة'], ['styled', all.filter(a => a.style).length, 'لهم أسلوب محسوب'],
+           ['dups', all.filter(a => a.duplicates.length).length, 'تهجئات تحتاج مراجعة', true]];
+      $('authorStats').innerHTML = st.map(([k, n, label, warn]) => `<button type="button" class="stat ${warn && n ? 'warn' : ''}" data-chip="${k}" aria-pressed="${k ? lib.achips.has(k) && lib.achips.size === 1 : !lib.achips.size}"><b>${num(n)}</b><span>${label}</span></button>`).join('');
+      $('authorStats').querySelectorAll('.stat').forEach(b => b.addEventListener('click', () => { lib.achips.clear(); if (b.dataset.chip) lib.achips.add(b.dataset.chip); lib.shown.__authors = 0; renderAuthors(); }));
+      $('authorChips').innerHTML = chipGroups.map(([group, list]) => `<div class="fgroup" role="group" aria-label="${group}"><b>${group}</b>${list.map(([k, label, fn]) =>
+        `<button type="button" class="fchip" data-k="${k}" aria-pressed="${lib.achips.has(k)}">${label} <small>${num(all.filter(fn).length)}</small></button>`).join('')}</div>`).join('');
+      $('authorChips').querySelectorAll('.fchip').forEach(b => b.addEventListener('click', () => {
+        const k = b.dataset.k; lib.achips.has(k) ? lib.achips.delete(k) : lib.achips.add(k); lib.shown.__authors = 0; renderAuthors(); }));
+      const q = $('authorSearch').value.trim().toLowerCase();
+      const active = {}; lib.achips.forEach(k => (active[ACHIP_FN[k][0]] ||= []).push(ACHIP_FN[k][1]));
+      const list = all.filter(a => (!q || [a.name, a.latin, ...(a.aliases || [])].some(x => String(x || '').toLowerCase().includes(q)))
+        && Object.values(active).every(fns => fns.some(fn => fn(a)))).sort(ASORTS[$('authorSort').value] || ASORTS.books);
+      $('clearAuthorFilters').hidden = !(lib.achips.size || q);
+      $('authorCount').textContent = `يعرض ${num(list.length)} من ${num(all.length)} ${P.unit}`;
+      document.querySelectorAll('.authorseg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === lib.aview)));
+      const lim = lib.shown.__authors || PAGE * 2, part = list.slice(0, lim);
+      const roles = a => Object.entries(a.roles).filter(([r]) => !(tr && r === 'translator')).map(([r, n]) => `<span class="role ${r}">${ROLE_AR[r]}${n > 1 ? ' ' + num(n) : ''}</span>`).join('');
+      const flags = a => (a.duplicates.length ? '<span class="dupflag">تهجئة ثانية؟</span>' : '') + (a.verified ? '<span class="okflag">مؤكد</span>' : '');
+      const latin = a => a.latin && a.latin !== a.name ? `<span class="latin">${esc(a.latin)}</span>` : '';
+      const html = lib.aview === 'list'
+        ? `<div class="table-scroll"><table class="booklist"><thead><tr><th>الاسم</th><th>${tr ? 'أدوار أخرى' : 'الأدوار'}</th><th>${tr ? 'الترجمات' : 'الكتب'}</th><th>المتوفر</th><th class="hide-sm">المبحوث</th><th class="hide-sm">الأسلوب في كتالوجنا</th><th class="hide-sm">ملاحظات</th></tr></thead><tbody>${part.map(a => `
+          <tr data-aid="${a.id}"><td><button type="button" class="ttl" data-aid="${a.id}">${esc(a.name)}</button>${latin(a)}</td>
+          <td>${roles(a)}</td><td class="num">${num(P.books(a))}</td><td class="num">${num(P.stock(a))}</td><td class="num hide-sm">${num(P.researched(a))}</td>
+          <td class="hide-sm">${esc(styleLine(a.style)) || '<span class="state">—</span>'}</td><td class="hide-sm">${flags(a)}</td></tr>`).join('')}</tbody></table></div>`
+        : `<div class="agrid">${part.map(a => `<button type="button" class="acard" data-aid="${a.id}" aria-label="فتح صفحة ${esc(a.name)}">
+          <span class="avatar" style="--c:${COLORS[a.id % COLORS.length]}" aria-hidden="true">${esc(initial(a.name))}</span>
+          <span><span class="nm">${esc(a.name)}</span>${latin(a)}
+          <span class="ln">${roles(a)}<span class="m">${tr ? `الترجمات ${num(P.books(a))}، المتوفر ${num(P.stock(a))}` : `${num(a.books)} ${bookWord(a.books)}، ${num(a.in_stock)} متوفر`}</span>${flags(a)}</span>
+          ${a.style ? `<span class="astyle">${esc(styleLine(a.style))}</span>` : ''}</span></button>`).join('')}</div>`;
+      $('authorGrid').innerHTML = (list.length ? html : `<p class="empty-note">${!all.length && tr ? 'ما فيه مترجمون في الكتالوج بعد.' : 'ما فيه أسماء مطابقة.'}</p>`)
+        + (list.length > lim ? `<button type="button" class="more" id="moreAuthors">عرض المزيد (باقي ${num(list.length - lim)})</button>` : '');
+      $('authorGrid').querySelectorAll('[data-aid]').forEach(el => el.addEventListener('click', e => { e.stopPropagation(); openAuthor(Number(el.dataset.aid)); }));
+      if ($('moreAuthors')) $('moreAuthors').addEventListener('click', () => { lib.shown.__authors = lim + PAGE * 2; renderAuthors(); });
+    }
+    $('authorSearch').addEventListener('input', () => { lib.shown.__authors = 0; renderAuthors(); });
+    $('authorSort').addEventListener('change', () => { store.set('authorSort', $('authorSort').value); renderAuthors(); });
+    $('authorSort').value = store.get('authorSort', 'books'); if (!$('authorSort').value) $('authorSort').value = 'books';
+    document.querySelectorAll('.authorseg button').forEach(b => b.addEventListener('click', () => { lib.aview = b.dataset.view; store.set('aview', lib.aview); renderAuthors(); }));
+    $('clearAuthorFilters').addEventListener('click', () => { lib.achips.clear(); $('authorSearch').value = ''; renderAuthors(); });
+
+    async function openAuthor(id, keepScroll = false) {
+      if ($('sheet').hidden) lastFocus = document.activeElement;
+      const top = $('sheet').scrollTop;
+      if (!keepScroll) $('sheet').innerHTML = '<div class="sheet-body">جاري تحميل صفحة المؤلف…</div>';
+      $('sheet').hidden = false; $('backdrop').hidden = false; document.body.style.overflow = 'hidden';
+      try {
+        const res = await fetch(`/api/admin/authors/${id}`);
+        if (!res.ok) throw new Error(res.status);
+        renderAuthor(await res.json());
+        $('sheet').scrollTop = keepScroll ? top : 0;
+      } catch (err) { $('sheet').innerHTML = '<div class="sheet-body">تعذر تحميل صفحة المؤلف. <button class="btn secondary" onclick="closeCard()">إغلاق</button></div>'; }
+    }
+    function renderAuthor(a) {
+      const s = a.style;
+      const styleRows = s ? [['الأشكال', s.formats], ['الأنواع الفرعية', s.subgenres], ['المزاج', s.moods], ['الإيقاع', s.pace], ['الطول المعتاد', s.typical_length], ['الموضوعات', s.themes]]
+        .filter(([, v]) => v && v.length).map(([l, v]) => `<div class="fact"><span>${l}</span><b>${esc([].concat(v).map(styleAr).join('، '))}</b></div>`).join('') : '';
+      // «الأسلوب من البحث»: the researched profile the chat uses (Wikidata/Abjjad/general knowledge), not computed from our books
+      const rRows = [['الأشكال', a.formats], ['الأنواع الفرعية', a.subgenres], ['المزاج', a.moods], ['الإيقاع', a.pace], ['الطول المعتاد', a.typical_length], ['الموضوعات', a.themes], ['من أشهر أعماله', a.known_for]]
+        .filter(([, v]) => v && v.length).map(([l, v]) => `<div class="fact"><span>${l}</span><b>${esc([].concat(v).map(styleAr).join('، '))}</b></div>`).join('');
+      const srcs = (a.source_urls || []).filter(Boolean);
+      const srcLine = srcs.length ? srcs.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(sourceLabel(u))}</a>`).join('، ') : 'معرفة عامة (بدون مصدر منشور)';
+      const researchBlock = `<section class="block"><h3>الأسلوب من البحث</h3>
+        ${a.style_note_ar ? `<p style="margin:0 0 10px;font-size:15px;line-height:1.7">${esc(a.style_note_ar)}</p>` : ''}
+        ${rRows ? `<div class="facts">${rRows}</div>` : (a.style_note_ar ? '' : '<p class="no-ev">ما فيه أسلوب مبحوث لهذا الشخص بعد.</p>')}
+        <p class="state" style="margin:8px 0 0">${esc(AUTHOR_STATUS_AR[a.research_status] || a.research_status || '')}${a.confidence != null ? ` · الثقة ${Math.round(a.confidence * 100)}٪` : ''}${a.origin ? ` · ${esc(a.origin)}` : ''} · المصادر: ${srcLine}</p>
+        <p class="state" style="margin:4px 0 0">هذا اللي تعتمد عليه المحادثة لما يطلب الزائر كتبًا تشبه هذا المؤلف، ويُعطى الزائر منه جملة عامة فقط.</p></section>`;
+      $('sheet').setAttribute('aria-labelledby', 'aTitle');
+      const roleCount = Object.entries(a.roles).map(([r, n]) => `${ROLE_AR[r]}: ${num(n)} ${bookWord(n)}`).join('، ');
+      $('sheet').innerHTML = `
+        <div class="sheet-head">
+          <span class="avatar" aria-hidden="true">${esc(initial(a.name))}</span>
+          <div><h2 id="aTitle">${esc(a.name)}</h2><p>${a.latin && a.latin !== a.name ? `<span dir="ltr">${esc(a.latin)}</span> · ` : ''}${esc(roleCount || 'بدون كتب مرتبطة')}، ${num(a.in_stock)} متوفر</p></div>
+          <button class="close" type="button" onclick="closeCard()" aria-label="إغلاق">×</button>
+        </div>
+        <div class="sheet-body">
+          <section class="block"><h3>البيانات</h3>
+            <div class="aform">
+              <div><label for="aNameAr">الاسم بالعربي</label><input id="aNameAr" type="text" maxlength="120" value="${esc(a.name)}" /></div>
+              <div><label for="aLatin">الاسم باللاتيني</label><input id="aLatin" type="text" dir="ltr" maxlength="120" value="${esc(a.latin || '')}" /></div>
+              <div class="full"><label for="aAliases">أسماء بديلة وتهجئات أخرى (افصل بفاصلة)</label><input id="aAliases" type="text" value="${esc((a.aliases || []).join('، '))}" /></div>
+              <div><label for="aOrigin">البلد / الأصل</label><input id="aOrigin" type="text" maxlength="80" value="${esc(a.origin || '')}" /></div>
+              <div><label class="switch"><input id="aVerified" type="checkbox" ${a.verified ? 'checked' : ''} /> البيانات مؤكدة من الموظف</label></div>
+            </div>
+            <div class="row" style="margin:12px 0 0"><button class="btn" id="saveAuthor" type="button">حفظ</button><span id="authorState" class="state" role="status"></span></div>
+            <p class="state" style="margin:8px 0 0">تعديل الاسم ما يغيّر نص المؤلف في بطاقات الكتب؛ الاسم القديم يُحفظ كاسم بديل حتى تبقى الكتب مرتبطة.</p>
+          </section>
+          ${researchBlock}
+          ${authorAwardsBlock(a)}
+          <section class="block"><h3>الأسلوب في كتالوجنا</h3>${styleRows ? `<div class="facts">${styleRows}</div><p class="state" style="margin:8px 0 0">محسوب من ${num(s.books)} ${s.books === 1 ? 'كتاب مبحوث' : 'كتب مبحوثة'} له عندنا، مو من سيرته.</p>` : (a.books_list.length ? '<p class="no-ev">ما عندنا كتب مبحوثة له بعد، فما فيه أسلوب محسوب.</p>' : '<p class="no-ev">ما عندنا كتب له في المخزون، فما فيه أسلوب محسوب من كتالوجنا.</p>')}</section>
+          <section class="block"><h3>الكتب (${num(a.books_list.length)})</h3>
+            <ul class="abooks">${a.books_list.map(b => `<li><button type="button" data-book="${b.book_id}">
+              ${cover(b)}<span><b>${esc(b.title)}</b><small>${ROLE_AR[b.role] || esc(b.role)}${b.publisher ? '، ' + esc(b.publisher) : ''}${b.genre ? '، ' + esc(b.genre) : ''}</small></span>
+              <span>${b.active && b.quantity > 0 ? `<span class="m">${num(b.quantity)} نسخ</span>` : '<span class="status off">غير متوفر</span>'}</span></button></li>`).join('') || '<li class="no-ev">ما فيه كتب مرتبطة.</li>'}</ul>
+          </section>
+          <section class="block"><h3>دمج تهجئة ثانية لنفس الشخص</h3>
+            <p class="state" style="margin:0 0 10px">الدمج فقط لنفس الاسم مكتوب بطريقة ثانية (مثل بارغاس/فارغاس). إذا اختلف اسم أو زاد اسم (محمد نور الدين/محمد ناصر الدين، إبراهيم عيسى/إبراهيم أحمد عيسى) فهم أشخاص مختلفون، لا تدمجهم. بعد الدمج تنتقل الكتب لهذا المؤلف والتهجئة الثانية تصير اسمًا بديلًا، وبيانات الكتب ما تتغير.</p>
+            ${a.duplicates.length ? `<div class="dups">${a.duplicates.map(d => `<div class="dup"><b>${esc(d.name)}</b><button type="button" class="mini" data-view-author="${d.id}">عرض</button><button type="button" class="mini ok" data-merge="${d.id}" data-name="${esc(d.name)}">دمج في «${esc(a.name)}»</button></div>`).join('')}</div>` : ''}
+            <div class="merge-pick"><input id="mergeSearch" type="search" placeholder="ما ظهرت التهجئة فوق؟ ابحث عنها…" aria-label="بحث عن اسم للدمج" /></div>
+            <div id="mergeResults" class="merge-res"></div><p id="mergeState" class="state" role="status"></p>
+          </section>
+        </div>`;
+      $('sheet').querySelectorAll('[data-book]').forEach(el => el.addEventListener('click', () => openCard(Number(el.dataset.book))));
+      $('sheet').querySelectorAll('[data-view-author]').forEach(el => el.addEventListener('click', () => openAuthor(Number(el.dataset.viewAuthor))));
+      const bindMerge = root => root.querySelectorAll('[data-merge]').forEach(el => el.addEventListener('click', () => mergeAuthor(a, Number(el.dataset.merge), el.dataset.name, el)));
+      bindMerge($('sheet'));
+      $('mergeSearch').addEventListener('input', () => {
+        const q = $('mergeSearch').value.trim().toLowerCase();
+        const hits = q.length < 2 || !authorsList ? [] : authorsList.filter(x => x.id !== a.id && [x.name, x.latin, ...(x.aliases || [])].some(n => String(n || '').toLowerCase().includes(q))).slice(0, 6);
+        $('mergeResults').innerHTML = hits.map(x => `<div class="dup"><b>${esc(x.name)} <small class="state">${num(x.books)} ${bookWord(x.books)}</small></b><button type="button" class="mini ok" data-merge="${x.id}" data-name="${esc(x.name)}">دمج في «${esc(a.name)}»</button></div>`).join('')
+          || (q.length >= 2 ? '<p class="no-ev">ما فيه اسم مطابق.</p>' : '');
+        bindMerge($('mergeResults'));
+      });
+      $('saveAuthor').addEventListener('click', () => saveAuthor(a.id));
+      bindAuthorAwards(a.id);
+    }
+    async function saveAuthor(id) {
+      const st = $('authorState'); st.className = 'state'; st.textContent = 'جاري الحفظ…'; $('saveAuthor').disabled = true;
+      const body = { name: $('aNameAr').value, latin: $('aLatin').value, origin: $('aOrigin').value, verified: $('aVerified').checked,
+                     aliases: $('aAliases').value.split(/[،,]/).map(x => x.trim()).filter(Boolean) };
+      try {
+        const res = await fetch(`/api/admin/authors/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(d.error || 'تعذر الحفظ');
+        await loadAuthors(!onPeople()); await openAuthor(id, true);
+        $('authorState').textContent = 'تم الحفظ';
+      } catch (err) { st.textContent = err.message || 'تعذر الحفظ'; st.classList.add('error'); $('saveAuthor').disabled = false; }
+    }
+    async function mergeAuthor(a, dropId, dropName, btn) {
+      if (!btn.dataset.sure) { btn.dataset.sure = '1'; btn.textContent = `اضغط للتأكيد: «${dropName}» يصير اسمًا بديلًا`; return; }
+      btn.disabled = true; $('mergeState').className = 'state'; $('mergeState').textContent = 'جاري الدمج…';
+      try {
+        const res = await fetch('/api/admin/authors/merge', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keep: a.id, drop: dropId }) });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(d.error || 'تعذر الدمج');
+        await loadAuthors(!onPeople()); await openAuthor(a.id, true);
+        $('mergeState').textContent = `تم الدمج: انتقل ${num(d.links_moved)} ${d.links_moved === 1 ? 'ارتباط' : 'ارتباطات'} إلى «${d.kept}».`;
+      } catch (err) { $('mergeState').textContent = err.message; $('mergeState').classList.add('error'); btn.disabled = false; }
+    }
+    selectLibPane(lib.pane, false, false);
 
     // ---------------- book card sheet
     async function openCard(id) {
-      lastFocus = document.activeElement;
+      if ($('sheet').hidden) lastFocus = document.activeElement;
+      $('sheet').setAttribute('aria-labelledby', 'sTitle');
       $('sheet').innerHTML = '<div class="sheet-body">جاري تحميل البطاقة…</div>';
       $('sheet').hidden = false; $('backdrop').hidden = false; document.body.style.overflow = 'hidden';
       try {
@@ -626,6 +1595,206 @@
     }
 
     let cardLanguages = [];
+    // Card v2 (2026-09-28): what the book is about, as researched (read-only here)
+    function aboutBlock(d) {
+      const a = d.about || {}, themes = (d.profile && d.profile.themes) || [];
+      const chips = list => list.map(x => `<span class="chip">${esc(x)}</span>`).join(' ');
+      const P = 'style="margin:6px 0;font-size:14px"';
+      const rows = [
+        a.hook ? `<p dir="auto" style="margin:0 0 8px;font-size:15px"><b>${esc(a.hook)}</b></p>` : '',
+        a.subjects.length ? `<p ${P}>الموضوعات: ${chips(a.subjects)}</p>` : '',
+        themes.length ? `<p ${P}>الثيمات: ${chips(themes)}</p>` : '',
+        a.subgenres.length ? `<p ${P}>أنواع فرعية: ${chips(a.subgenres)}</p>` : '',
+        a.setting ? `<p ${P}>المكان والزمن: <b dir="auto">${esc(a.setting)}</b></p>` : '',
+        a.series ? `<p ${P}>السلسلة: <b dir="auto">${esc(a.series)}</b>${a.series_position ? ` – الجزء ${num(a.series_position)}` : ''}</p>` : '',
+        a.learning_outcomes ? `<p ${P}>يخرج القارئ بـ: <span dir="auto">${esc(a.learning_outcomes)}</span></p>` : '',
+      ].join('');
+      const related = (a.related || []).length ? `<p ${P}>كتب مرتبطة:</p><ul style="margin:4px 0 0;padding-inline-start:20px;font-size:14px">${a.related.map(r =>
+        `<li><b>${esc(r.relation)}:</b> <a href="#" data-open="${r.id}" dir="auto">${esc(r.title)}</a> <span class="diff" dir="auto">(${esc(r.reason)})</span></li>`).join('')}</ul>` : '';
+      const research = a.research_label && !(d.confirmation && d.confirmation.needed) ? `<p class="${a.research_status === 'matched' ? 'diff' : 'warn'}" style="margin:8px 0 0">${esc(a.research_label)}${a.research_status !== 'matched' && a.research_note ? ` — <span dir="auto">${esc(a.research_note)}</span>` : ''}</p>` : '';
+      if (!rows && !research && !related) return '';
+      return `<section class="block"><h3>عن الكتاب</h3>${rows || '<p class="no-ev">لم يُبحث عن الكتاب بعد.</p>'}${related}${research}</section>`;
+    }
+    // Prizes and screen adaptations (2026-10-08): from our research or added by staff, each with its source
+    function honorForm(prefix, opts, withAdaptation) {
+      const o = list => list.map(x => `<option value="${esc(x.value)}">${esc(x.label)}</option>`).join('');
+      return `<details class="hon-add"><summary>+ إضافة ${withAdaptation ? 'جائزة أو فيلم/مسلسل' : 'جائزة'}</summary>
+        <div class="aform" style="margin-top:8px">
+          ${withAdaptation ? `<div><label for="${prefix}Type">النوع</label><select id="${prefix}Type"><option value="award">جائزة</option><option value="adaptation">فيلم أو مسلسل</option></select></div>` : ''}
+          <div data-hon="award"><label for="${prefix}Key">الجائزة</label><select id="${prefix}Key">${o(opts.awards)}</select></div>
+          <div data-hon="award"><label for="${prefix}Name">اسم الجائزة (إذا اخترت «جائزة أخرى»)</label><input id="${prefix}Name" type="text" maxlength="200" /></div>
+          <div data-hon="award"><label for="${prefix}Result">النتيجة</label><select id="${prefix}Result">${o(opts.results)}</select></div>
+          ${withAdaptation ? `<div data-hon="adaptation" hidden><label for="${prefix}Kind">العمل</label><select id="${prefix}Kind">${o(opts.kinds)}</select></div>
+          <div data-hon="adaptation" hidden><label for="${prefix}Title">اسم الفيلم أو المسلسل</label><input id="${prefix}Title" type="text" maxlength="200" /></div>` : `<div><label for="${prefix}Work">عن أي عمل (اختياري)</label><input id="${prefix}Work" type="text" maxlength="200" /></div>`}
+          <div><label for="${prefix}Year">السنة</label><input id="${prefix}Year" type="number" min="1500" max="2100" /></div>
+          <div class="full"><label for="${prefix}Url">رابط المصدر (مطلوب)</label><input id="${prefix}Url" type="url" dir="ltr" placeholder="https://" /></div>
+        </div>
+        <div class="row" style="margin:10px 0 0"><button class="btn" id="${prefix}Save" type="button">إضافة</button><span id="${prefix}State" class="state" role="status"></span></div>
+      </details>`;
+    }
+    function honorRow(r, kind) {
+      const src = r.source_url ? ` · <a href="${esc(r.source_url)}" target="_blank" rel="noopener noreferrer">المصدر ↗</a>` : '';
+      const who = r.source === 'staff' ? `أضافها ${esc(r.created_by || 'موظف')}` : (r.source === 'wikidata' ? 'من ويكي بيانات' : r.source === 'wikipedia_ar' ? 'من ويكيبيديا' : esc(r.source || ''));
+      return `<li><b dir="auto">${esc(r.label)}</b> <span class="diff">${who}${src}</span>${kind ? ` <button class="mini no" type="button" data-hon-del="${kind}" data-row="${r.row_id}">✕ حذف</button>` : ''}</li>`;
+    }
+    function honorsBlock(d) {
+      const h = d.honors || { awards: [], adaptations: [], author_awards: [] };
+      const ul = items => `<ul style="margin:4px 0 8px;padding-inline-start:20px;font-size:14px;line-height:1.9">${items}</ul>`;
+      return `<section class="block" id="honorsBlock"><h3>الجوائز والأفلام</h3>
+        ${h.awards.length ? `<p style="margin:0">جوائز الكتاب:</p>${ul(h.awards.map(r => honorRow(r, 'award')).join(''))}` : '<p class="no-ev">ما عندنا جائزة مسجّلة للكتاب.</p>'}
+        ${h.adaptations.length ? `<p style="margin:0">تحوّل إلى:</p>${ul(h.adaptations.map(r => honorRow(r, 'adaptation')).join(''))}` : '<p class="no-ev">ما عندنا فيلم أو مسلسل مسجّل عنه.</p>'}
+        ${h.author_awards.length ? `<p style="margin:0">جوائز المؤلف (تُعدّل من صفحة المؤلف):</p>${ul(h.author_awards.map(r => honorRow(r, '')).join(''))}` : ''}
+        ${d.honor_options ? honorForm('hb', d.honor_options, true) : ''}
+        <p class="state" style="margin:6px 0 0">المحادثة تذكر للزائر فقط ما هو مسجّل هنا.</p></section>`;
+    }
+    // «تعديلات مطلوبة» (2026-10-08): staff write what should be changed; kept with the book and
+    // listed in «البلاغات» → «تعديلات الموظفين». The book itself is not changed by a note.
+    function staffNoteRow(n, withBook) {
+      const done = n.status === 'done';
+      const meta = `كتبها ${esc(n.created_by || 'موظف')} · ${when(n.created_at)}${done ? ` · عالجها ${esc(n.handled_by || '—')} ${when(n.handled_at)}` : ''}`;
+      const text = `<p class="nr-text" dir="auto"${withBook ? '' : ' style="margin-top:0"'}>${esc(n.note)}</p><span class="nr-meta">${meta}</span>`;
+      const head = withBook
+        ? `<div class="nr-book">${cover({ book_id: n.book_id || 0, title: n.book_title, cover_url: n.cover_url })}<div><b>${esc(n.book_title || 'كتاب محذوف')}</b>
+             <span class="nr-meta">${esc(n.book_author || '')}${n.book_exists ? '' : ' · الكتاب لم يعد في الكتالوج'}</span>${text}</div></div>`
+        : `<div>${text}</div>`;
+      return `<div class="note-row${done ? ' done' : ''}">${head}<div class="nr-actions">
+          ${withBook && n.book_exists ? `<button type="button" class="btn secondary" data-open-book="${n.book_id}">افتح بطاقة الكتاب</button>` : ''}
+          <button type="button" class="btn${done ? ' secondary' : ''}" data-sn="${n.note_id}" data-to="${done ? 'open' : 'done'}">${done ? 'إعادة فتح' : 'تم التعديل'}</button></div></div>`;
+    }
+    function staffNotesBlock(d) {
+      if (!Array.isArray(d.staff_notes)) return '';   // a server started before this feature: no box rather than a box that cannot save
+      const notes = d.staff_notes;
+      return `<section class="block" id="staffNotesBlock" aria-labelledby="snTitle"><h3 id="snTitle">تعديلات مطلوبة على الكتاب</h3>
+        <p class="state" style="margin:0 0 8px">اكتب هنا أي شيء تبي يتعدل في بيانات هذا الكتاب (العنوان، المؤلف، الغلاف، النبذة، التصنيف، وغيرها). تنحفظ الملاحظة مع الكتاب وتظهر في «البلاغات» ← «تعديلات الموظفين»، والكتاب ما يتغير إلا لما يُنفَّذ التعديل.</p>
+        <label class="sr" for="snText">التعديل المطلوب</label>
+        <textarea id="snText" maxlength="1000" dir="auto" placeholder="مثال: اسم المؤلف الصحيح كذا، والغلاف المعروض لطبعة ثانية"></textarea>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px"><button id="snSave" class="btn" type="button">حفظ الملاحظة</button><span id="snState" class="state" role="status"></span></div>
+        <div id="snList">${notes.map(n => staffNoteRow(n, false)).join('')}</div></section>`;
+    }
+    function bindStaffNotes(bookId) {
+      const root = $('staffNotesBlock');
+      if (!root) return;
+      const redraw = (notes, msg) => {
+        root.outerHTML = staffNotesBlock({ staff_notes: notes });
+        bindStaffNotes(bookId);
+        if (msg) $('snState').textContent = msg;
+        loadInboxCount();
+      };
+      $('snSave').addEventListener('click', async () => {
+        const st = $('snState'), note = $('snText').value.trim();
+        st.className = 'state';
+        if (note.length < 2) { st.className = 'state error'; st.textContent = 'اكتب التعديل المطلوب أولًا.'; $('snText').focus(); return; }
+        $('snSave').disabled = true; st.textContent = 'جاري الحفظ…';
+        try {
+          const res = await fetch(`/api/admin/books/${bookId}/notes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ note }) });
+          const r = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(r.error || res.status);
+          redraw(r.staff_notes, 'تم الحفظ.');
+        } catch (err) { $('snSave').disabled = false; st.className = 'state error'; st.textContent = 'تعذر الحفظ: ' + err.message; }
+      });
+      root.querySelectorAll('[data-sn]').forEach(b => b.addEventListener('click', async () => {
+        b.disabled = true;
+        try {
+          const res = await fetch(`/api/admin/inbox/staff-notes/${b.dataset.sn}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: b.dataset.to }) });
+          const r = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(r.error || res.status);
+          redraw(r.staff_notes);
+        } catch (err) { b.disabled = false; $('snState').className = 'state error'; $('snState').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
+      }));
+    }
+    function bindHonors(bookId) {
+      const root = $('honorsBlock');
+      if (!root) return;
+      const type = $('hbType');
+      if (type) type.addEventListener('change', () => root.querySelectorAll('[data-hon]').forEach(el => { el.hidden = el.dataset.hon !== type.value; }));
+      root.querySelectorAll('[data-hon-del]').forEach(el => el.addEventListener('click', async () => {
+        if (!confirm('حذف هذا السطر؟')) return;
+        const res = await fetch(`/api/admin/books/${bookId}/honors/${el.dataset.honDel}/${el.dataset.row}`, { method: 'DELETE' });
+        if (res.ok) openCard(bookId); else alert('تعذر الحذف');
+      }));
+      if ($('hbSave')) $('hbSave').addEventListener('click', async () => {
+        const st = $('hbState'); st.className = 'state'; st.textContent = 'جاري الحفظ…';
+        const body = { type: type.value, award_key: $('hbKey').value, award_name: $('hbName').value, result: $('hbResult').value,
+                       kind: $('hbKind').value, title: $('hbTitle').value, year: $('hbYear').value, source_url: $('hbUrl').value };
+        if (!/^https?:\/\//.test(body.source_url)) { st.className = 'state error'; st.textContent = 'أضف رابط المصدر.'; return; }
+        try {
+          const res = await fetch(`/api/admin/books/${bookId}/honors`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+          const r = await res.json();
+          if (!res.ok) throw new Error(r.error || res.status);
+          openCard(bookId);
+        } catch (err) { st.className = 'state error'; st.textContent = 'تعذر الحفظ: ' + err.message; }
+      });
+    }
+    function authorAwardsBlock(a) {
+      const rows = (a.awards || []).map(r => honorRow(r, 'author')).join('');
+      return `<section class="block" id="authorAwards"><h3>الجوائز</h3>
+        ${rows ? `<ul style="margin:4px 0 8px;padding-inline-start:20px;font-size:14px;line-height:1.9">${rows}</ul>` : '<p class="no-ev">ما عندنا جائزة مسجّلة لهذا الشخص.</p>'}
+        ${a.honor_options ? honorForm('ab', a.honor_options, false) : ''}
+        <p class="state" style="margin:6px 0 0">جوائز الشخص نفسه (مثل نوبل) تُحسب لكل كتبه لما يطلب الزائر «كتاب حائز على جائزة».</p></section>`;
+    }
+    function bindAuthorAwards(authorId) {
+      const root = $('authorAwards');
+      if (!root) return;
+      root.querySelectorAll('[data-hon-del]').forEach(el => el.addEventListener('click', async () => {
+        if (!confirm('حذف هذه الجائزة؟')) return;
+        const res = await fetch(`/api/admin/authors/${authorId}/awards/${el.dataset.row}`, { method: 'DELETE' });
+        if (res.ok) openAuthor(authorId); else alert('تعذر الحذف');
+      }));
+      if ($('abSave')) $('abSave').addEventListener('click', async () => {
+        const st = $('abState'); st.className = 'state'; st.textContent = 'جاري الحفظ…';
+        const body = { award_key: $('abKey').value, award_name: $('abName').value, result: $('abResult').value,
+                       work_title: $('abWork').value, year: $('abYear').value, source_url: $('abUrl').value };
+        if (!/^https?:\/\//.test(body.source_url)) { st.className = 'state error'; st.textContent = 'أضف رابط المصدر.'; return; }
+        try {
+          const res = await fetch(`/api/admin/authors/${authorId}/awards`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+          const r = await res.json();
+          if (!res.ok) throw new Error(r.error || res.status);
+          openAuthor(authorId);
+        } catch (err) { st.className = 'state error'; st.textContent = 'تعذر الحفظ: ' + err.message; }
+      });
+    }
+    // «تأكيد هوية الكتاب» (2026-10-04): the answer is stored for the manager; it does not change the book
+    const CF_STATE = '<span id="cfState" class="state" role="status"></span>';
+    function confirmBlock(d) {
+      const c = d.confirmation;
+      if (!c) return '';
+      const note = c.note ? `<p class="cf-note" dir="auto"><b>ملاحظة البحث:</b> ${esc(c.note)}</p>` : '';
+      if (c.current) {
+        const k = c.current;
+        return `<section class="block confirm answered" aria-label="تأكيد هوية الكتاب"><h3>✓ تأكيد هوية الكتاب — سُجّل الرد</h3>
+          ${k.label ? `<p class="cf-done">الاختيار: <b dir="auto">${esc(k.label)}</b></p>` : ''}
+          ${k.comment ? `<p class="cf-done">التعليق: <span dir="auto">${esc(k.comment)}</span></p>` : ''}
+          <p class="diff" style="margin:0">سجّله ${esc(k.by || 'موظف')} · ${date(k.at)}. ${k.handled_at ? 'اعتُمد وصُحّح الكتاب عليه.' : 'يوصل للمدير ويُصحَّح الكتاب بناءً عليه.'}</p>
+          ${k.handled_at ? '' : '<div class="cf-acts"><button id="cfUndo" class="btn secondary" type="button">↩︎ تراجع عن الرد</button>' + CF_STATE + '</div>'}
+        </section>`;
+      }
+      return `<section class="block confirm" aria-label="تأكيد هوية الكتاب"><h3>⚠︎ هذا الكتاب يحتاج تأكيد هويته</h3>
+        <p class="cf-note">ما قدرنا نتأكد أي كتاب هذا بالضبط. شوف النسخة المطبوعة واختر الصحيح، أو اكتب ما على الغلاف.</p>
+        ${note}
+        <fieldset class="cf-opts"><legend>أيها الصحيح؟</legend>
+          ${c.options.map((o, i) => `<label class="cf-opt"><input type="radio" name="cfChoice" value="${esc(o.key)}" />
+            <span><span dir="auto">${esc(o.label)}</span>${o.detail ? `<small dir="auto">${esc(o.detail)}</small>` : ''}${o.url ? `<small><a href="${esc(o.url)}" target="_blank" rel="noopener noreferrer">صفحة الكتاب ↗</a></small>` : ''}</span></label>`).join('')}
+        </fieldset>
+        <label for="cfComment" style="font-size:14px;font-weight:700;color:#6B4E00">تعليقك (اختياري)</label>
+        <textarea id="cfComment" maxlength="1000" dir="auto" placeholder="مثال: المؤلف على الغلاف فلان، والمترجم فلان، والناشر كذا"></textarea>
+        <div class="cf-acts"><button id="cfSend" class="btn" type="button">إرسال التأكيد</button>${CF_STATE}</div>
+      </section>`;
+    }
+    async function sendConfirmation(bookId, undo) {
+      const st = $('cfState'), btn = $(undo ? 'cfUndo' : 'cfSend');
+      const picked = document.querySelector('input[name="cfChoice"]:checked');
+      const body = undo ? { undo: true } : { choice: picked ? picked.value : '', comment: $('cfComment').value };
+      st.className = 'state'; st.textContent = 'جاري الحفظ…'; btn.disabled = true;
+      try {
+        const res = await fetch(`/api/admin/books/${bookId}/confirmation`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error || res.status);
+        const top = $('sheet').scrollTop;
+        renderCard(d, true); $('sheet').scrollTop = top;
+        if ($('cfState')) $('cfState').textContent = undo ? 'تم التراجع؛ تقدر تختار من جديد.' : 'تم الحفظ. إن ضغطت بالغلط استخدم «تراجع».';
+        loadCatalog();
+      } catch (err) { st.className = 'state error'; st.textContent = 'تعذر الحفظ: ' + err.message; btn.disabled = false; }
+    }
     function renderCard(d, keepScroll = false) {
       if (d.languages) cardLanguages = d.languages;
       const b = d.book;
@@ -642,6 +1811,7 @@
               ${e.conflict ? '<span class="warn">⚠︎ المصادر متعارضة</span>' : ''}
               ${e.verified ? '<span class="chip confirmed">معتمد من موظف</span>' : ''}
             </div>
+            ${e.severity_label ? `<p class="ev-sum">الشدة: <b>${esc(e.severity_label)}</b>${e.frequency_label ? ` · ${esc(e.frequency_label)}` : ''}${e.note ? ` · <span dir="auto">${esc(e.note)}</span>` : ''}</p>` : ''}
             ${e.summary ? `<p class="ev-sum" dir="auto">${esc(e.summary)}</p>` : ''}
             ${e.site === 'derived' ? '<div class="ev-actions"><span class="diff">قيمة محسوبة تلقائيًا؛ لتغييرها استخدم «تعيين».</span></div>' : `<div class="ev-actions">
               ${e.rejected ? `<span class="diff">حذفها ${esc(e.rejected_by || 'موظف')} · ${date(e.rejected_at)}</span><button class="mini" data-act="restore" data-attr="${a.key}" data-ev="${e.evidence_id}">استرجاع</button>` :
@@ -670,6 +1840,13 @@
             ${factBox('الباركود', b.barcode)}${factBox('رمز المنتج في رواء', b.rewaa_sku)}
             ${factBox('المصدر', b.source === 'rewaa' ? 'رواء' : 'بيانات تجريبية')}${factBox('آخر مزامنة', b.last_synced_at ? date(b.last_synced_at) : null, 'لم تتم')}
           </div></section>
+          ${staffNotesBlock(d)}
+          ${confirmBlock(d)}
+          <section class="block" aria-labelledby="nbTitle"><h3 id="nbTitle" class="sr">ليس كتابًا</h3>
+            <div id="notBook" class="notbook">${NOT_BOOK_HTML}</div>
+          </section>
+          ${aboutBlock(d)}
+          ${honorsBlock(d)}
           <section class="block"><h3>المخزون والظهور</h3>
             <div class="inv">
               <div><label for="fPrice">السعر (ر.س)</label><input id="fPrice" type="number" min="0" step="0.5" value="${Number(b.price) || 0}" /></div>
@@ -709,24 +1886,66 @@
             </div>
             <p id="langState" class="state" role="status"></p>
           </section>
-          <section class="block"><h3>الصفات القرائية (من مراجعات القرّاء)</h3>
+          ${['أطفال', 'يافعين', 'قصص مصورة'].includes(b.genre) || b.age_min != null || b.age_max != null ? `<section class="block"><h3>العمر المناسب</h3>
+            <p class="diff" style="margin:0 0 8px">لكتب الأطفال واليافعين: من أي عمر إلى أي عمر يناسب الكتاب. يستخدمه أمين المكتبة لما يذكر الزائر عمر طفله.${b.age_source ? ' المصدر: ' + (String(b.age_source).startsWith('http') ? `<a href="${esc(b.age_source)}" target="_blank" rel="noopener noreferrer">${esc(host(b.age_source))}</a>` : b.age_source === 'staff' ? 'موظف' : esc(b.age_source)) : ''}</p>
+            <div class="inv">
+              <div><label for="fAgeMin">من عمر</label><input id="fAgeMin" type="number" min="0" max="18" inputmode="numeric" value="${b.age_min ?? ''}" /></div>
+              <div><label for="fAgeMax">إلى عمر</label><input id="fAgeMax" type="number" min="0" max="18" inputmode="numeric" value="${b.age_max ?? ''}" /></div>
+              <button id="saveAge" class="btn" type="button">حفظ</button>
+            </div>
+            ${b.age_note ? `<p class="diff">${esc(b.age_note)}</p>` : ''}
+            <p id="ageState" class="state" role="status"></p>
+          </section>` : ''}
+          <section class="block fold-block"><details id="attrsFold" class="fold" ${ATTRS_OPEN ? 'open' : ''}>
+            <summary><h3>الصفات القرائية (من مراجعات القرّاء)</h3><span class="fold-count">${num(d.review.total)} صفة · اضغط للعرض</span></summary>
             <div class="review-bar">
               <span>المراجعة اختيارية: أكّدت ${num(d.review.verified)} من ${num(d.review.total)} صفة. البطاقة تشتغل في التوصية حتى بدون مراجعة.</span>
               <span>تُسجَّل المراجعة باسمك: <b>${esc(ME ? ME.name : '')}</b></span>
             </div>
             <p id="reviewState" class="state" role="status"></p>
-            ${attrs}</section>
+            ${attrs}</details></section>
           <section class="block"><h3>كل المصادر المقروءة</h3>${d.sources.length ? `<ul class="sources">${d.sources.map(u => `<li><a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(decodeURI(u))}</a></li>`).join('')}</ul>` : '<p class="no-ev">لا توجد مصادر مسجلة.</p>'}</section>
         </div>`;
       $('closeBtn').addEventListener('click', closeCard);
+      $('attrsFold').addEventListener('toggle', e => { ATTRS_OPEN = e.target.open; });
+      $('sheet').querySelectorAll('a[data-open]').forEach(x => x.addEventListener('click', e => { e.preventDefault(); openCard(Number(x.dataset.open)); }));
       if (!keepScroll) $('closeBtn').focus();
       $('sheet').querySelectorAll('button.mini').forEach(btn => btn.addEventListener('click', () => reviewAction(b.book_id, btn)));
       $('saveInv').addEventListener('click', () => saveInventory(b.book_id));
+      bindHonors(b.book_id);
+      bindStaffNotes(b.book_id);
+      if ($('cfSend')) $('cfSend').addEventListener('click', () => sendConfirmation(b.book_id, false));
+      if ($('cfUndo')) $('cfUndo').addEventListener('click', () => sendConfirmation(b.book_id, true));
+      $('notBookBtn').addEventListener('click', () => askNotBook(b));
       $('saveLang').addEventListener('click', () => saveLanguage(b.book_id));
+      if ($('saveAge')) $('saveAge').addEventListener('click', () => saveAge(b.book_id));
       $('saveSummary').addEventListener('click', () => saveSummary(b.book_id));
       $('coverFetch').addEventListener('click', () => coverAction(b.book_id, 'fetch'));
       $('coverFile').addEventListener('change', () => coverAction(b.book_id, 'upload'));
       if ($('coverRemove')) $('coverRemove').addEventListener('click', () => coverAction(b.book_id, 'remove'));
+    }
+
+    const NOT_BOOK_HTML = '<p>هذا المنتج مو كتاب (لعبة، مجموعة تعليمية، أداة…)؟ احذفه من الكتالوج. يروح لقسم «المحذوفة» وتقدر تسترجعه.</p><button id="notBookBtn" class="btn secondary" type="button">ليس كتابًا</button>';
+    function askNotBook(b) {
+      const box = $('notBook'); box.classList.add('ask'); box.setAttribute('role', 'alertdialog'); box.setAttribute('aria-labelledby', 'nbAsk');
+      box.innerHTML = `<p id="nbAsk">متأكد تبغى تحذف «${esc(b.title)}» لأنه ليس كتابًا؟ بيختفي من الكتب والبحث والزوار، ويقدر يُسترجع من «المحذوفة».</p>
+        <div class="acts"><button id="nbYes" class="btn danger" type="button">نعم، احذفه</button><button id="nbNo" class="btn secondary" type="button">إلغاء</button></div>
+        <p id="nbState" class="state" role="status" style="flex-basis:100%"></p>`;
+      $('nbNo').addEventListener('click', () => { box.classList.remove('ask'); box.removeAttribute('role'); box.removeAttribute('aria-labelledby');
+        box.innerHTML = NOT_BOOK_HTML;
+        $('notBookBtn').addEventListener('click', () => askNotBook(b)); $('notBookBtn').focus(); });
+      $('nbYes').addEventListener('click', () => deleteNotBook(b));
+      $('nbNo').focus();
+    }
+    async function deleteNotBook(b) {
+      $('nbYes').disabled = $('nbNo').disabled = true; $('nbState').textContent = 'جاري الحذف…';
+      try {
+        const res = await fetch(`/api/admin/books/${b.book_id}/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ confirm: true, reason: 'not_a_book' }) });
+        if (!res.ok) throw new Error();
+        closeCard(); await loadCatalog();
+        $('count').textContent = `انحذف «${b.title}» وانتقل إلى «المحذوفة».`;
+      } catch (e) { $('nbState').textContent = 'تعذر الحذف'; $('nbYes').disabled = $('nbNo').disabled = false; }
     }
 
     async function reopenCard(id, stateId, text) {
@@ -770,6 +1989,20 @@
         langs.map(l => `<option value="${esc(l.value)}" ${l.value === current ? 'selected' : ''}>${esc(l.label)}</option>`).join('');
     }
 
+    async function saveAge(id) {
+      const st = $('ageState');
+      const lo = $('fAgeMin').value.trim(), hi = $('fAgeMax').value.trim();
+      st.textContent = 'جاري الحفظ…'; $('saveAge').disabled = true;
+      try {
+        const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ age_min: lo === '' ? null : Number(lo), age_max: hi === '' ? null : Number(hi) }) });
+        if (!res.ok) { st.textContent = 'العمر لازم يكون بين ٠ و١٨، و«من» أصغر من «إلى»'; return; }
+        const top = $('sheet').scrollTop;
+        renderCard(await (await fetch(`/api/admin/books/${id}`)).json(), true);
+        $('sheet').scrollTop = top; $('ageState').textContent = 'تم الحفظ';
+      } catch (e) { st.textContent = 'تعذر الحفظ'; }
+      finally { if ($('saveAge')) $('saveAge').disabled = false; }
+    }
     async function saveLanguage(id) {
       const st = $('langState');
       const body = { language: $('fLang').value, original_language: $('fOrig').value, translator: $('fTrans').value.trim() };
@@ -806,6 +2039,7 @@
 
     // ---------------- settings: model + test mode
     let llmStatus = null;
+    let modelLoadSeq = 0;
     const OTHER = '__other__';
     function currentModel() {
       return $('model').value === OTHER ? $('modelCustom').value.trim() : $('model').value;
@@ -815,6 +2049,8 @@
       const opt = p && (p.model_options || []).find(o => o.value === $('model').value);
       const other = $('model').value === OTHER;
       $('modelCustom').hidden = !other;
+      const shown = $('model').selectedOptions[0];
+      $('model').dir = shown && /[\u0600-\u06FF]/.test(shown.textContent) ? 'rtl' : 'ltr';  // «تلقائي (اختيار Codex)» reads right
       let hint = '';
       if (other) hint = 'اكتب الاسم بالضبط كما يظهر عند المزوّد.';
       else if (opt) {
@@ -824,10 +2060,12 @@
       }
       $('modelHint').innerHTML = hint; $('modelHint').hidden = !hint;
     }
-    function fillModels() {
+    function fillModels(preferred = '') {
       const p = (llmStatus.providers || []).find(x => x.id === $('provider').value);
       const sel = $('model'); sel.replaceChildren();
       const opts = p ? (p.model_options || []) : [];
+      sel.size = 1;  // always a closed dropdown; every option is still in the list
+      sel.setAttribute('aria-label', p && p.id === 'ollama' ? 'نماذج Ollama' : 'النموذج');
       const groups = {};
       opts.forEach(o => {
         const el = document.createElement('option'); el.value = o.value; el.textContent = o.label + (o.installed === false ? ' (غير مثبت)' : '');
@@ -837,30 +2075,100 @@
         } else sel.appendChild(el);
       });
       const other = document.createElement('option'); other.value = OTHER; other.textContent = 'نموذج آخر… (اكتب الاسم)'; sel.appendChild(other);
-      const saved = p && llmStatus.active && llmStatus.active.provider === p.id ? llmStatus.active.model : '';
+      const saved = preferred || (p && llmStatus.active && llmStatus.active.provider === p.id ? llmStatus.active.model : '');
       const wanted = saved || (p && p.default_model) || (opts[0] && opts[0].value) || '';
       if (wanted && opts.some(o => o.value === wanted)) { sel.value = wanted; $('modelCustom').value = ''; }
       else if (wanted || !opts.length) { sel.value = OTHER; $('modelCustom').value = wanted; }
       updateModelHint();
     }
-    $('model').addEventListener('change', updateModelHint);
+    async function loadProviderModels(refresh = false) {
+      const pid = $('provider').value; const seq = ++modelLoadSeq;
+      const p = (llmStatus.providers || []).find(x => x.id === pid);
+      const state = $('modelsState'); const preferred = currentModel();
+      if (!p || pid === 'none') {
+        $('model').disabled = false; $('refreshModels').disabled = true;
+        state.textContent = 'يستخدم النظام البديل بالكلمات.'; return;
+      }
+      state.textContent = 'جاري تحميل النماذج المتاحة…';
+      $('model').disabled = true; $('refreshModels').disabled = true;
+      try {
+        const res = await fetch(`/api/admin/llm/models?provider=${encodeURIComponent(pid)}${refresh ? '&refresh=1' : ''}`);
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || res.status);
+        if (seq !== modelLoadSeq || $('provider').value !== pid) return;
+        p.model_options = data.models;
+        fillModels(preferred);
+        const shown = data.models.length;
+        state.textContent = data.truncated
+          ? `تم تحميل أول ${shown} من أصل ${data.total} نموذجًا متاحًا.`
+          : `تم تحميل ${shown} نموذجًا من المزوّد${data.cached ? ' (قائمة محفوظة مؤقتًا)' : ''}.`;
+      } catch (err) {
+        if (seq === modelLoadSeq && $('provider').value === pid) {
+          fillModels(preferred);
+          state.textContent = `تعذر تحديث القائمة: ${err.message}. القائمة الحالية والاختيار اليدوي ما زالوا متاحين.`;
+        }
+      } finally {
+        if (seq === modelLoadSeq) { $('model').disabled = false; $('refreshModels').disabled = false; }
+      }
+    }
+    $('model').addEventListener('change', () => { updateModelHint(); markLlmDirty(); });
+    $('modelCustom').addEventListener('input', markLlmDirty);
     async function loadLlm() {
       try {
         llmStatus = await (await fetch('/api/admin/llm')).json();
         renderProviders();
+        const opt = p => `<option value="${p.id}">${esc(p.label)}</option>`;
+        const ready = llmStatus.providers.filter(p => p.configured), notReady = llmStatus.providers.filter(p => !p.configured);
         $('provider').innerHTML = '<option value="none">بدون ذكاء اصطناعي (كلمات فقط)</option>' +
-          llmStatus.providers.map(p => `<option value="${p.id}">${esc(p.label)}${p.configured ? '' : ' (غير جاهز)'}</option>`).join('');
+          (ready.length ? `<optgroup label="جاهزة">${ready.map(opt).join('')}</optgroup>` : '') +
+          (notReady.length ? `<optgroup label="غير جاهزة — جهّزها من «المزوّدون» تحت">${notReady.map(opt).join('')}</optgroup>` : '');
         $('provider').value = llmStatus.active ? llmStatus.active.provider : 'none';
         fillModels();
-        $('llmState').textContent = llmStatus.forced_off ? 'الذكاء الاصطناعي مطفأ من Terminal' :
-          (llmStatus.active ? `المستخدم الآن: ${llmStatus.active.provider} · ${llmStatus.active.model}` : 'بدون ذكاء اصطناعي الآن');
-      } catch (err) { $('llmState').textContent = 'تعذر تحميل إعدادات النموذج'; }
+        loadProviderModels(false);
+        renderAiNow();
+        $('llmState').textContent = '';
+      } catch (err) { $('aiNow').innerHTML = '<span class="diff">تعذر تحميل إعدادات النموذج</span>'; }
     }
+    function modelLabel(pid, model) {
+      const p = (llmStatus.providers || []).find(x => x.id === pid);
+      const o = p && (p.model_options || []).find(x => x.value === model);
+      return o ? o.label : model;
+    }
+    function renderAiNow() {
+      const a = llmStatus.active;
+      const p = a && (llmStatus.providers || []).find(x => x.id === a.provider);
+      let html;
+      if (llmStatus.forced_off) html = '<span class="dot"></span><span class="ai-model">الذكاء الاصطناعي مطفأ من Terminal</span>';
+      else if (!a) html = '<span class="dot"></span><span class="ai-model">بدون ذكاء اصطناعي <span>— المحادثة تشتغل بالكلمات فقط</span></span>';
+      else html = `<span class="dot on"></span><span class="ai-model"><span>المستخدم الآن:</span> <bdi dir="auto">${esc(modelLabel(a.provider, a.model))}</bdi> <span>· ${esc(p ? p.label : a.provider)}</span></span>`;
+      const e = llmStatus.last_error || {};
+      if (a && e.message && e.provider === a.provider)
+        html += `<span class="ai-err">آخر خطأ منذ تشغيل السيرفر (<bdi dir="ltr">${esc(e.at || '')}</bdi>): <bdi dir="auto">${esc(e.message)}</bdi></span>`;
+      $('aiNow').innerHTML = html;
+      const warns = (llmStatus.providers || []).filter(x => x.warning);
+      $('aiWarn').hidden = !warns.length;
+      $('aiWarn').innerHTML = warns.map(x => `<div><b>${esc(x.label)}:</b> ${esc(x.warning)}</div>` +
+        (x.update_command ? `<div>نفّذ في Terminal ثم اضغط «تحديث القائمة»: <code dir="ltr">${esc(x.update_command)}</code>
+          <button class="btn secondary" type="button" data-copy="${esc(x.update_command)}">انسخ الأمر</button></div>` : '')).join('');
+      $('aiWarn').querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'تم النسخ'; } catch (err) { b.textContent = 'انسخه يدويًا'; }
+      }));
+    }
+    function markLlmDirty() {
+      const a = llmStatus && llmStatus.active;
+      const same = $('provider').value === (a ? a.provider : 'none') && (!a || currentModel() === a.model);
+      $('llmState').className = 'state' + (same ? '' : ' error');
+      $('llmState').textContent = same ? '' : 'تغيير غير محفوظ — اضغط «حفظ» لتستخدمه المحادثة';
+    }
+    const provOpen = new Set();
     function renderProviders() {
-      $('providers').innerHTML = llmStatus.providers.map(p => `
-        <div class="prov" data-pid="${p.id}">
-          <div class="prov-head"><span><span class="dot ${p.configured ? 'on' : ''}"></span><b>${esc(p.label)}</b></span>
-            <span class="prov-note">${esc(p.note)}${p.masked_key ? ` · <span dir="ltr">${esc(p.masked_key)}</span>` : ''}</span></div>
+      const a = llmStatus.active;
+      const box = p => `
+        <details class="prov" data-pid="${p.id}" ${provOpen.has(p.id) ? 'open' : ''}>
+          <summary><span><span class="dot ${p.configured ? 'on' : ''}"></span><b>${esc(p.label)}</b></span>
+            ${a && a.provider === p.id ? '<span class="pill-now">مستخدم الآن</span>' : ''}
+            <span class="prov-note">${esc(p.note)}${p.version ? ` · إصدار <span dir="ltr">${esc(p.version)}</span>` : ''}${p.masked_key ? ` · <span dir="ltr">${esc(p.masked_key)}</span>` : ''}${p.warning ? ' · <b style="color:var(--danger)">يحتاج تحديث</b>' : ''}</span></summary>
+          <div class="prov-body">
           ${(p.id === 'ollama' || p.id === 'custom') ? `<div class="prov-row">
             <input type="url" dir="ltr" data-field="url" value="${esc(p.address || '')}" placeholder="${p.id === 'ollama' ? 'http://localhost:11434' : 'https://example.com/v1'}" aria-label="عنوان ${esc(p.label)}" />
             <button class="btn secondary" type="button" data-do="url">حفظ العنوان</button></div>` : ''}
@@ -869,7 +2177,19 @@
             <button class="btn" type="button" data-do="key">حفظ المفتاح</button>
             ${p.key_source === 'saved' ? '<button class="btn secondary" type="button" data-do="delkey">حذف المفتاح</button>' : ''}</div>` : ''}
           <div class="prov-row"><button class="btn secondary" type="button" data-do="ping">اختبار الاتصال</button><span class="prov-state" role="status"></span></div>
-        </div>`).join('');
+          </div>
+        </details>`;
+      const ps = llmStatus.providers.slice();
+      const isActive = p => a && a.provider === p.id;
+      const ready = ps.filter(p => p.configured || isActive(p)).sort((x, y) => isActive(y) - isActive(x));
+      const rest = ps.filter(p => !ready.includes(p));
+      const moreOpen = rest.some(p => provOpen.has(p.id));
+      $('providers').innerHTML = (ready.length ? ready.map(box).join('') : '<p class="diff">ما فيه مزوّد جاهز بعد.</p>') +
+        (rest.length ? `<details class="prov-more" ${moreOpen ? 'open' : ''}><summary>مزوّدون غير مجهّزين (${rest.length}): ${rest.map(p => esc(p.label)).join('، ')}</summary>
+          <div class="prov-list">${rest.map(box).join('')}</div></details>` : '');
+      $('providers').querySelectorAll('details.prov').forEach(d => d.addEventListener('toggle', () => {
+        if (d.open) provOpen.add(d.dataset.pid); else provOpen.delete(d.dataset.pid);
+      }));
       $('providers').querySelectorAll('button[data-do]').forEach(btn => btn.addEventListener('click', () => providerAction(btn)));
     }
     async function providerAction(btn) {
@@ -898,16 +2218,18 @@
         if (again) { again.className = 'prov-state good'; again.textContent = act === 'delkey' ? 'تم حذف المفتاح' : 'تم الحفظ'; }
       } catch (err) { st.className = 'prov-state bad'; st.textContent = 'تعذر: ' + err.message; btn.disabled = false; }
     }
-    $('provider').addEventListener('change', fillModels);
+    $('provider').addEventListener('change', () => { fillModels(); loadProviderModels(false); markLlmDirty(); });
+    $('refreshModels').addEventListener('click', () => loadProviderModels(true));
     $('saveLlm').addEventListener('click', async () => {
-      $('llmState').textContent = 'جاري الحفظ…';
+      $('llmState').className = 'state'; $('llmState').textContent = 'جاري الحفظ…';
       try {
         const res = await fetch('/api/admin/llm', { method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ provider: $('provider').value, model: currentModel() }) });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || res.status);
         await loadLlm();
-      } catch (err) { $('llmState').textContent = 'تعذر الحفظ: ' + err.message; }
+        $('llmState').className = 'state'; $('llmState').textContent = 'تم الحفظ ✓';
+      } catch (err) { $('llmState').className = 'state error'; $('llmState').textContent = 'تعذر الحفظ: ' + err.message; }
     });
     $('runTest').addEventListener('click', async () => {
       const out = $('testOut'); out.hidden = false; out.textContent = 'جاري التجربة…'; $('runTest').disabled = true;
@@ -973,7 +2295,7 @@
       if (!items.length) return '';
       return `<details class="plist" ${open ? 'open' : ''}><summary>${title} (${num(items.length)})</summary><ul>${items.slice(0, 300).map(i => `<li>${fmt(i)}</li>`).join('')}${items.length > 300 ? '<li class="diff">… والباقي</li>' : ''}</ul></details>`;
     }
-    const FIELD_AR = { price: 'السعر', quantity: 'الكمية', shelf_location: 'الرف', barcode: 'الباركود', rewaa_sku: 'رمز رواء' };
+    const FIELD_AR = { price: 'السعر', quantity: 'الكمية', shelf_location: 'الرف', barcode: 'الباركود', rewaa_sku: 'رمز رواء', publisher: 'دار النشر' };
     $('impPlan').addEventListener('click', async () => {
       $('applyState').textContent = '';
       try {
@@ -983,13 +2305,14 @@
         if (!res.ok) throw new Error(p.error || res.status);
         const zero = $('missingZero').checked;
         $('planStats').innerHTML = [[p.new.length, 'كتب جديدة'], [p.updated.length, 'تحديثات'], [p.unchanged.length, 'بدون تغيير'],
-          [p.missing.length, zero ? 'بتصير نافدة' : 'مو موجودة في الملف', zero], [p.invalid.length, 'صفوف فيها مشكلة', true]]
+          [p.missing.length, zero ? 'بتصير نافدة' : 'مو موجودة في الملف', zero], [p.invalid.length, 'صفوف فيها مشكلة', true], [(p.excluded || []).length, 'منتجات ليست كتبًا']]
           .map(([n, l, w]) => `<div class="stat ${w && n ? 'warn' : ''}"><b>${num(n)}</b><span>${l}</span></div>`).join('');
         $('planWarn').hidden = !p.match_warning; $('planWarn').textContent = p.match_warning || '';
         $('planLists').innerHTML =
-          listBlock('كتب جديدة بتنضاف (بطاقتها بانتظار الإثراء)', p.new, i => `<b>${esc(i.title)}</b> <span class="diff">${esc(i.author || 'مؤلف غير معروف')} · ${i.price ?? '—'} ر.س · كمية ${i.quantity ?? '—'} ${i.barcode ? '· ' + esc(i.barcode) : ''}</span>`, true) +
+          listBlock('كتب جديدة بتنضاف (بطاقتها بانتظار الإثراء)', p.new, i => `<b>${esc(i.title)}</b> <span class="diff">${esc(i.author || 'مؤلف غير معروف')}${i.publisher ? ' · ' + esc(i.publisher) : ''} · ${i.price ?? '—'} ر.س · كمية ${i.quantity ?? '—'} ${i.barcode ? '· ' + esc(i.barcode) : ''}</span>`, true) +
           listBlock('تحديثات على كتب موجودة', p.updated, i => `<b>${esc(i.title)}</b> <span class="diff">(مطابقة ب${esc(i.matched_by)}) ${Object.entries(i.changes).map(([k, [a, b]]) => `${FIELD_AR[k] || k}: ${esc(a ?? '—')} ← ${esc(b)}`).join(' · ')}</span>${i.note ? `<br><span class="diff">⚠︎ ${esc(i.note)}</span>` : ''}`, true) +
           listBlock('صفوف فيها مشكلة (ما بتنضاف)', p.invalid, i => `سطر ${num(i.row)}: <b>${esc(i.title || '—')}</b> <span class="warn">${esc(i.problems.join('، '))}</span>`, true) +
+          listBlock('منتجات ليست كتبًا (ما بتنضاف)', p.excluded || [], i => `سطر ${num(i.row)}: <b>${esc(i.title || '—')}</b> <span class="diff">${esc(i.reason)}</span>`) +
           listBlock(zero ? 'كتب بتصير نافدة لأنها مو في الملف' : 'كتب في الكتالوج مو موجودة في الملف (ما بتتغير)', p.missing, i => `${esc(i.title)} <span class="diff">${i.source === 'rewaa' ? 'من رواء' : 'بيانات تجريبية'} · كمية ${num(i.quantity || 0)}</span>`) +
           listBlock('بدون تغيير', p.unchanged, i => `${esc(i.title)}${i.note ? ` <span class="diff">⚠︎ ${esc(i.note)}</span>` : ''}`);
         $('impApply').dataset.armed = ''; $('impApply').textContent = 'تطبيق على الكتالوج';
@@ -1004,12 +2327,69 @@
           body: JSON.stringify({ upload_id: imp.upload_id, mapping: currentMapping(), missing_mode: $('missingZero').checked ? 'zero' : 'report' }) });
         const r = await res.json();
         if (!res.ok) throw new Error(r.error || res.status);
-        $('applyState').textContent = `تم: ${num(r.added)} جديد، ${num(r.updated)} تحديث، ${num(r.marked_out_of_stock)} صارت نافدة، ${num(r.invalid)} صف متجاهل`;
+        $('applyState').textContent = `تم: ${num(r.added)} جديد، ${num(r.updated)} تحديث، ${num(r.marked_out_of_stock)} صارت نافدة، ${num(r.invalid)} صف متجاهل، ${num(r.excluded || 0)} منتج ليس كتابًا`;
         $('mapPanel').hidden = true; imp = null; $('impFile').value = '';
         loadHistory();
       } catch (err) { $('applyState').textContent = 'تعذر التطبيق: ' + err.message; }
       finally { $('impApply').disabled = false; $('impApply').dataset.armed = ''; $('impApply').textContent = 'تطبيق على الكتالوج'; }
     });
+    // ---------------- staff confirmations: out to Claude, corrections back in (2026-10-04)
+    async function confirmPackage() {
+      const res = await fetch('/api/admin/confirmations');
+      if (!res.ok) throw new Error(res.status);
+      return res.json();
+    }
+    async function loadConfirmCount() {
+      try {
+        const p = await confirmPackage();
+        $('cxCount').textContent = p.count ? `${num(p.count)} رد بانتظار التصحيح (من ${num(p.books_needing_confirmation)} كتاب يحتاج تأكيد).`
+          : `لا توجد ردود جديدة. ${num(p.books_needing_confirmation)} كتاب ما زال يحتاج تأكيد من الموظفين.`;
+        $('cxCopy').disabled = $('cxDownload').disabled = !p.count;
+      } catch (err) { $('cxCount').textContent = 'تعذر تحميل الردود'; }
+    }
+    async function confirmOut(download) {
+      const st = $('cxState'); st.className = 'state'; st.textContent = '';
+      try {
+        const p = await confirmPackage(), text = JSON.stringify(p, null, 1);
+        if (download) {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+          a.download = `confirmations-${p.exported_at.slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(a.href);
+          st.textContent = `نُزّل ملف فيه ${num(p.count)} رد.`;
+        } else {
+          try { await navigator.clipboard.writeText(text); st.textContent = `نُسخ ${num(p.count)} رد. الصقها في محادثة Claude.`; }
+          catch (e) { $('cxText').value = text; $('cxText').select(); st.textContent = 'المتصفح منع النسخ التلقائي؛ النص في المربع تحت، انسخه يدويًا ثم امسحه.'; }
+        }
+      } catch (err) { st.className = 'state error'; st.textContent = 'تعذر تجهيز الردود'; }
+    }
+    async function confirmCorrections(apply) {
+      const st = $('cxPlanState'); st.className = 'state';
+      let pkg;
+      try { pkg = JSON.parse($('cxText').value); } catch (e) { st.className = 'state error'; st.textContent = 'النص ليس ملف تصحيحات صالحًا. الصقه كاملًا كما أعطاك إياه Claude.'; return; }
+      st.textContent = apply ? 'جاري التطبيق…' : 'جاري الفحص…'; $('cxPreview').disabled = $('cxApply').disabled = true;
+      try {
+        const res = await fetch('/api/admin/confirmations/corrections', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ package: pkg, apply }) });
+        const d = await res.json();
+        const items = d.items || [];
+        $('cxPlan').innerHTML = items.length ? `<thead><tr><th>الكتاب</th><th>التغيير</th><th>الحالة</th></tr></thead><tbody>${items.map(r => `<tr>
+          <td dir="auto">${esc(r.title || '')} <span class="diff">#${r.book_id ?? ''}</span></td>
+          <td>${r.changes.length ? r.changes.map(c => `<div><b>${esc(c.label)}:</b> <span class="diff" dir="auto">${esc(c.old ?? '—')}</span> ← <b dir="auto">${esc(c.new ?? '—')}</b></div>`).join('') : '<span class="diff">بدون تغيير في السجل (يُقفل الرد فقط)</span>'}${r.note ? `<div class="diff" dir="auto">${esc(r.note)}</div>` : ''}</td>
+          <td>${r.ok ? (d.applied ? '<span class="okflag">طُبّق</span>' : '<span class="okflag">جاهز</span>') : `<span class="warn">${esc(r.problem || '')}</span>`}</td></tr>`).join('')}</tbody>` : '';
+        if (d.applied) {
+          st.textContent = `تم: صُحّح ${num(d.books)} كتاب وأُقفل ${num(d.handled)} رد. النسخة الاحتياطية: ${d.backup}`;
+          $('cxApply').hidden = true; $('cxText').value = ''; loadConfirmCount(); loadCatalog();
+        } else if (d.ok) { st.textContent = `${num(items.length)} بند جاهز. راجع الجدول ثم اضغط «تطبيق التصحيحات».`; $('cxApply').hidden = false; }
+        else { st.className = 'state error'; st.textContent = d.error || 'تعذر الفحص'; $('cxApply').hidden = true; }
+      } catch (err) { st.className = 'state error'; st.textContent = 'تعذر الاتصال بالخادم'; }
+      finally { $('cxPreview').disabled = $('cxApply').disabled = false; }
+    }
+    $('cxCopy').addEventListener('click', () => confirmOut(false));
+    $('cxDownload').addEventListener('click', () => confirmOut(true));
+    $('cxPreview').addEventListener('click', () => confirmCorrections(false));
+    $('cxApply').addEventListener('click', () => confirmCorrections(true));
+    $('cxText').addEventListener('input', () => { $('cxApply').hidden = true; });
+    $('cxFile').addEventListener('change', async e => { const f = e.target.files[0]; if (f) { $('cxText').value = await f.text(); $('cxApply').hidden = true; confirmCorrections(false); } e.target.value = ''; });
+
     async function loadHistory() {
       try {
         const h = await (await fetch('/api/admin/import/history')).json();
@@ -1048,6 +2428,7 @@
       const manager = ME.role === 'manager';
       $('tabImport').hidden = !manager; $('tabSettings').hidden = !manager; $('tabStats').hidden = !manager;
       ['aPass', 'aPass2', 'pCur', 'pNew'].forEach(id => { $(id).value = ''; });
+      loadInboxCount();
     }
     $('authForm').addEventListener('submit', async e => {
       e.preventDefault(); $('authErr').textContent = ''; $('authBtn').disabled = true;
@@ -1135,7 +2516,7 @@
       const res = await fetch('/api/admin/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ daily_model_calls: Number($('capInput').value) }) });
       $('capState').textContent = res.ok ? 'تم الحفظ' : 'قيمة غير صحيحة'; loadUsage(); loadAudit();
     });
-    const AUDIT_LABELS = { 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف',
+    const AUDIT_LABELS = { 'inbox.export': 'تنزيل ملف البلاغات', 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف',
       'user.password_changed': 'تغيير كلمة المرور', 'book.update': 'تعديل كتاب', 'card.confirm': 'تأكيد صفة', 'card.reject': 'حذف صفة',
       'card.restore': 'استرجاع صفة', 'card.set': 'تعيين صفة', 'card.add': 'إضافة صفة', 'model.set': 'تغيير النموذج',
       'key.saved': 'حفظ مفتاح', 'key.deleted': 'حذف مفتاح', 'endpoint.set': 'تغيير عنوان مزوّد', 'import.apply': 'استيراد من رواء',
@@ -1147,13 +2528,145 @@
       } catch (e) { $('auditTable').innerHTML = '<tbody><tr><td>تعذر التحميل</td></tr></tbody>'; }
     }
 
+    // ---------------- inbox (staff and manager): visitor reports about a book, and visitor suggestions
+    const inbox = { kind: 'report', status: 'open', items: [], total: 0 };
+    let staffOpen = 0;   // open «تعديلات الموظفين», counted in the tab badge with the visitors' notes
+    function showInboxCounts(c) {
+      if (!c) return;
+      if (typeof c.staff_open === 'number') { $('inboxTabStaff').hidden = false; staffOpen = c.staff_open; $('inboxNStaff').textContent = staffOpen ? num(staffOpen) : ''; }
+      const open = (c.open || 0) + staffOpen;
+      $('inboxN').hidden = !open; $('inboxN').textContent = open ? num(open) : '';
+      $('tabInbox').setAttribute('aria-label', open ? `البلاغات، ${num(open)} بانتظار المعالجة` : 'البلاغات');
+      $('inboxNReport').textContent = c.report.open ? num(c.report.open) : '';
+      $('inboxNSuggestion').textContent = c.suggestion.open ? num(c.suggestion.open) : '';
+    }
+    async function loadInboxCount() {
+      if (!ME) return;
+      try { const res = await rawFetch('/api/admin/inbox/count'); if (res.ok) showInboxCounts(await res.json()); } catch (e) { /* the badge just stays as it is */ }
+    }
+    function setExportLink() {
+      // the file follows the status chosen above (open / handled / all)
+      const a = $('inboxExport');
+      if (a) a.href = `/api/admin/inbox/export?status=${inbox.status}`;
+    }
+    async function loadInbox(msg, more) {
+      setExportLink();
+      // more: fetch the next page (older notes) and keep what is already listed
+      $('inboxState').textContent = msg || 'جاري التحميل…';
+      const offset = more ? inbox.items.length : 0;
+      if (inbox.kind === 'questions') return loadQuestions(msg, more, offset);
+      if (inbox.kind === 'staff') return loadStaffNotes(msg, more, offset);
+      try {
+        const res = await fetch(`/api/admin/inbox?kind=${inbox.kind}&status=${inbox.status}&offset=${offset}`);
+        if (!res.ok) throw new Error(res.status);
+        const d = await res.json();
+        inbox.items = more ? inbox.items.concat(d.items) : d.items;
+        inbox.total = typeof d.total === 'number' ? d.total : inbox.items.length;
+        showInboxCounts(d.counts); renderInbox(inbox.items, msg);
+      } catch (e) { $('inboxState').textContent = 'تعذر تحميل البلاغات.'; if (!more) $('inboxList').innerHTML = ''; }
+    }
+    // «أسئلة بلا جواب» (2026-10-08): what visitors asked and our data could not answer, counted by phrase
+    async function loadQuestions(msg, more, offset) {
+      try {
+        const res = await fetch(`/api/admin/inbox/questions?status=${inbox.status}&offset=${offset}`);
+        if (!res.ok) throw new Error(res.status);
+        const d = await res.json();
+        inbox.items = more ? inbox.items.concat(d.items) : d.items;
+        inbox.total = d.total;
+        $('inboxNQuestions').textContent = d.counts.open ? num(d.counts.open) : '';
+        const rest = Math.max(0, inbox.total - inbox.items.length);
+        $('inboxState').textContent = msg || (inbox.items.length ? `عدد الأسئلة: ${num(inbox.total)}` : '');
+        $('inboxList').innerHTML = inbox.items.length ? `<p class="state" style="margin:0 0 8px">عبارات قصيرة فقط من طلبات الزوار (بدون رسائلهم كاملة)، مرتبة حسب عدد المرات. تساعدنا نعرف وش نبحث بعدها.</p>` + inbox.items.map(n => {
+          const done = n.status === 'done';
+          return `<div class="note-row${done ? ' done' : ''}"><div><p class="nr-text" dir="auto" style="margin-top:0"><b>${esc(n.phrase)}</b>${n.book_title ? ` <span class="nr-meta">(عن «${esc(n.book_title)}»)</span>` : ''}</p>
+            <span class="nr-reason">${esc(n.kind_label)} · ${num(n.times)} ${n.times === 1 ? 'مرة' : 'مرات'}</span>
+            <span class="nr-meta">آخر مرة ${when(n.last_at)}${done ? ` · عالجه ${esc(n.handled_by || '—')}` : ''}</span></div>
+            <div class="nr-actions"><button type="button" class="btn${done ? ' secondary' : ''}" data-q="${n.q_id}" data-to="${done ? 'open' : 'done'}">${done ? 'إعادة فتح' : 'تمت المعالجة'}</button></div></div>`;
+        }).join('') + (rest ? `<div class="nr-actions" style="justify-content:center"><button type="button" class="btn secondary" id="questionsMore">عرض المزيد (باقي ${num(rest)})</button></div>` : '')
+          : `<div class="empty-note">${inbox.status === 'open' ? 'ما فيه أسئلة مفتوحة.' : 'ما فيه أسئلة.'}</div>`;
+        if ($('questionsMore')) $('questionsMore').addEventListener('click', () => { $('questionsMore').disabled = true; loadInbox(null, true); });
+        $('inboxList').querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', async () => {
+          b.disabled = true;
+          const r = await fetch(`/api/admin/inbox/questions/${b.dataset.q}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: b.dataset.to }) });
+          if (r.ok) loadInbox(); else { b.disabled = false; $('inboxState').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
+        }));
+      } catch (e) { $('inboxState').textContent = 'تعذر تحميل الأسئلة.'; if (!more) $('inboxList').innerHTML = ''; }
+    }
+    // «تعديلات الموظفين» (2026-10-08): what staff wrote in the book cards, gathered in one list
+    async function loadStaffNotes(msg, more, offset) {
+      try {
+        const res = await fetch(`/api/admin/inbox/staff-notes?status=${inbox.status}&offset=${offset}`);
+        if (!res.ok) throw new Error(res.status);
+        const d = await res.json();
+        inbox.items = more ? inbox.items.concat(d.items) : d.items;
+        inbox.total = d.total;
+        staffOpen = d.counts.open; $('inboxNStaff').textContent = staffOpen ? num(staffOpen) : '';
+        loadInboxCount();
+        const rest = Math.max(0, inbox.total - inbox.items.length);
+        $('inboxState').textContent = msg || (inbox.items.length ? `عدد التعديلات: ${num(inbox.total)}${rest ? ` · المعروض ${num(inbox.items.length)}` : ''}` : '');
+        $('inboxList').innerHTML = inbox.items.length ? `<p class="state" style="margin:0 0 8px">ما كتبه الموظفون في بطاقات الكتب من تعديلات مطلوبة. الملاحظة ما تغيّر الكتاب؛ نفّذ التعديل في البطاقة ثم اضغط «تم التعديل».</p>`
+          + inbox.items.map(n => staffNoteRow(n, true)).join('')
+          + (rest ? `<div class="nr-actions" style="justify-content:center"><button type="button" class="btn secondary" id="staffMore">عرض الأقدم (باقي ${num(rest)})</button></div>` : '')
+          : `<div class="empty-note">${inbox.status === 'open' ? 'ما فيه تعديلات مفتوحة.' : 'ما فيه تعديلات.'}</div>`;
+        if ($('staffMore')) $('staffMore').addEventListener('click', () => { $('staffMore').disabled = true; loadInbox(null, true); });
+        $('inboxList').querySelectorAll('[data-open-book]').forEach(b => b.addEventListener('click', () => openCard(Number(b.dataset.openBook))));
+        $('inboxList').querySelectorAll('[data-sn]').forEach(b => b.addEventListener('click', async () => {
+          b.disabled = true;
+          const r = await fetch(`/api/admin/inbox/staff-notes/${b.dataset.sn}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: b.dataset.to }) });
+          if (r.ok) loadInbox(); else { b.disabled = false; $('inboxState').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
+        }));
+      } catch (e) { $('inboxState').textContent = 'تعذر تحميل التعديلات.'; if (!more) $('inboxList').innerHTML = ''; }
+    }
+    function renderInbox(items, msg) {
+      const report = inbox.kind === 'report';
+      const what = report ? 'عدد البلاغات' : 'عدد الاقتراحات';
+      const emptyText = inbox.status === 'open' ? (report ? 'ما فيه بلاغات مفتوحة.' : 'ما فيه اقتراحات جديدة.') : (report ? 'ما فيه بلاغات.' : 'ما فيه اقتراحات.');
+      const rest = Math.max(0, inbox.total - items.length);
+      $('inboxState').textContent = msg || (items.length ? `${what}: ${num(inbox.total)}${rest ? ` · المعروض ${num(items.length)}` : ''}` : '');
+      $('inboxList').innerHTML = items.length ? items.map(n => {
+        const done = n.status === 'done';
+        const meta = `${when(n.created_at)}${n.language === 'en' ? ' · من الواجهة الإنجليزية' : ''}${done ? ` · عالجه ${esc(n.handled_by || '—')} ${when(n.handled_at)}` : ''}`;
+        const head = report
+          ? `<div class="nr-book">${cover({ book_id: n.book_id || 0, title: n.book_title, cover_url: n.cover_url })}<div><b>${esc(n.book_title || 'كتاب محذوف')}</b>
+               <span class="nr-meta">${esc(n.book_author || '')}${n.book_exists ? '' : ' · الكتاب لم يعد في الكتالوج'}</span>
+               <span class="nr-reason">الخطأ في: ${esc(n.reason_label || n.reason || '—')}</span>
+               ${n.note ? `<p class="nr-text" dir="auto">${esc(n.note)}</p>` : ''}<span class="nr-meta">${meta}</span></div></div>`
+          : `<div><p class="nr-text" dir="auto" style="margin-top:0">${esc(n.note || '')}</p><span class="nr-meta">${meta}</span></div>`;
+        return `<div class="note-row${done ? ' done' : ''}">${head}<div class="nr-actions">
+            ${report && n.book_exists ? `<button type="button" class="btn secondary" data-open-book="${n.book_id}">افتح بطاقة الكتاب</button>` : ''}
+            <button type="button" class="btn${done ? ' secondary' : ''}" data-note="${n.note_id}" data-to="${done ? 'open' : 'done'}">${done ? 'إعادة فتح' : 'تمت المعالجة'}</button></div></div>`;
+      }).join('') + (rest ? `<div class="nr-actions" style="justify-content:center"><button type="button" class="btn secondary" id="inboxMore">عرض الأقدم (باقي ${num(rest)})</button></div>` : '')
+        : `<div class="empty-note">${emptyText}</div>`;
+      if ($('inboxMore')) $('inboxMore').addEventListener('click', () => { $('inboxMore').disabled = true; loadInbox(null, true); });
+      $('inboxList').querySelectorAll('[data-open-book]').forEach(b => b.addEventListener('click', () => openCard(Number(b.dataset.openBook))));
+      $('inboxList').querySelectorAll('[data-note]').forEach(b => b.addEventListener('click', async () => {
+        b.disabled = true;
+        try {
+          const res = await fetch(`/api/admin/inbox/${b.dataset.note}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: b.dataset.to }) });
+          if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.status);
+          await loadInbox();
+        } catch (e) { b.disabled = false; $('inboxState').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
+      }));
+    }
+    document.querySelectorAll('#inboxStatus button').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('#inboxStatus button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      inbox.status = btn.dataset.status; loadInbox();
+    }));
+    [['report', 'inboxTabReport'], ['suggestion', 'inboxTabSuggestion'], ['questions', 'inboxTabQuestions'], ['staff', 'inboxTabStaff']].forEach(([kind, id]) => $(id).addEventListener('click', () => {
+      inbox.kind = kind;
+      ['inboxTabReport', 'inboxTabSuggestion', 'inboxTabQuestions', 'inboxTabStaff'].forEach(other => { $(other).setAttribute('aria-selected', String(other === id)); $(other).tabIndex = other === id ? 0 : -1; });
+      $('inboxList').setAttribute('aria-labelledby', id);
+      loadInbox();
+    }));
+    setInterval(() => { if (ME && !document.hidden) loadInboxCount(); }, 60000);
+
     // ---------------- statistics (manager): reading trends and satisfaction
     let statDays = 30;
     const SAT = [['perfect', 'مناسبة جدًا', '#5A8F4E'], ['close', 'قريبة', '#C8A13E'], ['no', 'غير مناسبة', '#D8614A']];
     const pct = v => v == null ? '—' : num(v) + '٪';
     const shortDay = d => new Date(d + 'T12:00:00').toLocaleDateString('ar-SA-u-ca-gregory', { day: 'numeric', month: 'short' });
-    document.querySelectorAll('.seg button').forEach(btn => btn.addEventListener('click', () => {
-      document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    document.querySelectorAll('#statsView .seg button').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('#statsView .seg button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
       statDays = Number(btn.dataset.days); loadStats();
     }));
     async function loadStats() {
@@ -1272,6 +2785,16 @@
       } catch (e) { st.textContent = 'تعذر الحفظ'; }
       finally { $('secSave').disabled = false; }
     });
+
+    // ---------------- app version (the VERSION file, read by the running server)
+    async function loadVersion() {
+      const el = $('aboutVersion');
+      try {
+        const res = await fetch('/api/admin/version');
+        const v = res.ok ? (await res.json()).version : null;
+        el.textContent = v ? v.replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]).replace(/\./g, '٫') : '—';
+      } catch (e) { el.textContent = '—'; }
+    }
 
     // ---------------- trial QR code (manager)
     async function loadTrial() {

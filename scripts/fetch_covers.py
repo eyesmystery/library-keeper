@@ -7,12 +7,15 @@ Options:
   --sources LIST      e.g. openlibrary,goodreads   (default: openlibrary,goodreads,abjjad)
   --include-inactive  also books that are inactive / out of stock (default: in-stock books first, then the rest)
   --delay SECONDS     pause between books (default 1.0, be polite to the sites)
+  --records DIR       search covers (Open Library -> Goodreads -> Abjjad) for the identified books of a
+                      research folder that still have no cover
   --urls FILE         instead: download the image URLs found during research ({"book_id": "https://…"},
                       written by scripts/import_enrichment.py as covers_todo.json); skips books that have a cover
 Books still without a cover are listed in reports/covers_missing.csv for a web search during research
 (scripts/import_enrichment.py stores a found image URL) or a staff upload in the admin page.
 """
 import argparse
+import glob
 import csv
 import json
 import os
@@ -35,6 +38,7 @@ def main(argv=None):
     ap.add_argument("--delay", type=float, default=1.0)
     ap.add_argument("--report", default=os.path.join(ROOT, "reports", "covers_missing.csv"))
     ap.add_argument("--urls")
+    ap.add_argument("--records", help="research folder: search covers for its identified books that still have none")
     args = ap.parse_args(argv)
     if args.urls:
         return from_urls(args.urls, args.delay)
@@ -48,7 +52,16 @@ def main(argv=None):
     rows = [dict(r) for r in conn.execute(
         "SELECT * FROM books ORDER BY (active = 1 AND quantity > 0) DESC, book_id")]
     conn.close()
-    if args.book_id:
+    if args.records:
+        ids = set()
+        for f in glob.glob(os.path.join(args.records, "*.json")):
+            if os.path.basename(f).startswith(("_", "import_report", "covers_")):
+                continue
+            d = json.load(open(f, encoding="utf-8"))
+            if (d.get("match") or {}).get("status") == "matched" and isinstance(d.get("book_id"), int):
+                ids.add(d["book_id"])
+        rows = [r for r in rows if r["book_id"] in ids and not covers.has_local_cover(r)]
+    elif args.book_id:
         rows = [r for r in rows if r["book_id"] in args.book_id]
     elif not args.include_inactive:
         rows = [r for r in rows if r["active"] and (r["quantity"] or 0) > 0]
@@ -103,8 +116,17 @@ def from_urls(path, delay):
             ok += 1
             print(f"[{n}/{len(todo)}] OK   {got['cover_source']:<11} {book['title']}", flush=True)
         except Exception as e:
-            failed += 1
-            print(f"[{n}/{len(todo)}] --   {book['title']}: {str(e)[:100]}", flush=True)
+            # the researched page gave nothing: try the automatic search (Open Library -> Goodreads -> Abjjad)
+            try:
+                auto = covers.fetch_cover(dict(book))
+            except Exception:
+                auto = None
+            if auto:
+                ok += 1
+                print(f"[{n}/{len(todo)}] OK   {auto['source']:<11} {book['title']}  (search)", flush=True)
+            else:
+                failed += 1
+                print(f"[{n}/{len(todo)}] --   {book['title']}: {str(e)[:140]}", flush=True)
         time.sleep(delay)
     print(f"\nSaved {ok}, already had a cover {skipped}, failed {failed}")
     return 0

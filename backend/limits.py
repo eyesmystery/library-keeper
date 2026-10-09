@@ -17,6 +17,8 @@ import llm
 from models import get_connection
 
 PER_ADDRESS = (int(os.environ.get("LIBRARY_KEEPER_RATE_ADDR", "300")), 600)   # requests / seconds
+PER_ADDRESS_NOTES = (int(os.environ.get("LIBRARY_KEEPER_RATE_NOTES", "40")), 600)  # reports + suggestions
+PER_ADDRESS_FEEDBACK = (int(os.environ.get("LIBRARY_KEEPER_RATE_FEEDBACK", "60")), 600)  # ratings
 PER_CONVERSATION = (int(os.environ.get("LIBRARY_KEEPER_RATE_CONV", "30")), 600)
 DEFAULT_DAILY_CALLS = 1000
 
@@ -39,6 +41,23 @@ def allow_request(address, conversation_id=None):
     ok = _allow("a:" + str(address), *PER_ADDRESS)
     if ok and conversation_id:
         ok = _allow("c:" + str(conversation_id)[:64], *PER_CONVERSATION)
+    if not ok:
+        bump("rate_limited")
+    return ok
+
+
+def allow_note(address):
+    """Visitor reports and suggestions: a much smaller allowance than chat (they are typed by hand)."""
+    ok = _allow("n:" + str(address), *PER_ADDRESS_NOTES) and _allow("a:" + str(address), *PER_ADDRESS)
+    if not ok:
+        bump("rate_limited")
+    return ok
+
+
+def allow_feedback(address):
+    """Ratings: a visitor sends one after choosing a book, so a small allowance per address is enough
+    and keeps unlinked ratings from flooding the statistics (audit 2026-10-02)."""
+    ok = _allow("f:" + str(address), *PER_ADDRESS_FEEDBACK) and _allow("a:" + str(address), *PER_ADDRESS)
     if not ok:
         bump("rate_limited")
     return ok
@@ -85,8 +104,9 @@ def record_call(call):
     conn = get_connection()
     try:
         conn.execute("INSERT OR IGNORE INTO usage_daily (day) VALUES (?)", (today(),))
-        conn.execute("UPDATE usage_daily SET model_calls = model_calls + 1, tokens = tokens + ? WHERE day = ?",
-                     (tokens, today()))
+        # a call with a corrective retry is two provider requests
+        conn.execute("UPDATE usage_daily SET model_calls = model_calls + ?, tokens = tokens + ? WHERE day = ?",
+                     (max(1, int(call.get("attempts") or 1)), tokens, today()))
         conn.commit()
     finally:
         conn.close()

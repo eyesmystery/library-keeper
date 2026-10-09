@@ -9,8 +9,11 @@ Usage:  backend/venv/bin/python scripts/backup_db.py [--reason TEXT]
    ~/Library/Mobile Documents/com~apple~CloudDocs/Projects/Apps/Library Keeper Backups
    Override with LIBRARY_KEEPER_BACKUP_MIRROR (empty string = no mirror).
 3. A Git bundle of all commits is written next to the mirror copy (code backup).
-4. Cover images (data/covers) are copied to <mirror>/covers (new or changed files only).
-4. Keeps the newest 30 database backups in each folder; older ones are removed.
+4. Picture files are copied (new or changed files only, nothing is ever deleted from a copy):
+   data/covers -> <mirror>/covers; data/event_images -> <mirror>/event_images AND backups/event_images
+   (event pictures are few and exist nowhere else, so they also get a copy on this computer, which is
+   the only copy when there is no mirror). scripts/restore_db.py puts them back.
+5. Keeps the newest 30 database backups in each folder; older ones are removed.
 A line is appended to backups/backup_log.txt for every run. Exit code 0 = local backup OK.
 """
 import argparse
@@ -41,7 +44,10 @@ def log(msg):
 
 
 def snapshot(dest):
-    src = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+    # A leftover journal from an interrupted write (a "hot journal") must be rolled back before
+    # the file can be read; a read-only connection cannot do that, so open read-write then.
+    hot = os.path.exists(DB + "-journal") and os.path.getsize(DB + "-journal") > 0
+    src = sqlite3.connect(DB) if hot else sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
     out = sqlite3.connect(dest)
     try:
         src.backup(out)
@@ -62,6 +68,27 @@ def prune(folder, pattern):
         os.remove(old)
 
 
+ASSETS = ("covers", "event_images")   # folders under data/ that hold picture files named by the database
+
+
+def copy_assets(src_dir, dst_dir):
+    """Copy new or changed files (same rule as always for covers). -> number copied."""
+    if not os.path.isdir(src_dir):
+        return None
+    os.makedirs(dst_dir, exist_ok=True)
+    copied = 0
+    for fname in os.listdir(src_dir):
+        src = os.path.join(src_dir, fname)
+        dst = os.path.join(dst_dir, fname)
+        if not os.path.isfile(src) or fname.endswith(".part"):
+            continue
+        if not os.path.exists(dst) or os.path.getsize(dst) != os.path.getsize(src) \
+                or os.path.getmtime(dst) < os.path.getmtime(src):
+            shutil.copy2(src, dst)
+            copied += 1
+    return copied
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--reason", default="manual")
@@ -79,6 +106,12 @@ def main():
         return 1
     prune(LOCAL, "library-*.db")
     log(f"OK local {name} ({books} books, {os.path.getsize(local_path)} bytes, reason: {args.reason})")
+    try:  # event pictures: a copy on this computer too (audit 2026-10-08)
+        n = copy_assets(os.path.join(ROOT, "data", "event_images"), os.path.join(LOCAL, "event_images"))
+        if n is not None:
+            log(f"OK local event_images ({n} new or changed)")
+    except Exception as e:  # noqa: BLE001 - the database backup itself is fine
+        log(f"WARN local event_images copy failed: {e}")
 
     mirror = os.environ.get("LIBRARY_KEEPER_BACKUP_MIRROR", DEFAULT_MIRROR)
     if mirror:
@@ -90,24 +123,13 @@ def main():
         except Exception as e:  # noqa: BLE001 - the local copy still exists
             log(f"WARN mirror failed ({mirror}): {e}")
             return 0
-        try:  # cover images (data/covers): copy new or changed files only; nothing is deleted in the mirror
-            covers_src = os.path.join(ROOT, "data", "covers")
-            if os.path.isdir(covers_src):
-                covers_dst = os.path.join(mirror, "covers")
-                os.makedirs(covers_dst, exist_ok=True)
-                copied = 0
-                for fname in os.listdir(covers_src):
-                    src = os.path.join(covers_src, fname)
-                    dst = os.path.join(covers_dst, fname)
-                    if not os.path.isfile(src) or fname.endswith(".part"):
-                        continue
-                    if not os.path.exists(dst) or os.path.getsize(dst) != os.path.getsize(src) \
-                            or os.path.getmtime(dst) < os.path.getmtime(src):
-                        shutil.copy2(src, dst)
-                        copied += 1
-                log(f"OK covers ({copied} new or changed)")
-        except Exception as e:  # noqa: BLE001
-            log(f"WARN covers mirror failed: {e}")
+        for folder in ASSETS:  # picture files: copy new or changed files only; nothing is deleted in the mirror
+            try:
+                n = copy_assets(os.path.join(ROOT, "data", folder), os.path.join(mirror, folder))
+                if n is not None:
+                    log(f"OK {folder} ({n} new or changed)")
+            except Exception as e:  # noqa: BLE001
+                log(f"WARN {folder} mirror failed: {e}")
         try:
             has_commits = shutil.which("git") and subprocess.run(
                 ["git", "-C", ROOT, "rev-parse", "--verify", "HEAD"], capture_output=True).returncode == 0

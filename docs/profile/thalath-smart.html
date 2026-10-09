@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>ثلاث الذكي — ملف تعريفي</title>
+<style>
+@font-face{font-family:"Markazi";src:url("img/MarkaziText.ttf");font-weight:400 700}
+:root{--sage:#BFCCB8;--sage2:#ADB7A7;--coral:#D8614A;--brown:#3B1F14;--grey:#DDD9D9;--paper:#F7F3EC;--surface:#FFFCF7;--muted:#756B65}
+@page{size:A4;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper)}
+body{font-family:"Markazi",serif;color:var(--brown);font-size:15.5pt;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:210mm;height:297mm;position:relative;overflow:hidden;page-break-after:always;padding:20mm 18mm 16mm}
+.page:last-child{page-break-after:auto}
+.sage{background:var(--sage)}
+.pattern::before{content:"";position:absolute;inset:0;background:url("img/pattern_small.png") center/cover;opacity:.35;pointer-events:none}
+.page>*{position:relative}
+.kicker{font-size:12pt;font-weight:600;color:var(--coral);letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.kicker::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--coral)}
+h1{font-size:34pt;line-height:1.15;font-weight:700;margin:6px 0 10px}
+h2{font-size:24pt;line-height:1.2;font-weight:700;margin:4px 0 8px}
+h3{font-size:16pt;font-weight:700;margin-bottom:2px}
+p.lead{font-size:16.5pt;color:var(--brown);max-width:150mm}
+.muted{color:var(--muted)}
+.foot{position:absolute;bottom:9mm;left:18mm;right:18mm;display:flex;justify-content:space-between;align-items:center;font-size:10.5pt;color:var(--muted)}
+.foot img{height:12px}
+.foot .mk{height:26px}
+/* phone */
+.phone{border:5px solid var(--brown);border-radius:26px;overflow:hidden;background:var(--paper);box-shadow:0 6px 18px rgba(59,31,20,.12)}
+.phone img{display:block;width:100%}
+.cap{font-size:11.5pt;color:var(--muted);text-align:center;margin-top:7px;line-height:1.35}
+.cap b{color:var(--brown);display:block;font-size:12.5pt}
+/* cover */
+.cover{display:flex;flex-direction:column;padding:22mm 18mm 18mm}
+.cover .top{display:flex;justify-content:space-between;align-items:flex-start}
+.cover .marsa{width:104mm;margin:14mm 0 0 auto;display:block}
+.cover .sub{font-size:26pt;font-weight:600;margin-top:4mm}
+.cover .tag{font-size:15pt;color:var(--brown);opacity:.85;max-width:95mm;margin-top:3mm}
+.cover .phones{position:absolute;left:16mm;bottom:40mm;display:flex;gap:6mm;align-items:flex-end}
+.cover .phones .phone{width:52mm}
+.cover .phones .phone.b{width:46mm;margin-bottom:12mm}
+.cover .partner{position:absolute;right:18mm;bottom:18mm;left:18mm;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(59,31,20,.25);padding-top:5mm}
+.cover .partner .t{font-size:12pt}
+.cover .partner img{height:13mm}
+/* grids */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8mm}
+.card{background:var(--surface);border:1px solid var(--grey);border-radius:16px;padding:6mm 6mm 5mm}
+.card.sageb{background:rgba(191,204,184,.45);border-color:transparent}
+ul.clean{list-style:none}
+ul.clean li{padding-right:14px;position:relative;margin:2px 0;font-size:14pt;line-height:1.45}
+ul.clean li::before{content:"";position:absolute;right:0;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--coral)}
+.quote{font-size:19pt;font-weight:600;line-height:1.4;border-right:4px solid var(--coral);padding:2mm 6mm 2mm 0;margin:6mm 0 7mm}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:6mm;margin-top:5mm}
+.step{background:var(--brown);color:var(--paper);border-radius:16px;padding:6mm}
+.step .n{width:30px;height:30px;border-radius:50%;background:var(--coral);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14pt;margin-bottom:3mm}
+.step h3{color:var(--paper)}
+.step p{font-size:13pt;line-height:1.45;opacity:.9}
+.phones4{display:grid;grid-template-columns:repeat(4,1fr);gap:5mm;margin-top:6mm}
+.phones3{display:grid;grid-template-columns:repeat(3,1fr);gap:7mm}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:3mm}
+.pill{background:var(--surface);border:1px solid var(--grey);border-radius:999px;padding:1px 12px;font-size:12.5pt}
+.pill.s{background:var(--sage);border-color:var(--sage)}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:5mm;margin:6mm 0}
+.num{background:var(--surface);border:1px solid var(--grey);border-radius:16px;padding:5mm 4mm;text-align:center}
+.num b{display:block;font-size:28pt;line-height:1.05;color:var(--coral)}
+.num span{font-size:12pt;color:var(--muted);line-height:1.3;display:block;margin-top:2mm}
+.road{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin-top:4mm}
+.road .r{border-top:4px solid var(--sage2);padding-top:3mm}
+.road .r.now{border-color:var(--coral)}
+.road .r small{font-size:11pt;color:var(--coral);font-weight:700}
+.road .r p{font-size:13pt;line-height:1.4}
+.note{font-size:11pt;color:var(--muted);line-height:1.4}
+.closing{position:absolute;bottom:18mm;left:18mm;right:18mm;background:var(--sage);border-radius:22px;padding:9mm 10mm;display:flex;justify-content:space-between;align-items:center;overflow:hidden}
+.closing img.m{height:19mm;width:auto;flex:none}
+.closing img.t{height:10mm;width:auto;flex:none}
+.closing .mid{font-size:15pt;font-weight:600;text-align:center;flex:1;min-width:0;padding:0 6mm;line-height:1.4}
+.p4 ul.clean li{font-size:13pt;line-height:1.4}.p4 .card{padding:5mm 5mm 4mm}.p4 .pill{font-size:11.5pt}
+</style>
+</head>
+<body>
+
+<!-- 1. Cover -->
+<section class="page sage pattern cover">
+  <div class="top">
+    <div class="kicker">تعريف بالمشروع</div>
+    <div class="muted" style="font-size:12pt">أكتوبر ٢٠٢٦</div>
+  </div>
+  <img class="marsa" src="img/thalath-smart.svg" alt="ثلاث الذكي">
+  <div class="sub">مساعد القارئ في مكتبة ثلاث</div>
+  <p class="tag">يحوّل رغبة القارئ في القراءة، مهما كانت غامضة، إلى كتاب متوفر على الرف في دقائق، عبر محادثة عربية قصيرة.</p>
+  <div class="phones">
+    <div><div class="phone b"><img src="img/s_detail.jpg" alt=""></div></div>
+    <div><div class="phone"><img src="img/s_welcome.jpg" alt=""></div></div>
+  </div>
+  <div class="partner">
+    <div class="t">نسخة تجريبية جاهزة للتشغيل داخل<br><b style="font-size:14pt">مكتبة ثلاث — وجهتك الثقافية</b></div>
+    <div class="t" style="text-align:left">الإصدار ٠٫٩ التجريبي</div>
+  </div>
+</section>
+
+<!-- 2. Idea -->
+<section class="page">
+  <div class="kicker">الفكرة</div>
+  <h1>القارئ يريد أن يقرأ،<br>لكنه لا يعرف من أين يبدأ</h1>
+  <p class="lead">كثير من زوّار المكتبات يدخلون متحمسين للقراءة، ثم تربكهم الرفوف الكثيرة والعناوين غير المألوفة، فيخرجون بلا كتاب أو يكتفون بالأشهر. «ثلاث الذكي» يمنح هذا القارئ مرشدًا يحاوره بلغته، ويرشده إلى كتاب مناسب له ومتوفر فعلًا في المكتبة.</p>
+  <div class="quote">«تحويل رغبة الزائر الغامضة في القراءة إلى اختيار واضح ومقنع من الكتب المتوفرة فعليًا داخل المكتبة، خلال محادثة قصيرة وممتعة.»</div>
+  <div class="two">
+    <div class="card">
+      <h3>ما يواجهه القارئ</h3>
+      <ul class="clean">
+        <li>لا يعرف كيف يحوّل مزاجه أو اهتمامه إلى تصنيف أو عنوان.</li>
+        <li>لا يستطيع تقدير سهولة اللغة أو طول الكتاب أو أجوائه من الغلاف.</li>
+        <li>قد يتحرّج من طلب مساعدة طويلة من الموظف.</li>
+        <li>كثرة الخيارات قد تنتهي بالتردد وترك المكتبة.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>ما تواجهه المكتبة</h3>
+      <ul class="clean">
+        <li>صعوبة تقديم مساعدة شخصية لكل زائر وقت الازدحام.</li>
+        <li>تركّز الاهتمام على العناوين المشهورة وبقاء كتب جيدة بلا قرّاء.</li>
+        <li>غياب بيانات منظّمة عمّا يبحث عنه القرّاء فعلًا.</li>
+        <li>لا طريقة قابلة للتوسع لربط وصف القارئ بالمخزون.</li>
+      </ul>
+    </div>
+  </div>
+  <h2 style="margin-top:9mm">كيف يعمل</h2>
+  <div class="steps">
+    <div class="step"><div class="n">١</div><h3>يمسح الرمز</h3><p>رمز QR داخل المكتبة يفتح التجربة على جوال الزائر مباشرة، بلا تطبيق يُحمَّل ولا حساب ولا اسم.</p></div>
+    <div class="step"><div class="n">٢</div><h3>يسولف</h3><p>يكتب ما يريده بلهجته: مزاجه، موضوع يهمّه، آخر كتاب أعجبه، أو هدية لشخص يحب القراءة.</p></div>
+    <div class="step"><div class="n">٣</div><h3>يأخذ كتابه</h3><p>يحصل على ٣–٤ كتب متوفرة الآن، مع سبب ترشيح كل كتاب ونبذة عنه، ثم يختار ويقيّم التوصية.</p></div>
+  </div>
+  <div class="foot"><img class="mk" src="img/thalath-smart.svg" alt=""><span>٢</span></div>
+</section>
+
+<!-- 3. Visitor journey -->
+<section class="page">
+  <div class="kicker">تجربة القارئ</div>
+  <h1>من سؤال واحد إلى كتاب في اليد</h1>
+  <p class="lead">واجهة عربية أولًا، مصممة للجوال وبهوية المكتبة نفسها، تبدأ بسؤال بسيط: «وش ودّك تقرأ اليوم؟». وتتوفر كذلك باللغة الإنجليزية.</p>
+  <div class="phones4">
+    <div><div class="phone"><img src="img/s_welcome.jpg" alt=""></div><p class="cap"><b>البداية</b>سؤال واحد وزر واحد</p></div>
+    <div><div class="phone"><img src="img/s_start.jpg" alt=""></div><p class="cap"><b>المحادثة</b>اقتراحات جاهزة لمن لا يعرف كيف يبدأ</p></div>
+    <div><div class="phone"><img src="img/s_chat.jpg" alt=""></div><p class="cap"><b>الترشيحات</b>كتب متوفرة الآن مع سبب اختيار كل كتاب</p></div>
+    <div><div class="phone"><img src="img/s_detail.jpg" alt=""></div><p class="cap"><b>تفاصيل الكتاب</b>نبذة ولغة العمل وطوله</p></div>
+  </div>
+  <div class="two" style="margin-top:7mm">
+    <div class="card sageb">
+      <h3>يفهم لغة الناس</h3>
+      <p style="font-size:13.5pt;line-height:1.45">«أبغى رواية غامضة تشدني من أولها»، «شي خفيف مع القهوة»، «كتاب عن الأندلس»، «مو كئيبة ولا رومانسية». يفهم المزاج والطول والنوع والموضوع، وما يريد القارئ تجنّبه.</p>
+    </div>
+    <div class="card sageb">
+      <h3>صريح ولا يَعِد بما ليس على الرف</h3>
+      <p style="font-size:13.5pt;line-height:1.45">كل ترشيح مرتبط بمخزون المكتبة لحظة السؤال. وإذا طلب الزائر كتابًا غير متوفر أو نوعًا لا نملكه، يقول ذلك أولًا ثم يقترح الأقرب مع وجه الشبه.</p>
+    </div>
+  </div>
+  <p class="note" style="margin-top:4mm">اللقطات من النسخة الحالية للتطبيق (٠٫٩ التجريبية) وبيانات المكتبة الحقيقية.</p>
+  <div class="foot"><img class="mk" src="img/thalath-smart.svg" alt=""><span>٣</span></div>
+</section>
+
+<!-- 4. Smart catalog -->
+<section class="page p4">
+  <div class="kicker">ما وراء الترشيح</div>
+  <h1>كتالوج ذكي يعرف الكتاب قبل أن يُسأل عنه</h1>
+  <p class="lead">لا يبحث «ثلاث الذكي» في الإنترنت وقت السؤال. كل كتاب في المخزون تُبنى له مسبقًا «بطاقة» تصف تجربة قراءته من مراجعات القرّاء، ثم يعتمد عليها الترشيح فورًا.</p>
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:8mm;margin-top:5mm;align-items:start">
+    <div>
+      <div class="card">
+        <h3>ماذا تحمل بطاقة الكتاب</h3>
+        <div class="pills">
+          <span class="pill s">نبذة بصياغتنا</span><span class="pill s">جملة جذب</span><span class="pill">المزاج والأجواء</span><span class="pill">سرعة الإيقاع</span><span class="pill">الطول الفعلي</span><span class="pill">سهولة اللغة</span><span class="pill">الثقل العاطفي</span><span class="pill">الموضوعات</span><span class="pill">المكان والزمن</span><span class="pill">السلسلة وترتيبها</span><span class="pill">لغة العمل الأصلية ومترجمه</span><span class="pill">كتب الأطفال واليافعين</span><span class="pill">تنبيهات المحتوى</span>
+        </div>
+      </div>
+      <div class="card" style="margin-top:5mm">
+        <h3>أمانة في كل صفة</h3>
+        <ul class="clean">
+          <li>لكل صفة مصدرها ودرجة ثقة، والصفة الضعيفة لا تُستخدم في الترشيح.</li>
+          <li>الصفات تُنسب إلى القرّاء («حسب القرّاء»)، ولا تُقدَّم كحقائق مطلقة.</li>
+          <li>الكتاب غير المؤكدة هويته يُحال إلى موظف المكتبة ليؤكده من الغلاف، ولا يُخمَّن.</li>
+          <li>تنبيهات المحتوى تحمي الأطفال واليافعين عند طلب كتاب لهم.</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top:5mm">
+        <h3>مؤلفون وروابط بين الكتب</h3>
+        <p style="font-size:13pt;line-height:1.4">لكل مؤلف سجل بأسلوبه المعروف، فيُجاب «أبغى شيئًا يشبه ماركيز». وكل كتاب مربوط بما يشبهه، وبأعمال كاتبه، وبأجزاء سلسلته، وببديل أخف أو أقصر.</p>
+      </div>
+    </div>
+    <div>
+      <div class="phone" style="width:62mm;margin:0 auto"><img src="img/s_detail2.jpg" alt=""></div>
+      <p class="cap"><b>القرار عند القارئ</b>النبذة، والتوفر، وزر «أبغى هذا الكتاب»، ومكانه يدلّه عليه الموظف</p>
+    </div>
+  </div>
+  <div class="foot"><img class="mk" src="img/thalath-smart.svg" alt=""><span>٤</span></div>
+</section>
+
+<!-- 5. For the library and the sector -->
+<section class="page">
+  <div class="kicker">للمكتبة وللقطاع الثقافي</div>
+  <h1>أداة تشغيل للمكتبة،<br>وأثر يتجاوز الرف</h1>
+  <div style="display:grid;grid-template-columns:1fr 1.35fr;gap:9mm;margin-top:5mm;align-items:start">
+    <div>
+      <div class="phone"><img src="img/s_chosen.jpg" alt=""></div>
+      <p class="cap"><b>بعد الاختيار</b>تقييم من ضغطة واحدة يقيس جودة التوصية</p>
+    </div>
+    <div>
+      <div class="card">
+        <h3>لوحة إدارة لفريق المكتبة</h3>
+        <ul class="clean" style="--x:0">
+          <li>تحديث المخزون من ملف نظام نقاط البيع: الكميات والأسعار والكتب الجديدة، والنافد يختفي من الترشيحات.</li>
+          <li>بلاغات الزوار واقتراحاتهم تصل إلى الموظف، ومعها الكتب التي تحتاج تأكيد هويتها.</li>
+          <li>إحصاءات: الكتب الأكثر اختيارًا، ونسبة الرضا، وما يُقترح كثيرًا ولا يُختار.</li>
+          <li>حسابات للمدير والموظفين بصلاحيات مختلفة، وسجل لكل تعديل.</li>
+          <li>نسخ احتياطية تلقائية يومية، واستعادة بأمر واحد.</li>
+        </ul>
+      </div>
+      <div class="card sageb" style="margin-top:5mm">
+        <h3>أثر ثقافي</h3>
+        <ul class="clean">
+          <li>تحويل الزائر المتردد إلى قارئ، وتشجيع من يبدأ عادة القراءة.</li>
+          <li>إبراز الكتاب العربي والمترجم، والعناوين الجيدة غير المشهورة.</li>
+          <li>فهم أعمق لما يبحث عنه القرّاء، يساعد في اختيار ما يُعرض ويُطلب.</li>
+          <li>نموذج قابل للتكرار في مكتبات ومساحات قراءة أخرى.</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top:5mm">
+        <h3>خصوصية الزائر</h3>
+        <p style="font-size:13.5pt;line-height:1.45">لا حساب ولا اسم. المحادثة تُمسح عند البدء من جديد، والاختيارات تُحفظ بلا أي بيانات تعريفية.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><img class="mk" src="img/thalath-smart.svg" alt=""><span>٥</span></div>
+</section>
+
+<!-- 6. Status and next -->
+<section class="page">
+  <div class="kicker">أين وصلنا</div>
+  <h1>النسخة التجريبية جاهزة للتشغيل في المكتبة</h1>
+  <p class="lead">اكتمل الإصدار ٠٫٩ التجريبي على مخزون مكتبة ثلاث الفعلي، بنسختين للتركيب على ويندوز وماك. اختُبرت المحادثة بأربعين قارئًا افتراضيًا بأمزجة وأذواق مختلفة، وأُصلح ما ظهر فيها.</p>
+  <div class="nums">
+    <div class="num"><b>٥٬٣٤٥</b><span>عنوانًا في الكتالوج<br>من نظام المكتبة</span></div>
+    <div class="num"><b>٤٬٣٤٤</b><span>كتابًا له نبذة<br>بصياغتنا</span></div>
+    <div class="num"><b>٤٬٠٥٦</b><span>مؤلفًا ومترجمًا<br>في سجل المؤلفين</span></div>
+    <div class="num"><b>١٬١٦٥</b><span>اختبارًا آليًا<br>يتحقق من سلامة التطبيق</span></div>
+  </div>
+  <p class="note">الأرقام حتى ٧ أكتوبر ٢٠٢٦. وللكتالوج ٤٬٧٥٥ غلافًا، و٨٢٦ كتابًا قُرئت مراجعات قرّائها حتى الآن والعمل عليها مستمر.</p>
+  <h2 style="margin-top:8mm">الخطوات القادمة</h2>
+  <div class="road">
+    <div class="r now"><small>الآن</small><h3>التركيب في المكتبة</h3><p>تشغيل النسخة على جهاز المكتبة، وتدريب الموظفين، وتحديد أقسام الرفوف.</p></div>
+    <div class="r"><small>التالي</small><h3>تجربة الفريق</h3><p>تجربة داخلية مع موظفي المكتبة عبر رمز QR، وجمع ملاحظاتهم.</p></div>
+    <div class="r"><small>بعدها</small><h3>الإصدار ١٫٠ للزوار</h3><p>فتح التجربة لزوار المكتبة، مع تحديث أسبوعي للمخزون وقياس الرضا.</p></div>
+    <div class="r"><small>لاحقًا</small><h3>التوسع</h3><p>إتاحة النموذج لمكتبات ومساحات قراءة أخرى.</p></div>
+  </div>
+  <div class="closing">
+    <img class="m" src="img/thalath-smart.svg" alt="ثلاث الذكي">
+    <div class="mid" style="white-space:nowrap">مساعد القارئ في مكتبة ثلاث<br><span style="font-size:12.5pt;font-weight:400">كل قارئ يستحق أن يجد كتابه</span></div>
+    <div style="font-size:12.5pt;text-align:left;flex:none;line-height:1.4">مكتبة ثلاث<br>وجهتك الثقافية</div>
+  </div>
+</section>
+
+</body>
+</html>
