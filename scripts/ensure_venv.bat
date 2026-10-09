@@ -1,4 +1,6 @@
 @echo off
+rem setlocal: keep ROOT / VENV / PY inside this file, or the caller's ROOT ends in "scripts\.." and data\library.db is not found (2026-10-09).
+setlocal
 rem Creates backend\venv-win with the pinned requirements if it does not exist yet (first run on Windows).
 rem A separate folder from the Mac venv (backend/venv), so both can live in a shared project folder.
 set "ROOT=%~dp0.."

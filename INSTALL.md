@@ -86,7 +86,7 @@ gh release download --repo eyesmystery/library-keeper --pattern "*windows.zip"
 
 ## ٨. التحديث إلى إصدار جديد (بدون فقد تعديلاتكم)
 
-الحزمة الكاملة تستبدل كل شيء، فلا تُستعمل لتحديث تطبيق يعمل. للتحديث ملف خاص في صفحة الإصدارات اسمه `ThalathSmart-update-….zip` (نحو 65 ميغابايت، واحد للنظامين):
+الحزمة الكاملة تستبدل كل شيء، فلا تُستعمل لتحديث تطبيق يعمل. للتحديث ملف خاص في صفحة الإصدارات اسمه `ThalathSmart-update-….zip` (نحو 85 ميغابايت، واحد للنظامين):
 
 1. أغلق نافذة السيرفر.
 2. فك الملف، وانقل المجلد الناتج (`ThalathSmart-update-…`) إلى **داخل** مجلد التطبيق، بجانب `start_library`.
@@ -124,6 +124,7 @@ gh release download --repo eyesmystery/library-keeper --pattern "*windows.zip"
 |---|---|
 | الجوال لا يفتح العنوان | تأكد أنه على نفس الواي فاي، وأن Python مسموح له في جدار الحماية (ويندوز: الشبكات الخاصة)، وأن شبكة الضيوف لا تعزل الأجهزة. |
 | «السيرفر شغّال من قبل» | نافذة سيرفر أخرى مفتوحة؛ أغلقها ثم شغّل من جديد. |
+| ويندوز: «The catalog file data\library.db is missing» مع أن الملف موجود | خطأ في الإصدار 0.9.7 وما قبله. ثبّت ملف التحديث 0.9.8 (`install_update.bat`) ثم شغّل من جديد. |
 | `Python 3 is not installed` أو تعذر إنشاء البيئة | ثبّت Python ثم شغّل مرة ثانية. أول تشغيل يحتاج إنترنت. |
 | الردود بسيطة أو بلا ذكاء اصطناعي | الإعدادات ← الذكاء الاصطناعي ← «اختبار». مع Ollama: تأكد أنه مفتوح ومسجّل الدخول. |
 | نموذج إنشاء المدير يرفض | افتحه من الجهاز نفسه على `http://127.0.0.1:8802/admin`. |
@@ -148,7 +149,7 @@ cd backend && LIBRARY_KEEPER_HOST=0.0.0.0 ./venv/bin/python app.py
 
 - الاختبارات: `backend/venv/bin/python tests/run_all.py`
 - بناء حزمتي التحميل وملف التحديث من مجلد عمل فيه القاعدة الحية (يكتب في `release/`):
-  `backend/venv/bin/python scripts/make_release.py --version "0.9.7 beta" --no-user --update-from release/<الحزمة الكاملة السابقة>.zip`
+  `backend/venv/bin/python scripts/make_release.py --version "0.9.8 beta" --no-user --update-from release/<الحزمة الكاملة السابقة>.zip`
   الخيار `--update-from` يُكرَّر لكل إصدار سابق قد يكون مثبّتًا في المكتبة.
 - لا ترفع `data/library.db` ولا `backups/` ولا `data/test_logs/` ولا `data/llm_settings.json` ولا أي ملف مفاتيح؛ كلها في `.gitignore`.
 

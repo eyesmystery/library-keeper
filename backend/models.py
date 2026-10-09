@@ -354,6 +354,9 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         )
         """
     )
+    # what each Rewaa import added / changed, and who applied it (Ibrahim 2026-10-09: in the file sent to him)
+    _add_column(conn, "import_runs", "applied_by", "TEXT")
+    _add_column(conn, "import_runs", "details", "TEXT")
 
 
 def init_db() -> None:

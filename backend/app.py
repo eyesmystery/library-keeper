@@ -4035,8 +4035,10 @@ def admin_import_plan():
 def admin_import_apply():
     data = request.get_json(silent=True) or {}
     try:
+        user = acting_user() or {}
         result = rewaa_import.apply_plan(data.get("upload_id"), data.get("mapping"),
-                                         data.get("missing_mode", "zero"))
+                                         data.get("missing_mode", "zero"),
+                                         applied_by=user.get("display_name") or user.get("username"))
         auth.audit(acting_user(), "import.apply", None, {k: result.get(k) for k in ("added", "updated", "missing")
                                                            if isinstance(result, dict)})
         return jsonify(result)

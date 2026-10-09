@@ -236,7 +236,7 @@ def audit(user, action, target=None, details=None):
                         VALUES (?, ?, ?, ?, ?, ?)""",
                      (_now(), user.get("user_id") if user else None, user.get("username") if user else None,
                       action, None if target is None else str(target)[:120],
-                      json.dumps(details, ensure_ascii=False)[:1000] if details else None))
+                      json.dumps(details, ensure_ascii=False)[:6000] if details else None))  # room for a whole summary before/after (2026-10-09)
         conn.commit()
     finally:
         conn.close()

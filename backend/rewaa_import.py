@@ -14,6 +14,7 @@ until review-based enrichment runs).
 
 No third-party dependency: .xlsx is read with zipfile + xml.etree.
 """
+import json
 import csv
 import io
 from decimal import Decimal, InvalidOperation
@@ -462,7 +463,7 @@ def build_plan(upload_id, mapping, missing_mode="zero"):
     }
 
 
-def apply_plan(upload_id, mapping, missing_mode="zero"):
+def apply_plan(upload_id, mapping, missing_mode="zero", applied_by=None):
     """missing_mode: 'zero' (default since 2026-09-27: set quantity 0, hidden from visitors) or 'report' (change nothing)."""
     if missing_mode not in ("report", "zero"):
         raise ValueError("invalid missing_mode")
@@ -470,6 +471,7 @@ def apply_plan(upload_id, mapping, missing_mode="zero"):
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     conn = get_connection()
     zeroed = 0
+    added_rows, zeroed_rows = [], []
     try:
         conn.execute("BEGIN")
         for item in plan["new"]:
@@ -484,6 +486,8 @@ def apply_plan(upload_id, mapping, missing_mode="zero"):
                  item["shelf"] or None, item["barcode"] or None, item["sku"] or None, now))
             conn.execute("INSERT OR IGNORE INTO book_profiles (book_id, overall_status) VALUES (?, 'pending')",
                          (cur.lastrowid,))
+            added_rows.append({"book_id": cur.lastrowid, "title": item["title"], "author": item["author"] or "",
+                               "publisher": item.get("publisher") or "", "quantity": item["quantity"], "price": item["price"]})
         for item in plan["updated"] + plan["unchanged"]:
             sets = {k: v[1] for k, v in item["changes"].items()}
             sets["last_synced_at"] = now
@@ -496,13 +500,19 @@ def apply_plan(upload_id, mapping, missing_mode="zero"):
                     conn.execute("UPDATE books SET quantity = 0, last_synced_at = ? WHERE book_id = ?",
                                  (now, m["book_id"]))
                     zeroed += 1
+                    zeroed_rows.append({"book_id": m["book_id"], "title": m["title"], "quantity": m["quantity"]})
+        details = {"new": added_rows, "zeroed": zeroed_rows,
+                   "updated": [{"book_id": u["book_id"], "title": u["title"], "changes": u["changes"]} for u in plan["updated"]],
+                   "invalid": [{"row": i["row"], "title": i["title"], "problems": i["problems"]} for i in plan["invalid"]],
+                   "excluded": len(plan["excluded"]), "missing_mode": missing_mode}
         conn.execute(
             """INSERT INTO import_runs (source, file_name, applied_at, rows_read, added, updated, unchanged,
-                                        missing, marked_out_of_stock, invalid, mapping)
-               VALUES ('rewaa', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                        missing, marked_out_of_stock, invalid, mapping, applied_by, details)
+               VALUES ('rewaa', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (plan["file_name"], now, plan["rows_read"], len(plan["new"]), len(plan["updated"]),
              len(plan["unchanged"]), len(plan["missing"]), zeroed, len(plan["invalid"]),
-             ",".join(f"{k}:{v}" for k, v in plan["mapping"].items())))
+             ",".join(f"{k}:{v}" for k, v in plan["mapping"].items()), applied_by,
+             json.dumps(details, ensure_ascii=False)))
         conn.commit()
     except Exception:
         conn.rollback()
@@ -518,7 +528,10 @@ def apply_plan(upload_id, mapping, missing_mode="zero"):
 def history(limit=10):
     conn = get_connection()
     try:
-        return [dict(r) for r in conn.execute(
+        rows = [dict(r) for r in conn.execute(
             "SELECT * FROM import_runs ORDER BY run_id DESC LIMIT ?", (limit,))]
+        for r in rows:
+            r.pop("details", None)  # the per-book lists go to the inbox export, not to this short history
+        return rows
     finally:
         conn.close()

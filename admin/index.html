@@ -500,6 +500,8 @@
           <button class="settings-tab" role="tab" id="libTabBooks" aria-selected="true" aria-controls="libBooks">الكتب <span class="tab-n" id="libNBooks"></span></button>
           <button class="settings-tab" role="tab" id="libTabAuthors" aria-selected="false" aria-controls="libAuthors" tabindex="-1">المؤلفون <span class="tab-n" id="libNAuthors"></span></button>
           <button class="settings-tab" role="tab" id="libTabTranslators" aria-selected="false" aria-controls="libAuthors" tabindex="-1">المترجمون <span class="tab-n" id="libNTranslators"></span></button>
+          <button class="settings-tab" role="tab" id="libTabPublishers" aria-selected="false" aria-controls="libPublishers" tabindex="-1">دور النشر <span class="tab-n" id="libNPublishers"></span></button>
+          <button class="settings-tab" role="tab" id="libTabConfirm" aria-selected="false" aria-controls="libConfirm" tabindex="-1">تأكيد الهوية <span class="tab-n" id="libNConfirm"></span></button>
           <button class="settings-tab" role="tab" id="libTabOrigin" aria-selected="false" aria-controls="libOrigin" tabindex="-1">أصل الكتاب <span class="tab-n" id="libNOrigin"></span></button>
           <button class="settings-tab" role="tab" id="libTabDeleted" aria-selected="false" aria-controls="libDeleted" tabindex="-1">المحذوفة <span class="tab-n" id="libNDeleted"></span></button>
         </div>
@@ -570,8 +572,29 @@
         <div id="authorGrid"></div>
       </div>
 
+      <div id="libPublishers" class="lib-pane" role="tabpanel" aria-labelledby="libTabPublishers" hidden>
+        <p class="diff" style="margin:0 0 12px">دور النشر كما هي في الكتالوج، مع عدد كتب كل دار والمتوفر منها. اضغط على الدار لتشوف كتبها في «الكتب».</p>
+        <div class="lib-tools">
+          <input id="pubSearch" type="search" placeholder="ابحث باسم الدار…" aria-label="بحث في دور النشر" />
+          <label class="tool"><span>الترتيب</span><select id="pubSort">
+            <option value="books">الأكثر كتبًا</option>
+            <option value="stock">الأكثر توفرًا</option>
+            <option value="name">الاسم (أ–ي)</option>
+          </select></label>
+        </div>
+        <div class="count-row"><p id="pubCount" class="count" role="status"></p></div>
+        <div id="pubList" class="del-list"></div>
+      </div>
+
+      <div id="libConfirm" class="lib-pane" role="tabpanel" aria-labelledby="libTabConfirm" hidden>
+        <p class="diff" style="margin:0 0 12px">ابدأ من هنا: كتب ما تأكدنا أن سجلها هو نفس الكتاب اللي على الرف (المؤلف أو العنوان أو الطبعة)، وبعضها قد لا يكون كتابًا أصلًا. افتح الكتاب، قارن الغلاف والعنوان والمؤلف والدار، واختر الصحيح في صندوق «تأكيد هوية الكتاب». بعد الرد يخرج الكتاب من هذه القائمة، وإذا كان أصله غير معروف يظهر في «أصل الكتاب».</p>
+        <div class="lib-tools"><input id="confirmSearch" type="search" placeholder="ابحث بالعنوان أو المؤلف أو الدار…" aria-label="بحث في قائمة تأكيد الهوية" /></div>
+        <div class="count-row"><p id="confirmCount" class="count" role="status"></p></div>
+        <div id="confirmList" class="del-list"></div>
+      </div>
+
       <div id="libOrigin" class="lib-pane" role="tabpanel" aria-labelledby="libTabOrigin" hidden>
-        <p class="diff" style="margin:0 0 12px">كتب ما نعرف بعد هل هي عربية الأصل أو مترجمة. اختر من الكتاب نفسه: «عربي الأصل»، أو لغة الأصل إذا كان مترجمًا. الاختيار يُحفظ مباشرة ويخرج الكتاب من القائمة، وتقدر تتراجع عن آخر اختيار. ما يتغير المخزون ولا أي شيء ثاني في الكتاب.</p>
+        <p class="diff" style="margin:0 0 12px">كتب ما نعرف بعد هل هي عربية الأصل أو مترجمة. اختر من الكتاب نفسه: «عربي الأصل»، أو لغة الأصل إذا كان مترجمًا. الاختيار يُحفظ مباشرة ويخرج الكتاب من القائمة، وتقدر تتراجع عن آخر اختيار. ما يتغير المخزون ولا أي شيء ثاني في الكتاب. الكتب اللي تنتظر «تأكيد الهوية» ما تظهر هنا إلا بعد الرد عليها.</p>
         <div class="lib-tools"><input id="originSearch" type="search" placeholder="ابحث بالعنوان أو المؤلف أو الدار…" aria-label="بحث في قائمة أصل الكتاب" /></div>
         <div class="count-row"><p id="originCount" class="count" role="status"></p></div>
         <div id="originList" class="del-list"></div>
@@ -600,7 +623,7 @@
       </div>
       <div class="export-bar">
         <a id="inboxExport" class="btn secondary" href="/api/admin/inbox/export?status=open" download>تنزيل الكل في ملف (md)</a>
-        <span class="diff">البلاغات والاقتراحات والأسئلة بلا جواب وتعديلات الموظفين في ملف واحد، ترسله لإبراهيم أو تعالجه مع Claude.</span>
+        <span class="diff">البلاغات والاقتراحات والأسئلة بلا جواب وتعديلات الموظفين، ومعها سجل كل ما غيّره الموظفون في البيانات (قبل ← بعد) وملفات رواء المستوردة وما أضافته، خلال آخر 30 يومًا، في ملف واحد ترسله لإبراهيم أو تعالجه مع Claude.</span>
       </div>
       <p id="inboxState" class="count" role="status"></p>
       <div id="inboxList" class="del-list" role="tabpanel"></div>
@@ -1118,10 +1141,12 @@
         if (load) loadAuthors();
       }
       if (which === 'origin') renderOrigin();
+      if (which === 'confirm') renderConfirm();
+      if (which === 'publishers') renderPublishers();
       if (which === 'deleted' && load) { delNote = ''; loadDeleted(); }
       if (focus) $(LIB_PANES.find(([k]) => k === which)[1]).focus();
     }
-    const LIB_PANES = [['books', 'libTabBooks', 'libBooks'], ['authors', 'libTabAuthors', 'libAuthors'], ['translators', 'libTabTranslators', 'libAuthors'], ['origin', 'libTabOrigin', 'libOrigin'], ['deleted', 'libTabDeleted', 'libDeleted']];
+    const LIB_PANES = [['books', 'libTabBooks', 'libBooks'], ['authors', 'libTabAuthors', 'libAuthors'], ['translators', 'libTabTranslators', 'libAuthors'], ['publishers', 'libTabPublishers', 'libPublishers'], ['confirm', 'libTabConfirm', 'libConfirm'], ['origin', 'libTabOrigin', 'libOrigin'], ['deleted', 'libTabDeleted', 'libDeleted']];
     LIB_PANES.forEach(([k, t]) => {
       $(t).addEventListener('click', () => selectLibPane(k));
       $(t).addEventListener('keydown', e => {
@@ -1139,7 +1164,59 @@
       ['hi', 'الهندية'], ['sv', 'السويدية'], ['no', 'النرويجية'], ['da', 'الدنماركية'], ['nl', 'الهولندية'], ['pl', 'البولندية'], ['cs', 'التشيكية'],
       ['hu', 'المجرية'], ['el', 'اليونانية'], ['grc', 'اليونانية القديمة'], ['he', 'العبرية'], ['la', 'اللاتينية'], ['bs', 'البوسنية'],
       ['other', 'مترجم، اللغة غير معروفة']];
-    const originPending = b => b.active && (b.language || 'ar') === 'ar' && !b.original_language && b.research_status !== 'not_a_book';
+    // ---------------- «دور النشر» (Ibrahim 2026-10-09): publishers with their book counts; a click filters «الكتب»
+    function renderPublishers() {
+      const by = new Map();
+      (catalog || []).filter(b => b.active).forEach(b => {
+        const name = String(b.publisher || '').trim() || '—';
+        const p = by.get(name) || { name, books: 0, stock: 0 };
+        p.books += 1; p.stock += inStock(b) ? 1 : 0; by.set(name, p);
+      });
+      const all = [...by.values()].filter(p => p.name !== '—');
+      $('libNPublishers').textContent = all.length ? num(all.length) : '';
+      if (lib.pane !== 'publishers') return;
+      const q = $('pubSearch').value.trim().toLowerCase(), sort = $('pubSort').value;
+      const list = all.filter(p => !q || p.name.toLowerCase().includes(q)).sort((a, b) =>
+        sort === 'name' ? a.name.localeCompare(b.name, 'ar') : sort === 'stock' ? (b.stock - a.stock) || (b.books - a.books)
+          : (b.books - a.books) || (b.stock - a.stock));
+      const none = by.get('—');
+      const lim = lib.shown.__pubs || PAGE * 3;
+      $('pubCount').textContent = `${num(list.length)} من ${num(all.length)} دار` + (none ? ` · ${num(none.books)} كتاب بلا دار مسجّلة` : '');
+      $('pubList').innerHTML = list.slice(0, lim).map(p => `<div class="del-row org-row">
+          <div><button type="button" class="ttl" data-pub="${esc(p.name)}">${esc(p.name)}</button>
+            <span>${num(p.books)} كتاب · ${num(p.stock)} متوفر الآن</span></div>
+          <div class="org-act"><button type="button" class="mini" data-pub="${esc(p.name)}">عرض كتبها</button></div></div>`).join('')
+        + (list.length > lim ? `<button type="button" class="more" id="morePubs">عرض المزيد (باقي ${num(list.length - lim)})</button>` : '');
+      $('pubList').querySelectorAll('[data-pub]').forEach(el => el.addEventListener('click', () => {
+        lib.chips.clear(); $('search').value = ''; $('genreFilter').value = '';
+        $('publisherFilter').value = el.dataset.pub; selectLibPane('books', true); resetBooks();
+      }));
+      if ($('morePubs')) $('morePubs').addEventListener('click', () => { lib.shown.__pubs = lim + PAGE * 3; renderPublishers(); });
+    }
+    $('pubSearch').addEventListener('input', () => { lib.shown.__pubs = 0; renderPublishers(); });
+    $('pubSort').addEventListener('change', () => { lib.shown.__pubs = 0; renderPublishers(); });
+
+    // identity first (Ibrahim 2026-10-09): a book whose identity is still unconfirmed waits in «تأكيد الهوية»
+    const confirmPending = b => b.active && b.research_status === 'needs_confirmation' && !b.confirmation_answered;
+    const originPending = b => b.active && (b.language || 'ar') === 'ar' && !b.original_language && b.research_status !== 'not_a_book' && !confirmPending(b);
+    function renderConfirm() {
+      const all = (catalog || []).filter(confirmPending);
+      $('libNConfirm').textContent = all.length ? num(all.length) : '';
+      if (lib.pane !== 'confirm') return;
+      const q = $('confirmSearch').value.trim().toLowerCase();
+      const list = all.filter(b => !q || [b.title, b.author, b.publisher].some(x => String(x || '').toLowerCase().includes(q)))
+        .sort((a, b) => (inStock(b) - inStock(a)) || String(a.title).localeCompare(String(b.title), 'ar'));
+      const lim = lib.shown.__confirm || PAGE * 2;
+      $('confirmCount').textContent = all.length ? `${num(list.length)} من ${num(all.length)} كتاب ينتظر تأكيد هويته` : 'ما فيه كتب تنتظر تأكيد الهوية.';
+      $('confirmList').innerHTML = list.slice(0, lim).map(b => `<div class="del-row org-row">
+          <div><button type="button" class="ttl" data-bid="${b.book_id}">${esc(b.title)}</button>
+            <span>${esc(b.author || '')}${b.publisher ? ' · ' + esc(b.publisher) : ''}${b.shelf_location ? ' · الرف ' + esc(b.shelf_location) : ''}${inStock(b) ? '' : ' · غير متوفر الآن'}</span></div>
+          <div class="org-act"><button type="button" class="mini" data-bid="${b.book_id}">افتح وأكّد</button></div></div>`).join('')
+        + (list.length > lim ? `<button type="button" class="more" id="moreConfirm">عرض المزيد (باقي ${num(list.length - lim)})</button>` : '');
+      $('confirmList').querySelectorAll('[data-bid]').forEach(el => el.addEventListener('click', () => openCard(Number(el.dataset.bid))));
+      if ($('moreConfirm')) $('moreConfirm').addEventListener('click', () => { lib.shown.__confirm = lim + PAGE * 2; renderConfirm(); });
+    }
+    $('confirmSearch').addEventListener('input', () => { lib.shown.__confirm = 0; renderConfirm(); });
     let originNote = null;   // {text, id} of the last choice, for «تراجع»
     function renderOrigin() {
       const all = (catalog || []).filter(originPending);
@@ -1173,7 +1250,7 @@
         b.original_language = value || null;
         const lang = (ORIGIN_LANGS.find(([v]) => v === value) || [])[1];
         originNote = value ? { id, text: `«${b.title}»: ${value === 'ar' ? 'عربي الأصل' : value === 'other' ? 'مترجم (اللغة غير معروفة)' : 'مترجم عن ' + lang}.` } : null;
-        renderStats(); renderGrid(); renderOrigin();
+        renderStats(); renderGrid(); renderPublishers(); renderConfirm(); renderOrigin();
       } catch (e) { el.disabled = false; if (el.tagName === 'SELECT') el.value = ''; $('originCount').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
     }
     $('originSearch').addEventListener('input', () => { lib.shown.__origin = 0; renderOrigin(); });
@@ -1220,7 +1297,7 @@
         $('publisherFilter').innerHTML = '<option value="">الكل</option>' + byCount('publisher').map(([g, n]) => `<option value="${esc(g)}">${esc(g)} (${num(n)})</option>`).join('');
         $('genreFilter').value = keepG; $('publisherFilter').value = keepP;
         $('libNBooks').textContent = num(catalog.length);
-        renderStats(); renderGrid(); renderOrigin();
+        renderStats(); renderGrid(); renderPublishers(); renderConfirm(); renderOrigin();
         loadAuthors(!onPeople());
         loadDeleted(lib.pane !== 'deleted');
       } catch (err) { $('count').textContent = 'تعذر تحميل الكتب.'; }

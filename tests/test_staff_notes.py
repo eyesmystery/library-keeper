@@ -99,7 +99,31 @@ ok("تمت معالجته" not in s.get("/api/admin/inbox/export").get_data(as_t
    and "تمت معالجته" in s.get("/api/admin/inbox/export?status=all").get_data(as_text=True), "status=all includes handled ones")
 ok(con.execute("select count(*) from visitor_notes where status='done'").fetchone()[0] == 0, "the export marks nothing handled")
 ok(con.execute("select count(*) from audit_log where action='inbox.export'").fetchone()[0] >= 2, "export is in the audit log")
+# ---- section 5: what staff changed in the data, from audit_log (Ibrahim 2026-10-09)
+ok("## 5. تعديلات نفّذها الموظفون في المكتبة (" in md, "the file has the section of staff changes")
+bid5 = con.execute("select book_id from books where active=1 and quantity>0 order by book_id desc limit 1").fetchone()[0]
+cur = con.execute("select original_language, shelf_location from books where book_id=?", (bid5,)).fetchone()
+r = s.patch(f"/api/books/{bid5}", json={"original_language": "fr", "shelf_location": "رف تجربة 7"})
+ok(r.status_code == 200, "staff change a book (origin and shelf)") or print("   ->", r.status_code, r.get_data(as_text=True)[:300])
+long_summary = "نبذة تجريبية طويلة " * 30
+s.patch(f"/api/books/{bid5}", json={"summary": long_summary})
+md5 = s.get("/api/admin/inbox/export").get_data(as_text=True).split("## 5. ", 1)[1]
+ok("تعديل بيانات كتاب" in md5 and f"book_id {bid5}" in md5 and "لغة الأصل" in md5 and "صار الفرنسية" in md5
+   and "رف تجربة 7" in md5, "the change is listed with field, before and after")
+ok("- بواسطة: " in md5 and "- بواسطة: —" not in md5.split("رف تجربة 7")[0][-400:], "who made the change")
+ok(long_summary.split()[0] in md5 and "النبذة" in md5, "a long summary change is complete enough to read")
+last = con.execute("select details from audit_log where action='book.update' order by log_id desc limit 1").fetchone()[0]
+import json as _json
+ok(isinstance(_json.loads(last), dict), "audit details of a long summary are valid JSON (not cut)")
+ok("inbox.export" not in md5 and "login" not in md5, "exports and logins are not listed as changes")
+ok("★" in md5, "changes after the previous export are marked new")
+con.execute("update books set original_language=?, shelf_location=? where book_id=?", (cur[0], cur[1], bid5)); con.commit()
 admin2 = visitor.get("/admin").get_data(as_text=True)
+ok('id="libTabConfirm"' in admin2 and admin2.index('id="libTabConfirm"') < admin2.index('id="libTabOrigin"'),
+   "«تأكيد الهوية» tab comes before «أصل الكتاب»")
+ok("!confirmPending(b)" in admin2, "books waiting for identity are not in «أصل الكتاب»")
+ok('id="libTabPublishers"' in admin2 and admin2.index('id="libTabTranslators"') < admin2.index('id="libTabPublishers"') < admin2.index('id="libTabConfirm"')
+   and "['publishers', 'libTabPublishers', 'libPublishers']" in admin2 and 'id="pubList"' in admin2, "«دور النشر» tab after the authors / translators")
 ok('id="inboxExport"' in admin2, "admin inbox has the download button")
 
 print(f"\n{P} passed, {F} failed")

@@ -71,6 +71,21 @@ ok(con().execute("select quantity, price, shelf_location from books where rewaa_
 ok(r2["marked_out_of_stock"] > 0 and con().execute("select count(*) from books where quantity>0").fetchone()[0] == 1, "missing books set to quantity 0 only when chosen")
 hist = c.get("/api/admin/import/history").get_json()
 ok(len(hist) == 2 and hist[0]["file_name"] == "rewaa.xlsx" and hist[1]["added"] == 1, "import history recorded")
+# --- each import's books and who applied it, in the inbox export (Ibrahim 2026-10-09)
+run1 = con().execute("select applied_by, details from import_runs order by run_id limit 1").fetchone()
+d1 = json.loads(run1[1])
+ok(run1[0] and d1["new"] and d1["new"][0]["title"] == "كتاب جديد تمامًا" and d1["new"][0]["book_id"]
+   and any(u["title"] == "موسم الهجرة إلى الشمال" and "quantity" in u["changes"] for u in d1["updated"]) and len(d1["invalid"]) == 2,
+   "an import keeps who applied it, the new books, the changes and the refused rows")
+ok("details" not in hist[0], "the short history leaves the per-book lists out")
+d2 = json.loads(con().execute("select details from import_runs order by run_id desc limit 1").fetchone()[0])
+ok(d2["zeroed"] and all("title" in z for z in d2["zeroed"]), "books set to quantity 0 are listed")
+md = c.get("/api/admin/inbox/export").get_data(as_text=True)
+sec6 = md.split("## 6. ", 1)[1] if "## 6. " in md else ""
+ok(sec6.startswith("ملفات رواء المستوردة (2)") and "rewaa.csv" in sec6 and "rewaa.xlsx" in sec6
+   and "كتب جديدة أُضيفت للمكتبة (1)" in sec6 and "«كتاب جديد تمامًا» — مؤلف جديد" in sec6
+   and "صارت غير متوفرة لأنها ليست في ملف رواء" in sec6 and "أسطر مرفوضة (2)" in sec6, "the export lists both imports with their books")
+ok("ملفات رواء المستوردة: 2" in md, "the file header counts the imports")
 
 # --- real Rewaa export layout (simpleProducts CSV, 2026-09-28): Category = publisher, cafe/stationery rows, float SKUs
 real = ("Product Name,Product SKU,BarCode,Category,Supplier,Brand,Description,Sellable,type,Enable stock management,Weighted,"
