@@ -19,7 +19,8 @@ from models import get_connection
 
 KINDS = {"topic": "موضوع ما لقينا عنه كتابًا", "award": "جائزة ما عندنا كتاب مسجّل لها",
          "adaptation": "فيلم أو مسلسل ما عندنا بياناته", "missing_book": "كتاب طُلب وليس عندنا",
-         "wish": "رغبة لا نقدر نبحث بها", "question": "سؤال عن كتاب ما عرفنا نجاوبه"}
+         "wish": "رغبة لا نقدر نبحث بها", "question": "سؤال عن كتاب ما عرفنا نجاوبه",
+         "missing_author": "مؤلف طُلب وما عندنا من كتبه"}
 STATUSES = ("open", "done")
 PAGE = 100
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]")

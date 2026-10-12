@@ -159,8 +159,23 @@ y = con.execute("select max(cast(publication_year as int)) from books where quan
 if y and y > 2020:
     interp({})
     out = say("Anything published after 2020?")
-    ok(seen["facts"] and all(int(str(f.get("year"))[:4]) > 2020 for f in seen["facts"] if f["available"]), "«after 2020»: books published 2021 or later")
+    ok(seen["facts"] and all(int(str(f.get("first_published") or f.get("edition_year"))[:4]) > 2020 for f in seen["facts"] if f["available"]), "«after 2020»: books published 2021 or later")
     ok(any(c["key"] == "pubyear" for c in out["context"]), "badge for the publication year")
+
+# ---- «فاجئيني بكتب جديدة» then «رواية»: still new books (Ibrahim's staff chat 2026-10-11 21:14)
+W = A.new_release_wished
+ok(W(["فاجئيني بكتب جديدة", "رواية"]) == "carried", "start button «كتب جديدة» carried to the next answer")
+ok(W(["فاجئيني بكتب جديدة", "رواية", "هذي مو جديدة. المفروض تعتمد جديدة في السياق بعد"]) == "said", "«هذي مو جديدة» insists on it")
+ok(W(["ابغى روايات جديدة"]) == "said", "«روايات جديدة» is a new-release wish")
+ok(W(["فاجئيني بكتب جديدة", "رواية", "مو لازم جديدة، أي شي غامض"]) is None, "«مو لازم جديدة» takes it back")
+ok(W(["فاجئيني بكتب جديدة", "رواية", "أحب الروايات الغامضة"]) == "carried", "a later wish keeps «new»")
+ok(W(["ابغى رواية غامضة"]) is None, "no «new» said: no year limit")
+if y and y > 2022:
+    interp({"genres": ["رواية"]})
+    out = say("فاجئيني بكتب جديدة", "يسعدني! تبغى المفاجأة رواية، ولا كتاب غير روائي؟", "رواية")
+    lo = A.time.localtime().tm_year - A.NEW_RELEASE_YEARS
+    yrs = [int(str(f.get("first_published") or f.get("edition_year"))[:4]) for f in seen["facts"] if f["available"] and (f.get("first_published") or f.get("edition_year"))]
+    ok(yrs and all(v >= lo for v in yrs), f"«جديدة» then «رواية»: books published {lo} or later {yrs[:5]}")
 
 # ---- 12. reply rules
 ok("انسب كل كتاب لمؤلفه" in chat.RESPOND_SYSTEM_AR and "Attribute each book to its own author" in chat.RESPOND_SYSTEM_EN, "reply rules: each book's own author")

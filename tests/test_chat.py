@@ -136,6 +136,37 @@ for i in range(3):
 say(hist + [{"role": "user", "content": "أي شي"}])
 ok("اقترح الآن" in calls[-1]["system"], "after 3 questions without books the model must recommend")
 
+# start buttons and asking before suggesting (Ibrahim 2026-10-11)
+n = len(calls)
+r = say([{"role": "user", "content": "رشّحي لي كتاب يناسب ذوقي أو مزاجي"}])
+ok(len(calls) == n and r["books"] == [] and "؟" in r["reply"] and "ورّني كتب على طول" in r["suggestions"], "a start button: a fixed first question, no model call, no books")
+r = say([{"role": "user", "content": "رشّح لي كتاب يناسب ذوقي أو مزاجي"}])
+ok(len(calls) == n and r["books"] == [] and "؟" in r["reply"], "the button's earlier wording («رشّح») still opens its path")
+ok(chat.to_manar("رشّح لي حسب مزاجي") == "رشّحي لي حسب مزاجي" and chat.to_manar("رشح لي غيره") == "رشّحي لي غيره"
+   and chat.to_manar("قول لي أكثر") == "قولي لي أكثر" and chat.to_manar("أبغى رواية") == "أبغى رواية",
+   "the visitor's taps speak to Manar as a woman: «رشّحي لي»")
+ok("أبشر" in chat.RESPOND_SYSTEM_AR and "رشّحي لي" in chat.RESPOND_SYSTEM_AR, "reply rules: the visitor in the masculine («أبشر»), Manar asked in the feminine")
+r = say([{"role": "user", "content": "أدوّر كتاب معيّن"}])
+ok(r["books"] == [] and r["suggestions"] == [] and "اسم الكتاب" in r["reply"], "«a specific book» asks for the title and offers no taps")
+ok(say([{"role": "user", "content": "أبغى كتاب هدية"}])["books"] == [], "gift path asks first")
+script["interpret"] = {"intent": "clarify", "preferences": prefs(), "mentioned_titles": [], "wants_new_options": False}
+script["respond"] = show_all
+r = say([{"role": "user", "content": "أبغى أبدأ قراءة"}, {"role": "assistant", "content": "سؤال؟", "book_ids": []},
+         {"role": "user", "content": "ما أدري"}])
+ok(r["books"] == [] and "لا تقترح أي كتاب" in calls[-1]["system"], "a vague answer after one question: one more question, no book even if the model picked some")
+script["interpret"] = {"intent": "recommend", "preferences": prefs(use_cases=["gift"]), "mentioned_titles": [], "wants_new_options": False}
+r = say([{"role": "user", "content": "أبغى كتاب هدية"}, {"role": "assistant", "content": "سؤال؟", "book_ids": []},
+         {"role": "user", "content": "ما أدري وش يحب"}])
+ok(r["books"] == [] and "لا تقترح أي كتاب" in calls[-1]["system"], "«ما أدري وش يحب» gets one more question even when read as a recommendation")
+script["interpret"] = {"intent": "clarify", "preferences": prefs(), "mentioned_titles": [], "wants_new_options": False}
+r = say([{"role": "user", "content": "أبغى أبدأ قراءة"}, {"role": "assistant", "content": "سؤال؟", "book_ids": []},
+         {"role": "user", "content": "ورّني كتب على طول"}])
+ok("اقترح الآن" in calls[-1]["system"], "«ورّني كتب على طول» skips the remaining questions")
+r = say([{"role": "user", "content": "ما أدري"}, {"role": "assistant", "content": "سؤال؟", "book_ids": []},
+         {"role": "user", "content": "ما زلت ما أدري"}, {"role": "assistant", "content": "سؤال؟", "book_ids": []},
+         {"role": "user", "content": "أي شي"}])
+ok("اقترح الآن" in calls[-1]["system"], "after two questions a vague request gets books")
+
 script["interpret"] = {"intent": "recommend", "preferences": prefs(genres=["رواية"], unsupported_requests=["حبكة غير خطية"]), "mentioned_titles": [], "wants_new_options": False}
 script["respond"] = show_all
 say([{"role": "user", "content": "رواية حبكتها غير خطية"}])

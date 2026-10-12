@@ -6,10 +6,15 @@ audit_log with before -> after. Read only: nothing is marked handled by the expo
 import json
 from datetime import datetime, timedelta, timezone
 
+import confirmations
 import open_questions
+import os
+import testlog
+import staff_ideas
 import staff_notes
 import visitor_notes
 from models import get_connection
+import integrity
 
 RIYADH = timezone(timedelta(hours=3))
 STATUS_AR = {"open": "مفتوح", "done": "تمت معالجته"}
@@ -69,6 +74,8 @@ FIELD_AR = {
     "quantity": "الكمية", "active": "ظاهر للزوار", "shelf_location": "مكان الرف", "age_min": "أقل عمر",
     "age_max": "أعلى عمر", "summary": "النبذة", "name_ar": "الاسم", "name_latin": "الاسم اللاتيني",
     "aliases": "أسماء أخرى", "origin": "البلد", "staff_verified": "تأكيد الموظف",
+    "title": "العنوان", "author": "المؤلف", "publisher": "الناشر", "genre": "التصنيف", "page_count": "عدد الصفحات",
+    "publication_year": "سنة النشر", "isbn": "ISBN",
 }
 SKIP_FIELDS = {"summary_source", "summary_updated_at", "age_source"}
 ACTION_AR = {
@@ -172,7 +179,7 @@ def _edit_lines(r, books):
 
 # «ملفات رواء المستوردة» (Ibrahim 2026-10-09: «ابغى اعرف اذا تم تحميل ملف من رواء واضيف في المكتبة»)
 CHANGE_AR = {"price": "السعر", "quantity": "الكمية", "shelf_location": "الرف", "barcode": "الباركود",
-             "rewaa_sku": "رمز رواء", "publisher": "الدار"}
+             "rewaa_sku": "رمز رواء", "publisher": "الدار", "genre": "التصنيف", "keywords": "الكلمات المفتاحية"}
 LIST_CAP = 150
 
 
@@ -239,6 +246,75 @@ def _import_lines(run):
     return out
 
 
+# ---- 8. Test-mode conversations (Ibrahim 2026-10-10: «عشان لما ارسل لهم التحديث تصير تنحفظ وتجيني المحادثات
+# عشان اطور التطبيق»). Read from data/test_logs/chat-YYYY-MM-DD.jsonl (testlog.py), written only while
+# «وضع الاختبار» is on. The log's times are the computer's local time without a zone.
+CONV_CAP = 100
+TURN_TEXT_CAP = 1200
+
+
+def _local(ts):
+    try:
+        d = datetime.fromisoformat(str(ts))
+    except (TypeError, ValueError):
+        return None
+    return d.astimezone() if d.tzinfo is None else d
+
+
+def _conversations(status):
+    """-> (conversations newest first, capped; number left out). Last EDIT_DAYS days unless status=all."""
+    since = None if status == "all" else datetime.now().astimezone() - timedelta(days=EDIT_DAYS)
+    convs, order = {}, []
+    folder = testlog.LOG_DIR
+    names = sorted(n for n in os.listdir(folder) if n.startswith("chat-") and n.endswith(".jsonl")) if os.path.isdir(folder) else []
+    for name in names:
+        try:
+            with open(os.path.join(folder, name), encoding="utf-8") as f:
+                lines = f.readlines()
+        except OSError:
+            continue
+        for i, raw in enumerate(lines):
+            try:
+                row = json.loads(raw)
+            except ValueError:
+                continue
+            if not isinstance(row, dict):      # audit 2026-10-10: a JSON array line made the export fail
+                continue
+            when = _local(row.get("ts"))
+            if when is None or (since and when < since):
+                continue
+            key = row.get("conversation_id") or f"{name}:{i}"
+            if key not in convs:
+                convs[key] = {"id": row.get("conversation_id"), "start": when, "end": when, "rows": []}
+                order.append(key)
+            c = convs[key]
+            c["end"] = max(c["end"], when)
+            c["rows"].append(row)
+    out = [convs[k] for k in order if any(r.get("kind") == "turn" for r in convs[k]["rows"])]
+    out.sort(key=lambda c: c["start"], reverse=True)
+    return out[:CONV_CAP], max(0, len(out) - CONV_CAP)
+
+
+def _conversation_lines(c, books):
+    lines = []
+    for r in c["rows"]:
+        kind = r.get("kind")
+        if kind == "turn":
+            lines.append(f"- **الزائر:** {_md(r.get('visitor'))[:TURN_TEXT_CAP]}")
+            reply = _md(r.get("reply"))[:TURN_TEXT_CAP] or "—"
+            how = "" if r.get("understanding") == "ai" else " _(بالنظام البديل)_"
+            lines.append(f"- **منار:** {reply}{how}")
+            shown = r.get("books_shown") or []
+            if shown:
+                lines.append("  - الكتب المعروضة: " + "، ".join(f"«{_md(b.get('title'))}» ({b.get('id')})" for b in shown))
+        elif kind == "choice":
+            b = books.get(r.get("book_id")) or {}
+            lines.append(f"- **اختار الزائر:** «{_md(b.get('title')) or '—'}» ({r.get('book_id')})")
+        elif kind == "feedback":
+            lines.append(f"- **تقييمه للاختيار:** {r.get('rating')}")
+    return lines
+
+
 def build(status="open", generated_by=None):
     status = status if status in ("open", "done", "all") else "open"
     st = None if status == "all" else status
@@ -246,24 +322,34 @@ def build(status="open", generated_by=None):
     suggestions = _all(lambda o: (visitor_notes.list_notes("suggestion", st or "all", 300, o), visitor_notes.total("suggestion", st or "all")))
     questions = _all(lambda o: open_questions.list_rows(st or "all", o))
     edits = _all(lambda o: staff_notes.list_rows(st or "all", o))
+    ideas = _all(lambda o: staff_ideas.list_rows(st or "all", o))
     changes, since, prev_export = _staff_edits(status)
     imports = _imports(status)
+    convs, convs_left = _conversations(status)
     change_ids = {int(c["target"]) for c in changes
                   if c["action"].startswith(("book.", "cover.", "card.")) and str(c.get("target") or "").isdigit()}
-    books = _books({n.get("book_id") for n in reports + edits} | change_ids)
+    chosen = {r.get("book_id") for c in convs for r in c["rows"] if r.get("kind") == "choice"}
+    books = _books({n.get("book_id") for n in reports + edits} | change_ids | chosen)
     now = datetime.now(RIYADH).strftime("%Y-%m-%d %H:%M")
 
-    out = [f"# صندوق «ثلاث الذكي» — تصدير {now} (بتوقيت الرياض)", "",
-           f"- البنود: {SCOPE_AR[status]}",
+    tampered = integrity.check()   # «عن التطبيق» tamper check (Ibrahim 2026-10-12)
+    out = [f"# صندوق «منار» — تصدير {now} (بتوقيت الرياض)", ""]
+    if tampered:
+        out += ["> ⚠️ **تنبيه لإبراهيم: صفحة «عن التطبيق» تغيّرت في هذا الجهاز.** "
+                + "، ".join(tampered) + ". التحديث القادم يرجّعها كما كانت.", ""]
+    out += [f"- البنود: {SCOPE_AR[status]}",
+           f"- صفحة «عن التطبيق»: {'تغيّرت ⚠️' if tampered else 'سليمة'}",
            f"- صدّره: {_md(generated_by) or '—'}",
-           f"- بلاغات الكتب: {len(reports)} · اقتراحات الزوار: {len(suggestions)} · أسئلة بلا جواب: {len(questions)} · تعديلات مطلوبة: {len(edits)} · تعديلات نفّذها الموظفون: {len(changes)} · ملفات رواء المستوردة: {len(imports)}",
+           f"- بلاغات الكتب: {len(reports)} · اقتراحات الزوار: {len(suggestions)} · أسئلة بلا جواب: {len(questions)} · تعديلات مطلوبة: {len(edits)} · تعديلات نفّذها الموظفون: {len(changes)} · ملفات رواء المستوردة: {len(imports)} · اقتراحات الموظفين: {len(ideas)} · محادثات وضع الاختبار: {len(convs) + convs_left}",
            "",
-           "> **لـ Claude:** هذا الملف من لوحة إدارة «ثلاث الذكي»، مساعد يقترح كتب مكتبة ثلاث المتوفرة. "
+           "> **لـ Claude:** هذا الملف من لوحة إدارة «منار»، مساعدة تقترح كتب مكتبة ثلاث المتوفرة. "
            "كل بند عن كتاب فيه رقمه في قاعدة البيانات (book_id). البلاغات والتعديلات أخطاء في بيانات الكتاب "
            "(العنوان، المؤلف، الغلاف، النبذة، التصنيف، المكان) يلزم التحقق منها قبل تصحيحها. «أسئلة بلا جواب» "
            "عبارات قصيرة من طلبات الزوار ما لقى لها الشات جوابًا في بياناتنا، مرتبة حسب عدد المرات. التصدير "
-           "لا يغيّر شيئًا ولا يعلّم أي بند كمعالَج. القسم 5 سجلّ ما غيّره الموظفون فعلًا في البيانات (قبل ← بعد)، والقسم 6 ملفات رواء المستوردة وما أضافته وغيّرته، "
-           "وهذه التعديلات محفوظة في قاعدة المكتبة ويحتفظ بها التحديث القادم.", ""]
+           "لا يغيّر شيئًا ولا يعلّم أي بند كمعالَج. القسم 5 سجلّ ما غيّره الموظفون فعلًا في البيانات (قبل ← بعد)، والقسم 6 ملفات رواء المستوردة وما أضافته وغيّرته، والقسم 7 اقتراحات الموظفين العامة على التطبيق، والقسم 8 محادثات الزوار المحفوظة في وضع الاختبار (كلام الزائر ورد منار والكتب المعروضة واختياره وتقييمه) لتطوير الردود، "
+           "وهذه التعديلات محفوظة في قاعدة المكتبة ويحتفظ بها التحديث القادم. "
+           "البند الذي يُحَل في التطبيق يُكتب في release/inbox_resolutions.json برقم البند ونوعه وتاريخه، "
+           "فيُغلق تلقائيًا في المكتبة («تمت معالجته»، عالجه «تحديث …») عندما تثبّت التحديث.", ""]
 
     out += [f"## 1. بلاغات الكتب من الزوار ({len(reports)})", ""]
     if not reports:
@@ -273,7 +359,7 @@ def build(status="open", generated_by=None):
                 f"- الخطأ في: {_md(n.get('reason_label') or n.get('reason') or '—')}"]
         if n.get("note"):
             out.append(f"- كلام الزائر: {_md(n['note'])}")
-        out.append(f"- التاريخ: {_when(n.get('created_at'))} · الحالة: {STATUS_AR.get(n.get('status'), n.get('status'))}"
+        out.append(f"- التاريخ: {_when(n.get('created_at'))} · رقم البند: {n.get('note_id')} · الحالة: {STATUS_AR.get(n.get('status'), n.get('status'))}"
                    + (f" (عالجه {_md(n.get('handled_by'))} {_when(n.get('handled_at'))})" if n.get("status") == "done" else "")
                    + (" · من الواجهة الإنجليزية" if n.get("language") == "en" else ""))
         out.append("")
@@ -282,16 +368,17 @@ def build(status="open", generated_by=None):
     if not suggestions:
         out += ["لا يوجد.", ""]
     for i, n in enumerate(suggestions, 1):
-        out.append(f"{i}. {_md(n.get('note'))} — {_when(n.get('created_at'))} · {STATUS_AR.get(n.get('status'), n.get('status'))}")
+        out.append(f"{i}. {_md(n.get('note'))} — {_when(n.get('created_at'))} · رقم البند: {n.get('note_id')} · {STATUS_AR.get(n.get('status'), n.get('status'))}"
+                   + (f" (عالجه {_md(n.get('handled_by'))} {_when(n.get('handled_at'))})" if n.get("status") == "done" else ""))
     out.append("")
 
     out += [f"## 3. أسئلة بلا جواب ({len(questions)})", "",
-            "| # | العبارة | النوع | عن كتاب | عدد المرات | آخر مرة | الحالة |", "|---|---|---|---|---|---|---|"]
+            "| # | رقم البند | العبارة | النوع | عن كتاب | عدد المرات | آخر مرة | الحالة |", "|---|---|---|---|---|---|---|---|"]
     for i, q in enumerate(questions, 1):
-        out.append(f"| {i} | {_md(q.get('phrase'))} | {_md(q.get('kind_label'))} | {_md(q.get('book_title')) or '—'} | "
+        out.append(f"| {i} | {q.get('q_id')} | {_md(q.get('phrase'))} | {_md(q.get('kind_label'))} | {_md(q.get('book_title')) or '—'} | "
                    f"{q.get('times')} | {_when(q.get('last_at'))} | {STATUS_AR.get(q.get('status'), q.get('status'))} |")
     if not questions:
-        out.append("| — | لا يوجد | | | | | |")
+        out.append("| — | | لا يوجد | | | | | |")
     out.append("")
 
     out += [f"## 4. تعديلات مطلوبة من الموظفين ({len(edits)})", ""]
@@ -300,7 +387,7 @@ def build(status="open", generated_by=None):
     for i, n in enumerate(edits, 1):
         out += [f"### 4.{i} {_book_line(books.get(n.get('book_id')), n.get('book_title'), n.get('book_id'))}",
                 f"- المطلوب: {_md(n.get('note'))}",
-                f"- كتبه: {_md(n.get('created_by')) or '—'} · {_when(n.get('created_at'))} · الحالة: {STATUS_AR.get(n.get('status'), n.get('status'))}"
+                f"- كتبه: {_md(n.get('created_by')) or '—'} · {_when(n.get('created_at'))} · رقم البند: {n.get('note_id')} · الحالة: {STATUS_AR.get(n.get('status'), n.get('status'))}"
                 + (f" (نفّذه {_md(n.get('handled_by'))} {_when(n.get('handled_at'))})" if n.get("status") == "done" else ""),
                 ""]
     out += [f"## 5. تعديلات نفّذها الموظفون في المكتبة ({len(changes)})", "",
@@ -318,7 +405,54 @@ def build(status="open", generated_by=None):
         out += ["لا يوجد.", ""]
     for i, run in enumerate(imports, 1):
         star = " ★" if prev_export and str(run.get("applied_at") or "") > str(prev_export) else ""
-        out += [f"### 6.{i}{star} استيراد {_when(run.get('applied_at'))}"] + _import_lines(run)
-    counts = {"reports": len(reports), "suggestions": len(suggestions), "questions": len(questions), "edits": len(edits),
-              "staff_changes": len(changes), "imports": len(imports)}
+        out += [f"### 6.{i}{star} استيراد {'ملف المكتبة (الرفوف والتصنيف) ' if run.get('source') == 'library_sheet' else ''}{_when(run.get('applied_at'))}"] + _import_lines(run)
+    out += [f"## 7. اقتراحات الموظفين على التطبيق ({len(ideas)})", ""]
+    if not ideas:
+        out += ["لا يوجد.", ""]
+    for i, n in enumerate(ideas, 1):
+        out += [f"### 7.{i} {_md(n.get('created_by')) or '—'} · {_when(n.get('created_at'))} · رقم البند: {n.get('idea_id')} · {STATUS_AR.get(n.get('status'), n.get('status'))}"
+                + (f" (عالجه {_md(n.get('handled_by'))} {_when(n.get('handled_at'))})" if n.get("status") == "done" else ""),
+                "", "> " + "\n> ".join(_md(line) or " " for line in str(n.get("text") or "").split("\n")), ""]
+    out += [f"## 8. محادثات وضع الاختبار ({len(convs) + convs_left})", "",
+            f"- وضع الاختبار الآن: {'مفعّل' if testlog.enabled() else 'متوقف'}"
+            + (" · المدة: كل السجل" if status == "all" else f" · المدة: آخر {EDIT_DAYS} يومًا")
+            + (f" · ★ = جديدة بعد آخر تصدير ({_when(prev_export)})" if prev_export else ""), ""]
+    if convs_left:
+        out += [f"- الأحدث {len(convs)} محادثة فقط؛ {convs_left} أقدم منها غير مضمّنة.", ""]
+    if not convs:
+        out += ["لا يوجد.", ""]
+    prev_dt = _local(prev_export) if prev_export else None
+    for i, c in enumerate(convs, 1):
+        turns = sum(1 for r in c["rows"] if r.get("kind") == "turn")
+        first = next((r for r in c["rows"] if r.get("kind") == "turn"), {})
+        model = "/".join(x for x in (first.get("provider"), first.get("model")) if x) or "النظام البديل"
+        star = " ★" if prev_dt and c["start"] > prev_dt else ""
+        lang = " · بالإنجليزي" if first.get("language") == "en" else ""
+        out += [f"### 8.{i}{star} {c['start'].strftime('%Y-%m-%d %H:%M')} · {turns} رسالة · {_md(model)}{lang}"]
+        out += _conversation_lines(c, books) + [""]
+    # «ردود الموظفين على تأكيد هوية الكتب» (Ibrahim 2026-10-11): the full answers travel in this file, so the
+    # copy/download step in «استيراد من رواء» was removed. Claude returns a «confirmation-corrections-1» file that
+    # staff apply on the inbox page («تطبيق ملف التصحيحات من Claude»).
+    try:
+        cx = confirmations.export_package(include_handled=status != "open")
+    except Exception:  # never break the export over this section
+        cx = {"count": 0, "answers": [], "books_needing_confirmation": None}
+    answers = [a for a in cx.get("answers", []) if status != "done" or a.get("handled_at")]
+    waiting = cx.get("books_needing_confirmation")
+    out += [f"## 9. ردود الموظفين على تأكيد هوية الكتب ({len(answers)})", "",
+            (f"- كتب ما زالت تحتاج تأكيد هوية: {waiting}" if waiting is not None else "- تعذر قراءة الردود."), ""]
+    if not answers:
+        out += ["لا يوجد.", ""]
+    for i, a in enumerate(answers, 1):
+        bk = a.get("book") or {}
+        out += [f"### 9.{i} «{_md(bk.get('title')) or '—'}» ({a.get('book_id')}) — {_md(bk.get('author')) or '—'}",
+                f"- رد {_md(a.get('answered_by')) or '—'} · {_when(a.get('answered_at'))}: {_md(a.get('choice_label') or a.get('choice'))}"
+                + (f" · تعليق: {_md(a.get('comment'))}" if a.get("comment") else "")
+                + (f" · (عولج {_when(a.get('handled_at'))})" if a.get("handled_at") else ""), ""]
+    if answers:
+        out += ["> **لـ Claude:** هذه الردود كاملة (مع بيانات الكتاب الحالية والمرشّح الذي اختاره الموظف). "
+                "صحّح منها ما هو واضح وأرجع ملف تصحيحات بصيغة `confirmation-corrections-1` يطبّقه الموظفون من صفحة البلاغات.", "",
+                "```json", json.dumps({**cx, "answers": answers, "count": len(answers)}, ensure_ascii=False, indent=1), "```", ""]
+    counts = {"confirmations": len(answers), "test_conversations": len(convs) + convs_left, "reports": len(reports), "suggestions": len(suggestions), "questions": len(questions), "edits": len(edits),
+              "staff_changes": len(changes), "imports": len(imports), "ideas": len(ideas)}
     return "\n".join(out).rstrip() + "\n", counts

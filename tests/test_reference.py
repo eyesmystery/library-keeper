@@ -42,6 +42,21 @@ ok(out["books"] and all(b["reason"] for b in out["books"]), "shown books keep th
 turn({"title": "كتاب لا يعرفه أحد", "author": "", "format": "unknown", "moods": [], "themes": [], "known": False})
 ok(not any(f["why_it_matches"].startswith(("من كتب", "قريب من")) for f in seen["facts"]), "unknown reference adds nothing guessed")
 ok("وش اللي عجبه فيه" in seen["guidance"], "unknown reference: the visitor is asked what they liked")
+# «أبغى اقرأ لكتاب يشبه كتاب اخلع حذائك» (Ibrahim 2026-10-11): the model did not know it and two random
+# «خيار متوفر للتنويع» books were shown. Now: no book at all, and one question about what they liked.
+_ref = {"title": "اخلع حذائك", "author": "", "format": "unknown", "moods": [], "themes": [], "known": False}
+chat.interpret = lambda conv, active: {"intent": "recommend", "prefs": llm.clean_prefs({}), "mentioned_titles": ["اخلع حذائك"],
+                                      "wants_new_options": False, "references": chat.clean_references([_ref])}
+out = A.run_chat([{"role": "user", "content": "ابغى اقرأ لكتاب يشبه كتاب اخلع حذائك"}], active=("fake", "m"))
+ok(seen["facts"] == [] and out["books"] == [], "unknown reference, nothing else asked: no book is offered (no «for variety» fillers)")
+ok("show_book_ids فارغة" in seen["guidance"] and "اقترح من 2 إلى 4" not in seen["guidance"] and "suggestions" in seen["guidance"],
+   "and the guidance no longer also says «suggest 2 to 4»; it asks one question with tap answers")
+chat.interpret = lambda conv, active: {"intent": "recommend", "prefs": llm.clean_prefs({"genres": ["novel"]}), "mentioned_titles": ["اخلع حذائك"],
+                                      "wants_new_options": False, "references": chat.clean_references(
+                                          [{"title": "اخلع حذائك", "author": "", "format": "unknown", "moods": [], "themes": [], "known": False}])}
+out = A.run_chat([{"role": "user", "content": "أبغى رواية تشبه اخلع حذائك"}], active=("fake", "m"))
+ok(not any(f["why_it_matches"] in (A.FILLER_REASON, A.FILLER_REASON_EN) for f in seen["facts"]),
+   "with another wish (a novel) the reference request still gets no «for variety» filler")
 
 # a researched in-stock reference uses its own card, not the model's description
 inside = con.execute("""select b.title from books b join book_profiles p using(book_id)

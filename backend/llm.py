@@ -369,7 +369,7 @@ def _strict_schema(schema):
 def _codex_prompt(system, msgs):
     lines = [system, "", "<conversation>"]
     for m in msgs:
-        who = "الزائر" if m["role"] == "user" else "أمين المكتبة"
+        who = "الزائر" if m["role"] == "user" else "منار"
         lines.append(f"[{who}]: {m['content']}")
     lines += ["</conversation>", "",
               "Answer the conversation above for the library assistant. Do not run commands or read files. "

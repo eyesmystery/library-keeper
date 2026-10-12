@@ -49,6 +49,26 @@ ok(honors.matches_award(b3, ["nobel"]) == ["مؤلفه فاز بجائزة نو�
 ok(honors.matches_adaptation(b2, "film") and not honors.matches_adaptation(b2, "series") and honors.matches_adaptation(b1, "screen"), "film / series / either")
 ok(honors.to_english(honors.for_book(b1)["awards"][0]) == "Won International Prize for Arabic Fiction (Arabic Booker) 2022", "English wording")
 
+# ---------- Ibrahim's prize lists (2026-10-11): wins and named prizes first, the branch on the staff card
+_extra = [honors.add("author_awards", aid, {"award_key": "other", "award_name": "جائزة الكتاب الوطنية الأمريكية", "result": "winner", "year": 2020, "source_url": U}, "prize_lists"),
+          honors.add("author_awards", aid, {"award_key": "booker", "result": "shortlist", "year": 2021, "source_url": U}, "prize_lists"),
+          honors.add("author_awards", aid, {"award_key": "booker", "result": "winner", "year": 1990, "source_url": U}, "prize_lists")]
+ok(honors.for_book(b3)["author_awards"] == ["مؤلفه فاز بجائزة البوكر 1990", "مؤلفه فاز بجائزة نوبل للآداب 1988",
+   "مؤلفه فاز بجائزة الكتاب الوطنية الأمريكية 2020", "مؤلفه وصل إلى القائمة القصيرة لجائزة البوكر 2021"],
+   "named prizes won come first (the chat gets only the first three), then other prizes, then lists")
+ok(honors.award_label({"award_key": "pulitzer", "result": "winner", "year": 2007, "category": "الأدب القصصي"}) == "جائزة بوليتزر: فائز 2007 — الأدب القصصي"
+   and honors.award_label({"award_key": "hugo", "result": "winner", "year": 1985, "category": "الرواية"}) == "جائزة هوغو: فائز 1985",
+   "staff label names the branch (not the plain «الرواية»)")
+for _r in _extra:
+    honors.delete("author_awards", _r)
+_t = honors.add("book_awards", b3, {"award_key": "zayed", "result": "winner", "year": 2018, "category": "الترجمة", "source_url": U}, "prize_lists")
+_s = honors.add("author_awards", aid, {"award_key": "zayed", "result": "winner", "year": 2018, "work_title": "كتاب", "source_url": U}, "prize_lists")
+_h3 = honors.for_book(b3)
+ok(_h3["awards"] == ["فازت ترجمته بجائزة الشيخ زايد للكتاب 2018"] and _h3["author_awards"] == ["مؤلفه فاز بجائزة نوبل للآداب 1988"]
+   and honors.to_english(_h3["awards"][0]) == "Its translation won Sheikh Zayed Book Award 2018",
+   "a translation prize is the translation's; the person's row for the same prize is not repeated on the book")
+honors.delete("book_awards", _t); honors.delete("author_awards", _s)
+
 # ---------- interpretation fields and constraints
 cp = llm.clean_prefs({"awards": ["ipaf", "booker", "bad"], "award_year": 2022, "adaptation": "film"})
 ok(cp["awards"] == ["ipaf", "booker"] and cp["award_year"] == 2022 and cp["adaptation"] == "film", "clean_prefs keeps known prizes, year, adaptation")

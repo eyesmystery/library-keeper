@@ -47,17 +47,12 @@ ok(A.app.test_client().get("/api/admin/version").status_code == 401, "the versio
 ok('<b id="aboutVersion">—</b>' in html and "if (which === 'about') loadVersion();" in html and "/api/admin/version" in html,
    "about page reads its version from the server and shows a dash until it arrives")
 ok("١٫٠ ·" not in html and "سبتمبر ٢٠٢٦" not in html, "no hand-written version or date is left in the about page")
-ok(all(token in html for token in ['class="about-hero"', 'class="about-journey" role="list"',
-                                    'class="about-facts"', 'class="about-footer"']),
-   "about section has a clear identity, journey, trust facts, and footer structure")
-ok(all(text in html for text in ["يسولف مع ثلاث الذكي", "نبحث في الموجود", "يختار بثقة",
-                                 "خصوصية من البداية", "يستمر وقت التعطل"]),
-   "about copy explains the visitor journey, privacy, and fallback in plain Arabic")
-ok('about-marsa' not in html and 'marsa' not in html.lower() and "مرسى" not in html and '.about-thalath{width:92px;' in html and
-   '<h2 id="aboutTitle">ثلاث الذكي</h2>' in html and 'class="about-kicker"' not in html,
-   "about hero shows the Thalath mark alone and names the product «ثلاث الذكي»")
-ok(".about-journey{grid-template-columns:1fr}" in html and ".about-facts{grid-template-columns:1fr}" in html,
-   "about section stacks its journey and facts on narrow screens")
+ok(all(token in html for token in ['class="about-lockup"', 'class="about-manar"', 'class="about-thalath"', 'التطبيق خاص بمكتبة ثلاث.',
+                                    '<span>تطوير</span><img src="/static/assets/developer-logo.png" alt="إبراهيم" />']),
+   "about page is short (Ibrahim 2026-10-12): version, belongs to Thalath, Manar | Thalath lockup, developer logo under «تطوير»")
+ok('about-journey' not in html and 'about-facts' not in html and 'about-marsa' not in html and 'marsa' not in html.lower() and "مرسى" not in html
+   and '.about-manar{width:88px;aspect-ratio:2652/1442' in html and '<h2 id="aboutTitle">منار</h2>' in html,
+   "the long journey / facts sections are gone; the product is named «منار»")
 ids = __import__('re').findall(r'\bid="([^"]+)"', html)
 ok(len(ids) == len(set(ids)), "admin page has no duplicate element ids")
 print(f"TOTAL PASS={P} FAIL={F}")

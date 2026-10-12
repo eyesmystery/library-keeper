@@ -1,4 +1,4 @@
-"""Build the transfer copies of the app ("ثلاث الذكي") for the library's computer.
+"""Build the transfer copies of the app ("منار") for the library's computer.
 
 Usage (from the project root, on the Mac):
     backend/venv/bin/python scripts/make_release.py --version "0.9 beta"
@@ -56,11 +56,11 @@ OUT = os.path.join(ROOT, "release")
 BACKEND_SKIP = {"venv", "venv-win", "__pycache__"}
 SCRIPTS = ["backup_db.py", "restore_db.py", "confirmations.py", "ensure_venv.sh", "ensure_venv.bat", "build_embeddings.py"]
 EMPTY_TABLES = ["audit_log", "feedback", "book_choices", "book_daily", "usage_daily", "visitor_notes",
-                "book_confirmations", "open_questions", "staff_notes"]
+                "book_confirmations", "open_questions", "staff_notes", "staff_ideas"]
 
 # ---------------------------------------------------------------- start files (Windows)
 WIN_START = r"""@echo off
-rem Thalath Smart - start the server for the library: this computer and phones on the same Wi-Fi.
+rem Manar - start the server for the library: this computer and phones on the same Wi-Fi.
 chcp 65001 >nul
 setlocal
 set "ROOT=%~dp0"
@@ -80,7 +80,7 @@ rem Backups stay in the backups folder; a second copy goes to OneDrive when this
 if not defined LIBRARY_KEEPER_BACKUP_MIRROR if exist "%USERPROFILE%\OneDrive\" set "LIBRARY_KEEPER_BACKUP_MIRROR=%USERPROFILE%\OneDrive\Thalath Smart Backups"
 "%PYW%" "%ROOT%scripts\backup_db.py" --reason server-start || echo Warning: the backup failed (see backups\backup_log.txt).
 echo.
-echo Thalath Smart - the server is starting.
+echo Manar - the server is starting.
 echo   Admin page on this computer:  http://127.0.0.1:8802/admin
 echo   Visitors' address and QR code: admin page - Settings.
 echo If Windows asks whether Python may communicate on networks, allow it on PRIVATE networks.
@@ -96,7 +96,7 @@ pause
 """
 
 WIN_LOCAL = r"""@echo off
-rem Thalath Smart - start for THIS computer only (no phones). Use it for checking after an update.
+rem Manar - start for THIS computer only (no phones). Use it for checking after an update.
 chcp 65001 >nul
 setlocal
 set "ROOT=%~dp0"
@@ -116,7 +116,7 @@ pause
 """
 
 WIN_AUTOSTART = r"""@echo off
-rem Thalath Smart - run once: start the server automatically when this Windows user signs in,
+rem Manar - run once: start the server automatically when this Windows user signs in,
 rem and make a database backup every day at 03:15. Undo with remove_autostart.bat.
 chcp 65001 >nul
 setlocal
@@ -131,7 +131,7 @@ pause
 """
 
 WIN_REMOVE = r"""@echo off
-rem Thalath Smart - undo install_autostart.bat.
+rem Manar - undo install_autostart.bat.
 chcp 65001 >nul
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Remove-Item -ErrorAction SilentlyContinue (Join-Path ([Environment]::GetFolderPath('Startup')) 'Thalath Smart.lnk')"
 schtasks /Delete /F /TN "ThalathSmartBackup" >nul 2>&1
@@ -140,7 +140,7 @@ pause
 """
 
 WIN_DAILY = r"""@echo off
-rem Thalath Smart - daily backup run by the scheduled task (03:15). Same mirror folder as the start file.
+rem Manar - daily backup run by the scheduled task (03:15). Same mirror folder as the start file.
 setlocal
 set "ROOT=%~dp0..\"
 set "PYTHONUTF8=1"
@@ -149,7 +149,7 @@ if not defined LIBRARY_KEEPER_BACKUP_MIRROR if exist "%USERPROFILE%\OneDrive\" s
 """
 
 WIN_BACKUP = r"""@echo off
-rem Thalath Smart - make a database backup now (safe while the server is running).
+rem Manar - make a database backup now (safe while the server is running).
 chcp 65001 >nul
 setlocal
 set "ROOT=%~dp0"
@@ -162,7 +162,7 @@ pause
 
 # ---------------------------------------------------------------- start files (Mac)
 MAC_START = r"""#!/bin/zsh
-# ثلاث الذكي — تشغيل السيرفر للمكتبة: هذا الجهاز والجوالات على نفس الواي فاي.
+# منار — تشغيل السيرفر للمكتبة: هذا الجهاز والجوالات على نفس الواي فاي.
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT" || exit 1
 if lsof -iTCP:8802 -sTCP:LISTEN >/dev/null 2>&1; then
@@ -174,7 +174,7 @@ if [ ! -f "$ROOT/data/library.db" ]; then
 fi
 "$ROOT/backend/venv/bin/python" "$ROOT/scripts/backup_db.py" --reason server-start || echo "تنبيه: النسخة الاحتياطية فشلت (راجع backups/backup_log.txt)."
 echo ""
-echo "ثلاث الذكي — السيرفر يبدأ الآن."
+echo "منار — السيرفر يبدأ الآن."
 echo "  صفحة الإدارة على هذا الجهاز: http://127.0.0.1:8802/admin"
 echo "  عنوان الزوار ورمز QR: صفحة الإدارة ← الإعدادات."
 echo "اترك هذه النافذة مفتوحة والجهاز مستيقظًا. للإيقاف: Ctrl+C أو أغلق النافذة."
@@ -184,7 +184,7 @@ cd "$ROOT/backend" && LIBRARY_KEEPER_HOST=0.0.0.0 exec caffeinate -i ./venv/bin/
 """
 
 MAC_LOCAL = r"""#!/bin/zsh
-# ثلاث الذكي — تشغيل على هذا الجهاز فقط (بدون جوالات). للفحص بعد تحديث.
+# منار — تشغيل على هذا الجهاز فقط (بدون جوالات). للفحص بعد تحديث.
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT" || exit 1
 if lsof -iTCP:8802 -sTCP:LISTEN >/dev/null 2>&1; then echo "السيرفر شغّال من قبل. أغلق نافذته أولًا."; exit 1; fi
@@ -195,7 +195,7 @@ cd "$ROOT/backend" && exec ./venv/bin/python app.py
 """
 
 MAC_BACKUP = r"""#!/bin/zsh
-# ثلاث الذكي — نسخة احتياطية الآن (آمنة والسيرفر يعمل).
+# منار — نسخة احتياطية الآن (آمنة والسيرفر يعمل).
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 "$ROOT/scripts/ensure_venv.sh" || exit 1
 "$ROOT/backend/venv/bin/python" "$ROOT/scripts/backup_db.py" --reason manual
@@ -203,11 +203,13 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 
 # ---------------------------------------------------------------- update package (both systems)
 WIN_UPDATE = r"""@echo off
-rem Thalath Smart - install this update. Accounts, settings, events and stock stay; the catalog is merged.
+rem Manar - install this update. Accounts, settings, events and stock stay; the catalog is merged.
 chcp 65001 >nul
 setlocal
 set "UPD=%~dp0"
 set "APP=%~dp0.."
+rem Windows «Extract All» adds one more folder level; accept the app folder one level higher too (2026-10-09).
+if not exist "%APP%\data\library.db" if exist "%~dp0..\..\data\library.db" set "APP=%~dp0..\.."
 set "PYTHONUTF8=1"
 if not exist "%APP%\data\library.db" goto :noapp
 set "PYW=%APP%\backend\venv-win\Scripts\python.exe"
@@ -229,11 +231,13 @@ exit /b 1
 """
 
 MAC_UPDATE = r"""#!/bin/zsh
-# ثلاث الذكي — تثبيت هذا التحديث. الحسابات والإعدادات والفعاليات والمخزون تبقى؛ الكتالوج يُدمج.
+# منار — تثبيت هذا التحديث. الحسابات والإعدادات والفعاليات والمخزون تبقى؛ الكتالوج يُدمج.
 UPD="$(cd "$(dirname "$0")" && pwd)"
 APP="$(dirname "$UPD")"
+# an extra folder level from unzipping: accept the app folder one level higher too (2026-10-09)
+[ ! -f "$APP/data/library.db" ] && [ -f "$(dirname "$APP")/data/library.db" ] && APP="$(dirname "$APP")"
 if [ ! -f "$APP/data/library.db" ]; then
-  echo "ضع مجلد التحديث داخل مجلد «ثلاث الذكي» (بجانب start_library.command) ثم شغّل هذا الملف من جديد."; exit 1
+  echo "ضع مجلد التحديث داخل مجلد «منار» (بجانب start_library.command) ثم شغّل هذا الملف من جديد."; exit 1
 fi
 PY="$APP/backend/venv/bin/python"
 if [ ! -x "$PY" ]; then
@@ -246,14 +250,14 @@ fi
 def update_guide(version, counts, n_covers, from_versions):
     return f"""<!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ثلاث الذكي — تحديث {version}</title><style>{GUIDE_CSS}</style></head><body><main>
-<h1>ثلاث الذكي — تحديث إلى {version}</h1>
+<title>منار — تحديث {version}</title><style>{GUIDE_CSS}</style></head><body><main>
+<h1>منار — تحديث إلى {version}</h1>
 <p class="lead">تحديث فقط: لا يمسح شيئًا مما أضفتموه. فيه الكود الجديد، وتحديث كتالوج {counts['books']:,} كتابًا، و{n_covers:,} غلافًا جديدًا أو معدّلًا.</p>
 
 <h2>الخطوات</h2>
 <ol>
 <li>أغلق نافذة السيرفر (التطبيق يجب أن يكون متوقفًا أثناء التحديث).</li>
-<li>انقل هذا المجلد كاملًا إلى <b>داخل</b> مجلد «ثلاث الذكي»، بجانب ملف <code>start_library</code>.</li>
+<li>انقل هذا المجلد كاملًا إلى <b>داخل</b> مجلد «منار»، بجانب ملف <code>start_library</code>.</li>
 <li>انقر مرتين على <code>install_update.bat</code> (ويندوز) أو <code>install_update.command</code> (ماك؛ أول مرة: زر أيمن ثم «فتح»).</li>
 <li>انتظر حتى تظهر علامة ✓ ثم شغّل التطبيق من <code>start_library</code> كالعادة.</li>
 </ol>
@@ -312,7 +316,7 @@ def read_package(zip_path, work):
     return version, db, covers
 
 
-def build_update(stage, version, info, counts, from_zips, zip_path):
+def build_update(stage, version, info, counts, from_zips, zip_path, test_log="keep"):
     """The small update package, made from the staged full package (before the platform files are added)."""
     up = os.path.join(OUT, "_update")
     if os.path.exists(up):
@@ -338,6 +342,12 @@ def build_update(stage, version, info, counts, from_zips, zip_path):
         os.chmod(os.path.join(mac, "scripts", x), 0o755)
     shutil.copy2(os.path.join(stage, "data", "catalog_base.db"), os.path.join(up, "catalog.db"))
     shutil.copy2(os.path.join(ROOT, "scripts", "apply_update.py"), os.path.join(up, "apply_update.py"))
+    # inbox items this version solves: closed at the library when the update is installed (apply_resolutions)
+    resolutions = os.path.join(ROOT, "release", "inbox_resolutions.json")
+    if os.path.exists(resolutions):
+        shutil.copy2(resolutions, os.path.join(up, "inbox_resolutions.json"))
+    if test_log in ("on", "off"):      # read by apply_update.apply_settings; "keep" leaves the library's choice
+        write(os.path.join(up, "settings.json"), json.dumps({"test_log": test_log == "on"}) + "\n")
     covers_dir = os.path.join(stage, "data", "covers")
     now = apply_update.cover_manifest(covers_dir)
     need, from_versions = set(), []
@@ -412,8 +422,8 @@ def guide(platform, version, model, counts):
                   "وكلمة مرور من 8 خانات على الأقل فيها حروف وأرقام.")
     return f"""<!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ثلاث الذكي — تعليمات التركيب</title><style>{GUIDE_CSS}</style></head><body><main>
-<h1>ثلاث الذكي — تعليمات التركيب ({'ويندوز' if win else 'ماك'})</h1>
+<title>منار — تعليمات التركيب</title><style>{GUIDE_CSS}</style></head><body><main>
+<h1>منار — تعليمات التركيب ({'ويندوز' if win else 'ماك'})</h1>
 <p class="lead">الإصدار {version}. في هذه الحزمة: {counts['books']:,} كتابًا، {counts['covers']:,} غلافًا، {account}</p>
 
 <h2>١. قبل البدء</h2>
@@ -465,8 +475,8 @@ def guide(platform, version, model, counts):
 </ul>
 
 <h2>٦. تصحيحات الموظفين</h2>
-<p>ردود الموظفين على «الكتب التي تحتاج تأكيد هوية» تُخزَّن على هذا الجهاز. لإرسالها للتصحيح: صفحة الإدارة ← استيراد من رواء
-← «ردود الموظفين على تأكيد هوية الكتب» ← نسخ الردود أو تنزيلها. وملف التصحيحات الراجع يُطبَّق من نفس المكان بعد معاينته.</p>
+<p>ردود الموظفين على «الكتب التي تحتاج تأكيد هوية» تُخزَّن على هذا الجهاز وتطلع مع ملف البلاغات: صفحة الإدارة ← البلاغات
+← «تنزيل الكل في ملف». وملف التصحيحات الراجع يُطبَّق من نفس الصفحة: «تطبيق ملف التصحيحات من Claude» ← معاينة ← تطبيق.</p>
 
 <h2>٧. إذا حصلت مشكلة</h2>
 <table>
@@ -659,6 +669,8 @@ def main():
                     help="keep no account at all (copies published on GitHub); the first start asks for a manager account")
     ap.add_argument("--update-from", action="append", default=[], metavar="ZIP",
                     help="an earlier full package; also build the small update package for installations of it (repeatable)")
+    ap.add_argument("--test-log", choices=("keep", "on", "off"), default="keep",
+                    help="update package: turn «وضع الاختبار» on/off at the library (default: keep their setting)")
     ap.add_argument("--model", default=None, help="Ollama model written to data/llm_settings.json (default: the current one)")
     args = ap.parse_args()
     model = args.model
@@ -678,7 +690,7 @@ def main():
     made, update = {}, None
     if args.update_from:
         name = "ThalathSmart-update-%s-%s-%s%s.zip" % (tag, when.strftime("%Y%m%d-%H%M"), ref, "-dirty" if dirty else "")
-        update = build_update(stage, args.version, info, counts, args.update_from, os.path.join(OUT, name))
+        update = build_update(stage, args.version, info, counts, args.update_from, os.path.join(OUT, name), args.test_log)
     for platform in ("windows", "mac"):
         for f in os.listdir(stage):  # start files of the other platform are removed before each zip
             if f.endswith((".bat", ".command", ".html")):

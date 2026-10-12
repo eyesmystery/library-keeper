@@ -1,5 +1,5 @@
 @echo off
-rem Thalath Smart - start for THIS computer only (no phones). Use it for checking after an update.
+rem Manar - start for THIS computer only (no phones). Use it for checking after an update.
 chcp 65001 >nul
 setlocal
 set "ROOT=%~dp0"

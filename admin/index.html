@@ -4,13 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
-  <title>لوحة الإدارة — مكتبة ثلاث</title>
+  <title>لوحة الإدارة — منار</title>
+  <link rel="icon" href="/static/assets/manar-icon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/static/assets/favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="apple-touch-icon" href="/static/assets/apple-touch-icon.png" />
   <style>
-    @font-face{font-family:MarkaziText;src:url("/static/assets/MarkaziText.ttf") format("truetype");font-weight:400 700;font-display:swap}
+    /* Arabic base font: Zain (Ibrahim 2026-10-11, whole app; OFL, bundled — see assets/Zain-OFL.txt) */
+    @font-face{font-family:Zain;src:url("/static/assets/Zain-Light.ttf") format("truetype");font-style:normal;font-weight:300;font-display:swap}@font-face{font-family:Zain;src:url("/static/assets/Zain-Regular.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}@font-face{font-family:Zain;src:url("/static/assets/Zain-Bold.ttf") format("truetype");font-style:normal;font-weight:700;font-display:swap}@font-face{font-family:Zain;src:url("/static/assets/Zain-ExtraBold.ttf") format("truetype");font-style:normal;font-weight:800;font-display:swap}
     /* Thalath identity (docs/visual-style.md): sage, coral, brown on paper */
-    :root{--sage:#BFCCB8;--sage-deep:#ADB7A7;--sage-soft:#E4EADF;--coral:#D8614A;--brown:#3B1F14;--canvas:#F7F3EC;--surface:#FFFCF7;--ink:#3B1F14;--muted:#756B65;--line:#E4DCD2;--primary:#3B1F14;--primary-hover:#24120B;--primary-soft:#E4EADF;--accent:#D8614A;--accent-soft:#F7E0D9;--danger:#A8321F;--danger-soft:#F9E3DE;--info:#3f566a;--info-soft:#e6ecf1;--weak:#8b918e;--weak-soft:#efede8;--shadow-sm:0 1px 2px rgba(59,31,20,.06),0 6px 20px rgba(59,31,20,.05);--shadow-lg:0 20px 55px rgba(59,31,20,.16);--font:MarkaziText,"SF Arabic","Noto Sans Arabic","Geeza Pro",Tahoma,system-ui,sans-serif}
+    :root{--sage:#BFCCB8;--sage-deep:#ADB7A7;--sage-soft:#E4EADF;--coral:#D8614A;--brown:#3B1F14;--canvas:#F7F3EC;--surface:#FFFCF7;--ink:#3B1F14;--muted:#756B65;--line:#E4DCD2;--primary:#3B1F14;--primary-hover:#24120B;--primary-soft:#E4EADF;--accent:#D8614A;--accent-soft:#F7E0D9;--danger:#A8321F;--danger-soft:#F9E3DE;--info:#3f566a;--info-soft:#e6ecf1;--weak:#8b918e;--weak-soft:#efede8;--shadow-sm:0 1px 2px rgba(59,31,20,.06),0 6px 20px rgba(59,31,20,.05);--shadow-lg:0 20px 55px rgba(59,31,20,.16);--font:Zain,"SF Arabic","Noto Sans Arabic","Geeza Pro",Tahoma,system-ui,sans-serif}
     *{box-sizing:border-box}
-    body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.6;font-size-adjust:.5}
+    body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.6}
     button,input,select{font:inherit}
     [hidden]{display:none!important}
     :focus-visible{outline:3px solid rgba(216,97,74,.6);outline-offset:2px}
@@ -82,6 +86,7 @@
     .export-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:10px 0 4px}
     .export-bar .btn{text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
     .export-bar .diff{font-size:13px}
+    .cx-apply{margin-top:18px}.cx-apply summary h3{font-size:17px}
     /* reader attributes folded inside the card: open on demand (Ibrahim, 2026-10-09) */
     details.fold>summary{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;min-height:44px;cursor:pointer;list-style:none}
     details.fold>summary::-webkit-details-marker{display:none}
@@ -92,6 +97,13 @@
     details.fold[open]>summary .fold-count{display:none}
     details.fold[open]>summary{margin-bottom:12px}
     .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+    .idea-form{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-bottom:12px}
+    .idea-form textarea{width:100%;box-sizing:border-box;min-height:80px;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}
+    .block-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+    .block-head h3{margin:0}
+    .basic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end}
+    .basic-grid .bfull{grid-column:1/-1}
+    .basic-grid input,.basic-grid select{width:100%;box-sizing:border-box}
     .fact{padding:10px 12px;border-radius:12px;background:#f3f0e8}
     .fact span{display:block;font-size:11px;color:var(--muted)}
     .fact b{font-size:14px}
@@ -323,7 +335,7 @@
     .review-bar input{min-height:44px;padding:4px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;margin-inline-start:6px}
     .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
     .chip.rewaa{background:var(--info-soft);color:var(--info)}
-    @media(max-width:560px){.bar{padding:10px 14px}main{padding:14px 14px 50px}.sheet-body{padding:14px}.sheet-head{padding:14px}.about-hero{padding:22px 20px 24px}.about-body{padding:22px 20px}.about-hero h2{font-size:30px}.about-lead{font-size:17px}.about-journey{grid-template-columns:1fr}.about-step:not(:last-child){border-inline-end:0;border-bottom:1px solid var(--line)}.about-facts{grid-template-columns:1fr}.about-facts>div:nth-child(odd),.about-facts>div:nth-child(even){padding-inline:4px;border-inline-start:0}.about-footer{align-items:flex-start}.credit{margin-inline-start:auto}}
+    @media(max-width:560px){.bar{padding:10px 14px}main{padding:14px 14px 50px}.sheet-body{padding:14px}.sheet-head{padding:14px}}
     @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
     .auth{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:var(--canvas,#f6f2e9)}
     .auth-card{width:min(100%,380px);background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 20px 55px rgba(24,35,31,.13)}
@@ -406,26 +418,24 @@
     .gchip input{accent-color:var(--brown)}
     .gchip.taken{opacity:.45}
     /* about */
-    .panel.about{padding:0;overflow:hidden}
-    .about-hero{position:relative;isolation:isolate;padding:28px 30px 30px;background:var(--sage-soft)}
-    .about-hero:before{position:absolute;inset:0;z-index:-1;background:url('/static/assets/thalath-pattern.png') center/cover no-repeat;opacity:.045;content:"";pointer-events:none}
-    .about-topline{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:24px}
-    .about-brand{display:flex;align-items:center}.about-brand img{display:block;height:auto;object-fit:contain}.about-thalath{width:92px;aspect-ratio:1144/348}
-    .about-badge{padding:4px 12px;border:1px solid rgba(59,31,20,.18);border-radius:999px;background:rgba(255,252,247,.55);color:var(--brown);font-size:13px;font-weight:700}
-    .about-hero h2{margin:0 0 5px;color:var(--brown);font-size:34px;line-height:1.25}
-    .about-lead{max-width:680px;margin:0;color:#51453f;font-size:19px;line-height:1.75}
-    .about-body{padding:26px 30px 28px}
-    .about-body h3{margin:0 0 13px;color:var(--brown);font-size:20px}
-    .about-journey{display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:28px;border-block:1px solid var(--line)}
-    .about-step{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:18px 16px}.about-step:not(:last-child){border-inline-end:1px solid var(--line)}
-    .about-step>span{display:grid;width:30px;height:30px;place-items:center;border-radius:50%;background:var(--coral);color:var(--surface);font-size:14px;font-weight:700}
-    .about-step b{display:block;margin-bottom:2px;color:var(--brown);font-size:17px}.about-step p{margin:0;color:var(--muted);font-size:14px;line-height:1.65}
-    .about-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;border-top:1px solid var(--line)}
-    .about-facts>div{padding:15px 4px;border-bottom:1px solid var(--line)}.about-facts>div:nth-child(odd){padding-inline-end:24px}.about-facts>div:nth-child(even){padding-inline-start:24px;border-inline-start:1px solid var(--line)}
-    .about-facts dt{margin-bottom:2px;color:var(--brown);font-weight:700}.about-facts dd{margin:0;color:var(--muted);font-size:14px;line-height:1.65}
-    .about-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px;margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
-    .about-version span,.credit span{display:block;color:var(--muted);font-size:12px}.about-version b{font-size:15px}
-    .credit{display:flex;align-items:center;gap:12px;color:var(--muted)}.credit img{display:block;width:94px;height:auto}
+    /* book location column (2026-10-12) */
+    .booklist .loc-cell{white-space:nowrap}
+    .loc{display:inline-grid;gap:0;line-height:1.25}.loc b{font-size:15px;font-weight:700;color:var(--ink);text-align:start}.loc small{font-size:12px;color:var(--muted)}
+    .loc-kind{display:inline-block;margin-top:2px;padding:0 6px;border-radius:999px;background:var(--sage-soft);color:var(--muted);font-size:11px}
+    .loc-none{color:var(--muted)}
+    /* about:css:start — «عن التطبيق» (short, 2026-10-12), watched by backend/integrity.py */
+    .panel.about{display:grid;gap:22px;max-width:760px;padding:28px 30px}
+    .about-main{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px 32px}
+    .about-text h2{margin:0;color:var(--brown);font-size:30px;line-height:1.2}
+    .about-lead{margin:4px 0 0;color:var(--ink);font-size:18px}
+    .about-version{margin:6px 0 0;color:var(--muted);font-size:15px}.about-version b{color:var(--ink);font-weight:600}
+    .about-lockup{display:flex;align-items:center;gap:16px}
+    .about-manar{width:88px;aspect-ratio:2652/1442;height:auto;object-fit:contain}
+    .about-sep{width:1.5px;height:44px;background:rgba(59,31,20,.3)}
+    .about-thalath{width:84px;height:auto}
+    .credit{display:grid;justify-items:start;gap:6px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted)}
+    .credit span{font-size:14px}.credit img{display:block;width:110px;height:auto}
+    /* about:css:end */
     /* trial QR */
     .qr-row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
     .qr-box{display:grid;width:220px;min-height:220px;place-items:center;border:1px solid var(--line);border-radius:16px;background:#fff;padding:8px}
@@ -433,12 +443,120 @@
     .qr-info{flex:1 1 260px}.qr-info p{margin:0 0 10px}
     .qr-status{font-weight:700}.qr-status.ok{color:#3E6E35}.qr-status.bad{color:var(--danger)}
     #qrPrint{display:none}
+
+    /* ===== Dashboard look (Ibrahim, 2026-10-11, after a reference dashboard): brown side rail, paper stage framed on sage,
+       shared icon definitions; calm admin layout and progressive controls ===== */
+    :root{--tile:#EFE9DF;--tile-hover:#E8E1D4;--r-xl:28px;--r-lg:22px;--i-books:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7c-1.6-1.4-4-2-7-2v12c3 0 5.4.6 7 2 1.6-1.4 4-2 7-2V5c-3 0-5.4.6-7 2zM12 7v12'/%3E%3C/svg%3E");--i-chat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-7l-4 3v-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM8.5 10.5h7'/%3E%3C/svg%3E");--i-calendar:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM4 10h16M8 3.5v4M16 3.5v4'/%3E%3C/svg%3E");--i-chart:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 20v-7M12 20V5M18 20v-10'/%3E%3C/svg%3E");--i-upload:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v10M8 10l4 4 4-4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3'/%3E%3C/svg%3E");--i-sliders:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h9M17 7h3M4 17h3M11 17h9'/%3E%3Ccircle cx='15' cy='7' r='2'/%3E%3Ccircle cx='9' cy='17' r='2'/%3E%3C/svg%3E");--i-key:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='8' cy='15' r='4'/%3E%3Cpath d='M11 12l8-8M16 7l2 2'/%3E%3C/svg%3E");--i-out:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 8l-4 4 4 4M6 12h10'/%3E%3C/svg%3E");--i-pen:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20l1-4L16 5l3 3L8 19zM14 7l3 3'/%3E%3C/svg%3E");--i-bulb:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z'/%3E%3C/svg%3E");--i-spark:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z'/%3E%3C/svg%3E");--i-heart:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z'/%3E%3C/svg%3E");--i-file:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM14 3v5h5M9 13h6M9 17h6'/%3E%3C/svg%3E");--i-users:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='3.5'/%3E%3Cpath d='M3 20c.5-3.5 3-5.5 6-5.5s5.5 2 6 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5c1.7.6 2.8 2.3 3 5.5'/%3E%3C/svg%3E");--i-eye:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");--i-check:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M8.5 12.2l2.4 2.4 4.8-5'/%3E%3C/svg%3E");--i-search:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='M16 16l4 4'/%3E%3C/svg%3E");--i-help:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.7M12 16.8v.2'/%3E%3C/svg%3E");--i-split:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21v-6M12 15c0-4-6-5-6-9M12 15c0-4 6-5 6-9M3.5 7.5L6 5l2.5 2.5M15.5 7.5L18 5l2.5 2.5'/%3E%3C/svg%3E");--i-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='14' rx='2'/%3E%3Ccircle cx='9' cy='10' r='1.6'/%3E%3Cpath d='M20.5 16l-5-5-8 8'/%3E%3C/svg%3E");--i-arrow:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17L17 7M9 7h8v8'/%3E%3C/svg%3E");--i-flag:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 21V4M5 4h11l-2 4 2 4H5'/%3E%3C/svg%3E");}
+    /* ADMFX: calm, task-first workspace. Existing workflows and library identity. */
+    :root{--tile:var(--surface);--tile-hover:#F0EEE6;--r-xl:14px;--r-lg:12px;--shadow-sm:0 1px 3px rgba(59,31,20,.04)}
+    body{background:var(--canvas);font-size:17px;line-height:1.5}
+    .ic{display:inline-block;flex:none;width:20px;height:20px;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+    .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+    .shell{display:grid;grid-template-columns:224px minmax(0,1fr);max-width:1600px;min-height:100vh;margin:0 auto}
+    header.rail{position:sticky;top:0;align-self:start;height:100vh;background:var(--surface);color:var(--ink);box-shadow:none;border-inline-end:1px solid var(--line)}
+    header.rail .bar{display:flex;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:24px;max-width:none;height:100%;margin:0;padding:28px 16px 16px;overflow-y:auto}
+    header.rail .brand{flex-direction:column;align-items:flex-start;gap:8px;padding:0 12px;color:var(--ink)}
+    .brand .brand-icon{display:none}.brand .brand-logo{display:block;width:78px;height:auto}
+    header.rail .brand span{padding:0;border:0;font-size:14px;color:var(--muted);font-weight:400}
+    header.rail .tabs{display:flex;flex-direction:column;flex-wrap:nowrap;gap:4px}
+    header.rail .tab{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:17px;font-weight:400;text-align:right;cursor:pointer}
+    header.rail .tab::before{content:"";flex:none;width:20px;height:20px;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+    header.rail .tab:hover{background:var(--canvas);color:var(--ink)}
+    header.rail .tab[aria-selected="true"]{background:var(--sage-soft);color:var(--brown);font-weight:700}
+    #tabBooks{--i:var(--i-books)}#tabInbox{--i:var(--i-chat)}#tabEvents{--i:var(--i-calendar)}#tabStats{--i:var(--i-chart)}#tabImport{--i:var(--i-upload)}#tabSettings{--i:var(--i-sliders)}
+    header.rail .tab .tab-n.alert{margin-inline-start:auto;font-size:13px}
+    .who-av{display:none}header.rail .who{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;padding:16px 8px 0;border-top:1px solid var(--line)}
+    header.rail #whoName{display:block;flex-basis:100%;margin-bottom:8px;font-size:14px;overflow-wrap:anywhere}
+    header.rail .who button{font-size:14px;padding:6px 8px;border:0;border-radius:8px;color:var(--muted)}
+    header.rail .who button:hover{background:var(--canvas);color:var(--ink)}
+    .nav-toggle{display:none;min-height:44px;padding:6px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-weight:700}
+    main{min-width:0;max-width:none;margin:0;padding:32px 32px 64px}
+    .pagehead{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 24px}
+    .ph-title{margin:0;color:var(--ink);font-size:28px;font-weight:700;line-height:1.3}
+    .ph-actions{display:flex;align-items:center;gap:12px}.ph-gear{display:none}
+    a.ph-cta{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:0;padding:4px 0;border-radius:0;background:none;color:var(--muted);font-size:15px;font-weight:400;text-decoration:none;--i:var(--i-arrow)}
+    a.ph-cta:hover{color:var(--brown);text-decoration:underline}
+    .settings-tabs{display:flex;flex-wrap:nowrap;gap:4px;max-width:100%;margin:0 0 20px;padding:0 0 8px;overflow-x:auto;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;box-shadow:none}
+    .settings-tab{flex:none;min-height:44px;padding:6px 12px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:16px;font-weight:400}
+    .settings-tab:hover{background:var(--sage-soft);color:var(--ink)}
+    .settings-tab[aria-selected="true"]{background:var(--sage-soft);color:var(--brown);font-weight:700}
+    .tab-n{background:transparent;color:var(--muted);font-size:13px;padding:0 4px}.settings-tab[aria-selected="true"] .tab-n{background:transparent;color:var(--brown)}
+    .lib-tools{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:0 0 16px}
+    .lib-tools input[type=search]{flex:1 1 260px;min-width:0;min-height:48px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:17px}
+    .tool{flex:0 1 160px;gap:4px;min-width:0}.tool span{font-size:14px;color:var(--muted)}
+    .tool select{width:100%;min-height:44px;max-width:200px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:16px}
+    .filter-toggle{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer;font-weight:400;--i:var(--i-sliders)}
+    .filter-toggle[aria-expanded="true"]{background:var(--sage-soft);border-color:var(--sage-deep)}
+    #filterN{font-size:14px;font-weight:700}.filter-panel{margin:0 0 16px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+    .filter-panel .lib-tools{margin-bottom:16px}.filter-panel .viewseg{margin-inline-start:0}.filter-panel .fchips{gap:16px;margin:0 0 16px}
+    .filter-panel .fgroup{flex-basis:100%;gap:8px}.fgroup>b{min-width:64px;font-size:14px}
+    .filter-panel .legend-box{margin:0}.filter-panel .legend-box summary{min-height:44px;display:flex;align-items:center;font-size:14px}
+    .filter-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+    .fchip{min-height:44px;padding:6px 10px;border-radius:8px;background:var(--canvas);font-size:15px}
+    .fchip small{color:var(--muted)}.fchip[aria-pressed="true"]{background:var(--sage-soft);border-color:var(--sage-deep);color:var(--brown)}.fchip[aria-pressed="true"] small{color:var(--brown)}
+    #stats{display:flex;flex-wrap:wrap;gap:12px 28px;margin:0 0 16px;padding:0;background:none}
+    .catalog-stat{display:flex;align-items:baseline;gap:8px;font-size:14px;color:var(--muted)}.catalog-stat b{font-size:22px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+    .catalog-stat.warn b{color:var(--danger)}
+    .active-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.active-filters:empty{display:none}
+    .active-filter{display:inline-flex;align-items:center;gap:8px;min-height:44px;max-width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--brown);font-size:14px;cursor:pointer;overflow-wrap:anywhere}
+    .count-row{justify-content:space-between;gap:12px;min-height:44px;margin:0 0 8px}.count-row .count{font-size:14px}.linkbtn{min-height:44px;font-size:14px}
+    .seg{gap:4px;border:1px solid var(--line);border-radius:10px;padding:3px;background:var(--surface)}.seg button{min-height:44px;border-radius:7px;font-size:15px;font-weight:400}
+    .seg button[aria-pressed="true"]{background:var(--sage-soft);color:var(--brown);font-weight:700}
+    .btn{border-radius:8px;font-weight:700}.btn.secondary{background:var(--surface);color:var(--brown);border:1px solid var(--line)}
+    .mini,.more{min-height:44px;border-radius:8px}.more{font-size:15px}
+    .stat,.kpi,.panel,.panel-card,section.block,.book,.acard,.note-row,.del-row,.idea-form{border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:none}
+    .stat b{font-size:28px}.stat span{font-size:14px}.book:hover,.acard:hover{background:var(--tile-hover);transform:none}
+    .book .t{font-size:18px;font-weight:700}.book .author,.book .pub,.book .foot{font-size:14px}.book .m,.book .status,.book .rs,.book .chip{font-size:14px}
+    .book .chips,.book .foot{display:none}.book .meta{margin-bottom:0}.fact{background:var(--canvas)}
+    .booklist{width:100%;table-layout:fixed;border:1px solid var(--line);border-radius:12px;font-size:16px;background:var(--surface)}
+    .booklist th{padding:12px;background:var(--canvas);font-size:14px;font-weight:400}.booklist td{padding:12px;overflow-wrap:anywhere}
+    .booklist .bk-cell{width:40%}.booklist .book-name{display:flex;align-items:center;gap:12px;min-width:0}.booklist .book-name>div{min-width:0}
+    .booklist .cover{width:34px;flex:none}.booklist .ttl{min-width:0;min-height:44px;font-size:17px;font-weight:700;line-height:1.4}.booklist .sub{font-size:14px;color:var(--muted);line-height:1.5}
+    .booklist .stock-cell{font-size:16px;white-space:normal}.booklist .open-cell{width:64px;text-align:center}.row-open{min-width:44px;min-height:44px;padding:6px;border:0;border-radius:8px;background:transparent;color:var(--brown);cursor:pointer;font-size:20px}
+    .row-open:hover{background:var(--sage-soft)}.booklist tr.off td{opacity:1}.booklist tr.off .book-name{opacity:.75}
+    .booklist .rs,.booklist .status{display:inline-block;font-size:14px;padding:3px 8px;border-radius:6px;line-height:1.4}.booklist .review-cell{width:148px}
+    .booklist .qty-label,.booklist .mobile-price{display:none}.booklist th:not(.bk-cell):not(.review-cell):not(.open-cell){width:100px}
+    .shelf{border-radius:12px}.sheet{border-radius:0}.sheet-head h2{font-size:24px}.sheet-head p{font-size:14px}
+    .panel,.panel-card{padding:20px}.panel-card h3{font-size:20px}.panel-card>.diff{font-size:14px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+    .kpi{padding:16px}.kpi .label{font-size:16px;font-weight:400;color:var(--muted)}.kpi b{font-size:32px;line-height:1.3;margin:8px 0 4px}.kpi .sub{font-size:14px;line-height:1.5}
+    .panels{gap:16px}.plot{display:grid;grid-template-columns:40px minmax(0,1fr);gap:8px;direction:ltr;margin-top:16px}
+    .plot-scale{display:flex;flex-direction:column;justify-content:space-between;height:180px;color:var(--muted);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+    .days{height:180px;padding:0;gap:3px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(to top,transparent 0 calc(25% - 1px),var(--line) calc(25% - 1px) 25%)}
+    .days .d{justify-content:center;min-width:0}.days.dense{gap:0}.days .d i,.days .d:hover i,.days .d:focus i{width:min(100%,18px);border-radius:3px 3px 0 0;background:var(--brown)}
+    .days .d:focus-visible{outline:2px solid var(--coral);outline-offset:2px}.days .d em{padding:0 4px;font-size:13px;background:var(--surface);color:var(--brown)}
+    .days-axis{grid-column:2;direction:ltr;display:flex;justify-content:space-between;font-size:13px;margin-top:0}.days-axis span{direction:rtl;max-width:33%;text-align:center}
+    .chart-detail{margin-top:20px;border-top:1px solid var(--line);padding-top:8px}.chart-detail summary{display:flex;align-items:center;min-height:44px;cursor:pointer;color:var(--muted);font-size:16px}.chart-detail[open] summary{color:var(--ink)}
+    .chart-empty{padding:24px 0;color:var(--muted);font-size:15px}.hbar .fill{background:var(--brown)}
+    #statsView .st-head h2,#inboxView .st-head h2{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+    @media(max-width:1199px){main{padding:28px 24px 48px}.shell{grid-template-columns:204px minmax(0,1fr)}.tool{flex-basis:130px}.booklist th:not(.bk-cell):not(.review-cell):not(.open-cell){width:80px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:979px){
+      .shell{display:block}header.rail{position:static;height:auto;border-inline-end:0;border-bottom:1px solid var(--line)}
+      header.rail .bar{flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 20px;overflow:visible}
+      header.rail .brand{flex-direction:row;align-items:center;gap:12px;padding:0;margin-inline-end:auto}header.rail .brand-logo{width:52px}
+      .nav-toggle{display:inline-flex;align-items:center}.nav-toggle[aria-expanded="true"]{background:var(--sage-soft)}
+      header.rail .tabs{display:none;flex-basis:100%;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;overflow:visible}
+      header.rail.nav-open .tabs{display:grid}header.rail .who{display:none;flex-basis:100%;margin:0;padding-top:12px}
+      header.rail.nav-open .who:not([hidden]){display:flex}.pagehead{margin-bottom:16px}main{padding:20px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media(max-width:700px){
+      main{padding:20px 16px 40px}.ph-title{font-size:24px}.ph-actions .ic{width:16px;height:16px}a.ph-cta{font-size:14px}.settings-tabs{margin-bottom:16px}
+      .book-tools input[type=search]{flex-basis:100%}.book-tools .tool{flex:1 1 100px}.book-tools{gap:8px}
+      .tool select{max-width:none}.filter-toggle{padding:8px 10px}.filter-panel{padding:12px}.filter-panel .tool{flex:1 1 130px}.viewseg{flex-basis:100%}
+      #stats{gap:8px 16px;margin-bottom:8px}.catalog-stat{font-size:13px;gap:6px}.catalog-stat b{font-size:20px}.count-row{margin-bottom:4px}
+      .booklist,.booklist tbody{display:block}.booklist thead{display:none}.booklist tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:14px 12px;border-bottom:1px solid var(--line)}
+      .booklist tbody tr:last-child{border-bottom:0}.booklist td{display:block;border:0;padding:0;width:auto!important}.booklist td.hide-sm{display:none}
+      .booklist .bk-cell{grid-column:1/-1}.booklist .book-name{gap:10px}.booklist .book-name>div{flex:1}.booklist .ttl{min-height:44px;font-size:18px}
+      .booklist .stock-cell{grid-column:1;font-size:14px;margin-top:6px}.booklist .qty-label{display:inline}.booklist .mobile-price{display:inline;margin-inline-start:12px;color:var(--muted)}.booklist .review-cell{grid-column:1;margin-top:4px}
+      .booklist .open-cell{grid-column:2;grid-row:2/span 2;align-self:center}.booklist .sub{font-size:14px}.booklist .cover{width:32px}
+      .kpis{gap:8px}.kpi{padding:12px}.kpi b{font-size:28px}.kpi .label,.kpi .sub{font-size:14px}.panel-card{padding:16px}
+      .plot{grid-template-columns:28px minmax(0,1fr);gap:6px}.days{gap:2px}.plot-scale,.days-axis{font-size:12px}.rank .bk{min-width:160px}
+    }
     @media print{
       @page{size:A5;margin:12mm}
       body{background:#fff}
       body>*:not(#qrPrint){display:none!important}
       #qrPrint{display:flex!important;flex-direction:column;align-items:center;justify-content:center;min-height:180mm;text-align:center;color:#3B1F14}
-      #qrPrint .qp-logo{width:62mm;height:auto}
+      #qrPrint .qp-logo{width:48mm;height:auto}#qrPrint .qp-host{width:20mm;height:auto;margin-top:2mm;opacity:.85}
       #qrPrint .qp-kicker{margin:3mm 0 8mm;font-size:13pt}
       #qrPrint h1{margin:0 0 2mm;font-size:30pt}
       #qrPrint .qp-sub{margin:0 0 8mm;font-size:14pt}
@@ -449,27 +567,29 @@
 </head>
 <body>
   <div id="qrPrint" aria-hidden="true">
-    <img class="qp-logo" src="/static/assets/thalath-logo-brown.png" alt="" />
+    <img class="qp-logo" src="/static/assets/manar-logo.svg" alt="" />
+    <img class="qp-host" src="/static/assets/thalath-logo-brown.png" alt="" />
     <p class="qp-kicker">وجهتك الثقافية</p>
-    <h1>جرّب ثلاث الذكي</h1>
-    <p class="qp-sub">امسح الرمز بكاميرا جوالك، وقل له وش ودّك تقرأ</p>
+    <h1>جرّب منار</h1>
+    <p class="qp-sub">امسح الرمز بكاميرا جوالك، وقل لها وش ودّك تقرأ</p>
     <div id="qpCode" class="qp-code"></div>
     <p class="qp-note">نسخة تجريبية</p>
   </div>
-  <header>
+  <div class="shell">
+  <header class="rail">
     <div class="bar">
-      <h1 class="brand"><img src="/static/assets/thalath-logo-brown.png" alt="ثلاث" /><span>لوحة الإدارة</span></h1>
-      <nav class="tabs" role="tablist" aria-label="أقسام الإدارة">
-        <button class="tab" role="tab" id="tabBooks" aria-selected="true" aria-controls="booksView">المكتبة</button>
-        <button class="tab" role="tab" id="tabInbox" aria-selected="false" aria-controls="inboxView">البلاغات <span class="tab-n alert" id="inboxN" hidden></span></button>
-        <button class="tab" role="tab" id="tabEvents" aria-selected="false" aria-controls="eventsView">الفعاليات</button>
-        <button class="tab" role="tab" id="tabStats" aria-selected="false" aria-controls="statsView">الإحصاءات</button>
-        <button class="tab" role="tab" id="tabImport" aria-selected="false" aria-controls="importView">استيراد من رواء</button>
-        <button class="tab" role="tab" id="tabSettings" aria-selected="false" aria-controls="settingsView">الإعدادات</button>
+      <h1 class="brand"><img class="brand-icon" src="/static/assets/manar-icon.svg" alt="" /><img class="brand-logo" src="/static/assets/manar-logo.svg" alt="منار" /><span>لوحة الإدارة</span></h1>
+      <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="adminNav">القائمة</button>
+      <nav id="adminNav" class="tabs" role="tablist" aria-label="أقسام الإدارة" aria-orientation="vertical">
+        <button class="tab" role="tab" id="tabBooks" title="المكتبة" aria-selected="true" aria-controls="booksView">المكتبة</button>
+        <button class="tab" role="tab" id="tabInbox" title="البلاغات" aria-selected="false" aria-controls="inboxView">البلاغات <span class="tab-n alert" id="inboxN" hidden></span></button>
+        <button class="tab" role="tab" id="tabEvents" title="الفعاليات" aria-selected="false" aria-controls="eventsView">الفعاليات</button>
+        <button class="tab" role="tab" id="tabStats" title="الإحصاءات" aria-selected="false" aria-controls="statsView">الإحصاءات</button>
+        <button class="tab" role="tab" id="tabImport" title="استيراد من رواء" aria-selected="false" aria-controls="importView">استيراد من رواء</button>
+        <button class="tab" role="tab" id="tabSettings" title="الإعدادات" aria-selected="false" aria-controls="settingsView">الإعدادات</button>
       </nav>
-      <a class="visitor-link" href="/" target="_blank" rel="noopener">واجهة الزائر ↗</a>
-      <div class="who" id="who" hidden><span id="whoName"></span>
-        <button id="pwBtn" type="button">كلمة المرور</button><button id="logoutBtn" type="button">خروج</button></div>
+      <div class="who" id="who" hidden><span class="who-av" id="whoAv" aria-hidden="true"></span><span id="whoName"></span>
+        <button id="pwBtn" type="button" title="تغيير كلمة المرور"><span class="who-t">كلمة المرور</span></button><button id="logoutBtn" type="button" title="خروج"><span class="who-t">خروج</span></button></div>
     </div>
   </header>
 
@@ -494,6 +614,13 @@
   </div>
 
   <main>
+    <div class="pagehead">
+      <h2 class="ph-title" id="phTitle" tabindex="-1">المكتبة</h2>
+      <div class="ph-actions">
+        <button class="ph-gear" id="phGear" type="button" aria-label="الإعدادات" title="الإعدادات"><i class="ic" aria-hidden="true"></i></button>
+        <a class="visitor-link ph-cta" href="/" target="_blank" rel="noopener">واجهة الزائر <i class="ic" aria-hidden="true"></i></a>
+      </div>
+    </div>
     <div id="booksView" role="tabpanel" aria-labelledby="tabBooks">
       <div class="lib-top">
         <div class="settings-tabs lib-tabs" role="tablist" aria-label="أقسام المكتبة">
@@ -508,12 +635,17 @@
       </div>
 
       <div id="libBooks" class="lib-pane" role="tabpanel" aria-labelledby="libTabBooks">
-        <div id="stats" class="stats" aria-label="ملخص الكتالوج"></div>
-        <div class="lib-tools">
+        <div class="lib-tools book-tools">
           <input id="search" type="search" placeholder="ابحث بالعنوان أو المؤلف أو الدار أو الرف…" aria-label="بحث في الكتب" />
           <label class="tool"><span>التصنيف</span><select id="genreFilter"><option value="">الكل</option></select></label>
-          <label class="tool"><span>الدار</span><select id="publisherFilter"><option value="">الكل</option></select></label>
-          <label class="tool"><span>الترتيب</span><select id="sortBy">
+          <label class="tool"><span>الموقع</span><select id="locFilter"><option value="">الكل</option></select></label>
+          <label class="tool"><span>المخزون</span><select id="stockFilter"><option value="">الكل</option><option value="instock">متوفر</option><option value="out">نافد</option><option value="off">موقوف</option><option value="mixed" hidden>خيارات متعددة</option></select></label>
+          <button id="filterToggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="bookFilters"><i class="ic" aria-hidden="true"></i>الفلاتر <span id="filterN" hidden></span></button>
+        </div>
+        <div id="bookFilters" class="filter-panel" hidden>
+          <div class="lib-tools">
+            <label class="tool"><span>دار النشر</span><select id="publisherFilter"><option value="">الكل</option></select></label>
+            <label class="tool"><span>الترتيب</span><select id="sortBy">
             <option value="complete">الأكثر اكتمالًا</option>
             <option value="added">الأحدث إضافة</option>
             <option value="researched">الأحدث بحثًا</option>
@@ -522,23 +654,25 @@
             <option value="qty">الكمية (الأكثر)</option>
             <option value="price">السعر (الأعلى)</option>
             <option value="pages">عدد الصفحات</option>
+            <option value="loc">الموقع (الرف)</option>
           </select></label>
-          <label class="tool"><span>التجميع</span><select id="groupBy">
+            <label class="tool"><span>التجميع</span><select id="groupBy">
             <option value="">بدون تجميع</option>
             <option value="genre">التصنيف</option>
             <option value="publisher">دار النشر</option>
             <option value="research">حالة البحث</option>
             <option value="stock">المخزون</option>
             <option value="lang">لغة العمل</option>
+            <option value="loc">الموقع</option>
           </select></label>
-          <div class="seg viewseg" role="group" aria-label="شكل عرض الكتب">
-            <button type="button" data-view="cards" aria-pressed="true">بطاقات</button>
-            <button type="button" data-view="list" aria-pressed="false">قائمة</button>
-            <button type="button" data-view="shelf" aria-pressed="false">رفوف</button>
+            <div class="seg viewseg" role="group" aria-label="شكل عرض الكتب">
+              <button type="button" data-view="list" aria-pressed="true">قائمة</button>
+              <button type="button" data-view="cards" aria-pressed="false">بطاقات</button>
+              <button type="button" data-view="shelf" aria-pressed="false">رفوف</button>
+            </div>
           </div>
-        </div>
-        <div id="bookChips" class="fchips" aria-label="تصفية سريعة"></div>
-        <details class="legend-box"><summary>دليل ألوان الصفات</summary>
+          <div id="bookChips" class="fchips" aria-label="تصفية سريعة"></div>
+<details class="legend-box"><summary>دليل ألوان الصفات</summary>
           <div class="legend" aria-label="دليل الألوان">
             <span class="chip confirmed">مؤكد</span> ثقة ٨٥٪ فأكثر (٥ مراجعات أو أكثر)، يُذكر للزائر
             <span class="chip impression">انطباع</span> ٦٥–٨٤٪، للترتيب فقط
@@ -547,6 +681,10 @@
             <span class="chip derived">محسوب</span> مشتق من بيانات أخرى
           </div>
         </details>
+          <div class="filter-actions"><span class="state">الفلاتر تتطبق مباشرة</span><button id="filtersClose" class="btn secondary" type="button">تم</button></div>
+        </div>
+        <div id="stats" class="stats" aria-label="ملخص الكتالوج"></div>
+        <div id="activeBookFilters" class="active-filters" aria-label="الفلاتر المستخدمة"></div>
         <div class="count-row"><p id="count" class="count" role="status">جاري تحميل الكتب…</p><button type="button" id="clearBookFilters" class="linkbtn" hidden>مسح الفلاتر</button></div>
         <div id="grid"></div>
       </div>
@@ -620,13 +758,29 @@
         <button class="settings-tab" role="tab" id="inboxTabSuggestion" aria-selected="false" aria-controls="inboxList" tabindex="-1">الاقتراحات <span class="tab-n" id="inboxNSuggestion"></span></button>
         <button class="settings-tab" role="tab" id="inboxTabQuestions" aria-selected="false" aria-controls="inboxList" tabindex="-1">أسئلة بلا جواب <span class="tab-n" id="inboxNQuestions"></span></button>
         <button class="settings-tab" role="tab" id="inboxTabStaff" aria-selected="false" aria-controls="inboxList" tabindex="-1" hidden>تعديلات الموظفين <span class="tab-n" id="inboxNStaff"></span></button>
+        <button class="settings-tab" role="tab" id="inboxTabIdeas" aria-selected="false" aria-controls="inboxList" tabindex="-1">اقتراحات الموظفين <span class="tab-n" id="inboxNIdeas"></span></button>
       </div>
       <div class="export-bar">
         <a id="inboxExport" class="btn secondary" href="/api/admin/inbox/export?status=open" download>تنزيل الكل في ملف (md)</a>
-        <span class="diff">البلاغات والاقتراحات والأسئلة بلا جواب وتعديلات الموظفين، ومعها سجل كل ما غيّره الموظفون في البيانات (قبل ← بعد) وملفات رواء المستوردة وما أضافته، خلال آخر 30 يومًا، في ملف واحد ترسله لإبراهيم أو تعالجه مع Claude.</span>
+        <span class="diff">البلاغات والاقتراحات والأسئلة بلا جواب وتعديلات الموظفين واقتراحاتهم، ومعها سجل كل ما غيّره الموظفون في البيانات (قبل ← بعد) وملفات رواء المستوردة وما أضافته، ومحادثات الزوار المحفوظة في وضع الاختبار، وردود تأكيد هوية الكتب، خلال آخر 30 يومًا، في ملف واحد ترسله لإبراهيم أو تعالجه مع Claude.</span>
       </div>
       <p id="inboxState" class="count" role="status"></p>
       <div id="inboxList" class="del-list" role="tabpanel"></div>
+      <!-- «تطبيق ملف التصحيحات من Claude» (Ibrahim 2026-10-11): moved here from «استيراد من رواء»; the staff answers on
+           «تأكيد هوية الكتاب» now travel in «تنزيل الكل في ملف (md)» (section 9), so the copy/download step was removed -->
+      <details class="fold panel cx-apply" id="cxFold" hidden>
+        <summary><h3 id="cxTitle">تطبيق ملف التصحيحات من Claude</h3><span id="cxCount" class="diff">جاري التحميل…</span></summary>
+        <p class="diff" style="margin:10px 0 8px">ردود الموظفين على «تأكيد هوية الكتاب» تطلع مع «تنزيل الكل في ملف». بعد ما يرسلها إبراهيم لـ Claude يرجع ملف تصحيحات يُطبَّق هنا.</p>
+        <p class="diff" style="margin:0 0 8px">الصق نص التصحيحات هنا أو اختر الملف، ثم «معاينة». ما يتغير شيء قبل ما تضغط «تطبيق»، وتُؤخذ نسخة احتياطية أولًا.</p>
+        <textarea id="cxText" dir="ltr" style="width:100%;min-height:90px" aria-label="نص التصحيحات من Claude" placeholder='{"format": "confirmation-corrections-1", ...}'></textarea>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px">
+          <label class="btn secondary" for="cxFile">اختر ملف التصحيحات</label><input id="cxFile" type="file" accept=".json,application/json" hidden />
+          <button id="cxPreview" class="btn" type="button">معاينة</button>
+          <button id="cxApply" class="btn" type="button" hidden>تطبيق التصحيحات</button>
+          <span id="cxPlanState" class="state" role="status"></span>
+        </div>
+        <div style="overflow-x:auto;margin-top:10px"><table id="cxPlan" class="tbl"></table></div>
+      </details>
     </div>
 
     <!-- «الفعاليات» (Ibrahim, 2026-10-08): staff add events; upcoming ones show on the visitor start page -->
@@ -714,26 +868,24 @@
         </div>
       </section>
 
-      <section class="panel" aria-labelledby="cxTitle">
-        <h2 id="cxTitle">ردود الموظفين على تأكيد هوية الكتب</h2>
-        <p id="cxCount" class="diff" style="margin:0 0 10px">جاري التحميل…</p>
-        <p style="margin:0 0 6px;font-weight:700">١. أعطِ الردود لـ Claude</p>
-        <p class="diff" style="margin:0 0 8px">انسخ الردود والصقها في محادثة المدير مع Claude (أو نزّلها ملفًا وأرفقه). Claude يرجّع لك ملف تصحيحات.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
-          <button id="cxCopy" class="btn" type="button">نسخ الردود</button>
-          <button id="cxDownload" class="btn secondary" type="button">تنزيل ملف</button>
-          <span id="cxState" class="state" role="status"></span>
+
+      <section class="panel" aria-labelledby="lsTitle">
+        <h2 id="lsTitle">ملف المكتبة: الرفوف والتصنيف</h2>
+        <p class="hint">ملف Excel اللي تجهّزه المكتبة (رمز الرف، الدار، التصنيف، الكلمات المفتاحية). يكتب مكان كل كتاب مع تصنيف المكان (مثل «روايات · الرف R04»)، ويعبّي الدار والتصنيف إذا كانت فاضية، ويحدّث الكلمات المفتاحية. الدار المختلفة ما تتغيّر، تنعرض لك فقط. ما يتغيّر شي قبل ما تضغط «تطبيق»، وتنحفظ نسخة احتياطية قبلها.</p>
+        <div class="row">
+          <input id="lsFile" type="file" accept=".xlsx,.csv" class="wide" aria-label="ملف المكتبة" />
+          <button id="lsRead" class="btn" type="button">قراءة ومعاينة</button>
+          <span id="lsState" class="state" role="status"></span>
         </div>
-        <p style="margin:18px 0 6px;font-weight:700">٢. طبّق تصحيحات Claude</p>
-        <p class="diff" style="margin:0 0 8px">الصق نص التصحيحات هنا أو اختر الملف، ثم «معاينة». ما يتغير شيء قبل ما تضغط «تطبيق»، وتُؤخذ نسخة احتياطية أولًا.</p>
-        <textarea id="cxText" dir="ltr" style="width:100%;min-height:90px" aria-label="نص التصحيحات من Claude" placeholder='{"format": "confirmation-corrections-1", ...}'></textarea>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px">
-          <label class="btn secondary" for="cxFile">اختر ملف التصحيحات</label><input id="cxFile" type="file" accept=".json,application/json" hidden />
-          <button id="cxPreview" class="btn" type="button">معاينة</button>
-          <button id="cxApply" class="btn" type="button" hidden>تطبيق التصحيحات</button>
-          <span id="cxPlanState" class="state" role="status"></span>
+        <div id="lsPlan" hidden>
+          <p id="lsCols" class="hint"></p>
+          <div id="lsStats" class="stats"></div>
+          <div id="lsLists"></div>
+          <div class="row" style="margin-top:12px">
+            <button id="lsApply" class="btn" type="button">تطبيق على الكتالوج</button>
+            <span id="lsApplyState" class="state" role="status"></span>
+          </div>
         </div>
-        <div style="overflow-x:auto;margin-top:10px"><table id="cxPlan" class="tbl"></table></div>
       </section>
 
       <section class="panel" aria-labelledby="histTitle">
@@ -837,7 +989,7 @@
       </section>
       <section class="panel" aria-labelledby="tlTitle">
         <h2 id="tlTitle">وضع الاختبار</h2>
-        <p class="hint">لما يكون مفعّل، كل محادثة في واجهة الزائر تنحفظ في <span dir="ltr">data/test_logs</span> (كلام الزائر، رد النموذج، الكتب، الوقت) عشان نراجعها. يظهر تنبيه للزائر. لا تفعّله وقت التشغيل الفعلي.</p>
+        <p class="hint">لما يكون مفعّل، كل محادثة في واجهة الزائر تنحفظ في <span dir="ltr">data/test_logs</span> (كلام الزائر، رد النموذج، الكتب، الوقت) عشان نراجعها، وتدخل في ملف «تنزيل الكل» في البلاغات. يظهر تنبيه للزائر. لا تفعّله وقت التشغيل الفعلي.</p>
         <div class="row">
           <label class="switch" style="color:var(--ink);font-size:14px"><input id="tlToggle" type="checkbox" /> حفظ المحادثات للاختبار</label>
           <span id="tlState" class="state" role="status"></span>
@@ -851,40 +1003,29 @@
       </section>
       </div>
       <div id="settingsAbout" class="settings-pane" role="tabpanel" aria-labelledby="setTabAbout" hidden>
+      <!-- «عن التطبيق» short (Ibrahim 2026-10-12): version, belongs to Thalath, Manar | Thalath lockup, developer.
+           Watched by backend/integrity.py: any change between about:start and about:end is reported to Ibrahim. -->
+      <!-- about:start -->
       <section class="panel about" aria-labelledby="aboutTitle">
-        <div class="about-hero">
-          <div class="about-topline">
-            <div class="about-brand">
-              <img class="about-thalath" src="/static/assets/thalath-logo-brown.png" alt="مكتبة ثلاث" />
-            </div>
-            <span class="about-badge">نسخة تجريبية</span>
+        <div class="about-main">
+          <div class="about-text">
+            <h2 id="aboutTitle">منار</h2>
+            <p class="about-lead">التطبيق خاص بمكتبة ثلاث.</p>
+            <p class="about-version"><span>الإصدار</span> <b id="aboutVersion">—</b></p>
           </div>
-          <h2 id="aboutTitle">ثلاث الذكي</h2>
-          <p class="about-lead">يساعد الزائر يحوّل رغبته العامة إلى خيارات واضحة من الكتب المتوفرة فعلًا، مع سبب لكل اقتراح ومعلومة تدلّه على الكتاب داخل المكتبة.</p>
-        </div>
-        <div class="about-body">
-          <h3>رحلة الزائر</h3>
-          <div class="about-journey" role="list" aria-label="رحلة استخدام ثلاث الذكي في ثلاث خطوات">
-            <div class="about-step" role="listitem"><span>١</span><div><b>يسولف مع ثلاث الذكي</b><p>عن مزاجه، وقته، أو آخر كتاب عجبه.</p></div></div>
-            <div class="about-step" role="listitem"><span>٢</span><div><b>نبحث في الموجود</b><p>نستبعد النافد ونقارن طلبه ببطاقات الكتب.</p></div></div>
-            <div class="about-step" role="listitem"><span>٣</span><div><b>يختار بثقة</b><p>يشوف خيارات قليلة، وسبب الترشيح، ومكان الكتاب.</p></div></div>
+          <div class="about-lockup" role="img" aria-label="منار | مكتبة ثلاث">
+            <img class="about-manar" src="/static/assets/manar-logo.svg" alt="" />
+            <span class="about-sep" aria-hidden="true"></span>
+            <img class="about-thalath" src="/static/assets/thalath-logo-brown.png" alt="" />
           </div>
-          <h3>مبني على الوضوح والثقة</h3>
-          <dl class="about-facts">
-            <div><dt>اقتراحات من المخزون</dt><dd>ما يظهر للزائر إلا كتاب متوفر ومفعّل في المكتبة.</dd></div>
-            <div><dt>بيانات قابلة للمراجعة</dt><dd>الموظف يراجع صفات الكتب ويصححها متى احتاج.</dd></div>
-            <div><dt>خصوصية من البداية</dt><dd>ما نطلب اسم الزائر، والإحصاءات مجهولة. حفظ المحادثات مخصص لوضع الاختبار فقط.</dd></div>
-            <div><dt>يستمر وقت التعطل</dt><dd>إذا تعذر النموذج، يكمل ثلاث الذكي بالنظام البديل بدل ما تتوقف التجربة.</dd></div>
-          </dl>
-          <footer class="about-footer">
-            <div class="about-version"><span>الإصدار الحالي</span><b id="aboutVersion">—</b></div>
-            <div class="credit"><span>تطوير</span><img src="/static/assets/developer-logo.png" alt="إبراهيم" /></div>
-          </footer>
         </div>
+        <div class="credit"><span>تطوير</span><img src="/static/assets/developer-logo.png" alt="إبراهيم" /></div>
       </section>
+      <!-- about:end -->
       </div>
     </div>
   </main>
+  </div>
 
   <div id="backdrop" class="backdrop" hidden></div>
   <aside id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sTitle" hidden></aside>
@@ -901,6 +1042,7 @@
 
     const esc = t => { const d = document.createElement('div'); d.textContent = String(t ?? ''); return d.innerHTML; };
     const num = v => new Intl.NumberFormat('ar-SA', { maximumFractionDigits: 2 }).format(v);
+    // 8-step meter of a percentage (dashboard look, 2026-10-11); decorative, the number is written beside it
     const cover = b => b.cover_url ? `<img class="cover" src="${esc(b.cover_url)}" alt="" loading="lazy" />`
       : `<span class="cover" style="--c:${COLORS[b.book_id % COLORS.length]}" aria-hidden="true">${esc([...String(b.title || 'ك')][0])}</span>`;
     const COVER_SOURCES = { openlibrary: 'Open Library', goodreads: 'Goodreads', abjjad: 'أبجد', web: 'بحث في الإنترنت', staff: 'رفعها موظف' };
@@ -944,16 +1086,34 @@
       });
     });
 
-    function selectTab(which) {
+    // The active section supplies the page heading.
+    const HEADS = { books: 'المكتبة', inbox: 'البلاغات', events: 'الفعاليات', stats: 'الإحصاءات', import: 'استيراد من رواء', settings: 'الإعدادات' };
+    function setHead(which) { if (HEADS[which]) $('phTitle').textContent = HEADS[which]; }
+    setHead('books');
+    function setNavOpen(open, restoreFocus = false) {
+      document.querySelector('header.rail').classList.toggle('nav-open', open);
+      $('navToggle').setAttribute('aria-expanded', String(open));
+      if (restoreFocus) $('navToggle').focus();
+      setHdr();
+    }
+    $('navToggle').addEventListener('click', () => setNavOpen($('navToggle').getAttribute('aria-expanded') !== 'true'));
+    document.querySelector('header.rail').addEventListener('keydown', e => {
+      if (e.key === 'Escape' && $('navToggle').getAttribute('aria-expanded') === 'true') { setNavOpen(false, true); e.preventDefault(); }
+    });
+    function selectTab(which, keepMenu = false) {
+      setHead(which);
+      if (!keepMenu && !matchMedia('(min-width:980px)').matches && $('navToggle').getAttribute('aria-expanded') === 'true') {
+        setNavOpen(false); $('phTitle').focus({ preventScroll: true });
+      }
       const tabs = { books: ['tabBooks', 'booksView'], inbox: ['tabInbox', 'inboxView'], events: ['tabEvents', 'eventsView'], stats: ['tabStats', 'statsView'], import: ['tabImport', 'importView'], settings: ['tabSettings', 'settingsView'] };
       Object.entries(tabs).forEach(([key, [tab, view]]) => {
-        $(tab).setAttribute('aria-selected', String(key === which)); $(view).hidden = key !== which;
+        $(tab).setAttribute('aria-selected', String(key === which)); $(tab).tabIndex = key === which ? 0 : -1; $(view).hidden = key !== which;
       });
       if (which === 'settings') selectSettingsTab(currentSettingsTab);
-      if (which === 'import') { loadHistory(); loadConfirmCount(); }
+      if (which === 'import') loadHistory();
       if (which === 'stats') loadStats();
       if (which === 'events') loadEvents();
-      if (which === 'inbox') loadInbox(); else loadInboxCount();
+      if (which === 'inbox') { loadInbox(); if (ME && ME.role === 'manager') loadConfirmCount(); } else loadInboxCount();
       if (which === 'books') loadCatalog();
     }
     $('tabBooks').addEventListener('click', () => selectTab('books'));
@@ -962,6 +1122,20 @@
     $('tabInbox').addEventListener('click', () => selectTab('inbox'));
     $('tabSettings').addEventListener('click', () => selectTab('settings'));
     $('tabEvents').addEventListener('click', () => selectTab('events'));
+    $('phGear').addEventListener('click', () => selectTab('settings'));
+    $('adminNav').querySelectorAll('[role=tab]').forEach(tab => {
+      tab.tabIndex = tab.getAttribute('aria-selected') === 'true' ? 0 : -1;
+      tab.addEventListener('keydown', e => {
+        if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return;
+        e.preventDefault();
+        const tabs = [...$('adminNav').querySelectorAll('[role=tab]')].filter(t => !t.hidden);
+        const at = tabs.indexOf(tab);
+        const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 :
+          (at + (e.key === 'ArrowDown' ? 1 : -1) + tabs.length) % tabs.length;
+        const target = tabs[next], key = Object.keys(HEADS).find(k => 'tab' + k[0].toUpperCase() + k.slice(1) === target.id);
+        selectTab(key, true); target.focus({ preventScroll: true });
+      });
+    });
 
     // ---------------- «الفعاليات» (2026-10-08): add / edit / hide / delete; picture; optional book
     const ev = { editing: null, book: null, keepImage: false };
@@ -1087,7 +1261,7 @@
     const AUTHOR_STATUS_AR = { researched: 'مكتمل البحث', thin: 'بحث جزئي', needs_sources: 'يحتاج مصادر', pending: 'بانتظار البحث' };
     const styleAr = v => STYLE_AR[v] || v;
     const sourceLabel = u => { try { const h = new URL(u).hostname.replace(/^www\./, ''); return h.includes('wikidata') ? 'ويكي بيانات' : h.includes('abjjad') ? 'أبجد' : h; } catch (e) { return u; } };
-    const lib = { view: store.get('view', 'cards'), aview: store.get('aview', 'cards'), chips: new Set(), achips: new Set(),
+    const lib = { view: store.get('view.v2', 'list'), aview: store.get('aview', 'cards'), chips: new Set(), achips: new Set(),
                   shown: {}, collapsed: new Set(), pane: ['authors', 'translators', 'origin'].includes(store.get('pane', 'books')) ? store.get('pane', 'books') : 'books' };
     let authorsList = null, peopleShown = null;
     // «المؤلفون» and «المترجمون» (2026-10-03) share one pane; a person who only translates is listed under المترجمون only
@@ -1113,11 +1287,44 @@
     const GROUPS = {
       genre: b => b.genre || 'بدون تصنيف', publisher: b => b.publisher || 'دار غير معروفة',
       research: b => RS_AR[b.research_status || ''] || b.research_status,
-      stock: b => !b.active ? 'موقوف عن الظهور' : b.quantity > 0 ? 'متوفر' : 'نافد', lang: langGroup
+      stock: b => !b.active ? 'موقوف عن الظهور' : b.quantity > 0 ? 'متوفر' : 'نافد', lang: langGroup,
+      loc: b => locOf(b) || 'بدون موقع'
     };
     const GROUP_ORDER = { research: ['مبحوث', 'يحتاج تأكيد هوية', 'غير موجود بالمصادر', 'ليس كتابًا', 'غير مبحوث'],
                           stock: ['متوفر', 'نافد', 'موقوف عن الظهور'] };
+    // book location (Ibrahim 2026-10-12: a column and a filter, to help arrange the shelves).
+    // The typed place («روايات · الرف P05») first, otherwise the library section of its genre; never invented.
+    const locOf = b => String(b.location || b.shelf_location || '').trim();
+    const locParts = s => { const m = String(s).match(/^(.*?)\s*·\s*الرف\s+(\S+)$/); return m ? { area: m[1].trim(), shelf: m[2] } : { area: s, shelf: '' }; };
+    const locCmp = (a, b) => a.localeCompare(b, 'ar', { numeric: true });
+    function locCell(b) {
+      const s = locOf(b);
+      if (!s) return '<span class="loc-none">—</span>';
+      const { area, shelf } = locParts(s);
+      const fromSection = b.location_kind === 'section' ? ' <span class="loc-kind" title="من قسم التصنيف، مو مكتوب للكتاب">من القسم</span>' : '';
+      return shelf ? `<span class="loc"><b dir="ltr">${esc(shelf)}</b><small>${esc(area)}</small></span>` : `<span class="loc"><small>${esc(area)}</small>${fromSection}</span>`;
+    }
+    function fillLocFilter() {
+      const keep = $('locFilter').value, areas = new Map(); let none = 0;
+      catalog.forEach(b => {
+        const s = locOf(b); if (!s) { none++; return; }
+        const { area } = locParts(s);
+        if (!areas.has(area)) areas.set(area, new Map());
+        const m = areas.get(area); m.set(s, (m.get(s) || 0) + 1);
+      });
+      $('locFilter').innerHTML = '<option value="">الكل</option>' + (none ? `<option value="none">بدون موقع (${num(none)})</option>` : '')
+        + [...areas.entries()].sort((a, b) => locCmp(a[0], b[0])).map(([area, m]) => {
+          const total = [...m.values()].reduce((x, y) => x + y, 0);
+          const shelves = [...m.entries()].sort((a, b) => locCmp(a[0], b[0]));
+          const own = shelves.length === 1 && !locParts(shelves[0][0]).shelf;
+          return `<optgroup label="${esc(area)}"><option value="a:${esc(area)}">${own ? esc(area) : 'كل ' + esc(area)} (${num(total)})</option>`
+            + (own ? '' : shelves.map(([s, n]) => `<option value="s:${esc(s)}">الرف ${esc(locParts(s).shelf || s)} (${num(n)})</option>`).join('')) + '</optgroup>';
+        }).join('');
+      $('locFilter').value = keep; if ($('locFilter').selectedIndex < 0) $('locFilter').value = '';
+    }
+    const locMatch = (b, v) => { const s = locOf(b); return v === 'none' ? !s : v.startsWith('s:') ? s === v.slice(2) : !!s && locParts(s).area === v.slice(2); };
     const SORTS = {
+      loc: (a, b) => (!locOf(a)) - (!locOf(b)) || locCmp(locOf(a), locOf(b)) || String(a.title).localeCompare(String(b.title), 'ar'),
       added: (a, b) => b.book_id - a.book_id,
       researched: (a, b) => String(b.researched_at || '').localeCompare(String(a.researched_at || '')) || b.book_id - a.book_id,
       complete: (a, b) => completeness(b) - completeness(a) || a.title.localeCompare(b.title, 'ar'),
@@ -1296,6 +1503,7 @@
         $('genreFilter').innerHTML = '<option value="">الكل</option>' + byCount('genre').map(([g, n]) => `<option value="${esc(g)}">${esc(g)} (${num(n)})</option>`).join('');
         $('publisherFilter').innerHTML = '<option value="">الكل</option>' + byCount('publisher').map(([g, n]) => `<option value="${esc(g)}">${esc(g)} (${num(n)})</option>`).join('');
         $('genreFilter').value = keepG; $('publisherFilter').value = keepP;
+        fillLocFilter();
         $('libNBooks').textContent = num(catalog.length);
         renderStats(); renderGrid(); renderPublishers(); renderConfirm(); renderOrigin();
         loadAuthors(!onPeople());
@@ -1304,33 +1512,56 @@
     }
 
     function renderStats() {
-      const s = [
-        ['', catalog.length, 'إجمالي الكتب'],
-        ['instock', catalog.filter(inStock).length, 'ظاهرة للزوار'],
-        ['matched', catalog.filter(b => b.research_status === 'matched').length, 'مبحوثة'],
-        ['unresearched', catalog.filter(b => !b.research_status).length, 'غير مبحوثة'],
-        ['needs_confirmation', catalog.filter(b => b.research_status === 'needs_confirmation').length, 'تحتاج تأكيد هوية', true],
-        ['conflict', catalog.filter(b => b.counts.conflict > 0).length, 'صفات اختلف فيها القرّاء', true],
-        ['nocover', catalog.filter(b => inStock(b) && !b.cover_url).length, 'متوفرة بدون غلاف', true],
-      ];
-      const one = [...lib.chips].filter(k => k !== 'instock');
-      $('stats').innerHTML = s.map(([key, n, label, warn]) =>
-        `<button type="button" class="stat ${warn && n ? 'warn' : ''}" data-chip="${key}" aria-pressed="${key ? (key === 'instock' ? lib.chips.size === 1 && lib.chips.has(key) : one.length === 1 && one[0] === key) : !lib.chips.size}"><b>${num(n)}</b><span>${label}</span></button>`).join('');
-      $('stats').querySelectorAll('.stat').forEach(btn => btn.addEventListener('click', () => {
-        lib.chips.clear();
-        if (btn.dataset.chip) lib.chips.add(btn.dataset.chip);
-        if (btn.dataset.chip === 'nocover') lib.chips.add('instock');
-        lib.shown = {}; renderStats(); renderGrid();
+      const attention = catalog.filter(b => b.research_status === 'needs_confirmation' || b.status === 'needs_review' || b.counts.conflict > 0).length;
+      $('stats').innerHTML = `<span class="catalog-stat">إجمالي الكتب <b>${num(catalog.length)}</b></span>
+        <span class="catalog-stat">متوفر للزوار <b>${num(catalog.filter(inStock).length)}</b></span>
+        <span class="catalog-stat${attention ? ' warn' : ''}" title="هوية تحتاج تأكيدًا أو بطاقة تحتاج مراجعة أو صفات متعارضة">تحتاج مراجعة <b>${num(attention)}</b></span>`;
+    }
+
+    function setFiltersOpen(open, restoreFocus = false) {
+      $('bookFilters').hidden = !open;
+      $('filterToggle').setAttribute('aria-expanded', String(open));
+      if (restoreFocus) $('filterToggle').focus();
+    }
+    $('filterToggle').addEventListener('click', () => setFiltersOpen($('bookFilters').hidden));
+    $('filtersClose').addEventListener('click', () => setFiltersOpen(false, true));
+    $('bookFilters').addEventListener('keydown', e => {
+      if (e.key === 'Escape') { setFiltersOpen(false, true); e.preventDefault(); }
+    });
+    $('stockFilter').addEventListener('change', () => {
+      ['instock', 'out', 'off'].forEach(k => lib.chips.delete(k));
+      if ($('stockFilter').value && $('stockFilter').value !== 'mixed') lib.chips.add($('stockFilter').value);
+      resetBooks();
+    });
+    function renderActiveFilters() {
+      const stock = [...lib.chips].filter(k => ['instock', 'out', 'off'].includes(k));
+      $('stockFilter').value = stock.length > 1 ? 'mixed' : stock[0] || '';
+      const labels = Object.fromEntries(BOOK_CHIPS.flatMap(([, list]) => list.map(([k, label]) => [k, label])));
+      const active = [...lib.chips].map(k => [k, labels[k] || k]);
+      ['search', 'genreFilter', 'locFilter', 'publisherFilter'].forEach(id => {
+        const value = $(id).value.trim();
+        if (value) active.push([id, id === 'search' ? 'بحث: ' + value : id === 'locFilter' ? 'الموقع: ' + $(id).selectedOptions[0].textContent.replace(/\s*\([^)]*\)$/, '') : value]);
+      });
+      const extra = [...lib.chips].filter(k => !['instock', 'out', 'off'].includes(k)).length + Number(!!$('publisherFilter').value);
+      $('filterN').hidden = !extra; $('filterN').textContent = extra ? num(extra) : '';
+      $('activeBookFilters').innerHTML = active.map(([key, label]) => `<button type="button" class="active-filter" data-filter="${esc(key)}" aria-label="إزالة فلتر ${esc(label)}">${esc(label)} <span aria-hidden="true">×</span></button>`).join('');
+      $('activeBookFilters').querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('click', () => {
+        const key = btn.dataset.filter;
+        if (['search', 'genreFilter', 'locFilter', 'publisherFilter'].includes(key)) $(key).value = ''; else lib.chips.delete(key);
+        resetBooks();
+        if (!$('activeBookFilters').children.length) $('search').focus();
+        else $('activeBookFilters').querySelector('button').focus();
       }));
     }
 
     function filteredBooks() {
       const q = $('search').value.trim().toLowerCase();
-      const g = $('genreFilter').value, p = $('publisherFilter').value;
+      const g = $('genreFilter').value, p = $('publisherFilter').value, lf = $('locFilter').value;
       const active = {};
       lib.chips.forEach(k => { if (CHIP_FN[k]) (active[CHIP_FN[k][0]] ||= []).push(CHIP_FN[k][1]); });
       return catalog.filter(b => {
-        if (q && ![b.title, b.author, b.publisher, b.shelf_location, b.barcode].some(x => String(x || '').toLowerCase().includes(q))) return false;
+        if (q && ![b.title, b.author, b.publisher, b.shelf_location, b.location, b.barcode].some(x => String(x || '').toLowerCase().includes(q))) return false;
+        if (lf && !locMatch(b, lf)) return false;
         if (g && b.genre !== g) return false;
         if (p && b.publisher !== p) return false;
         // chips in the same group widen (OR); different groups narrow (AND)
@@ -1339,6 +1570,7 @@
     }
 
     function renderChips() {
+      const focusedKey = $('bookChips').contains(document.activeElement) ? document.activeElement.dataset.k : null;
       $('bookChips').innerHTML = BOOK_CHIPS.map(([group, list]) =>
         `<div class="fgroup" role="group" aria-label="${group}"><b>${group}</b>${list.map(([k, label, fn]) =>
           `<button type="button" class="fchip" data-k="${k}" aria-pressed="${lib.chips.has(k)}">${label} <small>${num(catalog.filter(fn).length)}</small></button>`).join('')}</div>`).join('');
@@ -1346,6 +1578,7 @@
         const k = btn.dataset.k; lib.chips.has(k) ? lib.chips.delete(k) : lib.chips.add(k);
         lib.shown = {}; renderStats(); renderGrid();
       }));
+      if (focusedKey) [...$('bookChips').querySelectorAll('.fchip')].find(b => b.dataset.k === focusedKey)?.focus({ preventScroll: true });
     }
 
     const rsBadge = b => `<span class="rs ${esc(b.research_status || '')}">${esc(RS_AR[b.research_status || ''] || b.research_status)}</span>${b.confirmation_answered ? ' <span class="okflag">ردّ الموظف</span>' : ''}`;
@@ -1360,7 +1593,7 @@
           <span class="meta">
             <span class="m">${esc(b.genre || 'بدون تصنيف')}</span>
             ${b.page_count ? `<span class="m">${num(b.page_count)} ص</span>` : ''}
-            ${b.shelf_location ? `<span class="m">${esc(b.shelf_location)}</span>` : ''}
+            ${locOf(b) ? `<span class="m">${esc(locOf(b))}</span>` : ''}
             <span class="m">${num(b.quantity || 0)} نسخ، ${num(b.price || 0)} ر.س</span>
             ${!b.active ? '<span class="status off">موقوف</span>' : (!(b.quantity > 0) ? '<span class="status off">نافد</span>' : '')}
             ${rsBadge(b)}
@@ -1371,16 +1604,21 @@
         </span>
       </button>`;
     }
+    function reviewBadge(b) {
+      if (b.research_status !== 'matched') return rsBadge(b);
+      if (b.counts.conflict > 0) return '<span class="status off">صفات متعارضة</span>';
+      if (b.status === 'needs_review') return '<span class="status needs_review">تحتاج مراجعة</span>';
+      return rsBadge(b);
+    }
     function bookRow(b) {
       return `<tr class="${inStock(b) ? '' : 'off'}" data-bid="${b.book_id}">
-        <td>${cover(b)}</td>
-        <td><button type="button" class="ttl" data-bid="${b.book_id}">${esc(b.title)}</button><span class="sub">${esc(b.author)}</span></td>
+        <td class="bk-cell"><div class="book-name">${cover(b)}<div><button type="button" class="ttl" data-bid="${b.book_id}">${esc(b.title)}</button><span class="sub">${esc(b.author)}${b.publisher ? ' · ' + esc(b.publisher) : ''}</span></div></div></td>
+        <td class="loc-cell">${locCell(b)}</td>
         <td class="hide-sm">${esc(b.genre || '—')}</td>
-        <td class="hide-sm">${esc(b.publisher || '—')}</td>
-        <td class="num">${num(b.quantity || 0)}${!b.active ? ' <span class="status off">موقوف</span>' : ''}</td>
-        <td class="num hide-sm">${num(b.price || 0)}</td>
-        <td>${rsBadge(b)}</td>
-        <td class="hide-sm"><span class="flags"><span class="flag ${b.cover_url ? 'on' : ''}" title="الغلاف">غ</span><span class="flag ${b.has_summary ? 'on' : ''}" title="النبذة">ن</span><span class="flag ${b.counts.confirmed ? 'on' : ''}" title="صفات مؤكدة">ص</span></span></td>
+        <td class="stock-cell">${!b.active ? '<span class="status off">موقوف</span>' : b.quantity > 0 ? `${num(b.quantity)} <span class="qty-label">نسخ متوفرة</span>` : '<span class="status off">نافد</span>'}<span class="mobile-price"><bdi>${num(b.price || 0)}</bdi> ر.س</span></td>
+        <td class="num hide-sm">${num(b.price || 0)} <span class="sub">ر.س</span></td>
+        <td class="review-cell">${reviewBadge(b)}</td>
+        <td class="open-cell"><button type="button" class="row-open" data-bid="${b.book_id}" aria-label="فتح بطاقة ${esc(b.title)}">←</button></td>
       </tr>`;
     }
     function bookSpine(b) {
@@ -1392,15 +1630,15 @@
       </button>`;
     }
     function renderItems(list) {
-      if (lib.view === 'list') return `<div class="table-scroll"><table class="booklist"><thead><tr><th><span class="sr">الغلاف</span></th><th>الكتاب</th><th class="hide-sm">التصنيف</th><th class="hide-sm">الدار</th><th>الكمية</th><th class="hide-sm">السعر</th><th>البحث</th><th class="hide-sm">البيانات</th></tr></thead><tbody>${list.map(bookRow).join('')}</tbody></table></div>`;
+      if (lib.view === 'list') return `<div class="table-scroll"><table class="booklist" role="table" aria-label="قائمة الكتب"><thead><tr><th class="bk-cell" scope="col">الكتاب</th><th class="loc-cell" scope="col">الموقع</th><th class="hide-sm" scope="col">التصنيف</th><th scope="col">الكمية</th><th class="hide-sm" scope="col">السعر</th><th class="review-cell" scope="col">المراجعة</th><th class="open-cell" scope="col"><span class="sr">عرض</span></th></tr></thead><tbody>${list.map(bookRow).join('')}</tbody></table></div>`;
       if (lib.view === 'shelf') return `<div class="shelf">${list.map(bookSpine).join('')}</div>`;
       return `<div class="grid">${list.map(bookCard).join('')}</div>`;
     }
 
     function renderGrid() {
-      renderChips();
+      renderChips(); renderActiveFilters();
       const list = filteredBooks().sort(SORTS[$('sortBy').value] || SORTS.added);
-      const filtered = lib.chips.size || $('search').value.trim() || $('genreFilter').value || $('publisherFilter').value;
+      const filtered = lib.chips.size || $('search').value.trim() || $('genreFilter').value || $('locFilter').value || $('publisherFilter').value;
       $('clearBookFilters').hidden = !filtered;
       $('count').textContent = `يعرض ${num(list.length)} من ${num(catalog.length)} كتاب`;
       document.querySelectorAll('.viewseg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === lib.view)));
@@ -1410,7 +1648,9 @@
         const m = new Map();
         list.forEach(b => { const k = GROUPS[gkey](b); if (!m.has(k)) m.set(k, []); m.get(k).push(b); });
         const order = GROUP_ORDER[gkey];
-        groups = [...m.entries()].sort((a, b) => order ? order.indexOf(a[0]) - order.indexOf(b[0]) : b[1].length - a[1].length || a[0].localeCompare(b[0], 'ar'));
+        groups = [...m.entries()].sort((a, b) => order ? order.indexOf(a[0]) - order.indexOf(b[0])
+          : gkey === 'loc' ? (a[0] === 'بدون موقع') - (b[0] === 'بدون موقع') || locCmp(a[0], b[0])
+          : b[1].length - a[1].length || a[0].localeCompare(b[0], 'ar'));
       }
       $('grid').innerHTML = !list.length ? '<p class="empty-note">ما فيه كتب مطابقة. جرّب تمسح بعض الفلاتر.</p>' : groups.map(([name, items]) => {
         const lim = lib.shown[name] || PAGE, open = !lib.collapsed.has(gkey + ':' + name);
@@ -1425,17 +1665,17 @@
     }
     const resetBooks = () => { lib.shown = {}; renderStats(); renderGrid(); };
     $('search').addEventListener('input', resetBooks);
-    ['genreFilter', 'publisherFilter', 'sortBy', 'groupBy'].forEach(id => $(id).addEventListener('change', () => {
+    ['genreFilter', 'locFilter', 'publisherFilter', 'sortBy', 'groupBy'].forEach(id => $(id).addEventListener('change', () => {
       if (id === 'sortBy' || id === 'groupBy') store.set(id, $(id).value);
       resetBooks();
     }));
     $('sortBy').value = store.get('sortBy', 'complete'); if (!$('sortBy').value) $('sortBy').value = 'complete';
     $('groupBy').value = store.get('groupBy', ''); if ($('groupBy').selectedIndex < 0) $('groupBy').value = '';
-    document.querySelectorAll('.viewseg button').forEach(b => b.addEventListener('click', () => { lib.view = b.dataset.view; store.set('view', lib.view); renderGrid(); }));
+    document.querySelectorAll('.viewseg button').forEach(b => b.addEventListener('click', () => { lib.view = b.dataset.view; store.set('view.v2', lib.view); renderGrid(); }));
     $('clearBookFilters').addEventListener('click', () => {
-      lib.chips.clear(); $('search').value = ''; $('genreFilter').value = ''; $('publisherFilter').value = ''; resetBooks();
+      lib.chips.clear(); $('search').value = ''; $('genreFilter').value = ''; $('locFilter').value = ''; $('publisherFilter').value = ''; resetBooks(); $('search').focus();
     });
-    const setHdr = () => document.documentElement.style.setProperty('--hdr', (document.querySelector('header')?.offsetHeight || 68) + 'px');
+    const setHdr = () => document.documentElement.style.setProperty('--hdr', (matchMedia('(min-width:980px)').matches ? 0 : (document.querySelector('header')?.offsetHeight || 68)) + 'px');
     setHdr(); window.addEventListener('resize', setHdr);
 
     // ---------------- authors (list, detail sheet, simple edits, merging a duplicate spelling)
@@ -1645,6 +1885,14 @@
     $('backdrop').addEventListener('click', closeCard);
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('sheet').hidden) closeCard(); });
 
+    // the year the work first came out, with where it was read and when (ORIGYR 2026-10-11)
+    const ORIG_YEAR_SOURCES = { goodreads: 'Goodreads', openlibrary: 'Open Library', wikidata: 'Wikidata', staff: 'إدخال الموظف' };
+    function origYearText(b) {
+      if (!b.original_year) return null;
+      const src = ORIG_YEAR_SOURCES[b.original_year_source] || b.original_year_source || '';
+      const when = b.original_year_checked_at ? String(b.original_year_checked_at).slice(0, 10) : '';
+      return `${b.original_year}${src ? ' — ' + src : ''}${when ? ' (' + when + ')' : ''}`;
+    }
     function factBox(label, value, unknownText = 'غير معروف') {
       const has = value !== null && value !== undefined && value !== '';
       return `<div class="fact"><span>${label}</span><b class="${has ? '' : 'unknown'}">${has ? esc(value) : unknownText}</b></div>`;
@@ -1910,9 +2158,31 @@
           <button class="close" type="button" aria-label="إغلاق" id="closeBtn">✕</button>
         </div>
         <div class="sheet-body">
-          <section class="block"><h3>البيانات الأساسية</h3><div class="facts">
+          <section class="block" id="basicBlock"><div class="block-head"><h3>البيانات الأساسية</h3>
+            <button id="basicEdit" class="btn secondary" type="button" aria-expanded="false" aria-controls="basicForm">تعديل البيانات</button></div>
+            <div id="basicForm" class="basic-form" hidden>
+              <p class="diff" style="margin:0 0 10px">صحّح من الكتاب نفسه (الغلاف والصفحة الأولى). كل تعديل يُسجَّل باسمك مع القيمة القديمة والجديدة، ويظهر في ملف «تنزيل الكل» اللي يُرسل لإبراهيم.</p>
+              <div class="inv basic-grid">
+                <div class="bfull"><label for="bTitle">العنوان</label><input id="bTitle" type="text" maxlength="300" dir="auto" value="${esc(b.title || '')}" /></div>
+                <div class="bfull"><label for="bAuthor">المؤلف</label><input id="bAuthor" type="text" maxlength="200" dir="auto" value="${esc(b.author || '')}" /></div>
+                <div><label for="bPublisher">الناشر</label><input id="bPublisher" type="text" maxlength="150" dir="auto" value="${esc(b.publisher || '')}" /></div>
+                <div><label for="bGenre">التصنيف</label><select id="bGenre"><option value="">غير مصنف</option>${GENRE_LIST.map(g => `<option value="${esc(g)}" ${g === b.genre ? 'selected' : ''}>${esc(g)}</option>`).join('')}</select></div>
+                <div><label for="bYear">سنة طبعتنا</label><input id="bYear" type="number" min="1000" max="2100" step="1" inputmode="numeric" value="${b.publication_year || ''}" /></div>
+                <div><label for="bOrigYear">سنة الصدور الأصلية</label><input id="bOrigYear" type="number" min="1000" max="2100" step="1" inputmode="numeric" value="${b.original_year || ''}" aria-describedby="bOrigYearHint" /><span id="bOrigYearHint" class="diff">أول نشر للعمل (للمترجم: سنة الأصل)</span></div>
+                <div><label for="bPages">عدد الصفحات</label><input id="bPages" type="number" min="1" max="20000" step="1" inputmode="numeric" value="${b.page_count || ''}" /></div>
+                <div><label for="bIsbn">ISBN</label><input id="bIsbn" type="text" maxlength="20" dir="ltr" inputmode="numeric" value="${esc(b.isbn || '')}" /></div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">
+                <button id="basicSave" class="btn" type="button">حفظ التعديلات</button>
+                <button id="basicCancel" class="btn secondary" type="button">إلغاء</button>
+                <span class="diff">الباركود ورمز رواء لا يُعدّلان هنا لأن استيراد رواء يطابق بهما.</span>
+              </div>
+              <p id="basicState" class="state" role="status"></p>
+            </div>
+            <div class="facts" id="basicFacts">
             ${factBox('التصنيف', b.genre)}${factBox('عدد الصفحات (تقريبي)', b.page_count ? num(b.page_count) : null)}
-            ${factBox('الناشر', b.publisher)}${factBox('سنة النشر', b.publication_year)}
+            ${factBox('الناشر', b.publisher)}${factBox('سنة طبعتنا', b.publication_year)}
+            ${factBox('سنة الصدور الأصلية', origYearText(b), 'غير معروفة بعد')}
             ${factBox('ISBN', b.isbn)}${factBox('الأصل واللغة', b.origin, 'غير معروف بعد')}
             ${factBox('الباركود', b.barcode)}${factBox('رمز المنتج في رواء', b.rewaa_sku)}
             ${factBox('المصدر', b.source === 'rewaa' ? 'رواء' : 'بيانات تجريبية')}${factBox('آخر مزامنة', b.last_synced_at ? date(b.last_synced_at) : null, 'لم تتم')}
@@ -1948,10 +2218,10 @@
             <p id="coverState" class="state" role="status"></p>
           </section>
           <section class="block"><h3>نبذة عن الكتاب</h3>
-            <p class="diff" style="margin:0 0 8px">جملتين أو ثلاث بكلامنا عن موضوع الكتاب، بدون نسخ من المواقع وبدون حرق. يستخدمها أمين المكتبة لتعريف الكتاب للزائر.</p>
+            <p class="diff" style="margin:0 0 8px">جملتين أو ثلاث بكلامنا عن موضوع الكتاب، بدون نسخ من المواقع وبدون حرق. تستخدمها منار لتعريف الكتاب للزائر.</p>
             <textarea id="fSummary" maxlength="700" dir="auto" aria-label="نبذة عن الكتاب">${esc(b.summary || '')}</textarea>
             <div style="display:flex;gap:10px;align-items:center;margin-top:8px"><button id="saveSummary" class="btn" type="button">حفظ النبذة</button>
-              <span class="diff">${b.summary_source ? 'المصدر: ' + (String(b.summary_source).startsWith('http') ? `<a href="${esc(b.summary_source)}" target="_blank" rel="noopener noreferrer">${esc(host(b.summary_source))}</a>` : 'موظف') : ''}</span></div>
+              <span class="diff">${b.summary_source ? 'المصدر: ' + (String(b.summary_source).startsWith('http') ? `<a href="${esc(b.summary_source)}" target="_blank" rel="noopener noreferrer">${esc(host(b.summary_source))}</a>` : ({ library_sheet: 'ملف المكتبة (بعد التحقق)', general_knowledge: 'معرفة عامة بالعمل' }[b.summary_source] || 'موظف')) : ''}</span></div>
             <p id="summaryState" class="state" role="status"></p>
           </section>
           <section class="block"><h3>لغة الكتاب</h3>
@@ -1964,7 +2234,7 @@
             <p id="langState" class="state" role="status"></p>
           </section>
           ${['أطفال', 'يافعين', 'قصص مصورة'].includes(b.genre) || b.age_min != null || b.age_max != null ? `<section class="block"><h3>العمر المناسب</h3>
-            <p class="diff" style="margin:0 0 8px">لكتب الأطفال واليافعين: من أي عمر إلى أي عمر يناسب الكتاب. يستخدمه أمين المكتبة لما يذكر الزائر عمر طفله.${b.age_source ? ' المصدر: ' + (String(b.age_source).startsWith('http') ? `<a href="${esc(b.age_source)}" target="_blank" rel="noopener noreferrer">${esc(host(b.age_source))}</a>` : b.age_source === 'staff' ? 'موظف' : esc(b.age_source)) : ''}</p>
+            <p class="diff" style="margin:0 0 8px">لكتب الأطفال واليافعين: من أي عمر إلى أي عمر يناسب الكتاب. تستخدمه منار لما يذكر الزائر عمر طفله.${b.age_source ? ' المصدر: ' + (String(b.age_source).startsWith('http') ? `<a href="${esc(b.age_source)}" target="_blank" rel="noopener noreferrer">${esc(host(b.age_source))}</a>` : b.age_source === 'staff' ? 'موظف' : esc(b.age_source)) : ''}</p>
             <div class="inv">
               <div><label for="fAgeMin">من عمر</label><input id="fAgeMin" type="number" min="0" max="18" inputmode="numeric" value="${b.age_min ?? ''}" /></div>
               <div><label for="fAgeMax">إلى عمر</label><input id="fAgeMax" type="number" min="0" max="18" inputmode="numeric" value="${b.age_max ?? ''}" /></div>
@@ -1995,6 +2265,9 @@
       if ($('cfUndo')) $('cfUndo').addEventListener('click', () => sendConfirmation(b.book_id, true));
       $('notBookBtn').addEventListener('click', () => askNotBook(b));
       $('saveLang').addEventListener('click', () => saveLanguage(b.book_id));
+      $('basicEdit').addEventListener('click', () => toggleBasic(true));
+      $('basicCancel').addEventListener('click', () => toggleBasic(false));
+      $('basicSave').addEventListener('click', () => saveBasic(b));
       if ($('saveAge')) $('saveAge').addEventListener('click', () => saveAge(b.book_id));
       $('saveSummary').addEventListener('click', () => saveSummary(b.book_id));
       $('coverFetch').addEventListener('click', () => coverAction(b.book_id, 'fetch'));
@@ -2064,6 +2337,39 @@
       const langs = (cardLanguages || []);
       return (allowUnknown ? `<option value="" ${current ? '' : 'selected'}>غير معروف</option>` : '') +
         langs.map(l => `<option value="${esc(l.value)}" ${l.value === current ? 'selected' : ''}>${esc(l.label)}</option>`).join('');
+    }
+
+    // «البيانات الأساسية» (Ibrahim 2026-10-09): staff open the form with a button and save only what they changed
+    const GENRE_LIST = ['رواية', 'قصص قصيرة', 'شعر', 'مسرحية', 'مقالات ونصوص', 'نقد أدبي', 'سيرة ذاتية', 'أدب رحلات', 'تاريخ', 'فكر',
+      'دين', 'علم نفس', 'علم اجتماع', 'علوم', 'تطوير ذاتي', 'أعمال', 'فنون وسينما', 'أطفال', 'يافعين', 'قصص مصورة'];
+    function toggleBasic(open) {
+      $('basicForm').hidden = !open; $('basicFacts').hidden = open;
+      $('basicEdit').hidden = open; $('basicEdit').setAttribute('aria-expanded', String(open));
+      if (open) $('bTitle').focus(); else $('basicEdit').focus();
+    }
+    async function saveBasic(b) {
+      const st = $('basicState');
+      const now = { title: $('bTitle').value.trim(), author: $('bAuthor').value.trim(), publisher: $('bPublisher').value.trim(),
+        genre: $('bGenre').value, publication_year: $('bYear').value.trim(), original_year: $('bOrigYear').value.trim(), page_count: $('bPages').value.trim(),
+        isbn: $('bIsbn').value.replace(/[\s-]/g, '').toUpperCase() };
+      const was = { title: b.title || '', author: b.author || '', publisher: b.publisher || '', genre: b.genre || '',
+        publication_year: b.publication_year ? String(b.publication_year) : '', original_year: b.original_year ? String(b.original_year) : '', page_count: b.page_count ? String(b.page_count) : '', isbn: b.isbn || '' };
+      const body = {};
+      Object.keys(now).forEach(k => { if (now[k] !== was[k]) body[k] = (k === 'publication_year' || k === 'original_year' || k === 'page_count') ? (now[k] === '' ? null : Number(now[k])) : now[k]; });
+      if (!now.title || !now.author) { st.textContent = 'العنوان والمؤلف ما يصير يكونون فاضيين (اكتب «غير معروف» للمؤلف إذا ما هو مكتوب).'; return; }
+      if (!Object.keys(body).length) { st.textContent = 'ما فيه تغيير.'; return; }
+      st.textContent = 'جاري الحفظ…'; $('basicSave').disabled = true;
+      try {
+        const res = await fetch(`/api/books/${b.book_id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (!res.ok) { st.textContent = 'تأكد من القيم: السنة بين ١٠٠٠ والسنة الحالية، الصفحات رقم، وISBN صحيح (١٠ أو ١٣ رقمًا) أو فاضي.'; return; }
+        const top = $('sheet').scrollTop;
+        renderCard(await (await fetch(`/api/admin/books/${b.book_id}`)).json(), true);
+        $('sheet').scrollTop = top;
+        const n = Object.keys(body).length;
+        $('basicState').textContent = n === 1 ? 'تم حفظ التعديل وتسجيله.' : `تم حفظ ${num(n)} تعديلات وتسجيلها.`;
+        loadCatalog();
+      } catch (e) { st.textContent = 'تعذر الحفظ'; }
+      finally { if ($('basicSave')) $('basicSave').disabled = false; }
     }
 
     async function saveAge(id) {
@@ -2410,6 +2716,56 @@
       } catch (err) { $('applyState').textContent = 'تعذر التطبيق: ' + err.message; }
       finally { $('impApply').disabled = false; $('impApply').dataset.armed = ''; $('impApply').textContent = 'تطبيق على الكتالوج'; }
     });
+    // ---------------- the library's own book sheet: shelves, publisher, category, keywords (SHELF, 2026-10-11)
+    let lsUpload = null;
+    const LS_FIELD = { shelf_location: 'المكان', publisher: 'الدار', genre: 'التصنيف', keywords: 'الكلمات المفتاحية' };
+    const LS_COL = { shelf: 'رمز الرف', title: 'العنوان', publisher: 'الدار', author: 'المؤلف', category: 'التصنيف', keywords: 'الكلمات المفتاحية', description: 'الوصف' };
+    const lsVal = v => Array.isArray(v) ? v.join('، ') : (v ?? '—');
+    $('lsRead').addEventListener('click', async () => {
+      const file = $('lsFile').files[0];
+      if (!file) { $('lsState').textContent = 'اختر ملف أولًا'; return; }
+      $('lsState').textContent = 'جاري القراءة والمطابقة…'; $('lsPlan').hidden = true; $('lsApplyState').textContent = '';
+      const fd = new FormData(); fd.append('file', file);
+      try {
+        const res = await fetch('/api/admin/library-sheet/upload', { method: 'POST', body: fd });
+        const p = await res.json();
+        if (!res.ok) throw new Error(p.error || res.status);
+        lsUpload = p.upload_id;
+        $('lsState').textContent = `تمت القراءة: ${num(p.rows_read)} صف، ${num(p.matched_books)} كتاب انطابق`;
+        $('lsCols').textContent = 'الأعمدة اللي استخدمناها: ' + Object.entries(p.columns).map(([f, h]) => `${LS_COL[f] || f} ← «${h}»`).join(' · ');
+        const c = p.counts;
+        $('lsStats').innerHTML = [[p.matched_books, 'كتب انطابقت'], [c.shelf_location, 'مكان جديد أو متغيّر'], [c.publisher, 'دار فاضية تتعبّى'],
+          [c.genre, 'تصنيف فاضي يتعبّى'], [c.keywords, 'كلمات مفتاحية'], [p.probable_total, 'مطابقة محتملة (تحتاج تدقيق)', true],
+          [p.publisher_differs_total, 'دار مختلفة (ما تتغيّر)', true], [p.unmatched_total, 'صفوف ما انطابقت', true], [p.numeric_codes_total, 'رمز مو رف (ما ينكتب)', true], [p.shifted_rows_total, 'صفوف وصفها منزاح', true]]
+          .map(([n, l, w]) => `<div class="stat ${w && n ? 'warn' : ''}"><b>${num(n)}</b><span>${l}</span></div>`).join('');
+        const more = (k) => p[k + '_total'] > p[k].length ? ` — أول ${num(p[k].length)} من ${num(p[k + '_total'])}` : '';
+        $('lsLists').innerHTML =
+          listBlock('الدار في الملف تختلف عن الدار عندنا (ما بتتغيّر)', p.publisher_differs, i => `<b dir="auto">${esc(i.title)}</b> <span class="diff">عندنا: ${esc(i.ours || '—')} · في الملف: ${esc(i.sheet)}</span>`, true) +
+          listBlock('تغييرات على الكتب' + more('updated'), p.updated, i => `<b dir="auto">${esc(i.title)}</b> <span class="diff">(${esc(i.matched_by)}) ${Object.entries(i.changes).map(([k, [a, b]]) => `${LS_FIELD[k] || k}: ${esc(lsVal(a))} ← ${esc(lsVal(b))}`).join(' · ')}</span>`) +
+          listBlock('مطابقات محتملة تحتاج تدقيق' + more('probable'), p.probable, i => `سطر ${num(i.row)}: <b dir="auto">${esc(i.title)}</b> ← <span dir="auto">${esc(i.our_title)}</span> <span class="diff">${esc(i.kind_ar)}</span>`) +
+          listBlock('صفوف ما لقينا لها كتاب عندنا' + more('unmatched'), p.unmatched, i => `سطر ${num(i.row)}: <b dir="auto">${esc(i.title)}</b> <span class="diff">${esc(i.publisher || '')}${i.shelf ? ' · ' + esc(i.shelf) : ''}</span>`) +
+          listBlock('رموز مو بصيغة رف (رقم فقط) — ما تنكتب' + more('numeric_codes'), p.numeric_codes, i => `سطر ${num(i.row)}: <span dir="auto">${esc(i.title)}</span> <span class="diff">${esc(i.value)}</span>`) +
+          listBlock('كتاب على أكثر من رف', p.several_shelves, i => `<b dir="auto">${esc(i.title)}</b> <span class="diff">${esc(i.codes.join(' / '))}</span>`) +
+          listBlock('صفوف وصفها وكلماتها تخص سطرًا مجاورًا (ما أخذنا كلماتها)' + more('shifted_rows'), p.shifted_rows, i => `سطر ${num(i.row)}: <span dir="auto">${esc(i.title)}</span>`) +
+          listBlock('تصنيف المكتبة ما فهمناه (يبقى فاضي)', p.genre_unclear, i => `<b dir="auto">${esc(i.title)}</b> <span class="diff">${esc(i.category)}</span>`) +
+          listBlock('كتب متوفرة عندنا ومو موجودة في الملف' + more('in_stock_not_in_sheet'), p.in_stock_not_in_sheet, i => `<span dir="auto">${esc(i.title)}</span> <span class="diff">${esc(i.publisher || '')}</span>`);
+        $('lsApply').dataset.armed = ''; $('lsApply').textContent = 'تطبيق على الكتالوج';
+        $('lsPlan').hidden = false;
+      } catch (err) { $('lsState').textContent = 'تعذر: ' + err.message; }
+    });
+    $('lsApply').addEventListener('click', async () => {
+      if (!lsUpload) return;
+      if (!$('lsApply').dataset.armed) { $('lsApply').dataset.armed = '1'; $('lsApply').textContent = 'متأكد؟ اضغط مرة ثانية للتطبيق'; return; }
+      $('lsApply').disabled = true; $('lsApplyState').textContent = 'جاري التطبيق…';
+      try {
+        const res = await fetch('/api/admin/library-sheet/apply', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ upload_id: lsUpload }) });
+        const r = await res.json();
+        if (!res.ok) throw new Error(r.error || res.status);
+        $('lsApplyState').textContent = `تم: ${num(r.updated)} كتاب تحدّث (المكان ${num(r.shelf_location)}، الدار ${num(r.publisher)}، التصنيف ${num(r.genre)}، الكلمات ${num(r.keywords)}). النسخة الاحتياطية: ${r.backup}`;
+        lsUpload = null; $('lsFile').value = ''; loadHistory();
+      } catch (err) { $('lsApplyState').textContent = 'تعذر التطبيق: ' + err.message; }
+      finally { $('lsApply').disabled = false; $('lsApply').dataset.armed = ''; $('lsApply').textContent = 'تطبيق على الكتالوج'; }
+    });
     // ---------------- staff confirmations: out to Claude, corrections back in (2026-10-04)
     async function confirmPackage() {
       const res = await fetch('/api/admin/confirmations');
@@ -2419,25 +2775,9 @@
     async function loadConfirmCount() {
       try {
         const p = await confirmPackage();
-        $('cxCount').textContent = p.count ? `${num(p.count)} رد بانتظار التصحيح (من ${num(p.books_needing_confirmation)} كتاب يحتاج تأكيد).`
-          : `لا توجد ردود جديدة. ${num(p.books_needing_confirmation)} كتاب ما زال يحتاج تأكيد من الموظفين.`;
-        $('cxCopy').disabled = $('cxDownload').disabled = !p.count;
-      } catch (err) { $('cxCount').textContent = 'تعذر تحميل الردود'; }
-    }
-    async function confirmOut(download) {
-      const st = $('cxState'); st.className = 'state'; st.textContent = '';
-      try {
-        const p = await confirmPackage(), text = JSON.stringify(p, null, 1);
-        if (download) {
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-          a.download = `confirmations-${p.exported_at.slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(a.href);
-          st.textContent = `نُزّل ملف فيه ${num(p.count)} رد.`;
-        } else {
-          try { await navigator.clipboard.writeText(text); st.textContent = `نُسخ ${num(p.count)} رد. الصقها في محادثة Claude.`; }
-          catch (e) { $('cxText').value = text; $('cxText').select(); st.textContent = 'المتصفح منع النسخ التلقائي؛ النص في المربع تحت، انسخه يدويًا ثم امسحه.'; }
-        }
-      } catch (err) { st.className = 'state error'; st.textContent = 'تعذر تجهيز الردود'; }
+        $('cxCount').textContent = p.count ? `${num(p.count)} رد من الموظفين بانتظار التصحيح · ${num(p.books_needing_confirmation)} كتاب يحتاج تأكيد`
+          : `${num(p.books_needing_confirmation)} كتاب يحتاج تأكيد هوية`;
+      } catch (err) { $('cxCount').textContent = ''; }
     }
     async function confirmCorrections(apply) {
       const st = $('cxPlanState'); st.className = 'state';
@@ -2460,8 +2800,6 @@
       } catch (err) { st.className = 'state error'; st.textContent = 'تعذر الاتصال بالخادم'; }
       finally { $('cxPreview').disabled = $('cxApply').disabled = false; }
     }
-    $('cxCopy').addEventListener('click', () => confirmOut(false));
-    $('cxDownload').addEventListener('click', () => confirmOut(true));
     $('cxPreview').addEventListener('click', () => confirmCorrections(false));
     $('cxApply').addEventListener('click', () => confirmCorrections(true));
     $('cxText').addEventListener('input', () => { $('cxApply').hidden = true; });
@@ -2470,8 +2808,9 @@
     async function loadHistory() {
       try {
         const h = await (await fetch('/api/admin/import/history')).json();
-        $('lastSync').textContent = h.length ? `آخر مزامنة: ${date(h[0].applied_at)} (${esc(h[0].file_name || '')})` : 'ما تمت أي مزامنة من رواء للحين.';
-        $('histTable').innerHTML = h.length ? `<thead><tr><th>التاريخ</th><th>الملف</th><th>صفوف</th><th>جديد</th><th>تحديث</th><th>بدون تغيير</th><th>مو في الملف</th><th>صارت نافدة</th><th>مشاكل</th></tr></thead><tbody>${h.map(r => `<tr><td>${date(r.applied_at)}</td><td>${esc(r.file_name || '')}</td><td>${num(r.rows_read)}</td><td>${num(r.added)}</td><td>${num(r.updated)}</td><td>${num(r.unchanged)}</td><td>${num(r.missing)}</td><td>${num(r.marked_out_of_stock)}</td><td>${num(r.invalid)}</td></tr>`).join('')}</tbody>` : '<tbody><tr><td>لا يوجد سجل بعد.</td></tr></tbody>';
+        const rw = h.find(r => r.source !== 'library_sheet');
+        $('lastSync').textContent = rw ? `آخر مزامنة: ${date(rw.applied_at)} (${esc(rw.file_name || '')})` : 'ما تمت أي مزامنة من رواء للحين.';
+        $('histTable').innerHTML = h.length ? `<thead><tr><th>التاريخ</th><th>الملف</th><th>صفوف</th><th>جديد</th><th>تحديث</th><th>بدون تغيير</th><th>مو في الملف</th><th>صارت نافدة</th><th>مشاكل</th></tr></thead><tbody>${h.map(r => `<tr><td>${date(r.applied_at)}</td><td>${r.source === 'library_sheet' ? 'ملف المكتبة: ' : ''}${esc(r.file_name || '')}</td><td>${num(r.rows_read)}</td><td>${num(r.added)}</td><td>${num(r.updated)}</td><td>${num(r.unchanged)}</td><td>${num(r.missing)}</td><td>${num(r.marked_out_of_stock)}</td><td>${num(r.invalid)}</td></tr>`).join('')}</tbody>` : '<tbody><tr><td>لا يوجد سجل بعد.</td></tr></tbody>';
       } catch (err) { $('lastSync').textContent = 'تعذر تحميل السجل'; }
     }
 
@@ -2502,8 +2841,10 @@
       ME = d.user; CSRF = d.csrf;
       $('auth').hidden = true; $('who').hidden = false;
       $('whoName').textContent = `${ME.name} · ${ME.role_label}`;
+      $('whoAv').textContent = String(ME.name || '؟').trim().charAt(0); $('who').title = $('whoName').textContent;
       const manager = ME.role === 'manager';
-      $('tabImport').hidden = !manager; $('tabSettings').hidden = !manager; $('tabStats').hidden = !manager;
+      $('tabImport').hidden = !manager; $('tabSettings').hidden = !manager; $('tabStats').hidden = !manager; $('phGear').hidden = !manager;
+      $('cxFold').hidden = !manager;  // applying identity corrections stays manager-only, as in «استيراد من رواء»
       ['aPass', 'aPass2', 'pCur', 'pNew'].forEach(id => { $(id).value = ''; });
       loadInboxCount();
     }
@@ -2593,7 +2934,7 @@
       const res = await fetch('/api/admin/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ daily_model_calls: Number($('capInput').value) }) });
       $('capState').textContent = res.ok ? 'تم الحفظ' : 'قيمة غير صحيحة'; loadUsage(); loadAudit();
     });
-    const AUDIT_LABELS = { 'inbox.export': 'تنزيل ملف البلاغات', 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف',
+    const AUDIT_LABELS = { 'staff_idea.add': 'اقتراح موظف على التطبيق', 'staff_idea.done': 'معالجة اقتراح موظف', 'staff_idea.open': 'إعادة فتح اقتراح موظف', 'inbox.export': 'تنزيل ملف البلاغات', 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف',
       'user.password_changed': 'تغيير كلمة المرور', 'book.update': 'تعديل كتاب', 'card.confirm': 'تأكيد صفة', 'card.reject': 'حذف صفة',
       'card.restore': 'استرجاع صفة', 'card.set': 'تعيين صفة', 'card.add': 'إضافة صفة', 'model.set': 'تغيير النموذج',
       'key.saved': 'حفظ مفتاح', 'key.deleted': 'حذف مفتاح', 'endpoint.set': 'تغيير عنوان مزوّد', 'import.apply': 'استيراد من رواء',
@@ -2608,10 +2949,12 @@
     // ---------------- inbox (staff and manager): visitor reports about a book, and visitor suggestions
     const inbox = { kind: 'report', status: 'open', items: [], total: 0 };
     let staffOpen = 0;   // open «تعديلات الموظفين», counted in the tab badge with the visitors' notes
+    let ideasOpen = 0;   // open «اقتراحات الموظفين» (2026-10-09)
     function showInboxCounts(c) {
       if (!c) return;
       if (typeof c.staff_open === 'number') { $('inboxTabStaff').hidden = false; staffOpen = c.staff_open; $('inboxNStaff').textContent = staffOpen ? num(staffOpen) : ''; }
-      const open = (c.open || 0) + staffOpen;
+      if (typeof c.ideas_open === 'number') { ideasOpen = c.ideas_open; $('inboxNIdeas').textContent = ideasOpen ? num(ideasOpen) : ''; }
+      const open = (c.open || 0) + staffOpen + ideasOpen;
       $('inboxN').hidden = !open; $('inboxN').textContent = open ? num(open) : '';
       $('tabInbox').setAttribute('aria-label', open ? `البلاغات، ${num(open)} بانتظار المعالجة` : 'البلاغات');
       $('inboxNReport').textContent = c.report.open ? num(c.report.open) : '';
@@ -2633,6 +2976,7 @@
       const offset = more ? inbox.items.length : 0;
       if (inbox.kind === 'questions') return loadQuestions(msg, more, offset);
       if (inbox.kind === 'staff') return loadStaffNotes(msg, more, offset);
+      if (inbox.kind === 'ideas') return loadIdeas(msg, more, offset);
       try {
         const res = await fetch(`/api/admin/inbox?kind=${inbox.kind}&status=${inbox.status}&offset=${offset}`);
         if (!res.ok) throw new Error(res.status);
@@ -2694,6 +3038,50 @@
         }));
       } catch (e) { $('inboxState').textContent = 'تعذر تحميل التعديلات.'; if (!more) $('inboxList').innerHTML = ''; }
     }
+    // «اقتراحات الموظفين» (Ibrahim 2026-10-09): any general suggestion about the app, from any staff member
+    async function loadIdeas(msg, more, offset) {
+      const keep = $('ideaText') ? $('ideaText').value : '';
+      try {
+        const res = await fetch(`/api/admin/inbox/staff-ideas?status=${inbox.status}&offset=${offset}`);
+        if (!res.ok) throw new Error(res.status);
+        const d = await res.json();
+        inbox.items = more ? inbox.items.concat(d.items) : d.items;
+        inbox.total = d.total;
+        ideasOpen = d.counts.open; $('inboxNIdeas').textContent = ideasOpen ? num(ideasOpen) : '';
+        loadInboxCount();
+        const rest = Math.max(0, inbox.total - inbox.items.length);
+        $('inboxState').textContent = msg || (inbox.items.length ? `عدد الاقتراحات: ${num(inbox.total)}${rest ? ` · المعروض ${num(inbox.items.length)}` : ''}` : '');
+        const form = `<div class="idea-form"><label for="ideaText"><b>اقتراح جديد على التطبيق</b></label>
+            <p class="state" style="margin:2px 0 8px">أي فكرة أو ملاحظة عامة: شي ناقص، شي مزعج، أو شي ودّك يكون أسهل. يُحفظ باسمك ويوصل لإبراهيم في ملف «تنزيل الكل». (ملاحظة عن كتاب بعينه اكتبها في بطاقة الكتاب.)</p>
+            <textarea id="ideaText" maxlength="1000" dir="auto" rows="3" placeholder="اكتب اقتراحك هنا…"></textarea>
+            <div class="nr-actions" style="margin-top:8px"><button type="button" class="btn" id="ideaSend">إرسال الاقتراح</button><span id="ideaState" class="state" role="status"></span></div></div>`;
+        $('inboxList').innerHTML = form + (inbox.items.length ? inbox.items.map(n => {
+          const done = n.status === 'done';
+          return `<div class="note-row${done ? ' done' : ''}"><div><p class="nr-text" dir="auto" style="margin-top:0;white-space:pre-line">${esc(n.text)}</p>
+            <span class="nr-meta">${esc(n.created_by || '—')} · ${when(n.created_at)}${done ? ` · عالجه ${esc(n.handled_by || '—')} ${when(n.handled_at)}` : ''}</span></div>
+            <div class="nr-actions"><button type="button" class="btn${done ? ' secondary' : ''}" data-idea="${n.idea_id}" data-to="${done ? 'open' : 'done'}">${done ? 'إعادة فتح' : 'تمت المعالجة'}</button></div></div>`;
+        }).join('') + (rest ? `<div class="nr-actions" style="justify-content:center"><button type="button" class="btn secondary" id="ideasMore">عرض الأقدم (باقي ${num(rest)})</button></div>` : '')
+          : `<div class="empty-note">${inbox.status === 'open' ? 'ما فيه اقتراحات مفتوحة.' : 'ما فيه اقتراحات.'}</div>`);
+        $('ideaText').value = keep;
+        $('ideaSend').addEventListener('click', async () => {
+          const text = $('ideaText').value.trim();
+          if (text.length < 3) { $('ideaState').textContent = 'اكتب الاقتراح أولًا.'; $('ideaText').focus(); return; }
+          $('ideaSend').disabled = true; $('ideaState').textContent = 'جاري الإرسال…';
+          try {
+            const r = await fetch('/api/admin/inbox/staff-ideas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+            if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.status);
+            $('ideaText').value = '';
+            await loadInbox('تم إرسال الاقتراح، شكرًا لك.');
+          } catch (e) { $('ideaSend').disabled = false; $('ideaState').textContent = 'تعذر الإرسال: ' + e.message; }
+        });
+        if ($('ideasMore')) $('ideasMore').addEventListener('click', () => { $('ideasMore').disabled = true; loadInbox(null, true); });
+        $('inboxList').querySelectorAll('[data-idea]').forEach(b => b.addEventListener('click', async () => {
+          b.disabled = true;
+          const r = await fetch(`/api/admin/inbox/staff-ideas/${b.dataset.idea}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: b.dataset.to }) });
+          if (r.ok) loadInbox(); else { b.disabled = false; $('inboxState').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
+        }));
+      } catch (e) { $('inboxState').textContent = 'تعذر تحميل الاقتراحات.'; if (!more) $('inboxList').innerHTML = ''; }
+    }
     function renderInbox(items, msg) {
       const report = inbox.kind === 'report';
       const what = report ? 'عدد البلاغات' : 'عدد الاقتراحات';
@@ -2729,9 +3117,9 @@
       document.querySelectorAll('#inboxStatus button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
       inbox.status = btn.dataset.status; loadInbox();
     }));
-    [['report', 'inboxTabReport'], ['suggestion', 'inboxTabSuggestion'], ['questions', 'inboxTabQuestions'], ['staff', 'inboxTabStaff']].forEach(([kind, id]) => $(id).addEventListener('click', () => {
+    [['report', 'inboxTabReport'], ['suggestion', 'inboxTabSuggestion'], ['questions', 'inboxTabQuestions'], ['staff', 'inboxTabStaff'], ['ideas', 'inboxTabIdeas']].forEach(([kind, id]) => $(id).addEventListener('click', () => {
       inbox.kind = kind;
-      ['inboxTabReport', 'inboxTabSuggestion', 'inboxTabQuestions', 'inboxTabStaff'].forEach(other => { $(other).setAttribute('aria-selected', String(other === id)); $(other).tabIndex = other === id ? 0 : -1; });
+      ['inboxTabReport', 'inboxTabSuggestion', 'inboxTabQuestions', 'inboxTabStaff', 'inboxTabIdeas'].forEach(other => { $(other).setAttribute('aria-selected', String(other === id)); $(other).tabIndex = other === id ? 0 : -1; });
       $('inboxList').setAttribute('aria-labelledby', id);
       loadInbox();
     }));
@@ -2741,7 +3129,7 @@
     let statDays = 30;
     const SAT = [['perfect', 'مناسبة جدًا', '#5A8F4E'], ['close', 'قريبة', '#C8A13E'], ['no', 'غير مناسبة', '#D8614A']];
     const pct = v => v == null ? '—' : num(v) + '٪';
-    const shortDay = d => new Date(d + 'T12:00:00').toLocaleDateString('ar-SA-u-ca-gregory', { day: 'numeric', month: 'short' });
+    const shortDay = (d, withYear = false) => new Date(d + 'T12:00:00').toLocaleDateString('ar-SA-u-ca-gregory', { day: 'numeric', month: 'short', ...(withYear ? { year: 'numeric' } : {}) });
     document.querySelectorAll('#statsView .seg button').forEach(btn => btn.addEventListener('click', () => {
       document.querySelectorAll('#statsView .seg button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
       statDays = Number(btn.dataset.days); loadStats();
@@ -2780,15 +3168,23 @@
         <div class="kpi"><span class="label">مرات اقتراح الكتب</span><b>${num(t.shown)}</b><span class="sub">نسبة الاختيار من الاقتراحات ${pct(t.choice_rate_pct)}</span></div>
         <div class="kpi"><span class="label">قيّموا بعد الاختيار</span><b>${pct(t.rated_pct)}</b><span class="sub">${num(t.rated)} تقييم</span></div>
       </div>`;
-      const max = Math.max(1, ...d.daily.map(x => x.chosen));
-      const peak = d.daily.reduce((a, x) => x.chosen > a.chosen ? x : a, d.daily[0] || { chosen: 0 });
-      const days = `<div class="panel-card span-all"><h3>الاختيارات يوميًا</h3><span class="diff">عدد مرات ضغط «أبغى هذا الكتاب» في كل يوم${peak && peak.chosen ? ` · أعلى يوم: ${shortDay(peak.day)} (${num(peak.chosen)})` : ''}</span>
-        <div class="days" role="img" aria-label="الاختيارات يوميًا">${d.daily.map(x => {
-          const h = Math.round(100 * x.chosen / max);
-          const tip = `${shortDay(x.day)}: ${num(x.chosen)} اختيار · ${num(x.shown)} اقتراح · ${num(x.perfect + x.close + x.no)} تقييم`;
-          return `<span class="d" tabindex="0" data-tip="${esc(tip)}" style="--h:${h}%"><i style="height:${h}%"></i>${x === peak && x.chosen ? `<em>${num(x.chosen)}</em>` : ''}</span>`;
-        }).join('')}</div>
-        <div class="days-axis"><span>${d.daily.length ? shortDay(d.daily[d.daily.length - 1].day) : ''}</span><span>${d.daily.length ? shortDay(d.daily[0].day) : ''}</span></div></div>`;
+      const daily = [...d.daily].sort((a, b) => a.day.localeCompare(b.day));
+      const chartDay = day => shortDay(day, daily.length > 90);
+      const peak = daily.reduce((a, x) => x.chosen > a.chosen ? x : a, { chosen: 0 });
+      const dailyChart = (key, label) => {
+        const values = daily.map(x => x[key]), max = Math.max(0, ...values);
+        if (!max) return `<p class="chart-empty">ما فيه ${label} خلال هذي الفترة.</p>`;
+        const step = Math.max(1, Math.ceil(max / 4)), ceiling = step * 4;
+        const peakValue = Math.max(...values), peakIndex = values.indexOf(peakValue);
+        return `<div class="plot"><div class="plot-scale" aria-hidden="true">${[4, 3, 2, 1, 0].map(i => `<span>${num(step * i)}</span>`).join('')}</div>
+          <div class="days${daily.length > 60 ? ' dense' : ''}" role="group" aria-label="عدد ${label} يوميًا">${daily.map((x, i) => {
+            const h = 100 * x[key] / ceiling;
+            const tip = `${chartDay(x.day)}: ${num(x[key])} ${key === 'chosen' ? 'اختيار' : 'اقتراح'}`;
+            return `<span class="d" tabindex="0" role="img" aria-label="${esc(tip)}" data-tip="${esc(tip)}" style="--h:${h}%"><i style="height:${h}%"></i>${i === peakIndex ? `<em>${num(x[key])}</em>` : ''}</span>`;
+          }).join('')}</div><div class="days-axis">${[0, Math.floor((daily.length - 1) / 2), daily.length - 1].filter((n, i, a) => a.indexOf(n) === i).map(i => `<span>${chartDay(daily[i].day)}</span>`).join('')}</div></div>`;
+      };
+      const days = `<div class="panel-card span-all"><h3>الاختيارات يوميًا</h3><span class="diff">عدد مرات ضغط «أبغى هذا الكتاب»${peak.chosen ? ` · أعلى يوم: ${chartDay(peak.day)} (${num(peak.chosen)})` : ''}</span>
+        ${dailyChart('chosen', 'اختيارات')}<details class="chart-detail"><summary>عرض اقتراحات الكتب يوميًا</summary>${dailyChart('shown', 'اقتراحات')}</details></div>`;
       const satTotal = Math.max(1, s.total);
       const sat = `<div class="panel-card"><h3>رضا العميل</h3><span class="diff">تقييم الزائر بعد ما يختار كتابًا: هل كانت التوصية مناسبة؟</span>
         ${s.total ? `<div class="satbar" role="img" aria-label="توزيع التقييمات">${SAT.map(([k, , c]) => s.counts[k] ? `<span style="width:${100 * s.counts[k] / satTotal}%;background:${c}" title="${num(s.counts[k])}"></span>` : '').join('')}</div>
@@ -2869,7 +3265,7 @@
       try {
         const res = await fetch('/api/admin/version');
         const v = res.ok ? (await res.json()).version : null;
-        el.textContent = v ? v.replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]).replace(/\./g, '٫') : '—';
+        el.textContent = v ? v.replace(/\s*beta\s*$/i, ' (تجريبية)').replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]).replace(/\./g, '٫') : '—';
       } catch (e) { el.textContent = '—'; }
     }
 

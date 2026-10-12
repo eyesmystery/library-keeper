@@ -299,7 +299,7 @@ def ics(ev, book_title=None):
     if book_title:
         desc = (desc + "\n\n" if desc else "") + "عن كتاب «" + book_title + "»"
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Thalath//Thalath Smart//AR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Thalath//Manar//AR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
              "BEGIN:VEVENT", f"UID:event-{ev['event_id']}@thalath-smart", f"DTSTAMP:{stamp}",
              (f"DTSTART;VALUE=DATE:{start}" if kind == "DATE" else f"DTSTART:{start}"),
              (f"DTEND;VALUE=DATE:{end}" if kind == "DATE" else f"DTEND:{end}"),

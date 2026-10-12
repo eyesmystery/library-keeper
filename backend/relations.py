@@ -25,8 +25,9 @@ MOOD_AR = {"comforting": "مريحة", "warm": "دافئة", "funny": "مرحة"
            "dark": "قاتمة", "sad": "حزينة", "uplifting": "مبهجة"}
 TYPES_AR = {"same_author": "للمؤلف نفسه", "series_prev": "الجزء السابق", "series_next": "الجزء التالي",
             "similar": "مشابه", "lighter_alternative": "بديل أخف", "shorter_alternative": "بديل أقصر",
-            "easier_alternative": "بديل بلغة أسهل"}
-PER_TYPE = {"same_author": 5, "similar": 4, "lighter_alternative": 2, "shorter_alternative": 2, "easier_alternative": 2}
+            "easier_alternative": "بديل بلغة أسهل", "same_topic": "موضوع قريب"}
+PER_TYPE = {"same_author": 5, "similar": 4, "lighter_alternative": 2, "shorter_alternative": 2, "easier_alternative": 2,
+            "same_topic": 3}
 CARD_STATUSES = ("enriched", "needs_review", "approved")
 
 
@@ -117,6 +118,7 @@ def compute(books, profiles):
                 sd, td = _order(LANG, sp.get("language_difficulty")), _order(LANG, tp.get("language_difficulty"))
                 if sd is not None and td is not None and td < sd:
                     out.append((sb["book_id"], tb["book_id"], "easier_alternative", f"لغته {LANG_AR[tp['language_difficulty']]} بدل {LANG_AR[sp['language_difficulty']]}؛ {link}", 0.7))
+    out += _same_topic(books, profiles, {(r[0], r[1]) for r in out if r[2] == "similar"})
     # keep the strongest few per (source, type)
     out.sort(key=lambda r: (r[0], r[2], -r[4]))
     kept, count = [], {}
@@ -126,6 +128,57 @@ def compute(books, profiles):
             kept.append(r)
             count[k] = count.get(k, 0) + 1
     return kept
+
+
+TOPIC_COMMON_SHARE = 0.015  # a keyword on more than this share of the keyworded books says nothing («رواية»، «مصر»)
+
+
+def _same_topic(books, profiles, already):
+    """Books of the same genre and language that share at least two specific keywords of the library
+    sheet (SHELF 2026-10-11, Ibrahim «اعتمد الكلمات المفتاحية للبحث والربط»). A later volume that
+    needs the earlier ones is never offered; a pair already linked as «similar» is not repeated."""
+    words = {}
+    for b in books:
+        if (profiles.get(b["book_id"]) or {}).get("series_dependency") == "requires_previous":
+            continue
+        ks = {_norm(k) for k in _jl(b.get("keywords")) if _norm(k)}
+        if ks:
+            words[b["book_id"]] = (b, ks)
+    if not words:
+        return []
+    df = {}
+    for _b, ks in words.values():
+        for k in ks:
+            df[k] = df.get(k, 0) + 1
+    limit = max(3, int(TOPIC_COMMON_SHARE * len(words)))
+    posting = {}
+    for bid, (_b, ks) in words.items():
+        for k in ks:
+            if df[k] <= limit:
+                posting.setdefault(k, []).append(bid)
+    shared = {}
+    for k, ids in posting.items():
+        for s in ids:
+            for t in ids:
+                if s != t:
+                    shared.setdefault((s, t), []).append(k)
+    label = {}
+    for b, _ks in words.values():
+        for k in _jl(b.get("keywords")):
+            label.setdefault(_norm(k), k)
+    out = []
+    for (s, t), ks in shared.items():
+        if len(ks) < 2 or (s, t) in already:
+            continue
+        sb, tb = words[s][0], words[t][0]
+        if _norm(sb["title"]) == _norm(tb["title"]) or (sb.get("language") or "ar") != (tb.get("language") or "ar"):
+            continue
+        if not sb.get("genre") or sb.get("genre") != tb.get("genre"):
+            continue
+        ks = sorted(ks, key=lambda k: df[k])
+        out.append((s, t, "same_topic", "يتقاطعان في: " + "، ".join(label[k] for k in ks[:3]),
+                    round(min(0.5 + 0.05 * len(ks), 0.65), 2)))
+    return out
 
 
 def rebuild():

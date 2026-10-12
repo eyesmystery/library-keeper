@@ -1,5 +1,5 @@
 @echo off
-rem Thalath Smart - run once: start the server automatically when this Windows user signs in,
+rem Manar - run once: start the server automatically when this Windows user signs in,
 rem and make a database backup every day at 03:15. Undo with remove_autostart.bat.
 chcp 65001 >nul
 setlocal

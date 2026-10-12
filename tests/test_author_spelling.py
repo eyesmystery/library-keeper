@@ -67,5 +67,11 @@ ok(no_data.followup(conv) is None, "«لا …» is a new wish, not the offer")
 e = A.run_chat([{"role": "user", "content": "what are your best sellers?"}], active=False, language="en")
 ok(e["books"] == [] and "sales figures" in e["reply"], "the same in English")
 
+# ---------- subject words written another way: «تاريخ اللغة» finds «حول أصل اللغة» (staff chat 2026-10-11)
+import topics
+forms = topics.content_words("تاريخ اللغة")
+ok(any("اصل" in f for f in forms) and any("نشاه" in f for f in forms), "«تاريخ» also means «أصل / نشأة» in a subject")
+ok(any("تاريخ" in f for f in topics.content_words("أصل الإنسان")), "and the other way round")
+
 print(f"\nTOTAL pass={P} fail={F}")
 sys.exit(1 if F else 0)

@@ -78,13 +78,24 @@ def index(all_books):
     books, counts = {}, {}
     for bid, b in all_books.items():
         title = _tokens(b.get("title"))
-        subj = _tokens(_json_words(b.get("subjects")) + " " + _json_words(b.get("subgenres")) + " " + str(b.get("setting") or ""))
+        # + the library sheet's keywords (SHELF 2026-10-11, Ibrahim «اعتمد الكلمات المفتاحية للبحث والربط»)
+        subj = _tokens(_json_words(b.get("subjects")) + " " + _json_words(b.get("subgenres")) + " " + str(b.get("setting") or "")
+                       + " " + _json_words(b.get("keywords")))
         text = _tokens(str(b.get("summary") or "") + " " + str(b.get("hook") or "") + " " + _json_words(b.get("learning_outcomes")))
         books[bid] = (title, subj, text)
         for w in title | subj | text:
             counts[w] = counts.get(w, 0) + 1
     _cache.update(key=key, at=time.time(), index=(books, counts, max(1, len(all_books))))
     return _cache["index"]
+
+
+# Words a subject may be written with in our data instead of the visitor's word: «تاريخ اللغة» is
+# «حول أصل اللغة» (staff chat 2026-10-11). Only near-equivalents; each side finds the other.
+_SAME = [("تاريخ", "اصل", "نشاه", "نشوء", "تطور")]
+_SAME_AS = {}
+for _group in _SAME:
+    for _w in _group:
+        _SAME_AS[normalize(_w)] = {normalize(x) for x in _group}
 
 
 def content_words(phrase):
@@ -97,6 +108,9 @@ def content_words(phrase):
         if len(w) < 3 or w in _STOP or strip_al(w) in _STOP or w.isdigit():
             continue
         forms = stems(w)
+        for f in list(forms):
+            for alt in _SAME_AS.get(f, ()):
+                forms |= stems(alt)
         if forms:
             out.append(forms)
     return out

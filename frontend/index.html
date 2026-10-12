@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#BFCCB8" />
-  <meta id="metaDescription" name="description" content="ثلاث الذكي يساعدك تختار كتابًا متوفرًا الآن في مكتبة ثلاث." />
-  <title>ثلاث الذكي</title>
+  <meta id="metaDescription" name="description" content="منار تساعدك تختار كتابًا متوفرًا الآن في مكتبة ثلاث." />
+  <title>منار | مكتبة ثلاث</title>
+  <link rel="icon" href="/static/assets/manar-icon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/static/assets/favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="apple-touch-icon" href="/static/assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
@@ -13,10 +16,10 @@
     <section id="welcome" class="welcome-screen brand-pattern" aria-labelledby="welcomeTitle">
       <div class="welcome-top"><button id="welcomeLangBtn" class="language-button" type="button" aria-label="Switch to English">EN</button></div>
       <div class="welcome-main">
-        <div class="brand-signature guide-lockup"><img class="brand-mark" src="/static/assets/thalath-smart.svg" alt="ثلاث الذكي" /></div>
+        <div class="brand-signature guide-lockup"><img class="brand-mark" src="/static/assets/manar-logo.svg" alt="منار" /><span class="host-under" role="img" aria-label="مكتبة ثلاث"></span></div>
         <div class="welcome-copy">
           <h1 id="welcomeTitle">وش ودّك<br />تقرأ اليوم؟</h1>
-          <p id="welcomeBody">سولف معي عن مزاجك، وألقى لك كتابًا من الموجود عندنا.</p>
+          <p id="welcomeBody">سولف معي عن مزاجك، وألقى لك كتاب من الموجود عندنا.</p>
         </div>
         <div class="start-card">
           <p id="startNote">تقدر تبدأ بكلمة، شعور، أو آخر كتاب عجبك.</p>
@@ -38,8 +41,8 @@
       <header class="app-header">
         <button id="chatBackBtn" class="header-action header-back" type="button">رجوع</button>
         <div class="header-center">
-          <div class="header-brand"><img class="host-mark" src="/static/assets/thalath-logo-brown.png" alt="مكتبة ثلاث" /></div>
-          <span id="chatTitle" class="sr-only">ثلاث الذكي</span>
+          <button class="header-brand brand-home" type="button" aria-label="الرجوع للصفحة الرئيسية"><img class="host-mark" src="/static/assets/manar-logo.svg" alt="منار" /></button>
+          <span id="chatTitle" class="sr-only">منار</span>
           <span id="modelStatus" class="model-status" role="status" hidden>النموذج غير متاح · نكمل بالنظام البديل</span>
         </div>
         <div class="header-end">
@@ -53,7 +56,7 @@
         <div id="contextBar" class="context-bar" role="status" hidden><span id="contextTitle" class="context-title">نبحث عن:</span><div id="contextChips" class="context-chips"></div></div>
         <div id="chips" class="chips" aria-label="ردود مقترحة"></div>
         <form id="composer" class="composer" autocomplete="off">
-          <label id="chatInputLabel" class="sr-only" for="chatInput">اكتب رسالتك لثلاث الذكي</label>
+          <label id="chatInputLabel" class="sr-only" for="chatInput">اكتب رسالتك لمنار</label>
           <textarea id="chatInput" rows="1" maxlength="500" placeholder="اكتب رسالتك هنا…"></textarea>
           <button id="sendBtn" class="send-button" type="submit" aria-label="إرسال">
             <svg id="sendIcon" width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
@@ -71,7 +74,7 @@
       <div class="detail-head brand-pattern">
         <header class="detail-header">
           <button id="backBtn" class="detail-back" type="button">رجوع</button>
-          <div class="detail-brand"><img class="host-mark" src="/static/assets/thalath-logo-brown.png" alt="مكتبة ثلاث" /></div>
+          <button class="detail-brand brand-home" type="button" aria-label="الرجوع للصفحة الرئيسية"><img class="host-mark" src="/static/assets/manar-logo.svg" alt="منار" /></button>
           <button id="detailLangBtn" class="language-button header-language" type="button" aria-label="Switch to English">EN</button>
         </header>
         <div id="detailCover" class="detail-cover" aria-hidden="true"><span id="dInitial"></span><img id="dCoverImg" alt="" hidden /></div>
@@ -97,7 +100,7 @@
       <div class="detail-head brand-pattern event-head">
         <header class="detail-header">
           <button id="eventBackBtn" class="detail-back" type="button">رجوع</button>
-          <div class="detail-brand"><img class="host-mark" src="/static/assets/thalath-logo-brown.png" alt="مكتبة ثلاث" /></div>
+          <button class="detail-brand brand-home" type="button" aria-label="الرجوع للصفحة الرئيسية"><img class="host-mark" src="/static/assets/manar-logo.svg" alt="منار" /></button>
           <span></span>
         </header>
         <div id="eImageBox" class="event-image" hidden><img id="eImage" alt="" /></div>
@@ -121,7 +124,7 @@
     <section id="feedback" class="feedback-screen brand-pattern" aria-labelledby="feedbackTitle" hidden>
       <button id="feedbackBackBtn" class="detail-back feedback-back" type="button">رجوع</button>
       <button id="feedbackLangBtn" class="language-button feedback-language" type="button" aria-label="Switch to English">EN</button>
-      <div class="feedback-brand"><img class="feedback-host" src="/static/assets/thalath-smart.svg" alt="ثلاث الذكي" /></div>
+      <div class="feedback-brand"><img class="feedback-host" src="/static/assets/manar-logo.svg" alt="منار" /></div>
       <div class="feedback-card">
         <div class="success-mark" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.5 3.2 3.2L18 7.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg></div>
         <h2 id="feedbackTitle">اختيار جميل</h2>

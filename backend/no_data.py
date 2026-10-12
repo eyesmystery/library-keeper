@@ -59,7 +59,7 @@ def answer(text, language="ar"):
     chip = f"{ar_kind} فازت بجوائز مؤخرًا" if ar_kind else CHIP_AR
     offer = OFFER_AR.replace("كتبًا", ar_kind) if ar_kind else OFFER_AR
     reply = "ما عندنا بيانات عن الأكثر مبيعًا عندنا، فما أقدر أحدد وش أكثر كتاب يُباع. " + offer
-    return reply, [chip, "كتب تحولت لأفلام أو مسلسلات", "رشّح لي حسب ذوقي"]
+    return reply, [chip, "كتب تحولت لأفلام أو مسلسلات", "رشّحي لي حسب ذوقي"]
 
 
 def followup(conv):

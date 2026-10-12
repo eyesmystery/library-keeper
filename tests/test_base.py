@@ -14,18 +14,18 @@ for path in ["/", "/static/styles.css", "/static/app.js", "/admin", "/api/books"
 css = open("../frontend/styles.css", encoding="utf-8").read()
 html = open("../frontend/index.html", encoding="utf-8").read()
 js = open("../frontend/app.js", encoding="utf-8").read()
-ok(".host-mark{width:72px;aspect-ratio:1144/348}" in css and "marsa" not in css.lower() and "marsa" not in html.lower()
+ok(".host-mark{width:56px;aspect-ratio:2652/1442}" in css and html.count('class="host-mark" src="/static/assets/manar-logo.svg" alt="منار"') == 3 and "marsa" not in css.lower() and "marsa" not in html.lower()
    and "مرسى" not in html and "مرسى" not in js and "Marsa" not in js,
-   "Visitor pages carry the Thalath mark alone (the old product name and logo are gone)")
+   "Chat and book-detail headers carry the «منار» logo (old names and logos are gone)")
 ok('id="modelStatus" class="model-status" role="status" hidden' in html and
    "setModelStatus(data.understanding !== 'ai')" in js,
    "Visitor chat reveals a compact fallback notice when AI is unavailable")
-ok(".brand-signature{width:max-content;max-width:100%;margin:30px 0 58px auto" in css and
+ok(".brand-signature{width:max-content;max-width:100%;margin:4px 0 46px auto" in css and
    ".guide-lockup{display:grid;direction:rtl;justify-items:end;gap:8px}" in css and
-   "aspect-ratio:1144/627" in css and html.count('src="/static/assets/thalath-smart.svg" alt="ثلاث الذكي"') == 2 and "smart-tag" not in css + html
+   "aspect-ratio:2652/1442" in css and 'class="brand-mark" src="/static/assets/manar-logo.svg" alt="منار"' in html and 'class="feedback-host" src="/static/assets/manar-logo.svg" alt="منار"' in html and "smart-tag" not in css + html
    and 'viewBox="0 0 1144 627"' in open("../frontend/assets/thalath-smart.svg", encoding="utf-8").read()[:200] and c.get("/static/assets/thalath-smart.svg").status_code == 200
-   and "<title>ثلاث الذكي</title>" in html and "أنا ثلاث الذكي" in js,
-   "Welcome and feedback show the one-piece «ثلاث الذكي» SVG lockup; the assistant is named «ثلاث الذكي»")
+   and "<title>منار | مكتبة ثلاث</title>" in html and "أنا منار" in js,
+   "Welcome and feedback show the «منار» logo; the assistant is named «منار»")
 ok("@media(min-width:700px){" in css and ".chat-books{grid-template-columns:repeat(2,minmax(0,1fr))" in css
    and ".app-shell{position:relative;width:min(100%,480px)" in css,
    "Visitor pages have a tablet layout from 700px (full screen, two book cards per row) and keep the phone layout")
@@ -77,3 +77,7 @@ ok(genres_of("أبغى ديوان شعر") == {"شعر"}, "poetry query -> poetr
 ok("شعر" not in genres_of("أشعر بالملل وأبغى رواية"), "أشعر does not trigger poetry")
 ok(all(b["author"] == "غازي القصيبي" for b in rec("كتب غازي القصيبي")["results"][:3]), "author search القصيبي")
 ok(con2.execute("select count(*) from books where shelf_location glob '[A-H][0-9]*'").fetchone()[0] == 0, "no invented shelf codes (locations come from staff or library sections)")
+ok(html.count('class="header-brand brand-home" type="button"') == 1 and html.count('class="detail-brand brand-home" type="button"') == 2
+   and "function goHome() { if (noteMode) closeNote(); closeMore(); showSection('welcome'); }" in js
+   and "document.querySelectorAll('.brand-home').forEach(button => button.addEventListener('click', goHome));" in js
+   and "home: 'الرجوع للصفحة الرئيسية'" in js and "home: 'Back to the start page'" in js, "the «منار» logo in the chat and detail headers goes back to the start page")

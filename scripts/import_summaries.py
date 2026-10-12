@@ -6,7 +6,8 @@ Usage (work on a COPY first, then back up and run on the live database):
 Only books.summary, summary_source, summary_updated_at and hook are written, and only for a `matched` book whose
 summary is still empty (an existing summary or hook is never overwritten). Nothing else in the database changes.
 Refused: a summary over 80 words / 700 characters, with a double quote, or without a source URL
-(the literal source `general_knowledge` is accepted since 2026-10-04: well-known works written from the model's knowledge, Ibrahim's decision).
+(the literal source `general_knowledge` is accepted since 2026-10-04: well-known works written from the model's knowledge, Ibrahim's decision;
+`library_sheet` since 2026-10-11: rewritten from the library's own sheet after checking, SHELF track, Ibrahim's decision).
 Without --apply nothing is written. The report is saved as <batch_dir>/import_report.json.
 """
 import json, os, re, sqlite3, sys
@@ -30,7 +31,7 @@ for d in recs:
     elif b["research_status"] != "matched": why = "not matched"
     elif (b["summary"] or "").strip(): why = "already has a summary"
     elif not s or len(s.split()) > 80 or '"' in s: why = "summary empty, too long or quoted"
-    elif not (u.startswith("http") or u == "general_knowledge"): why = "no source url"
+    elif not (u.startswith("http") or u in ("general_knowledge", "library_sheet")): why = "no source url"
     if why:
         report["refused"].append({"book_id": bid, "why": why}); continue
     keep_hook = bool((b["hook"] or "").strip()) or not h

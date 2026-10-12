@@ -17,7 +17,7 @@ def fake_post(url, body, headers, timeout):
     state["n"] += 1
     system = body["messages"][0]["content"]
     last = " ".join(m["content"] for m in body["messages"][1:] if m["role"] == "user")
-    if "intent" in system and "preferences" in system and "أمين المكتبة" not in system:
+    if "intent" in system and "preferences" in system and "منار" not in system:
         prefs = {"genres": [], "moods_exclude": []}
         if "حزين" in last:
             prefs["moods_exclude"] = ["sad"]

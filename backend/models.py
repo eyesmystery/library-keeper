@@ -150,6 +150,18 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         "age_max": "INTEGER",
         "age_source": "TEXT",
         "age_note": "TEXT",
+        # The year the WORK was first published (Ibrahim 2026-10-11 «سنة الصدور الأصلية»), not the year of
+        # our edition (publication_year, from Rewaa). For a translated book: the original's first
+        # publication. Where it came from (goodreads | openlibrary | wikidata | staff), the page it was read
+        # on, and when it was looked up. Empty when no source gave it: nothing is guessed.
+        "original_year": "INTEGER",
+        "original_year_source": "TEXT",
+        "original_year_ref": "TEXT",
+        "original_year_checked_at": "TEXT",
+        # Keywords from the library's own book sheet (SHELF track, Ibrahim 2026-10-11 «اعتمد الكلمات المفتاحية
+        # للبحث والربط»): a JSON list of short words, written by backend/library_sheet.py; used by the subject
+        # search (topics.py) and to link books on a shared subject (relations.py).
+        "keywords": "TEXT",
     }
     existing_books = {row["name"] for row in conn.execute("PRAGMA table_info(books)")}
     for column, column_type in book_additions.items():
@@ -328,12 +340,18 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
     # Edits staff ask for in a book's card (2026-10-08; see backend/staff_notes.py)
     import staff_notes
     staff_notes.ensure_table(conn)
+    # General suggestions about the app from staff (2026-10-09; see backend/staff_ideas.py)
+    import staff_ideas
+    staff_ideas.ensure_table(conn)
     # Library events shown on the visitor start page (2026-10-08; see backend/events.py)
     import events
     events.ensure_table(conn)
     # Meaning-search vectors of the books (2026-10-08; see backend/embeddings.py)
     import embeddings
     embeddings.ensure_table(conn)
+    # Books we do not have, looked up outside when a visitor names them (2026-10-11; backend/outside_books.py)
+    import outside_books
+    outside_books.ensure_table(conn)
     conn.execute("CREATE INDEX IF NOT EXISTS idx_books_barcode ON books(barcode)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_books_rewaa_sku ON books(rewaa_sku)")
     conn.execute(
@@ -574,7 +592,9 @@ def get_book(book_id: int) -> Optional[sqlite3.Row]:
 def update_book(book_id: int, fields: dict) -> None:
     allowed = {"price", "quantity", "shelf_location", "active", "cover_url", "language", "original_language",
                "translator", "cover_source", "cover_updated_at", "summary", "summary_source", "summary_updated_at",
-               "age_min", "age_max", "age_source"}
+               "age_min", "age_max", "age_source",
+               "title", "author", "publisher", "genre", "page_count", "publication_year", "isbn",
+               "original_year", "original_year_source", "original_year_ref", "original_year_checked_at"}
     updates = {k: v for k, v in fields.items() if k in allowed}
     if not updates:
         return

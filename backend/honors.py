@@ -71,13 +71,21 @@ def award_name(row):
 
 
 def award_label(row, with_work=False):
-    """«الجائزة العالمية للرواية العربية (البوكر العربية): فائز 2022»."""
+    """«الجائزة العالمية للرواية العربية (البوكر العربية): فائز 2022»؛ the branch after a dash for staff
+    («جائزة بوليتزر: فائز 2007 — الأدب القصصي», Ibrahim's prize lists 2026-10-11)."""
     text = award_name(row) + ": " + RESULTS.get(row.get("result"), "")
     if row.get("year"):
         text += f" {row['year']}"
     if with_work and row.get("work_title"):
         text += f" عن «{row['work_title']}»"
+    if row.get("category") and row.get("category") not in ("الرواية", "أفضل رواية"):
+        text += f" — {row['category']}"
     return text
+
+
+def _rank(row):
+    """Wins before lists, the named prizes before the others, newest first: the chat is given only the first few."""
+    return (row.get("result") != "winner", row.get("award_key") == "other", -(_int_year(row.get("year")) or 0))
 
 
 def adaptation_label(row):
@@ -122,8 +130,13 @@ def clear_cache():
 def for_book(book_id):
     """-> {"awards": [labels], "author_awards": [labels], "adaptations": [labels]} (empty lists when none)."""
     d = load()
-    return {"awards": [reason_label(r) for r in d["book"].get(book_id, [])],
-            "author_awards": [reason_label(r, True) for aid in d["book_authors"].get(book_id, []) for r in d["author"].get(aid, [])],
+    own = d["book"].get(book_id, [])
+    same = {(r["award_key"], r.get("award_name"), r.get("year"), r["result"]) for r in own}
+    # the author's row for this very prize (written with the book's title) says nothing the book's own row does not
+    theirs = [r for aid in d["book_authors"].get(book_id, []) for r in d["author"].get(aid, [])
+              if (r["award_key"], r.get("award_name"), r.get("year"), r["result"]) not in same]
+    return {"awards": [reason_label(r) for r in sorted(own, key=_rank)],
+            "author_awards": [reason_label(r, True) for r in sorted(theirs, key=_rank)],
             "adaptations": [adaptation_label(r) for r in d["adapt"].get(book_id, [])]}
 
 
@@ -135,7 +148,8 @@ def reason_label(row, author=False):
     li = ("لل" + name[2:]) if name.startswith("ال") else "ل" + name   # «للجائزة»، «لجائزة بوكر»
     if name[:1].isascii():   # «فاز بجائزة «Eisner Award»» rather than «فاز بEisner Award» (2026-10-08)
         bi, li = f"بجائزة «{name}»", f"لجائزة «{name}»"
-    verb = {"winner": "فاز " + bi, "shortlist": "وصل إلى القائمة القصيرة " + li,
+    won = "فازت ترجمته " if (row.get("category") or "").startswith("الترجمة") and not author else "فاز "   # Zayed / Hamad translation
+    verb = {"winner": won + bi, "shortlist": "وصل إلى القائمة القصيرة " + li,
             "longlist": "وصل إلى القائمة الطويلة " + li, "nominated": "رُشّح " + li}.get(row.get("result"), name)
     text = ("مؤلفه " if author else "") + verb + (f" {row['year']}" if row.get("year") else "")
     if author and row.get("work_title"):
@@ -204,6 +218,41 @@ def newest_award_year(book_id, keys, min_year=None, max_year=None):
     rows = list(d["book"].get(book_id, [])) + [r for aid in d["book_authors"].get(book_id, []) for r in d["author"].get(aid, [])]
     years = [_int_year(r.get("year")) or 0 for r in rows if _wanted(r, keys, want_any) and _in_years(r, None, min_year, max_year)]
     return max(years) if years else 0
+
+
+_NAME_STOP = {"جائزه", "جايزه", "الجائزه", "prize", "award", "awards", "for", "the", "of", "in", "and", "de", "la", "le", "a"}
+_NAME_GENERIC = set("روايه ادب ادبيه كتاب عربي عربيه وطنيه وطني دوليه دولي عالميه عالمي كبري كبرى افضل حريه دوله "
+                    "فخريه ذهبيه فضيه شعر قصه ترجمه سلام مؤلف جديد يوم نقاد امير اميره ملك ملكه "
+                    "book novel literary literature national international best new world golden".split())
+
+
+def _stem(w):
+    for p in ("وال", "بال", "لل", "فال", "ال", "و", "ب", "ل", "ف"):
+        if w.startswith(p) and len(w) - len(p) >= 3:
+            return w[len(p):]
+    return w
+
+
+def other_name_in(text):
+    """The full name of a prize stored under «other» that the visitor wrote out, longest first:
+    «فيه رواية فازت بغونكور للرواية الأولى؟» -> «جائزة غونكور للرواية الأولى», not the main Goncourt
+    (QAD 2026-10-12, case 16). Needs every word of the name but «جائزة»; a name of two words counts only
+    when its first word is its own («غونكور»، not «الرواية العربية»)."""
+    text = re.sub(r"[؟?!.،,:;«»()\"']", " ", str(text or ""))
+    have = {_stem(w) for w in _nw(text)} | set(_nw(text))
+    d = load()
+    names = {r.get("award_name") for rows in list(d["book"].values()) + list(d["author"].values())
+             for r in rows if r.get("award_key") == "other" and r.get("award_name")}
+    best = None
+    for n in names:
+        words = [w for w in _nw(n) if w not in _NAME_STOP]
+        if len(words) < 2 or not all(w in have or _stem(w) in have for w in words):
+            continue
+        if len(words) < 3 and (_stem(words[0]) in _NAME_GENERIC or words[0] in _NAME_GENERIC):
+            continue
+        if best is None or len(words) > best[0]:
+            best = (len(words), n)
+    return best[1] if best else None
 
 
 def name_exists(phrase):
@@ -334,7 +383,7 @@ AWARDS_EN = {"ipaf": "International Prize for Arabic Fiction (Arabic Booker)", "
              "zayed": "Sheikh Zayed Book Award", "katara": "Katara Prize for Arabic Novel",
              "mahfouz": "Naguib Mahfouz Medal for Literature", "sharjah": "Sharjah Award for Arab Creativity",
              "pulitzer": "Pulitzer Prize", "goncourt": "Prix Goncourt", "hugo": "Hugo Award", "other": "another prize"}
-_EN_VERBS = [("مؤلفه فاز ب", "Its author won "), ("فاز ب", "Won "),
+_EN_VERBS = [("مؤلفه فاز ب", "Its author won "), ("فازت ترجمته ب", "Its translation won "), ("فاز ب", "Won "),
              ("وصل إلى القائمة القصيرة لل", "Shortlisted for ال"), ("وصل إلى القائمة القصيرة ل", "Shortlisted for "),
              ("وصل إلى القائمة الطويلة لل", "Longlisted for ال"), ("وصل إلى القائمة الطويلة ل", "Longlisted for "),
              ("رُشّح لل", "Nominated for ال"), ("رُشّح ل", "Nominated for "), ("له صلة بـ", "Listed for "),

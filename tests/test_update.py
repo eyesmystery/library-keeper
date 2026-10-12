@@ -70,7 +70,7 @@ ok(dict(sqlite3.connect(BASE).execute("SELECT name, sha1 FROM cover_files")).key
 # ---- Ibrahim's side after more work
 UP = copy("upstream.db")
 run(UP,
-    ("UPDATE books SET summary='نبذة جديدة من التحديث' WHERE book_id=?", (A_,)),
+    ("UPDATE books SET summary='نبذة جديدة من التحديث', shelf_location='روايات · الرف K01' WHERE book_id=?", (A_,)),
     ("UPDATE books SET genre='تاريخ' WHERE book_id=?", (B_,)),
     ("UPDATE books SET summary='نبذة التحديث للكتاب ج' WHERE book_id=?", (C_,)),
     ("UPDATE books SET price=99, quantity=0 WHERE book_id=?", (D_,)),
@@ -124,7 +124,8 @@ ok(g("SELECT summary, genre FROM books WHERE book_id=?", (B_,)) == ("نبذة ع
 ok(g("SELECT summary FROM books WHERE book_id=?", (C_,))[0] == "نبذة المكتبة للكتاب ج", "both changed the same field: the library's value stays")
 conf = [c for c in rep["conflicts"] if c["table"] == "books" and c["key"] == [C_] and c["column"] == "summary"]
 ok(len(conf) == 1 and conf[0]["update"] == "نبذة التحديث للكتاب ج" and conf[0]["before"] == "نبذة الأساس", "that conflict is in the report with the three values")
-ok(g("SELECT price, quantity, shelf_location FROM books WHERE book_id=?", (D_,)) == (70.0, 9, "رف 4"), "stock (price, quantity, shelf) is always the library's")
+ok(g("SELECT price, quantity, shelf_location FROM books WHERE book_id=?", (D_,)) == (70.0, 9, "رف 4"), "stock (price, quantity) is the library's; a shelf the staff changed stays")
+ok(g("SELECT shelf_location FROM books WHERE book_id=?", (A_,))[0] == "روايات · الرف K01", "a shelf set on Ibrahim's side arrives with the update (SHELF 2026-10-11)")
 ok(g("SELECT title, rewaa_sku FROM books WHERE book_id=?", (top + 1,)) == ("كتاب جديد من التحديث", "SKU-UP-1"), "the update's new book arrives under its own id")
 moved = g("SELECT book_id, quantity FROM books WHERE rewaa_sku='SKU-LIB-1'")
 ok(moved[0] >= U.LOCAL_ID_START and moved[1] == 4, "the library's own book with that id moved to the library's id range, untouched")
@@ -258,6 +259,131 @@ try:
 except U.UpdateError:
     wrong = True
 ok(wrong, "a folder that is not the app is refused")
+
+# ---- a failure AFTER the code and the covers were replaced puts the whole installation back (audit 2026-10-09)
+def snapshot_of(app):
+    """Every file of an installation with its bytes, without backups/ and updates/ (they may grow)."""
+    out = {}
+    for base, dirs, files in os.walk(app):
+        dirs[:] = [d for d in dirs if os.path.join(base, d) not in (os.path.join(app, "backups"), os.path.join(app, "updates"))]
+        for f in files:
+            p = os.path.join(base, f)
+            out[os.path.relpath(p, app)] = open(p, "rb").read()
+    return out
+
+def failing_update(name, breaker, lib):
+    """Run the update on a fresh installation with one file operation made to fail. -> facts about what is left."""
+    app = make_app(name, lib)
+    open(os.path.join(app, "data", "catalog_base.db"), "wb").write(open(BASE, "rb").read())   # an installation that was updated before
+    was = snapshot_of(app)
+    real = {"replace": U.os.replace, "copy2": U.shutil.copy2}
+    breaker(app, real)
+    try:
+        U.apply(app, UPD, port=PORT, say=lambda *_: None); error = None
+    except Exception as e:  # noqa: BLE001
+        error = e
+    finally:
+        U.os.replace, U.shutil.copy2 = real["replace"], real["copy2"]
+    now = snapshot_of(app)
+    reports = sorted(os.listdir(os.path.join(app, "updates"))) if os.path.isdir(os.path.join(app, "updates")) else []
+    keeps = [d for d in os.listdir(os.path.join(app, "backups")) if d.startswith("before_update_")]
+    return {"app": app, "error": error, "same": now == was, "diff": sorted(k for k in set(was) | set(now) if was.get(k) != now.get(k)),
+            "reports": reports, "keep": os.path.join(app, "backups", keeps[0]) if keeps else None}
+
+def break_db_swap(app, real):
+    db = os.path.join(app, "data", "library.db")
+    def replace(src, dst):
+        if os.path.abspath(dst) == os.path.abspath(db) and "updating" in os.path.basename(src):
+            raise PermissionError("simulated: the database file is locked at the final swap")
+        return real["replace"](src, dst)
+    U.os.replace = replace
+
+LIB5 = library("library5.db")
+r1 = failing_update("late-db", break_db_swap, LIB5)
+ok(isinstance(r1["error"], U.UpdateError) and "أُرجع كل شيء" in str(r1["error"]) and "PermissionError" in str(r1["error"]),
+   "final database swap fails: the staff member is told in Arabic that everything was put back, with the cause")
+ok(r1["same"], f"final database swap fails: code, VERSION, start files, covers and database are byte for byte as before {r1['diff'][:4]}")
+ok(open(os.path.join(r1["app"], "VERSION")).read().strip() == "0.9.6 beta" and open(os.path.join(r1["app"], "backend", "app.py")).read() == "old code"
+   and open(os.path.join(r1["app"], "backend", "old_module.py")).read() == "gone in the update"
+   and open(os.path.join(r1["app"], "data", "covers", f"{A_}.jpg"), "rb").read() == b"cover-a-v1"
+   and open(os.path.join(r1["app"], "backend", "venv", "bin", "python")).read() == "the environment",
+   "final database swap fails: old code and its dropped module are back, the cover is the old one, the Python environment untouched")
+ok(not os.path.exists(os.path.join(r1["app"], "scripts", "daily.bat")), "final database swap fails: a file the update had added is removed again")
+fail_md = [f for f in r1["reports"] if f.startswith("update_FAILED_") and f.endswith(".md")]
+fail_json = [f for f in r1["reports"] if f.startswith("update_FAILED_") and f.endswith(".json")]
+info = json.load(open(os.path.join(r1["app"], "updates", fail_json[0]), encoding="utf-8")) if fail_json else {}
+ok(len(fail_md) == 1 and info.get("failed_step") == "database swap" and info.get("rolled_back") is True and info.get("rollback_problems") == []
+   and info.get("version_now") == "0.9.6 beta" and info.get("backup_folder", "").startswith("backups") and not [f for f in r1["reports"] if f.startswith("update_report_")],
+   "final database swap fails: a failure report names the step, says the rollback is complete and where the backup is; no success report")
+ok(r1["keep"] and one(os.path.join(r1["keep"], "library.db"), "SELECT password_hash FROM staff_users WHERE username='noura'") == ("hash-of-the-library",)
+   and one(os.path.join(r1["app"], "data", "library.db"), "PRAGMA integrity_check") == ("ok",), "final database swap fails: the backup taken first is there and the database is sound")
+res2 = U.apply(r1["app"], UPD, port=PORT, say=lambda *_: None)
+ok(open(os.path.join(r1["app"], "VERSION")).read().strip() == "0.9.7 beta" and open(os.path.join(r1["app"], "backend", "app.py")).read() == "new code"
+   and one(os.path.join(r1["app"], "data", "library.db"), "SELECT summary FROM books WHERE book_id=?", (A_,)) == ("نبذة جديدة من التحديث",)
+   and res2["mode"] == "three-way", "after the rollback the same update installs normally once the cause is gone")
+
+def break_base_save(app, real):     # the database is already swapped when this fails
+    def replace(src, dst):
+        if os.path.basename(dst) == "catalog_base.db":
+            raise OSError("simulated: catalog_base.db cannot be written")
+        return real["replace"](src, dst)
+    U.os.replace = replace
+def dump_of(path):
+    con = sqlite3.connect(path)
+    try:
+        return "\n".join(con.iterdump())
+    finally:
+        con.close()
+r2 = failing_update("late-base", break_base_save, LIB5)
+# here the database file was replaced and then written again from the backup: same content, not the same bytes
+ok(isinstance(r2["error"], U.UpdateError) and r2["diff"] in ([], [os.path.join("data", "library.db")]) and dump_of(os.path.join(r2["app"], "data", "library.db")) == dump_of(LIB5),
+   f"saving the catalog base fails after the swap: the old database is restored (every table and row) with the old code and covers {r2['diff'][:4]}")
+i2 = [f for f in r2["reports"] if f.endswith(".json")]
+i2 = json.load(open(os.path.join(r2["app"], "updates", i2[0]), encoding="utf-8")) if i2 else {}
+ok(i2.get("failed_step") == "saving the catalog base" and i2.get("database_restored_from_backup") is True
+   and one(os.path.join(r2["app"], "data", "library.db"), "SELECT summary FROM books WHERE book_id=?", (A_,)) == ("نبذة الأساس",),
+   "saving the catalog base fails: the report says the database came back from the backup; it holds the library's data, not the merged catalog")
+
+def break_code_copy(app, real):     # fails in the middle of copying the new code
+    def copy2(src, dst, *a, **k):
+        if os.path.basename(dst) == "index.html" and os.sep + "frontend" + os.sep in dst and os.sep + "backups" + os.sep not in dst:
+            raise OSError("simulated: disk full while copying the new code")
+        return real["copy2"](src, dst, *a, **k)
+    U.shutil.copy2 = copy2
+r3 = failing_update("mid-code", break_code_copy, LIB5)
+ok(isinstance(r3["error"], U.UpdateError) and r3["same"], f"copying the new code fails half way: the covers changed in the step before are put back too {r3['diff'][:4]}")
+
+def break_cover_copy(app, real):    # fails on the second cover
+    seen = []
+    def copy2(src, dst, *a, **k):
+        if os.sep + os.path.join("data", "covers") + os.sep in dst:
+            seen.append(dst)
+            if len(seen) == 2:
+                raise OSError("simulated: a cover cannot be written")
+        return real["copy2"](src, dst, *a, **k)
+    U.shutil.copy2 = copy2
+r4 = failing_update("mid-covers", break_cover_copy, LIB5)
+ok(isinstance(r4["error"], U.UpdateError) and r4["same"], f"a cover fails half way: the covers already changed are put back, code and database untouched {r4['diff'][:4]}")
+
+def break_everything(app, real):    # the swap fails AND the old code cannot be moved back
+    break_db_swap(app, real)
+    real_move = U.shutil.move
+    def move(src, dst, *a, **k):
+        if os.sep + "backups" + os.sep in src and os.path.basename(dst) == "app.py":
+            raise OSError("simulated: the old file cannot be moved back")
+        return real_move(src, dst, *a, **k)
+    U.shutil.move = move
+    r["move"] = real_move
+r = {}
+r5 = failing_update("no-way-back", break_everything, LIB5)
+U.shutil.move = r["move"]
+i5 = [f for f in r5["reports"] if f.endswith(".json")]
+i5 = json.load(open(os.path.join(r5["app"], "updates", i5[0]), encoding="utf-8")) if i5 else {}
+ok(isinstance(r5["error"], U.UpdateError) and "لا تشغّل التطبيق" in str(r5["error"]) and "أُرجع كل شيء" not in str(r5["error"])
+   and i5.get("rolled_back") is False and any("app.py" in x for x in i5.get("rollback_problems", []))
+   and open(os.path.join(r5["keep"], "code", "backend", "app.py")).read() == "old code",
+   "when the rollback itself cannot finish, the message says so plainly, names the file and the old code is still in the backup")
+ok(not any("updating" in f or "restoring" in f for x in (r1, r2, r3, r4, r5) for f in os.listdir(os.path.join(x["app"], "data"))), "no working file is left behind after any failure")
 
 print(f"\n{P} passed, {F} failed")
 sys.exit(1 if F else 0)

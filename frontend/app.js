@@ -5,26 +5,26 @@ const $ = id => document.getElementById(id);
 
 const COPY = {
   ar: {
-    title: 'ثلاث الذكي', description: 'ثلاث الذكي يساعدك تختار كتابًا متوفرًا الآن في مكتبة ثلاث.',
+    title: 'منار | مكتبة ثلاث', description: 'منار تساعدك تختار كتابًا متوفرًا الآن في مكتبة ثلاث.',
     switchLanguage: 'Switch to English', tagline: 'الذكي',
     hero: 'وش ودّك<br>تقرأ اليوم؟',
-    welcomeBody: 'سولف معي عن مزاجك، وألقى لك كتابًا من الموجود عندنا.',
+    welcomeBody: 'سولف معي عن مزاجك، وألقى لك كتاب من الموجود عندنا.',
     startNote: 'تقدر تبدأ بكلمة، شعور، أو آخر كتاب عجبك.', start: 'سولف معي عن مزاجك',
-    discover: 'اكتشف', ask: 'اسأل', read: 'اقرأ', follow: 'تابع مكتبة ثلاث', followOn: 'مكتبة ثلاث على', networks: { instagram: 'انستقرام', snapchat: 'سناب شات', tiktok: 'تيك توك', x: 'إكس' }, newChat: 'جديدة', assistant: 'ثلاث الذكي',
+    discover: 'اكتشف', ask: 'اسأل', read: 'اقرأ', follow: 'تابع مكتبة ثلاث', followOn: 'مكتبة ثلاث على', networks: { instagram: 'انستقرام', snapchat: 'سناب شات', tiktok: 'تيك توك', x: 'إكس' }, newChat: 'جديدة', assistant: 'منار',
     modelFallback: 'النموذج غير متاح · نكمل بالنظام البديل',
     testBanner: 'وضع الاختبار مفعّل: هذي المحادثة تنحفظ عشان نراجعها ونحسّن المساعد.',
-    conversation: 'المحادثة', suggestedReplies: 'ردود مقترحة', inputLabel: 'اكتب رسالتك لثلاث الذكي',
+    conversation: 'المحادثة', suggestedReplies: 'ردود مقترحة', inputLabel: 'اكتب رسالتك لمنار',
     placeholder: 'اكتب رسالتك هنا…', send: 'إرسال', trust: 'ما نطلب اسمك، والمحادثة تنمسح لما تبدأ من جديد.',
-    back: 'رجوع', accordingReaders: 'حسب القرّاء', closeChoice: 'اختيار قريب من وصفك', language: 'اللغة',
+    back: 'رجوع', home: 'الرجوع للصفحة الرئيسية', accordingReaders: 'حسب القرّاء', closeChoice: 'اختيار قريب من وصفك', language: 'اللغة',
     findAt: 'بتلقاه في', want: 'أبغى هذا الكتاب', feedbackTitle: 'اختيار جميل',
     feedbackQuestion: 'هل كانت التوصية مناسبة؟', perfect: 'مناسبة جدًا', close: 'قريبة', no: 'غير مناسبة',
-    greeting: 'أهلًا فيك! أنا ثلاث الذكي، أمين المكتبة هنا. قل لي وش مزاجك اليوم، أو وش آخر كتاب عجبك، وأساعدك تلقى كتاب يناسبك من الموجود عندنا.',
-    startChips: ['أبغى رواية ممتعة', 'شي خفيف مع القهوة', 'أبغى أبدأ عادة القراءة', 'هدية لشخص يحب القراءة'],
+    greeting: 'أهلًا فيك! أنا منار. قل لي وش مزاجك اليوم، أو وش آخر كتاب عجبك، وأساعدك تلقى كتاب يناسبك من الموجود عندنا.',
+    startChips: ['أدوّر كتاب معيّن', 'رشّحي لي كتاب يناسب ذوقي أو مزاجي', 'أبغى كتاب هدية', 'أبغى أبدأ قراءة', 'فاجئيني بكتب جديدة'],
     detailsAria: (title, author) => `عرض تفاصيل كتاب ${title} للكاتب ${author}`,
     pages: n => `${n} صفحة`, unknownLength: 'الطول غير معروف', shelf: value => `الرف ${value}`,
     askStaff: 'موقعه عند الموظف', available: 'متوفر', fallbackReply: 'هذي خيارات متوفرة الآن.',
-    fallbackChips: ['ورّني غيرها', 'شي أخف'], typing: 'ثلاث الذكي يكتب',
-    connectionError: 'تعذر الوصول لثلاث الذكي الآن. تأكد من الاتصال وجرّب مرة ثانية.',
+    fallbackChips: ['ورّني غيرها', 'شي أخف'], typing: 'منار تكتب',
+    connectionError: 'تعذر الوصول لمنار الآن. تأكد من الاتصال وجرّب مرة ثانية.',
     book: 'كتاب', shelfUnknown: 'اسأل موظف المكتبة يدلّك عليه', whereLabel: 'مكانه', unknown: 'غير معروف', currency: value => `${value} ر.س`,
     selectedAt: (title, place) => `ستجد «${title}» في ${place}. ويمكن لموظف المكتبة مساعدتك.`,
     selectedHelp: title => `اخترت «${title}». ويمكن لموظف المكتبة مساعدتك في الوصول إليه.`,
@@ -46,31 +46,31 @@ const COPY = {
     reportReasons: [['title_author', 'العنوان أو المؤلف'], ['cover', 'الغلاف'], ['summary', 'النبذة'], ['details', 'التصنيف أو الصفحات أو اللغة'], ['location', 'المكان أو التوفر'], ['other', 'شي ثاني']],
     reportReasonsLabel: 'نوع الخطأ', reportNoteLabel: 'تفاصيل أكثر (اختياري)', reportPlaceholder: 'مثلًا: اسم المؤلف الصحيح…',
     reportSent: 'وصلنا بلاغك، شكرًا لك.', needReason: 'اختر وش الغلط أول.', needNote: 'اكتب لنا وش الغلط.',
-    suggestBtn: 'عندك اقتراح؟', suggestTitle: 'اقتراحك يهمّنا', suggestLead: 'كتاب تتمنى نوفّره، أو شي يخلّي ثلاث الذكي أحسن. ما نطلب اسمك.',
+    suggestBtn: 'عندك اقتراح؟', suggestTitle: 'اقتراحك يهمّنا', suggestLead: 'كتاب تتمنى نوفّره، أو شي يخلّي منار أحسن. ما نطلب اسمك.',
     suggestNoteLabel: 'اقتراحك', suggestPlaceholder: 'اكتب اقتراحك هنا…', suggestSent: 'وصلنا اقتراحك، شكرًا لك.', needSuggestion: 'اكتب اقتراحك أول.',
     noteSend: 'إرسال', noteSending: 'جاري الإرسال…', noteCancel: 'إلغاء', noteFailed: 'ما قدرنا نرسلها الآن. جرّب مرة ثانية.', noteBusy: 'وصلتنا رسائل كثيرة من هنا. جرّب بعد شوي.',
   },
   en: {
-    title: 'Smart Library Guide | Thalath', description: 'The smart library guide at Thalath helps you choose a book that is available now.',
+    title: 'Manar | Thalath', description: 'Manar, the book guide at Thalath, helps you choose a book that is available now.',
     switchLanguage: 'التبديل للعربية', tagline: 'SMART LIBRARY GUIDE',
     hero: 'What would you<br>like to read today?',
     welcomeBody: "Tell me what you're in the mood for, and I'll find a book that's here now.",
     startNote: 'Start with a word, a feeling, or the last book you loved.', start: "Tell me what you're in the mood for",
-    discover: 'Discover', ask: 'Ask', read: 'Read', follow: 'Follow Thalath', followOn: 'Thalath on', networks: { instagram: 'Instagram', snapchat: 'Snapchat', tiktok: 'TikTok', x: 'X' }, newChat: 'New', assistant: 'Book guide',
+    discover: 'Discover', ask: 'Ask', read: 'Read', follow: 'Follow Thalath', followOn: 'Thalath on', networks: { instagram: 'Instagram', snapchat: 'Snapchat', tiktok: 'TikTok', x: 'X' }, newChat: 'New', assistant: 'Manar',
     modelFallback: 'Model unavailable · using fallback',
     testBanner: 'Test mode is on: this conversation is saved so we can review and improve the assistant.',
-    conversation: 'Conversation', suggestedReplies: 'Suggested replies', inputLabel: 'Write a message to the book guide',
+    conversation: 'Conversation', suggestedReplies: 'Suggested replies', inputLabel: 'Write a message to Manar',
     placeholder: 'Write your message…', send: 'Send', trust: 'We do not ask for your name, and this chat clears when you start again.',
-    back: 'Back', accordingReaders: 'According to readers', closeChoice: 'A close match for what you described', language: 'Language',
+    back: 'Back', home: 'Back to the start page', accordingReaders: 'According to readers', closeChoice: 'A close match for what you described', language: 'Language',
     findAt: 'Find it at', want: 'I want this book', feedbackTitle: 'Lovely choice',
     feedbackQuestion: 'Was this recommendation a good fit?', perfect: 'Perfect fit', close: 'Close', no: 'Not for me',
-    greeting: "Welcome! I'm your smart library guide at Thalath. Tell me your mood today, or the last book you enjoyed, and I'll help you find something available here.",
-    startChips: ['A fun novel', 'Something light with coffee', 'Help me start reading', 'A gift for a reader'],
+    greeting: "Welcome! I'm Manar, your book guide at Thalath. Tell me your mood today, or the last book you enjoyed, and I'll help you find something available here.",
+    startChips: ['Find a specific book', 'Recommend something for my taste or mood', 'I want a gift book', 'I want to start reading', 'Surprise me with new books'],
     detailsAria: (title, author) => `View details for ${title} by ${author}`,
     pages: n => `${n} pages`, unknownLength: 'Length unknown', shelf: value => `Shelf ${value}`,
     askStaff: 'Ask a bookseller for its location', available: 'Available', fallbackReply: 'Here are a few books available now.',
-    fallbackChips: ['Show me others', 'Something lighter'], typing: 'The book guide is typing',
-    connectionError: 'The book guide is unavailable right now. Check your connection and try again.',
+    fallbackChips: ['Show me others', 'Something lighter'], typing: 'Manar is typing',
+    connectionError: 'Manar is unavailable right now. Check your connection and try again.',
     book: 'Book', shelfUnknown: 'Ask a bookseller to show you', whereLabel: 'Where to find it', unknown: 'Unknown', currency: value => `SAR ${value}`,
     selectedAt: (title, place) => `You will find “${title}” at ${place}. A bookseller can help you too.`,
     selectedHelp: title => `You chose “${title}”. A bookseller can help you find it.`,
@@ -92,7 +92,7 @@ const COPY = {
     reportReasons: [['title_author', 'Title or author'], ['cover', 'Cover'], ['summary', 'Summary'], ['details', 'Genre, pages or language'], ['location', 'Location or availability'], ['other', 'Something else']],
     reportReasonsLabel: 'What is wrong', reportNoteLabel: 'More details (optional)', reportPlaceholder: 'For example: the correct author name…',
     reportSent: 'We got your report. Thank you.', needReason: 'Choose what is wrong first.', needNote: 'Tell us what is wrong.',
-    suggestBtn: 'Have a suggestion?', suggestTitle: 'We would love your suggestion', suggestLead: 'A book you wish we had, or something that would make the guide better. We do not ask for your name.',
+    suggestBtn: 'Have a suggestion?', suggestTitle: 'We would love your suggestion', suggestLead: 'A book you wish we had, or something that would make Manar better. We do not ask for your name.',
     suggestNoteLabel: 'Your suggestion', suggestPlaceholder: 'Write your suggestion…', suggestSent: 'We got your suggestion. Thank you.', needSuggestion: 'Write your suggestion first.',
     noteSend: 'Send', noteSending: 'Sending…', noteCancel: 'Cancel', noteFailed: 'We could not send it right now. Please try again.', noteBusy: 'We received many messages from here. Try again in a little while.',
   }
@@ -165,6 +165,7 @@ function applyLanguage() {
   $('sendBtn').setAttribute('aria-label', t('send'));
   $('trustNote').textContent = t('trust');
   ['backBtn', 'chatBackBtn', 'feedbackBackBtn'].forEach(id => { $(id).textContent = t('back'); });
+  document.querySelectorAll('.brand-home').forEach(button => button.setAttribute('aria-label', t('home')));
   renderContext();
   $('readerLabel').textContent = t('accordingReaders');
   $('languageLabel').textContent = t('language');
@@ -226,9 +227,10 @@ function bookCard(book, index) {
   const initial = [...String(book.title || (currentLanguage === 'ar' ? 'ك' : 'B')).trim()][0] || 'B';
   // an unknown detail is left out, not written as «غير معروف» (Ibrahim, 2026-10-08)
   const pages = book.page_count ? t('pages')(formatNumber(book.page_count)) : '';
-  const stock = stockLabel(book.quantity);
+  // the chat card says «متوفر» without the count, and shows the price (Ibrahim, 2026-10-11)
+  const price = Number(book.price) > 0 ? t('currency')(formatNumber(book.price)) : '';
   const shelf = locationText(book) || t('askStaff');
-  card.innerHTML = `<span class="book-card-copy"><span class="book-title">${escapeHtml(book.title)}</span><span class="book-author">${escapeHtml(book.author)}</span><span class="book-reason">${escapeHtml(book.reason ?? t('closeChoice'))}</span><span class="book-meta"><span class="meta-chip stock-chip">${escapeHtml(t('available'))} · ${escapeHtml(stock)}</span>${pages ? `<span class="meta-chip">${escapeHtml(pages)}</span>` : ''}<span class="meta-chip">${escapeHtml(shelf)}</span></span></span>${book.cover_url ? `<span class="book-token has-cover" aria-hidden="true"><img src="${escapeHtml(book.cover_url)}" alt="" loading="lazy" /></span>` : `<span class="book-token" aria-hidden="true"><span>${escapeHtml(initial)}</span></span>`}`;
+  card.innerHTML = `<span class="book-card-copy"><span class="book-title">${escapeHtml(book.title)}</span><span class="book-author">${escapeHtml(book.author)}</span><span class="book-reason">${escapeHtml(book.reason ?? t('closeChoice'))}</span><span class="book-meta"><span class="meta-chip stock-chip">${escapeHtml(t('available'))}</span>${price ? `<span class="meta-chip price-chip">${escapeHtml(price)}</span>` : ''}${pages ? `<span class="meta-chip">${escapeHtml(pages)}</span>` : ''}<span class="meta-chip">${escapeHtml(shelf)}</span></span></span>${book.cover_url ? `<span class="book-token has-cover" aria-hidden="true"><img src="${escapeHtml(book.cover_url)}" alt="" loading="lazy" /></span>` : `<span class="book-token" aria-hidden="true"><span>${escapeHtml(initial)}</span></span>`}`;
   card.addEventListener('click', () => showBook(book));
   return card;
 }
@@ -236,10 +238,11 @@ function bookCard(book, index) {
 function botMessage(text, books = [], extraClass = '') {
   const wrap = bubble('bot', text, extraClass);
   if (books.length) {
+    // the suggested books come first, then Manar's text and question (Ibrahim, 2026-10-11)
     const list = document.createElement('div');
-    list.className = 'chat-books';
+    list.className = 'chat-books books-first';
     books.forEach((book, index) => list.appendChild(bookCard(book, index)));
-    wrap.appendChild(list);
+    wrap.prepend(list);
   }
   if ($('chatLog').children.length > 1) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
   return wrap;
@@ -329,7 +332,8 @@ async function send(text) {
     typing(false);
     botMessage(data.reply || t('fallbackReply'), books);
     messages.push({ role: 'assistant', content: data.reply || '', book_ids: books.map(book => book.book_id) });
-    setChips(Array.isArray(data.suggestions) && data.suggestions.length ? data.suggestions : t('fallbackChips'));
+    const chips = Array.isArray(data.suggestions) ? data.suggestions : [];
+    setChips(chips.length || !books.length ? chips : t('fallbackChips'));
   } catch (error) {
     if (askedIn !== conversationId) return;
     typing(false);
@@ -624,6 +628,8 @@ function showEvent(e) {
 function backToChat() { showSection('chat'); scrollToEnd(); }
 // Back buttons and the phone's own back gesture walk the same path: feedback → book → chat → start page.
 function goBack() { if (noteMode) closeNote(); closeMore(); history.back(); }
+// the «منار» logo at the top of chat and detail pages goes back to the start page; the conversation is kept (like «رجوع»)
+function goHome() { if (noteMode) closeNote(); closeMore(); showSection('welcome'); }
 function updateFeedbackLocation() {
   if (!selectedBook) return;
   const place = locationText(selectedBook);
@@ -833,6 +839,7 @@ $('chatInput').addEventListener('input', autoGrow);
 // coming back to the start page keeps the conversation; «جديدة» in the chat starts a fresh one
 $('startBtn').addEventListener('click', () => { if (messages.length) { showSection('chat'); scrollToEnd(); } else newChat(); });
 $('chatBackBtn').addEventListener('click', goBack);
+document.querySelectorAll('.brand-home').forEach(button => button.addEventListener('click', goHome));
 $('eventBackBtn').addEventListener('click', goBack);
 $('feedbackBackBtn').addEventListener('click', goBack);
 window.addEventListener('popstate', event => {

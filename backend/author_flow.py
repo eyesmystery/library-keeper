@@ -304,6 +304,24 @@ def _named_before(name, earlier, author_records):
     return False
 
 
+def _spoken_of(proposal, written, earlier, question):
+    """The assistant itself named this author in full earlier in the conversation (not inside a
+    «تقصد …؟» question), and the visitor now writes his family name."""
+    want, said = key(proposal), key(written).split()
+    if len(want.split()) < 2 or not said:
+        return False
+    last = said[-1][1:] if said[-1].startswith('ل') and said[-1][1:] == want.split()[-1] else said[-1]
+    if last != want.split()[-1]:
+        return False
+    for c in earlier:
+        text = c['content']
+        if c['role'] != 'assistant' or text == question or NEAR_RE.match(text) or re.match(r'^(تقصد|Do you mean|Which one do you mean)', text):
+            continue
+        if ' ' + want + ' ' in ' ' + key(text) + ' ' or ' ل' + want + ' ' in ' ' + key(text) + ' ':
+            return True
+    return False
+
+
 def resolve(request, conversation, books, english=False):
     """Return (reply or None, allowed author names or None, direct-works mode)."""
     mode = request.get('mode')
@@ -319,10 +337,12 @@ def resolve(request, conversation, books, english=False):
     # reach the canonical record, whose name is what the catalog shows.
     import authors as author_records
     known_record = False
+    record_keys = set()
     for n in list(raw_names):
         rec = author_records.lookup(n)
         if rec:
             known_record = True
+            record_keys |= {key(x) for x in author_records.names_of(rec)}
             raw_names += [x for x in author_records.names_of(rec) if x not in raw_names]
             full = rec['name_ar']  # the stored canonical name, not the model's spelling
     names = {key(v) for v in raw_names}
@@ -352,6 +372,19 @@ def resolve(request, conversation, books, english=False):
 
     def allowed(d):
         return set(by_display.get(d, {d}))
+
+    # the interpreter gave no name at all («عندكم لرجاء عالم او ليلى الجهني؟» -> name_as_written ""): the
+    # catalog authors written out in full in the visitor's message are the request (QAFIX re-run, case 21)
+    if mode == 'works' and not written:
+        msg = ' ' + key(last_message) + ' '
+        said = [d for d in by_display if len(key(d).split()) >= 2
+                and any(' ' + p + key(d) + ' ' in msg for p in ('', 'ل', 'و', 'ب'))]
+        said = [d for d in said if not any(d != e and key(d) in key(e) for e in said)]
+        if said:
+            written = ' أو '.join(said)
+            request['name_as_written'] = written
+            if len(said) == 1:
+                return None, allowed(said[0]), True
 
     # «لغازي القصيبي أو تركي الحمد»، «نجيب محفوظ وماركيز»: several authors asked for in one message
     # are looked up one by one, never as one name (QA2 2026-10-09, cases 21 and 33). The caller
@@ -428,9 +461,14 @@ def resolve(request, conversation, books, english=False):
     # «ايه اقصد موراكامي» after the visitor wrote «هاروكي موركامي» himself earlier: the full name is
     # already his, no «تقصد …؟» again (QA2 2026-10-09, case 18)
     confirmed = confirmed or bool(proposal and _named_before(proposal, conversation[:-1], author_records))
+    # «وش عندكم لمحفوظ غيرها؟» right after Manar herself spoke of «نجيب محفوظ»: the conversation already
+    # says who is meant, no «تقصد نجيب محفوظ؟» (QAFIX 2026-10-11, case 26)
+    confirmed = confirmed or bool(proposal and _spoken_of(proposal, written, conversation[:-1], question))
     if previous == question and last in NO:
         return ('What is the author’s full name?' if english else 'وش اسم المؤلف كامل؟'), None, mode == 'works'
-    ambiguous = len(key(written).split()) < 2 or (proposal and key(written) != key(proposal) and not exact)
+    ambiguous = len(key(written).split()) < 2 or (proposal and key(written) != key(proposal) and not exact
+                                                   # "Nizar Qabbani" is a stored spelling of «نزار قباني»: no «Do you mean …?» (2026-10-12)
+                                                   and key(written) not in record_keys)
     # «أحب ماركيز، عطني شي بنفس الجو»: for likeness, a name our author records know needs no
     # «تقصد فلان؟» first; a request for his own books still confirms a one-word name (2026-10-07)
     if written and mode in ('similar', 'both') and known_record and len(options) <= 1:

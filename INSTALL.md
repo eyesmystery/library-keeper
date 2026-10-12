@@ -1,4 +1,4 @@
-# تثبيت «ثلاث الذكي» وتشغيله
+# تثبيت «منار» وتشغيله
 
 *English summary for people and AI agents is at the end: [Install in English](#install-in-english).*
 
@@ -149,7 +149,7 @@ cd backend && LIBRARY_KEEPER_HOST=0.0.0.0 ./venv/bin/python app.py
 
 - الاختبارات: `backend/venv/bin/python tests/run_all.py`
 - بناء حزمتي التحميل وملف التحديث من مجلد عمل فيه القاعدة الحية (يكتب في `release/`):
-  `backend/venv/bin/python scripts/make_release.py --version "0.9.8 beta" --no-user --update-from release/<الحزمة الكاملة السابقة>.zip`
+  `backend/venv/bin/python scripts/make_release.py --version "0.9.9 beta" --no-user --update-from release/<الحزمة الكاملة السابقة>.zip`
   الخيار `--update-from` يُكرَّر لكل إصدار سابق قد يكون مثبّتًا في المكتبة.
 - لا ترفع `data/library.db` ولا `backups/` ولا `data/test_logs/` ولا `data/llm_settings.json` ولا أي ملف مفاتيح؛ كلها في `.gitignore`.
 

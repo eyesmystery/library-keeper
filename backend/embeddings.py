@@ -163,6 +163,33 @@ def stale_ids(conn, model=None):
     return sorted(bid for bid, h in rows if now.get(bid) != h)
 
 
+LIKE_THRESHOLD = 0.58   # a whole description (without its title) against our books' texts (calibrated 2026-10-11:
+LIKE_BAND = 0.06       # «اخلع حذاءك» -> books on happiness / self-reflection 0.64-0.67; within this of the best)
+
+
+def similar_to(text, book_ids, top=4, threshold=None):
+    """Books whose stored text is closest in meaning to a whole description (a book we do not have,
+    looked up outside) -> [(book_id, similarity), ...] best first; [] when unavailable."""
+    vecs = load()
+    if not vecs or not text:
+        return []
+    qv = embed([text], timeout=8.0)
+    if not qv:
+        return []
+    q = qv[0]
+    scored = []
+    for i in book_ids:
+        v = vecs.get(i)
+        if v is not None:
+            s = sum(a * b for a, b in zip(q, v))
+            if s >= (LIKE_THRESHOLD if threshold is None else threshold):
+                scored.append((i, round(s, 3)))
+    scored.sort(key=lambda x: -x[1])
+    stale = _drop_changed([i for i, _ in scored[:top * 2]])
+    scored = [x for x in scored if x[0] not in stale]
+    return [x for x in scored if x[1] >= scored[0][1] - LIKE_BAND][:top] if scored else []
+
+
 def search(phrases, book_ids):
     """-> {phrase: [(book_id, similarity), ...] best first} for the books given (only those with a
     vector): at or above THRESHOLD and within BAND of the best one, TOP per phrase. {} when unavailable.

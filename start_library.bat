@@ -1,5 +1,5 @@
 @echo off
-rem Thalath Smart - start the server for the library: this computer and phones on the same Wi-Fi.
+rem Manar - start the server for the library: this computer and phones on the same Wi-Fi.
 chcp 65001 >nul
 setlocal
 set "ROOT=%~dp0"
@@ -19,7 +19,7 @@ rem Backups stay in the backups folder; a second copy goes to OneDrive when this
 if not defined LIBRARY_KEEPER_BACKUP_MIRROR if exist "%USERPROFILE%\OneDrive\" set "LIBRARY_KEEPER_BACKUP_MIRROR=%USERPROFILE%\OneDrive\Thalath Smart Backups"
 "%PYW%" "%ROOT%scripts\backup_db.py" --reason server-start || echo Warning: the backup failed (see backups\backup_log.txt).
 echo.
-echo Thalath Smart - the server is starting.
+echo Manar - the server is starting.
 echo   Admin page on this computer:  http://127.0.0.1:8802/admin
 echo   Visitors' address and QR code: admin page - Settings.
 echo If Windows asks whether Python may communicate on networks, allow it on PRIVATE networks.

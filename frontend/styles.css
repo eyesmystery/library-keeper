@@ -1,4 +1,4 @@
-@font-face{font-family:MarkaziText;src:url('/static/assets/MarkaziText.ttf') format('truetype');font-style:normal;font-weight:400 700;font-display:swap}
+/* Arabic base font: Zain (Ibrahim 2026-10-11; OFL, bundled) */@font-face{font-family:Zain;src:url('/static/assets/Zain-Light.ttf') format('truetype');font-style:normal;font-weight:300;font-display:swap}@font-face{font-family:Zain;src:url('/static/assets/Zain-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}@font-face{font-family:Zain;src:url('/static/assets/Zain-Bold.ttf') format('truetype');font-style:normal;font-weight:700;font-display:swap}@font-face{font-family:Zain;src:url('/static/assets/Zain-ExtraBold.ttf') format('truetype');font-style:normal;font-weight:800;font-display:swap}
 :root{
   color-scheme:light;
   --sage:oklch(82.4% .043 138);
@@ -15,7 +15,7 @@
   --success:oklch(48% .075 145);
   --danger:oklch(50% .13 28);
   --shadow:0 22px 65px oklch(27.5% .058 40 / .12);
-  --font-arabic:MarkaziText,"Geeza Pro",Tahoma,serif;
+  --font-arabic:Zain,"Geeza Pro",Tahoma,serif;
   --font-english:"Proxima Nova","Avenir Next",Avenir,"Helvetica Neue",Arial,sans-serif;
 }
 *{box-sizing:border-box}
@@ -34,14 +34,15 @@ button,textarea{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:t
 .welcome-top{display:flex;min-height:62px;align-items:center;justify-content:flex-end;gap:12px;padding:max(12px,env(safe-area-inset-top)) 22px 0}
 .language-button{min-width:44px;min-height:44px;border:0;background:transparent;color:var(--brown);font-size:15px;font-weight:600}
 .welcome-main{display:flex;min-height:calc(100dvh - 62px);flex:1;flex-direction:column;padding:5px 24px max(24px,env(safe-area-inset-bottom))}
-.brand-signature{width:max-content;max-width:100%;margin:30px 0 58px auto;text-align:right}
+.brand-signature{width:max-content;max-width:100%;margin:4px 0 46px auto;text-align:right}
 .brand-mark{display:block;width:min(210px,56vw);height:auto;aspect-ratio:1144/348;object-fit:contain;object-position:right center}
 .brand-signature p{display:flex;align-items:center;justify-content:flex-start;gap:8px;margin:12px 0 0;color:var(--brown);font-size:19px;font-weight:600;line-height:1.25;letter-spacing:.01em}.brand-signature p:before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--coral)}
-.welcome-copy{max-width:405px}
+.welcome-copy{max-width:405px;margin-bottom:36px}
 .kicker{display:flex;align-items:center;gap:9px;margin:0 0 14px;font-size:18px;font-weight:600}
 .kicker span[aria-hidden]{flex:none;width:9px;height:9px;border-radius:50%;background:var(--coral)}
-.welcome-copy h1{margin:0 0 16px;font-size:clamp(46px,13vw,59px);font-weight:650;line-height:1.02;letter-spacing:-.025em}
-.welcome-copy>p:last-child{max-width:390px;margin:0;color:var(--brown-soft);font-size:21px;line-height:1.55}
+.welcome-copy h1{margin:0 0 16px;font-size:clamp(46px,13vw,59px);font-weight:500;line-height:1.16;letter-spacing:0}
+/* welcome headline in Ruqaa (Ibrahim 2026-10-11: headline only; Aref Ruqaa, SIL OFL official) */@font-face{font-family:Ruqaa;src:url('/static/assets/ArefRuqaa-Regular.ttf') format('truetype');font-weight:400;font-display:swap}html:not([lang="en"]) .welcome-copy h1{margin-bottom:26px;font-family:Ruqaa,var(--font-arabic);font-weight:400;font-synthesis:none;color:var(--brown);line-height:1.3}
+.welcome-copy>p:last-child{max-width:390px;margin:0;color:var(--brown-soft);font-size:18px;line-height:1.6}
 .start-card{margin-top:auto;padding:18px;border:1px solid oklch(27.5% .058 40 / .13);border-radius:25px;background:var(--surface)}
 .start-card>p{margin:0 0 13px;font-size:18px;line-height:1.55}
 .start-button{display:flex;width:100%;min-height:58px;align-items:center;justify-content:space-between;padding:0 18px;border:0;border-radius:17px;background:var(--coral);color:var(--surface);font-size:20px;font-weight:650;box-shadow:0 10px 24px oklch(64.5% .156 32 / .2);transition:background .18s cubic-bezier(.22,1,.36,1),transform .18s cubic-bezier(.22,1,.36,1)}
@@ -53,7 +54,7 @@ button,textarea{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:t
 .chat-screen{display:flex;min-height:100vh;min-height:100dvh;flex-direction:column;background:var(--paper)}
 .app-header{display:grid;min-height:78px;grid-template-columns:1fr auto 1fr;align-items:center;padding:max(10px,env(safe-area-inset-top)) 20px 8px;border-bottom:1px solid var(--line);background:var(--paper)}
 .header-action{min-width:52px;min-height:44px;padding:0;border:0;background:transparent;color:var(--brown);font-size:16px;font-weight:600;text-align:right}
-.header-center{display:grid;justify-items:center;justify-self:center;gap:2px;min-width:0}.header-brand{display:flex;align-items:center;justify-content:center;gap:10px}.header-brand img,.detail-brand img{height:auto;object-fit:contain}.host-mark{width:72px;aspect-ratio:1144/348}.detail-brand{display:flex;align-items:center;justify-content:center;gap:9px;justify-self:center}.model-status{max-width:240px;margin-top:2px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--danger);font-size:11px;font-weight:650;line-height:1.35;text-align:center}.header-language{justify-self:end}
+.header-center{display:grid;justify-items:center;justify-self:center;gap:2px;min-width:0}.header-brand{display:flex;align-items:center;justify-content:center;gap:10px}.header-brand img,.detail-brand img{height:auto;object-fit:contain}.host-mark{width:56px;aspect-ratio:2652/1442}.detail-brand{display:flex;align-items:center;justify-content:center;gap:9px;justify-self:center}.model-status{max-width:240px;margin-top:2px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--danger);font-size:11px;font-weight:650;line-height:1.35;text-align:center}.header-language{justify-self:end}
 .chat-log{display:flex;flex:1;flex-direction:column;gap:14px;padding:24px 20px 14px}
 .msg{max-width:86%;animation:message-in .22s cubic-bezier(.22,1,.36,1) both}
 @keyframes message-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
@@ -94,7 +95,7 @@ button,textarea{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:t
 .stock-note{display:flex;align-items:center;justify-content:center;gap:8px;margin:11px 0 0;color:var(--muted);font-size:13px}.stock-note>span:first-child{width:7px;height:7px;border-radius:50%;background:var(--success)}.stock-note strong{color:var(--success);font-weight:600}.stock-note strong:after{margin-right:8px;color:var(--line);content:"•"}
 
 /* Feedback */
-.feedback-screen{display:flex;min-height:100vh;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:34px 22px;background:var(--sage)}.feedback-language{position:absolute;top:max(12px,env(safe-area-inset-top));inset-inline-end:22px}.feedback-back{position:absolute;top:max(12px,env(safe-area-inset-top));inset-inline-start:22px}.feedback-brand{display:flex;flex-direction:column;align-items:center;margin-bottom:30px}.feedback-host{width:124px;height:auto;aspect-ratio:1144/627;object-fit:contain}.feedback-card{width:100%;padding:30px 22px;border:1px solid oklch(27.5% .058 40 / .13);border-radius:27px;background:var(--surface);text-align:center;box-shadow:var(--shadow)}.success-mark{display:grid;width:64px;height:64px;margin:0 auto 17px;place-items:center;border-radius:50%;background:var(--sage);color:var(--success)}.feedback-card h2{margin:0 0 7px;font-size:31px;font-weight:650}.feedback-card>p{margin:0 auto 24px;color:var(--muted);font-size:16px;line-height:1.55}.feedback-question{margin-bottom:11px!important;color:var(--brown)!important;font-weight:600}.feedback-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.feedback-button{min-height:47px;padding:8px;border:1px solid var(--line);border-radius:13px;background:var(--paper);font-size:14px;font-weight:600}.feedback-button:hover{border-color:var(--sage-deep);background:var(--sage)}
+.feedback-screen{display:flex;min-height:100vh;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:34px 22px;background:var(--sage)}.feedback-language{position:absolute;top:max(12px,env(safe-area-inset-top));inset-inline-end:22px}.feedback-back{position:absolute;top:max(12px,env(safe-area-inset-top));inset-inline-start:22px}.feedback-brand{display:flex;flex-direction:column;align-items:center;margin-bottom:30px}.feedback-host{width:110px;height:auto;aspect-ratio:2652/1442;object-fit:contain}.feedback-card{width:100%;padding:30px 22px;border:1px solid oklch(27.5% .058 40 / .13);border-radius:27px;background:var(--surface);text-align:center;box-shadow:var(--shadow)}.success-mark{display:grid;width:64px;height:64px;margin:0 auto 17px;place-items:center;border-radius:50%;background:var(--sage);color:var(--success)}.feedback-card h2{margin:0 0 7px;font-size:31px;font-weight:650}.feedback-card>p{margin:0 auto 24px;color:var(--muted);font-size:16px;line-height:1.55}.feedback-question{margin-bottom:11px!important;color:var(--brown)!important;font-weight:600}.feedback-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.feedback-button{min-height:47px;padding:8px;border:1px solid var(--line);border-radius:13px;background:var(--paper);font-size:14px;font-weight:600}.feedback-button:hover{border-color:var(--sage-deep);background:var(--sage)}
 .toast{position:fixed;right:20px;bottom:max(20px,env(safe-area-inset-bottom));left:20px;z-index:20;width:min(calc(100% - 40px),440px);margin-inline:auto;padding:13px 16px;border-radius:14px;background:var(--brown);color:var(--surface);box-shadow:var(--shadow);font-size:15px;text-align:center;animation:message-in .22s cubic-bezier(.22,1,.36,1)}
 
 :focus-visible{outline:3px solid oklch(64.5% .156 32 / .55);outline-offset:3px}
@@ -118,7 +119,7 @@ html[lang="en"] .book-card-copy{grid-column:2;grid-row:1}
 html[lang="en"] .meta-chip{font-family:var(--font-english)}
 html[lang="en"] .feedback-language{right:auto;left:22px}
 html[lang="en"] .stock-note strong:after{margin-right:0;margin-left:8px}
-@media(max-width:360px){.welcome-main{padding-inline:18px}.brand-signature{margin-top:22px;margin-bottom:48px}.welcome-copy h1{font-size:45px}.feedback-actions{grid-template-columns:1fr}.book-card{grid-template-columns:minmax(0,1fr) 68px;padding:12px}.book-token{width:68px;height:95px}}
+@media(max-width:360px){.welcome-main{padding-inline:18px}.brand-signature{margin-top:0;margin-bottom:38px}.welcome-copy h1{font-size:45px}.feedback-actions{grid-template-columns:1fr}.book-card{grid-template-columns:minmax(0,1fr) 68px;padding:12px}.book-token{width:68px;height:95px}}
 @media(min-width:600px){body{padding:28px}.app-shell{min-height:calc(100vh - 56px);border:1px solid oklch(27.5% .058 40 / .12);border-radius:34px;box-shadow:var(--shadow)}.welcome-screen,.chat-screen,.detail-screen,.feedback-screen{min-height:calc(100vh - 56px)}.welcome-main{min-height:calc(100dvh - 118px)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
@@ -130,8 +131,10 @@ html[lang="en"] .stock-note strong:after{margin-right:0;margin-left:8px}
 
 /* Guide lockup: the Thalath logo with the guide label beneath it (the old product mark was removed on 2026-10-05, a new name is not chosen yet); fixed bilingual artwork, same in both UI languages */
 .guide-lockup{display:grid;direction:rtl;justify-items:end;gap:8px}
-/* «ثلاث الذكي» lockup (2026-10-05): one SVG (assets/thalath-smart.svg) — the Thalath logo with the «الذكي» tag under its left end, the tag drawn as outlines so size and position never change; Arabic artwork in both UI languages until an English form is chosen */
-.guide-lockup .brand-mark{width:min(168px,45vw);aspect-ratio:1144/627;flex:none}
+/* «منار» logo (2026-10-11, Ibrahim's design v5: assets/manar-logo.svg, traced from his PNG, 2652×1442; v4 (1910×657) kept as manar-logo-v4.svg, v3 as manar-logo-v3.svg). Before: «ثلاث الذكي» lockup (2026-10-05): one SVG (assets/thalath-smart.svg) — the Thalath logo with the «الذكي» tag under its left end, the tag drawn as outlines so size and position never change; Arabic artwork in both UI languages until an English form is chosen */
+.guide-lockup .brand-mark{width:min(150px,40vw);aspect-ratio:2652/1442;flex:none}
+/* Thalath logo in coral under the left end of the «منار» logo (Ibrahim 2026-10-10): the brown PNG used as a mask so the colour follows --coral. */
+.guide-lockup .host-under{display:block;width:min(76px,20vw);aspect-ratio:1144/348;transform:translateX(-32px);background:var(--coral);-webkit-mask:url("/static/assets/thalath-logo-brown.png") center/contain no-repeat;mask:url("/static/assets/thalath-logo-brown.png") center/contain no-repeat}
 html[lang="en"] .guide-lockup .brand-mark{object-position:right center}
 
 /* Report a mistake / send a suggestion (2026-10-03): quiet text buttons + one bottom sheet */
@@ -166,15 +169,15 @@ body{padding:0}
 .welcome-screen,.chat-screen,.detail-screen,.feedback-screen{min-height:100vh;min-height:100dvh}
 .welcome-top{width:min(100%,780px);margin-inline:auto;padding-inline:40px}
 .welcome-main{width:min(100%,780px);min-height:calc(100dvh - 62px);margin-inline:auto;padding:5px 40px max(40px,env(safe-area-inset-bottom))}
-.brand-signature{margin:36px 0 64px auto}
-.guide-lockup .brand-mark{width:220px}
-.welcome-copy{max-width:640px}.welcome-copy h1{font-size:78px}.welcome-copy>p:last-child{max-width:580px;font-size:25px}
+.brand-signature{margin:8px 0 56px auto}
+.guide-lockup .brand-mark{width:175px}
+.welcome-copy{max-width:640px;margin-bottom:48px}.welcome-copy h1{font-size:78px}html:not([lang="en"]) .welcome-copy h1{margin-bottom:34px}.welcome-copy>p:last-child{max-width:580px;font-size:21px}
 html[lang="en"] .welcome-copy h1{font-size:68px}html[lang="en"] .welcome-copy>p:last-child{font-size:22px}
 .start-card{padding:24px}.start-card>p{font-size:20px}.start-button{min-height:66px;padding:0 24px;font-size:22px}
 html[lang="en"] .start-card>p{font-size:18px}html[lang="en"] .start-button{font-size:20px}
 .welcome-steps{margin-top:22px;font-size:16px}
 .app-header{min-height:84px;padding-inline:max(28px,calc((100% - 820px)/2))}
-.host-mark{width:88px}
+.host-mark{width:68px}
 .header-action,.detail-back,.language-button{font-size:17px}
 .chat-log{gap:16px;padding:30px max(28px,calc((100% - 820px)/2)) 18px}
 .msg{max-width:72%}.msg-bot{max-width:100%}.msg-bot .msg-text{max-width:72%}.msg-text{font-size:19px}
@@ -187,7 +190,7 @@ html[lang="en"] .start-card>p{font-size:18px}html[lang="en"] .start-button{font-
 .detail-head{min-height:340px;padding-inline:max(28px,calc((100% - 820px)/2))}
 .detail-body{width:min(100%,820px);margin-inline:auto;padding:32px 28px max(36px,env(safe-area-inset-bottom))}
 .detail-body h2{font-size:40px}.detail-author{font-size:20px}.detail-summary,.detail-reason{font-size:19px}.trait-line{font-size:17px}.trait-line strong{font-size:18px}
-.feedback-card{width:min(100%,540px);padding:38px 34px}.feedback-host{width:150px}
+.feedback-card{width:min(100%,540px);padding:38px 34px}.feedback-host{width:130px}
 .note-sheet{width:min(100%,580px);bottom:40px;border-radius:26px}
 }
 
@@ -252,3 +255,10 @@ html[lang="en"] .start-card>p{font-size:18px}html[lang="en"] .start-button{font-
 .more-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .more-close{flex:none;min-height:40px}
 .more-list{display:grid;gap:10px;margin-top:10px}
+
+/* «منار» logo in the headers is a button back to the start page (2026-10-11, Ibrahim) */
+.brand-home{appearance:none;-webkit-appearance:none;background:none;border:0;margin:0;padding:4px 6px;border-radius:12px;color:inherit;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}.brand-home:active{opacity:.7}
+/* suggested books above Manar's text; price on the chat card instead of the copy count (2026-10-11) */
+.msg-bot .chat-books.books-first{margin-top:0;margin-bottom:11px}
+.price-chip{color:var(--brown);font-weight:650}
+@media(min-width:700px){.msg-bot .chat-books.books-first{margin-top:0;margin-bottom:14px}}

@@ -65,7 +65,7 @@ def summary():
                             row = json.loads(raw)
                         except ValueError:
                             continue
-                        if row.get("kind") == "turn":
+                        if isinstance(row, dict) and row.get("kind") == "turn":
                             turns += 1
                             conversations.add(row.get("conversation_id"))
             except OSError:

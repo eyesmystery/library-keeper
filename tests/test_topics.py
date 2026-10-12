@@ -78,6 +78,11 @@ ok(calls[-2]["kind"] == "interpret" and calls[-2]["max_tokens"] >= 2500, "the in
 
 script["interpret"] = {"intent": "clarify", "preferences": prefs(), "mentioned_titles": [], "wants_new_options": False}
 r = say([{"role": "user", "content": "عطني أي شي حلو"}])
+ok(not [x for x in facts_of(calls[-1]) if "اقتراح للبداية" in x["why_it_matches"]] and r["books"] == [],
+   "an open first request is asked about before any book (Ibrahim 2026-10-11)")
+r = say([{"role": "user", "content": "عطني أي شي حلو"}, {"role": "assistant", "content": "سؤال؟", "book_ids": []},
+         {"role": "user", "content": "ما أدري"}, {"role": "assistant", "content": "سؤال؟", "book_ids": []},
+         {"role": "user", "content": "أي شي"}])
 f = facts_of(calls[-1])
 starters = [x for x in f if "اقتراح للبداية" in x["why_it_matches"]]
 if starters:   # the test catalog has researched cards with a pleasant mood
@@ -86,7 +91,7 @@ if starters:   # the test catalog has researched cards with a pleasant mood
     genres = [con.execute("select genre from books where book_id=?", (x["id"],)).fetchone()[0] for x in starters]
     ok(len(set(genres)) == len(genres), "each from a different category")
 else:
-    ok("اسأل سؤالًا واحدًا" in calls[-1]["system"], "no researched pleasant book in the test catalog: the model only asks")
+    ok("اقترح الآن" in calls[-1]["system"], "no researched pleasant book in the test catalog: after two questions the model is told to recommend")
 
 script["interpret"] = {"intent": "about_book", "preferences": prefs(), "mentioned_titles": ["كتاب لا وجود له إطلاقا"], "wants_new_options": False}
 r = say([{"role": "user", "content": "عندكم كتاب لا وجود له إطلاقا؟"}])

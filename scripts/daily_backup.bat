@@ -1,5 +1,5 @@
 @echo off
-rem Thalath Smart - daily backup run by the scheduled task (03:15). Same mirror folder as the start file.
+rem Manar - daily backup run by the scheduled task (03:15). Same mirror folder as the start file.
 setlocal
 set "ROOT=%~dp0..\"
 set "PYTHONUTF8=1"

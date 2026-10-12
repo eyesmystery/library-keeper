@@ -1,7 +1,7 @@
 """Look authors up on Wikidata and add sourced facts to `authors` (docs/author-profile-proposal.md).
 
 Run on the Mac (needs internet):
-  python3 scripts/lookup_authors_wikidata.py fetch <db_path> <out_dir> [--status thin,needs_sources] [--limit N] [--delay 0.4]
+  python3 scripts/lookup_authors_wikidata.py fetch <db_path> <out_dir> [--status thin,needs_sources] [--ids 1,2] [--limit N] [--delay 0.4]
   python3 scripts/lookup_authors_wikidata.py apply <db_path> <out_dir>/results.json [--apply]
 
 fetch  searches Wikidata (Arabic and Latin names), keeps humans only, scores each candidate
@@ -85,10 +85,13 @@ def _label(ent, pref=("ar", "en")):
     return next((v["value"] for v in ent.get("labels", {}).values()), None)
 
 
-def fetch(db, out_dir, statuses, limit, delay):
+def fetch(db, out_dir, statuses, limit, delay, ids=None):
     con = sqlite3.connect(f"file:{db}?mode=ro", uri=True); con.row_factory = sqlite3.Row
-    rows = con.execute(f"SELECT * FROM authors WHERE research_status IN ({','.join('?' * len(statuses))}) ORDER BY author_id",
-                       statuses).fetchall()
+    if ids:  # --ids 12,34: these authors only, whatever their status (poets batch 2026-10-12)
+        rows = con.execute(f"SELECT * FROM authors WHERE author_id IN ({','.join('?' * len(ids))}) ORDER BY author_id", sorted(ids)).fetchall()
+    else:
+        rows = con.execute(f"SELECT * FROM authors WHERE research_status IN ({','.join('?' * len(statuses))}) ORDER BY author_id",
+                           statuses).fetchall()
     titles = {}
     for r in con.execute("SELECT ba.author_id, b.title FROM book_authors ba JOIN books b USING(book_id)"):
         titles.setdefault(r[0], []).append(r[1])
@@ -276,7 +279,8 @@ if __name__ == "__main__":
     if cmd == "fetch":
         args = sys.argv[4:]
         opt = lambda k, d: args[args.index(k) + 1] if k in args else d
-        fetch(sys.argv[2], sys.argv[3], opt("--status", "thin,needs_sources").split(","), int(opt("--limit", 0)), float(opt("--delay", 1.2)))
+        fetch(sys.argv[2], sys.argv[3], opt("--status", "thin,needs_sources").split(","), int(opt("--limit", 0)), float(opt("--delay", 1.2)),
+              {int(x) for x in opt("--ids", "").split(",") if x})
     elif cmd == "review":  # review <out_dir> --pick 196=Q123,341=Q456 --reject 88,152 --no-origin 83
         args = sys.argv[3:]
         opt = lambda k: args[args.index(k) + 1] if k in args else ""

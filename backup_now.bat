@@ -1,5 +1,5 @@
 @echo off
-rem Thalath Smart - make a database backup now (safe while the server is running).
+rem Manar - make a database backup now (safe while the server is running).
 chcp 65001 >nul
 setlocal
 set "ROOT=%~dp0"

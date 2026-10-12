@@ -72,6 +72,14 @@ c.post(f"/api/admin/books/{b2}/confirmation", json={"choice": "none", "comment":
 pk = m.get("/api/admin/confirmations").get_json()
 a2 = next(a for a in pk["answers"] if a["book_id"] == b2)
 ok(pk["format"] == "book-confirmations-1" and pk["count"] == 1 and a2["comment"].endswith("كاتب جديد") and a2["book"]["title"], "manager export carries the open answers with the book fields")
+import inbox_export
+md9, cnt9 = inbox_export.build("open", "manager")
+blk = md9.split("## 9. ")[1] if "## 9. " in md9 else ""
+js9 = json.loads(blk.split("```json\n")[1].split("\n```")[0]) if "```json" in blk else {}
+ok(cnt9["confirmations"] == 1 and "ردود الموظفين على تأكيد هوية الكتب (1)" in md9 and f"({b2})" in blk and "كاتب جديد" in blk
+   and js9.get("format") == "book-confirmations-1" and js9["answers"][0]["book_id"] == b2 and js9["answers"][0]["book"]["title"]
+   and "confirmation-corrections-1" in blk, "the inbox file carries the open answers in section 9, with the full package for Claude")
+ok(inbox_export.build("done", "manager")[1]["confirmations"] == 1, "«تمت معالجتها» export lists the handled answer only")
 bk = a2["book"]
 def pkg(**kw):
     item = {"book_id": b2, "confirmation_id": a2["confirmation_id"],
@@ -126,5 +134,8 @@ ok(c.post(f"/api/admin/books/{b1}/confirmation", json={"choice": ["x"]}).status_
 ok(con.execute("select count(*) from authors where name_ar='كاتب جديد'").fetchone()[0] == 1, "people records follow the corrected author")
 ok(m.get("/api/admin/confirmations").get_json()["count"] == 0 and post(pkg(expect={"title": bk["title"], "author": "كاتب جديد", "research_status": "matched"}), True).status_code == 400, "the answer is closed and cannot be applied twice")
 ok(c.post("/api/admin/confirmations/corrections", json={"package": pkg()}).status_code == 403, "staff cannot apply corrections")
-ok('id="cxCopy"' in html and 'id="cxApply"' in html and "/api/admin/confirmations/corrections" in html, "import tab has the copy / download / preview / apply panel")
+ok('id="cxCopy"' not in html and 'id="cxDownload"' not in html and 'id="cxApply"' in html and "/api/admin/confirmations/corrections" in html
+   and html.index('id="cxFold"') > html.index('id="inboxView"') and html.index('id="cxFold"') < html.index('id="eventsView"')
+   and "if (which === 'inbox') { loadInbox(); if (ME && ME.role === 'manager') loadConfirmCount(); }" in html
+   and "$('cxFold').hidden = !manager;" in html and 'id="cxFold" hidden>' in html, "the apply-corrections fold sits on the inbox page; the copy / download step is gone")
 print(f"TOTAL PASS={P} FAIL={F}")
