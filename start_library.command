@@ -17,4 +17,5 @@ echo "  عنوان الزوار ورمز QR: صفحة الإدارة ← الإ�
 echo "اترك هذه النافذة مفتوحة والجهاز مستيقظًا. للإيقاف: Ctrl+C أو أغلق النافذة."
 echo ""
 ( sleep 4; open "http://127.0.0.1:8802/admin" ) &
-cd "$ROOT/backend" && LIBRARY_KEEPER_HOST=0.0.0.0 exec caffeinate -i ./venv/bin/python app.py
+# run_server.py keeps the server running and installs an update the manager approved (AUTOUPD, 2026-10-16)
+cd "$ROOT" && LIBRARY_KEEPER_HOST=0.0.0.0 exec caffeinate -i "$ROOT/backend/venv/bin/python" "$ROOT/scripts/run_server.py"

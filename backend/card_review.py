@@ -106,6 +106,14 @@ def recompute_card(conn, book_id):
                 seen.add(r["attribute_value"])
                 values.append(r["attribute_value"])
         card[attr] = values if attr == "sensitive_content" else values[:3]
+    # Q-MGR-9 (2026-10-18): the shelf genre is the approved format. With no format evidence left the
+    # profile keeps its format, and genres follow the format as the importers write them ([format]),
+    # instead of being wiped to None / [] by a staff confirm or an import.
+    cur = conn.execute("SELECT format FROM book_profiles WHERE book_id = ?", (book_id,)).fetchone()
+    if card["format"] == "unknown" and cur and cur[0]:
+        card["format"] = cur[0]
+    if not card["genres"]:
+        card["genres"] = [card["format"]] if card["format"] != "unknown" else []
     # "none" only stands when no real warning survives
     if len(card["sensitive_content"]) > 1:
         card["sensitive_content"] = [v for v in card["sensitive_content"] if v != "none"]

@@ -259,6 +259,35 @@ problems = cs.compare(src, built)[1]
 src.close(); built.close()
 ok(problems == ["book_adaptations: same number of rows, different content"], "snapshot: same counts but a changed row is caught too")
 ok(cs.main("export") == 0 and cs.main("verify") == 0, "snapshot: export again -> verify passes")
+# AUDFIX 2026-10-15 (audit 2026-10-14 P3): what every server start writes again (relation ids and dates, authors'
+# updated_at) is reported apart; a real difference in a relation is still a DIFF, and --strict compares every column
+con = db()
+con.execute("insert into book_relations (source_book_id, target_book_id, relation_type, reason_ar, confidence, source, created_at) "
+            "values (?, ?, 'similar', 'سبب اختبار', 0.7, 'staff', '2026-10-14T12:00:00+00:00')", (b2, b3))
+con.commit(); con.close()
+ok(cs.main("export") == 0 and cs.main("verify") == 0, "snapshot: export with a relation -> verify passes")
+con = db()
+con.execute("update book_relations set relation_id = relation_id + 100000, created_at = '2026-10-15T00:00:00+00:00' where reason_ar = 'سبب اختبار'")
+con.execute("update authors set updated_at = '2026-10-15T00:00:00+00:00' where author_id = ?", (aid,))
+con.commit(); con.close()
+src, built = sqlite3.connect(DBP), cs.rebuild(snap := open(cs.SNAP, encoding="utf-8").read())
+lines, problems = cs.compare(src, built)
+strict_problems = cs.compare(src, built, strict=True)[1]
+src.close(); built.close()
+ok(not problems and any(l.startswith("book_relations:") and "relation_id/created_at differ" in l for l in lines)
+   and any(l.startswith("authors:") and "updated_at differ" in l for l in lines),
+   "snapshot: a new relation id and dates, and a new authors.updated_at, are reported apart, not as a content difference")
+ok(cs.main("verify") == 0 and cs.main("verify", strict=True) == 1 and len(strict_problems) == 2,
+   "snapshot: verify passes on them; verify --strict still fails on the two tables")
+con = db(); con.execute("update book_relations set reason_ar = 'سبب آخر' where reason_ar = 'سبب اختبار'"); con.commit(); con.close()
+src, built = sqlite3.connect(DBP), cs.rebuild(snap)
+problems = cs.compare(src, built)[1]
+src.close(); built.close()
+ok(cs.main("verify") == 1 and problems and problems[0].startswith("book_relations: 1 rows only in the database and 1 only in the snapshot")
+   and any("سبب آخر" in p for p in problems) and any("سبب اختبار" in p for p in problems),
+   "snapshot: a changed relation reason is a DIFF that shows both versions")
+con = db(); con.execute("delete from book_relations where reason_ar = 'سبب آخر'"); con.commit(); con.close()
+ok(cs.main("export") == 0 and cs.main("verify") == 0, "snapshot: export again -> verify passes (relations)")
 keep = DBP + ".kept-by-test"
 os.replace(DBP, keep)
 try:
@@ -343,6 +372,18 @@ if shutil.which("git") and os.path.isdir(os.path.join(REAL_ROOT, ".git")):
     ok(len(ref) == 7 and all(c in "0123456789abcdef" for c in ref), "release: in the project the commit is the short Git hash")
 ok(abs((mr.riyadh_now().replace(tzinfo=None) - datetime.datetime.utcnow()).total_seconds() - 3 * 3600) < 5, "release: the build time is Riyadh time (UTC+3)")
 ok(not os.path.exists(os.path.join(REAL_ROOT, "release", "_stage")), "no release was built by this test")
+
+# Codex audit 2026-10-15 evening (P2): a build must not start from a snapshot older than the database
+_gdb = os.path.join(TMP_ROOT, "data", "gate.db"); _gsnap = os.path.join(TMP_ROOT, "data", "gate.sql")
+_s = sqlite3.connect(os.path.join(TMP_ROOT, "data", "library.db")); _d = sqlite3.connect(_gdb); _s.backup(_d); _s.close(); _d.close()
+ok(mr.snapshot_gate(_gdb, _gsnap) and "no catalog snapshot" in mr.snapshot_gate(_gdb, _gsnap), "release gate: no snapshot file stops the build")
+_c = sqlite3.connect(f"file:{_gdb}?mode=ro", uri=True); open(_gsnap, "w", encoding="utf-8").write(cs.dump(_c)); _c.close()
+ok(mr.snapshot_gate(_gdb, _gsnap) is None, "release gate: a snapshot that matches the database lets the build go on")
+_c = sqlite3.connect(_gdb); _c.execute("UPDATE books SET title = title || ' *' WHERE book_id = (SELECT MIN(book_id) FROM books)"); _c.commit(); _c.close()
+_why = mr.snapshot_gate(_gdb, _gsnap)
+ok(_why and "older than the database" in _why and "catalog_snapshot.py export" in _why, "release gate: a change after the export stops the build and says what to run")
+ok("--allow-stale-snapshot" in open(mr.__file__, encoding="utf-8").read(), "release gate: can be passed over on purpose")
+os.remove(_gdb); os.remove(_gsnap)
 
 # =====================================================================================================
 # 5-6. Visitor page: static checks (the measured checks run in a real browser, see ui_check.py)

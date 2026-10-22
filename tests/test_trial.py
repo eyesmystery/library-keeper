@@ -10,7 +10,7 @@ def ok(cond, msg):
     print(("PASS " if cond else "FAIL ") + msg); P += bool(cond); F += (not cond)
 
 ok(A.app.test_client().get("/api/admin/trial").status_code == 401, "trial info needs sign-in")
-ok(login(A.app.test_client(), "staff").get("/api/admin/trial").status_code == 403, "trial info is manager-only")
+ok(login(A.app.test_client(), "staff").get("/api/admin/trial").status_code == 200, "trial info: staff may open it (settings, 2026-10-13)")
 m = login(A.app.test_client())
 d = m.get("/api/admin/trial").get_json()
 ok(d["mode"] == "local" and d["reachable"] is False, "default server (this computer only) is reported as not reachable by phones")

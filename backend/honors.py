@@ -25,6 +25,8 @@ AWARDS = {   # key -> Arabic name shown to staff and visitors
     "pulitzer": "جائزة بوليتزر",
     "goncourt": "جائزة غونكور",
     "hugo": "جائزة هوغو",
+    "nebula": "جائزة نيبولا",
+    "locus": "جائزة لوكَس",
     "other": "جائزة أخرى",
 }
 RESULTS = {"winner": "فائز", "shortlist": "القائمة القصيرة", "longlist": "القائمة الطويلة", "nominated": "مرشّح"}
@@ -113,6 +115,18 @@ def load(max_age=60):
             data["author"].setdefault(r["author_id"], []).append(dict(r))
         for r in conn.execute("SELECT * FROM book_adaptations ORDER BY year"):
             data["adapt"].setdefault(r["book_id"], []).append(dict(r))
+        # Where the novel comes from, for «رواية تحولت لفيلم عربي / أجنبي / هوليوودي» (Ibrahim 2026-10-16 23:3x: «بلد
+        # الرواية اهم من بلد الفلم»): its authors' countries, else its original language. Only books with an adaptation.
+        data["novel"] = {}
+        if data["adapt"]:
+            ids = list(data["adapt"])
+            q = ",".join("?" * len(ids))
+            for r in conn.execute(f"SELECT book_id, original_language FROM books WHERE book_id IN ({q})", ids):
+                data["novel"][r["book_id"]] = {"lang": (r["original_language"] or "").strip().lower(), "countries": []}
+            for r in conn.execute(f"SELECT ba.book_id, au.origin FROM book_authors ba JOIN authors au ON au.author_id = ba.author_id "
+                                  f"WHERE ba.role = 'author' AND ba.book_id IN ({q})", ids):
+                if (r["origin"] or "").strip() and r["book_id"] in data["novel"]:
+                    data["novel"][r["book_id"]]["countries"].append(r["origin"].strip())
         if data["author"]:
             for r in conn.execute("SELECT book_id, author_id FROM book_authors WHERE role='author'"):
                 if r["author_id"] in data["author"]:
@@ -191,7 +205,7 @@ def _in_years(r, year=None, min_year=None, max_year=None):
             and (not max_year or (y is not None and y <= max_year)))
 
 
-def matches_award(book_id, keys, year=None, min_year=None, max_year=None):
+def matches_award(book_id, keys, year=None, min_year=None, max_year=None, results=None):
     """Reasons («فاز بـ…»، «وصل إلى القائمة القصيرة لـ…») that make this book answer the prize wish;
     empty = it does not, winners first. keys: award keys, or ["any"]: «حائزة على جائزة» means a prize
     actually won (by the book or by its author), so lists and nominations count only for a NAMED prize;
@@ -201,11 +215,16 @@ def matches_award(book_id, keys, year=None, min_year=None, max_year=None):
     want_any = "any" in keys
     rows = []
     for r in d["book"].get(book_id, []):
-        if _wanted(r, keys, want_any) and _in_years(r, year, min_year, max_year):
+        if _wanted(r, keys, want_any) and _in_years(r, year, min_year, max_year) and (not results or r["result"] in results):
             rows.append((r["result"] != "winner", reason_label(r)))
+    if results and results != ["winner"]:
+        # «القائمة القصيرة للبوكر» is about the book's own result, never its author's prize (QAD 2026-10-15, case 29)
+        return [label for _, label in sorted(rows, key=lambda x: x[0])]
     for aid in d["book_authors"].get(book_id, []):
         for r in d["author"].get(aid, []):
-            if _wanted(r, keys, want_any) and _in_years(r, year, min_year, max_year):
+            # «كاتبة فازت بنوبل»: «فاز» is the person's own win too; only the author's wins count then
+            # (QAD 2026-10-18, case 24: Nobel is an author_awards prize, «فاز» had left it out)
+            if _wanted(r, keys, want_any) and _in_years(r, year, min_year, max_year) and (not results or r["result"] in results):
                 rows.append((True, reason_label(r, True)))
     return [label for _, label in sorted(rows, key=lambda x: x[0])]
 
@@ -262,10 +281,72 @@ def name_exists(phrase):
     return any(_wanted(r, k, False) for rows in list(d["book"].values()) + list(d["author"].values()) for r in rows)
 
 
-def matches_adaptation(book_id, kind):
-    """kind: film / series / screen (any of the two) -> labels of the matching adaptations."""
-    kinds = {"film": ("film", "animated", "tv_film"), "series": ("series",), "screen": SCREEN}.get(kind, ())
-    return [adaptation_label(r) for r in load()["adapt"].get(book_id, []) if r["kind"] in kinds]
+# Countries of the Arab League in Arabic and English (AUDFIX, audit 2026-10-16 P2: السودان and البحرين were missing
+# from the partial list, so their films counted as foreign)
+_ARAB_COUNTRY = re.compile(
+    r"مصر|سوري|لبنان|عراق|سعودي|السعوديه|السعودية|كويت|اردن|أردن|فلسطين|تونس|مغرب|جزائر|ليبيا|سودان|بحرين|قطر|امارات|إمارات"
+    r"|عمان|عُمان|يمن|موريتانيا|صومال|جيبوتي|جزر القمر"
+    r"|egypt|syria|leban|iraq|saudi|kuwait|\bjordan|palestin|tunisia|morocc|algeria|libya|sudan|bahrain|qatar|emirates|\buae\b"
+    r"|\boman\b|yemen|mauritania|somalia|djibouti|comoros", re.I)
+_US_COUNTRY = re.compile(r"الولايات المتحد|أمريكا|امريكا|أميركا|اميركا|united states|\busa?\b|\bu\.s\.", re.I)
+
+
+def adaptation_origin(r):
+    """-> "arab" / "foreign" from the adaptation's recorded country, None when no country is recorded. The letters
+    of its title or the list it came from do not tell where a film was made (AUDFIX, audit 2026-10-16 P2: «هيبتا»
+    2016 and «بنت اسمها ذات» 2013, Egyptian works, came from the world lists and read as foreign)."""
+    country = str(r.get("country") or "").strip()
+    if not country:
+        return None
+    return "arab" if _ARAB_COUNTRY.search(country) else "foreign"
+
+
+def _adapt_origin_ok(r, origin):
+    """origin: "american" («فيلم هوليوودي / أمريكي»), "foreign" («فيلم أجنبي») or "arab" («فيلم عربي / مصري»)
+    (QADFIX4, QAD 2026-10-16 case 31.1). Only a recorded country answers it: an adaptation with no country does not
+    meet an origin wish, and Hollywood is a US production, not any foreign one (AUDFIX, audit 2026-10-16 P2)."""
+    if not origin:
+        return True
+    country = str(r.get("country") or "").strip()
+    if not country:
+        return False
+    if origin == "american":
+        return bool(_US_COUNTRY.search(country))
+    return adaptation_origin(r) == origin
+
+
+def novel_origins(book_id):
+    """-> set of "arab" / "foreign" / "american" for the novel itself: its authors' recorded countries (an Arab
+    country -> arab; the US -> american + foreign; any other -> foreign), else its original language (ar -> arab,
+    any other -> foreign). Empty when nothing is recorded (Ibrahim 2026-10-16 23:3x: «بلد الرواية اهم من بلد الفلم»)."""
+    n = load().get("novel", {}).get(book_id)
+    if not n:
+        return set()
+    out = set()
+    for c in n["countries"]:
+        if _ARAB_COUNTRY.search(c):
+            out.add("arab")
+        else:
+            out.add("foreign")
+            if _US_COUNTRY.search(c):
+                out.add("american")
+    if not out and n["lang"]:
+        out.add("arab" if n["lang"] == "ar" else "foreign")
+    return out
+
+
+def matches_adaptation(book_id, kind, max_year=None, origin=None):
+    """kind: film / series / screen (any of the two) -> labels of the matching adaptations.
+    max_year: only adaptations made that year or before («فيلم قديم»، «أبيض وأسود», QAD 2026-10-15, case 34).
+    origin: "american" / "foreign" / "arab" (QADFIX4; country only, AUDFIX 2026-10-16). The novel's own origin comes
+    first (Ibrahim 2026-10-16 23:3x: «بلد الرواية اهم من بلد الفلم»): when the novel is from there, every adaptation of
+    the kind counts; otherwise an adaptation whose recorded country is from there. A novel with several films matches
+    when any of them does."""
+    kinds = {"film": ("film", "animated", "tv_film"), "series": ("series",), "screen": SCREEN, "animated": ("animated",)}.get(kind, ())
+    novel_ok = bool(origin) and origin in novel_origins(book_id)
+    return [adaptation_label(r) for r in load()["adapt"].get(book_id, [])
+            if r["kind"] in kinds and (not max_year or (_int_year(r.get("year")) or 9999) <= max_year)
+            and (novel_ok or _adapt_origin_ok(r, origin))]
 
 
 def _clean_url(v):
@@ -382,7 +463,7 @@ AWARDS_EN = {"ipaf": "International Prize for Arabic Fiction (Arabic Booker)", "
              "intl_booker": "International Booker Prize", "nobel": "Nobel Prize in Literature",
              "zayed": "Sheikh Zayed Book Award", "katara": "Katara Prize for Arabic Novel",
              "mahfouz": "Naguib Mahfouz Medal for Literature", "sharjah": "Sharjah Award for Arab Creativity",
-             "pulitzer": "Pulitzer Prize", "goncourt": "Prix Goncourt", "hugo": "Hugo Award", "other": "another prize"}
+             "pulitzer": "Pulitzer Prize", "goncourt": "Prix Goncourt", "hugo": "Hugo Award", "nebula": "Nebula Award", "locus": "Locus Award", "other": "another prize"}
 _EN_VERBS = [("مؤلفه فاز ب", "Its author won "), ("فازت ترجمته ب", "Its translation won "), ("فاز ب", "Won "),
              ("وصل إلى القائمة القصيرة لل", "Shortlisted for ال"), ("وصل إلى القائمة القصيرة ل", "Shortlisted for "),
              ("وصل إلى القائمة الطويلة لل", "Longlisted for ال"), ("وصل إلى القائمة الطويلة ل", "Longlisted for "),

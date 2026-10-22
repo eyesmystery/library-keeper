@@ -231,7 +231,7 @@ def goodreads_page(goodreads_id=None, isbn=None, title=None, timeout=12.0):
     if not m:
         return None
     st = json.loads(m.group(1))["props"]["pageProps"].get("apolloState") or {}
-    out = {"reviews": [], "sources": []}
+    out = {"sources": []}
     for k, v in st.items():
         if k.startswith("Book:") and v.get("title") and "title" not in out:
             out["title"] = v.get("title")
@@ -292,7 +292,7 @@ def _save(key, asked, info, status):
         for f, v in (info or {}).items():
             if f in ("sources",):
                 merged[f] = list(dict.fromkeys((old.get(f) or []) + list(v or [])))
-            elif f in ("genres", "subjects", "reviews"):
+            elif f in ("genres", "subjects"):
                 if v:
                     merged[f] = v
             elif v not in (None, "", []) and f in ("title", "author", "year", "publisher", "language", "pages", "description",
@@ -314,7 +314,9 @@ def _save(key, asked, info, status):
                       merged.get("title"), merged.get("author"), merged.get("year"), merged.get("publisher"), merged.get("language"),
                       merged.get("pages"), json.dumps(merged.get("genres") or [], ensure_ascii=False),
                       json.dumps(merged.get("subjects") or [], ensure_ascii=False), merged.get("description"), merged.get("rating"),
-                      merged.get("ratings_count"), json.dumps(merged.get("reviews") or [], ensure_ascii=False), merged.get("isbn"),
+                      # reader-review text is never stored, whatever a source hands over; a row that held some
+                      # from before 2026-10-12 is emptied the next time it is written (AGENTS.md; audit 2026-10-12 #6)
+                      merged.get("ratings_count"), "[]", merged.get("isbn"),
                       merged.get("wikidata"), merged.get("goodreads_id"), json.dumps(merged.get("sources") or [], ensure_ascii=False),
                       old.get("times_asked") or 0, merged.get("looked_at") if status == "keep" else _now(),
                       _now() if info and info.get("_enriched") else old.get("enriched_at"), merged.get("blurb")))
@@ -430,7 +432,7 @@ def _enrich_waiting(key, title, row, left):
 
 
 def enrich_later(key):
-    """Goodreads description / genres / rating / reviews, after the answer (one at a time). -> the thread or None."""
+    """Goodreads description / genres / rating (no review text), after the answer (one at a time). -> the thread or None."""
     with _lock:
         if key in _busy or not _up("goodreads"):
             return None
@@ -465,12 +467,13 @@ def enrich(key):
     same = gr and (same_title(row.get("title") or row["asked_title"], gr.get("title") or "")
                    or same_title(row["asked_title"], gr.get("title") or ""))
     if same and by_title and row.get("author") and gr.get("author"):
-        # found by title alone: the author must be the same person too (one shared name word is enough
-        # between an Arabic and an Arabic spelling; a Latin page author is accepted only by its family name)
-        a, b = set(norm(row["author"]).split()) - {"عبد", "ال", "بن"}, set(norm(gr["author"]).split())
-        # between an Arabic and a Latin spelling the page author must be one of the Latin forms we hold for
-        # that person (a Latin name alone proved nothing: «الأرض» of الشرقاوي took Steinbeck's blurb, audit 2026-10-12 #1)
-        same = bool(a & b) or same_person(row["author"], gr["author"])
+        # found by title alone: the author must be the same person too. Between an Arabic and a Latin spelling
+        # the page author must be one of the Latin forms we hold for that person (a Latin name alone proved
+        # nothing: «الأرض» of الشرقاوي took Steinbeck's blurb, audit 2026-10-12 #1). Between two spellings in
+        # the same script the whole name must agree, or both must be names of one record in our authors table:
+        # one shared word is not enough («أحمد خالد توفيق» took a page by «أحمد مراد», audit 2026-10-12 evening #2).
+        # A doubtful page is left aside (status «keep», nothing of it stored).
+        same = same_author(row["author"], gr["author"])
     if not same:
         _save(key, row["asked_title"], {"_enriched": True}, "keep")
         return False
@@ -523,6 +526,67 @@ def same_person(name_a, name_b):
         if any(_family(x) == fam for x in [name_latin] + al if isinstance(x, str) and _LATIN.search(x)):
             return True
     return False
+
+
+_NAME_DROP = {"د", "دكتور", "الدكتور", "دكتوره", "الدكتوره", "الشيخ", "شيخ", "بن", "بنت", "dr", "al", "el", "bin", "the"}
+
+
+def _name_words(name):
+    """The words of a person's name for comparing two spellings in the same script: accents, hamza seats
+    and titles («د.») left out; «عبد الرحمن» = «عبدالرحمن», «أبو», «ابن» joined to the next word; a leading
+    «ال» of a long word dropped («الشرقاوي» = «شرقاوي»); Latin in lower case without «al-»."""
+    import unicodedata
+    t = unicodedata.normalize("NFKD", str(name or ""))
+    t = norm("".join(c for c in t if not unicodedata.combining(c)))
+    t = re.sub(r"(?:^| )(عبد|ابو|ابي|ابن|abd|abu|ibn) (?=\S)", lambda m: " " + m.group(1), t)
+    words = [w for w in t.split() if w not in _NAME_DROP]
+    return [w[2:] if w.startswith("ال") and len(w) >= 5 else w for w in words]
+
+
+def _same_name(name_a, name_b):
+    """Two spellings in the same script: the same words (spaces aside), or the shorter name (two words at
+    least) inside the longer one with the same first and last word («عبد الرحمن منيف» / «عبد الرحمن بن
+    إبراهيم منيف»). «أحمد خالد توفيق» / «أحمد مراد» or «أحمد خالد» share words but are not the same name."""
+    wa, wb = _name_words(name_a), _name_words(name_b)
+    if not wa or not wb:
+        return False
+    if "".join(wa) == "".join(wb):
+        return True
+    short, long_ = sorted((wa, wb), key=len)
+    return len(short) >= 2 and set(short) <= set(long_) and short[0] == long_[0] and short[-1] == long_[-1]
+
+
+def _same_record(name_a, name_b):
+    """Both names belong to one record of our authors table (its Arabic name, Latin name or an alias)."""
+    ka, kb = "".join(_name_words(name_a)), "".join(_name_words(name_b))
+    if not ka or not kb:
+        return False
+    conn = get_connection()
+    try:
+        rows = conn.execute("SELECT name_ar, name_latin, aliases FROM authors").fetchall()
+    except Exception:  # noqa: BLE001
+        return False
+    finally:
+        conn.close()
+    for name_ar, name_latin, aliases in rows:
+        try:
+            al = json.loads(aliases or "[]") if str(aliases or "").startswith("[") else []
+        except ValueError:
+            al = []
+        keys = {"".join(_name_words(x)) for x in [name_ar, name_latin] + list(al) if isinstance(x, str) and x.strip()}
+        if ka in keys and kb in keys:
+            return True
+    return False
+
+
+def same_author(name_a, name_b):
+    """Whether a page's author is our author: an Arabic and a Latin spelling through same_person, two spellings
+    in one script by the whole name or one record of our authors table (audit 2026-10-12 evening #2)."""
+    if not (name_a or "").strip() or not (name_b or "").strip():
+        return False
+    if bool(_LATIN.search(name_a)) != bool(_LATIN.search(name_b)):
+        return same_person(name_a, name_b)
+    return _same_name(name_a, name_b) or _same_record(name_a, name_b)
 
 
 def brief(row, language="ar"):

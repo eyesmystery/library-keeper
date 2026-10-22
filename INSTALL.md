@@ -86,12 +86,14 @@ gh release download --repo eyesmystery/library-keeper --pattern "*windows.zip"
 
 ## ٨. التحديث إلى إصدار جديد (بدون فقد تعديلاتكم)
 
-الحزمة الكاملة تستبدل كل شيء، فلا تُستعمل لتحديث تطبيق يعمل. للتحديث ملف خاص في صفحة الإصدارات اسمه `ThalathSmart-update-….zip` (نحو 85 ميغابايت، واحد للنظامين):
+الحزمة الكاملة تستبدل كل شيء، فلا تُستعمل لتحديث تطبيق يعمل. للتحديث ملف خاص في صفحة الإصدارات اسمه `ThalathSmart-update-….zip` (نحو 175 ميغابايت، واحد للنظامين):
 
 1. أغلق نافذة السيرفر.
 2. فك الملف، وانقل المجلد الناتج (`ThalathSmart-update-…`) إلى **داخل** مجلد التطبيق، بجانب `start_library`.
 3. انقر مرتين على `install_update.bat` (ويندوز) أو `install_update.command` (ماك؛ أول مرة: زر أيمن ثم «فتح»).
 4. انتظر علامة ✓ ثم شغّل التطبيق من `start_library` كالعادة.
+
+**من الإصدار 0.9.10:** بعد تثبيته بهذه الطريقة مرة واحدة، تصل التحديثات القادمة إلى صفحة الإدارة في «التنبيهات» ← «تحديثات منار». يضغط المدير «موافقة وتحديث» فيُنزَّل التحديث ويُفحص توقيعه ويُثبَّت بنفس الطريقة، ثم يعود التطبيق للعمل وحده. الطريقة اليدوية أعلاه تبقى متاحة دائمًا.
 
 ماذا يفعل التحديث:
 
@@ -149,7 +151,7 @@ cd backend && LIBRARY_KEEPER_HOST=0.0.0.0 ./venv/bin/python app.py
 
 - الاختبارات: `backend/venv/bin/python tests/run_all.py`
 - بناء حزمتي التحميل وملف التحديث من مجلد عمل فيه القاعدة الحية (يكتب في `release/`):
-  `backend/venv/bin/python scripts/make_release.py --version "0.9.9 beta" --no-user --update-from release/<الحزمة الكاملة السابقة>.zip`
+  `backend/venv/bin/python scripts/make_release.py --version "0.9.10 beta" --no-user --update-from release/<الحزمة الكاملة السابقة>.zip`
   الخيار `--update-from` يُكرَّر لكل إصدار سابق قد يكون مثبّتًا في المكتبة.
 - لا ترفع `data/library.db` ولا `backups/` ولا `data/test_logs/` ولا `data/llm_settings.json` ولا أي ملف مفاتيح؛ كلها في `.gitignore`.
 

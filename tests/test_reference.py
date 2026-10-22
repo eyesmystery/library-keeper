@@ -142,7 +142,7 @@ near_cat = [{"author": a, "active": 1, "quantity": nq} for a, nq in [
 nreq = dict(name_as_written="جمال العقاد", full_name="", aliases=[], mode="works")
 nconv = [{"role": "user", "content": "في كتب لجمال العقاد"}]
 nq, names, direct = author_flow.resolve(dict(nreq), nconv, near_cat)
-ok(nq == "ما عندنا مؤلف باسم جمال العقاد، تقصد «عباس محمود العقاد»؟" and names is None, "unknown name sharing a family name: visitor is asked, nothing shown")
+ok(nq == "ما عندنا كتب لـجمال العقاد الآن، تقصد «عباس محمود العقاد»؟" and names is None, "unknown name sharing a family name: visitor is asked, nothing shown")
 r, names, direct = author_flow.resolve(dict(nreq), nconv + [{"role": "assistant", "content": nq}, {"role": "user", "content": "ايه"}], near_cat)
 ok(r is None and names == {"عباس محمود العقاد"} and direct, "confirmed near name resolves to the catalog author")
 r, names, direct = author_flow.resolve(dict(nreq), nconv + [{"role": "assistant", "content": nq}, {"role": "user", "content": "لا"}], near_cat)
@@ -158,10 +158,10 @@ for unknown, why in [("سعد العتيق", "a similar but different family nam
 r, names, _ = author_flow.resolve(dict(nreq, name_as_written="سالم علوان حسن"), [{"role": "user", "content": "كتب"}], near_cat)
 ok(r is None, "a family name that is only someone's middle name suggests nobody")
 gq, _, _ = author_flow.resolve(dict(nreq, name_as_written="ريم الغامدي"), [{"role": "user", "content": "كتب ريم الغامدي"}], near_cat)
-ok(gq == "ما عندنا مؤلف باسم ريم الغامدي، تقصد مين: «خالد الغامدي»، «سارة الغامدي»، «نورة الغامدي» ولا «هند الغامدي»؟", "up to five people with the family name are listed, available books first")
+ok(gq == "ما عندنا كتب لـريم الغامدي الآن، تقصد مين: «خالد الغامدي»، «سارة الغامدي»، «نورة الغامدي» ولا «هند الغامدي»؟", "up to five people with the family name are listed, available books first")
 many_cat = near_cat + [{"author": n + " الغامدي", "active": 1, "quantity": 1} for n in ("ماجد", "ليلى")]
 mq, mnames, _ = author_flow.resolve(dict(nreq, name_as_written="ريم الغامدي"), [{"role": "user", "content": "كتب ريم الغامدي"}], many_cat)
-ok(mq == "ما عندنا مؤلف باسم ريم الغامدي، وعندنا أكثر من مؤلف بنفس اللقب. وش اسم المؤلف اللي تقصده كامل؟" and mnames is None, "more than five people with the family name: asked for the full name, no list")
+ok(mq == "ما عندنا كتب لـريم الغامدي الآن، وعندنا أكثر من مؤلف بنفس اللقب. وش اسم المؤلف اللي تقصده كامل؟" and mnames is None, "more than five people with the family name: asked for the full name, no list")
 r, names, _ = author_flow.resolve(dict(nreq, name_as_written="ريم الغامدي"), [{"role": "user", "content": "كتب ريم الغامدي"}, {"role": "assistant", "content": mq}, {"role": "user", "content": "ريم الغامدي"}], many_cat)
 ok(r is None and names == set(), "the full-name question is asked once, then the usual no-such-author answer")
 joint_cat = [{"author": a, "active": 1, "quantity": 1} for a in ["ويندي براون", "طلال أسد، جوديث بتلر، ويندي براون، صبا محمود", "دان براون", "مايكل براون"]]
@@ -170,7 +170,7 @@ ok(jq == "تقصد مين: «دان براون»، «مايكل براون» و�
 r, names, _ = author_flow.resolve(dict(nreq, name_as_written="براون"), [{"role": "user", "content": "ابغى كتاب لبراون"}, {"role": "assistant", "content": jq}, {"role": "user", "content": "ويندي"}], joint_cat)
 ok(names == {"ويندي براون", "طلال أسد، جوديث بتلر، ويندي براون، صبا محمود"}, "the chosen author's co-authored book counts as hers")
 q2, _, _ = author_flow.resolve(dict(nreq, name_as_written="كريس براون"), [{"role": "user", "content": "كتب كريس براون"}], near_cat)
-ok(q2 == "ما عندنا مؤلف باسم كريس براون، تقصد «دان براون» ولا «بيتر براون»؟", "several near authors: available books first, at most three")
+ok(q2 == "ما عندنا كتب لـكريس براون الآن، تقصد «دان براون» ولا «بيتر براون»؟", "several near authors: available books first, at most three")
 r, names, _ = author_flow.resolve(dict(nreq, name_as_written="كريس براون"), [{"role": "user", "content": "كتب كريس براون"}, {"role": "assistant", "content": q2}, {"role": "user", "content": "الثاني"}], near_cat)
 ok(names == {"بيتر براون"}, "choice between near authors selects only that one")
 ok(author_flow.resolve(isa_req, isa_conv + [{"role": "assistant", "content": q}, {"role": "user", "content": "لا"}], isa)[0] == "وش اسم المؤلف كامل؟",

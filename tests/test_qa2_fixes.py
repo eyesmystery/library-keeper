@@ -126,9 +126,10 @@ if fosse:
 # ---- 7. comics for a 13-year-old: only those with a fitting researched age
 comic = con.execute("select book_id from books where genre='قصص مصورة' and age_min is not null and age_min<=13 and (age_max is null or age_max>=12) and quantity>0 and active=1 limit 1").fetchone()
 b = dict(con.execute("select * from books limit 1").fetchone(), genre="قصص مصورة")
-ok(not A.age_allowed(None, "young_adult", (), dict(b, age_min=None, age_max=None), 13), "a comic with no known age is not offered to a teen")
-ok(A.age_allowed(None, "young_adult", (), dict(b, age_min=12, age_max=None), 13)
-   and not A.age_allowed(None, "young_adult", (), dict(b, age_min=16, age_max=None), 13), "a comic is offered when its age range fits")
+ok(not A.age_allowed(None, "children", (), dict(b, age_min=None, age_max=None), 9), "a comic with no known age is not offered to a child")
+ok(A.age_allowed(None, "young_adult", (), dict(b, age_min=None, age_max=None), 13), "QADFIX12 #7: a teenager gets it (the reply warns about adult content)")
+ok(A.age_allowed(None, "children", (), dict(b, age_min=8, age_max=None), 9)
+   and not A.age_allowed(None, "children", (), dict(b, age_min=16, age_max=None), 9), "a comic is offered to a child when its age range fits")
 interp({"audience": "young_adult", "genres": ["قصص مصورة"]})
 out = say("بنتي ١٣ سنة وتحب القصص المصورة والمانجا", "تمام", "عندكم قصص مصورة؟")
 ok("للطفل ولا للكبار" not in out["reply"], "no «للطفل ولا للكبار» when the kind was asked for the child")

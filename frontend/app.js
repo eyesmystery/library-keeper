@@ -35,6 +35,7 @@ const COPY = {
     moreCount: n => `المتوفر الآن: ${n}`, moreNone: 'ما عندنا كتاب ثاني متوفر الآن.', moreLoading: 'لحظة…',
     moreFailed: 'تعذر التحميل، حاول مرة ثانية.', moreClose: 'إغلاق',
     authorAria: name => `كتب ${name} الثانية`, publisherAria: name => `كتب ثانية من ${name}`,
+    picksTitle: 'اختياراتنا هذا الشهر', picksAria: (title, author) => `اختيارنا هذا الشهر: ${title}${author ? '، ' + author : ''}`,
     eventsTitle: 'فعالياتنا', eventKicker: 'فعالية في مكتبة ثلاث', eventBook: 'عن كتاب', eventToday: 'اليوم', eventTomorrow: 'بكرة',
     eventsAria: title => `تفاصيل الفعالية: ${title}`, yearLabel: 'سنة النشر',
     addCalendar: 'أضف إلى التقويم', addGoogle: 'أو في تقويم Google', calendarPlace: 'مكتبة ثلاث',
@@ -81,6 +82,7 @@ const COPY = {
     moreCount: n => `Available now: ${n}`, moreNone: 'We have no other book available right now.', moreLoading: 'One moment…',
     moreFailed: 'Could not load, please try again.', moreClose: 'Close',
     authorAria: name => `Other books by ${name}`, publisherAria: name => `Other books from ${name}`,
+    picksTitle: 'Our picks this month', picksAria: (title, author) => `Our pick this month: ${title}${author ? ', ' + author : ''}`,
     eventsTitle: 'Our events', eventKicker: 'An event at Thalath', eventBook: 'About the book', eventToday: 'Today', eventTomorrow: 'Tomorrow',
     eventsAria: title => `Event details: ${title}`, yearLabel: 'Published',
     addCalendar: 'Add to calendar', addGoogle: 'or to Google Calendar', calendarPlace: 'Thalath Bookshop',
@@ -152,6 +154,8 @@ function applyLanguage() {
   $('eCalendarIcs').textContent = t('addCalendar');
   $('eCalendarGoogle').textContent = t('addGoogle');
   $('eventBackBtn').textContent = t('back');
+  $('picksTitle').textContent = t('picksTitle');
+  loadPicks();
   loadEvents();
   document.querySelectorAll('.social-link').forEach(link => { link.setAttribute('aria-label', `${t('followOn')} ${t('networks')[link.dataset.network]}`); });
   $('newChatBtn').textContent = t('newChat');
@@ -391,6 +395,8 @@ function showBook(book) {
   $('dInitial').textContent = [...String(book.title || (currentLanguage === 'ar' ? 'ك' : 'B')).trim()][0] || 'B';
   $('dGenre').textContent = currentLanguage === 'en' ? (GENRES_EN[book.genre] || book.genre || t('book')) : (book.genre || t('book'));
   $('dTraits').textContent = t('closeChoice');
+  // a book opened from «اختياراتنا هذا الشهر» was not matched to anything the visitor described (2026-10-14)
+  $('dTraits').parentElement.hidden = !!book.fromPicks;
   $('dPrice').textContent = book.price ? t('currency')(formatNumber(book.price)) : '';
   $('dStock').parentElement.classList.toggle('no-price', !book.price);
   $('dStock').textContent = stockLabel(book.quantity, true);
@@ -429,7 +435,7 @@ function renderContext() {
     remove.className = 'context-clear';
     remove.textContent = '✕';
     remove.setAttribute('aria-label', t('contextRemove')(item.label));
-    remove.addEventListener('click', () => removeContext(item));
+    remove.dataset.key = item.key;   // removed through the click handler on #contextChips below
     chip.append(text, remove);
     box.appendChild(chip);
   });
@@ -444,6 +450,27 @@ function removeContext(item) {
   showToast(t('contextRemoved')(item.label));
   setChips([t('showNow')]);
 }
+// Which pill a ✕ tap removes is decided by where the finger really was, read from the current layout,
+// not by the element the browser's touch adjustment delivered the click to: in Chromium a tap 5px inside
+// one ✕ near the next row reached the ✕ above it and removed the wrong pill (daily audit 2026-10-12 #2).
+// A tap whose point is on no ✕ target (a pill's words, the gap between rows) removes nothing.
+// Keyboard and screen-reader clicks without a pointer (detail 0) use their own button.
+let contextDown = null;
+document.addEventListener('pointerdown', event => {
+  if ($('contextBar').hidden) return;
+  const under = document.elementFromPoint(event.clientX, event.clientY);
+  const button = under && under.closest('.context-clear');
+  contextDown = { key: button && $('contextChips').contains(button) ? button.dataset.key : null, at: event.timeStamp };
+}, true);
+$('contextChips').addEventListener('click', event => {
+  const button = event.target.closest('.context-clear');
+  if (!button) return;
+  let key = button.dataset.key;
+  if (event.detail !== 0 && contextDown && event.timeStamp - contextDown.at < 2000) key = contextDown.key;
+  contextDown = null;
+  const item = contextItems.find(x => x.key === key);
+  if (item) removeContext(item);
+});
 
 // ---------------- other books by the author / from the publisher, in a sheet over the book page
 let moreOpen = false;
@@ -524,6 +551,38 @@ document.addEventListener('keydown', event => {
   else if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 });
+
+// ---------------- «اختياراتنا هذا الشهر» (Ibrahim, 2026-10-14): five books staff approved in the admin, on the
+// start page under the welcome. Each shows its cover, title, author and a short line; tapping opens the book page.
+let picksSeq = 0;
+async function loadPicks() {
+  const seq = ++picksSeq;
+  try {
+    const response = await fetch(`${API}/picks?lang=${currentLanguage}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (seq !== picksSeq) return;
+    renderPicks(Array.isArray(data.books) ? data.books : []);
+  } catch (error) { if (seq === picksSeq) renderPicks([]); }
+}
+function renderPicks(list) {
+  const row = $('picksRow');
+  row.replaceChildren();
+  list.forEach(book => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'pick-card';
+    card.setAttribute('aria-label', t('picksAria')(book.title, book.author));
+    const initial = [...String(book.title || 'ك').trim()][0] || 'ك';
+    const cover = book.cover_url
+      ? `<img src="${escapeHtml(book.cover_url)}" alt="" loading="lazy" />`
+      : `<span class="pick-cover-mark" aria-hidden="true">${escapeHtml(initial)}</span>`;
+    card.innerHTML = `<span class="pick-cover">${cover}</span><span class="pick-text"><strong dir="auto">${escapeHtml(book.title)}</strong><span class="pick-author" dir="auto">${escapeHtml(book.author || '')}</span>${book.line ? `<span class="pick-line" dir="auto">${escapeHtml(book.line)}</span>` : ''}</span>`;
+    card.addEventListener('click', () => showBook(Object.assign({}, book, { reason: book.line || '', fromPicks: true })));
+    row.appendChild(card);
+  });
+  $('picksBox').hidden = list.length === 0;
+}
 
 // ---------------- «فعالياتنا» (2026-10-08): upcoming library events on the start page; staff add
 // them in the admin. Tapping one opens its page; an event about a book links to the book.

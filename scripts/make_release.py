@@ -54,9 +54,28 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "release")
 
 BACKEND_SKIP = {"venv", "venv-win", "__pycache__"}
-SCRIPTS = ["backup_db.py", "restore_db.py", "confirmations.py", "ensure_venv.sh", "ensure_venv.bat", "build_embeddings.py"]
+SCRIPTS = ["backup_db.py", "restore_db.py", "confirmations.py", "ensure_venv.sh", "ensure_venv.bat", "build_embeddings.py",
+           # AUTOUPD (2026-10-16): the start files run run_server.py, which installs an approved update by auto_update.py
+           "run_server.py", "auto_update.py"]
+CHANNEL_DIR = os.path.expanduser("~/.library_keeper/channel")
+
+
+def channel_settings():
+    """data/channel.json for the library (AUTOUPD): where the signed channel lives, and the read-only token when the
+    repository is private (saved on Ibrahim's Mac by `scripts/channel_publish.py token`; never in git)."""
+    out = {"repo": "eyesmystery/library-keeper", "tag": "manar-channel", "enabled": True}
+    try:
+        with open(os.path.join(CHANNEL_DIR, "read_token"), encoding="utf-8") as f:
+            tok = f.read().strip()
+        if tok:
+            out["token"] = tok
+    except OSError:
+        pass
+    return json.dumps(out, ensure_ascii=False, indent=1) + "\n"
 EMPTY_TABLES = ["audit_log", "feedback", "book_choices", "book_daily", "usage_daily", "visitor_notes",
-                "book_confirmations", "open_questions", "staff_notes", "staff_ideas"]
+                "book_confirmations", "open_questions", "staff_notes", "staff_ideas",
+                # «اختياراتنا هذا الشهر» (PICKS 2026-10-14): the library approves its own picks; rows made on the Mac are tries
+                "monthly_picks", "monthly_pick_months"]
 
 # ---------------------------------------------------------------- start files (Windows)
 WIN_START = r"""@echo off
@@ -87,12 +106,10 @@ echo If Windows asks whether Python may communicate on networks, allow it on PRI
 echo Keep this window open and this computer awake. To stop the server: close this window.
 echo.
 start "" /min cmd /c "timeout /t 6 /nobreak >nul & start "" http://127.0.0.1:8802/admin"
-cd /d "%ROOT%backend"
 set "LIBRARY_KEEPER_HOST=0.0.0.0"
-"%PYW%" app.py
-echo.
-echo The server stopped. If this was not expected, read the lines above.
-pause
+rem run_server.py keeps the server running and installs an update the manager approved (AUTOUPD). One line, so that
+rem an update replacing this file while it runs cannot make Windows read the rest of the new file.
+"%PYW%" "%ROOT%scripts\run_server.py" & echo. & echo The server stopped. If this was not expected, read the lines above. & pause & exit /b
 """
 
 WIN_LOCAL = r"""@echo off
@@ -180,7 +197,8 @@ echo "  عنوان الزوار ورمز QR: صفحة الإدارة ← الإ�
 echo "اترك هذه النافذة مفتوحة والجهاز مستيقظًا. للإيقاف: Ctrl+C أو أغلق النافذة."
 echo ""
 ( sleep 4; open "http://127.0.0.1:8802/admin" ) &
-cd "$ROOT/backend" && LIBRARY_KEEPER_HOST=0.0.0.0 exec caffeinate -i ./venv/bin/python app.py
+# run_server.py keeps the server running and installs an update the manager approved (AUTOUPD, 2026-10-16)
+cd "$ROOT" && LIBRARY_KEEPER_HOST=0.0.0.0 exec caffeinate -i "$ROOT/backend/venv/bin/python" "$ROOT/scripts/run_server.py"
 """
 
 MAC_LOCAL = r"""#!/bin/zsh
@@ -362,6 +380,7 @@ def build_update(stage, version, info, counts, from_zips, zip_path, test_log="ke
     os.makedirs(os.path.join(up, "covers"))
     for name in sorted(need):
         shutil.copy2(os.path.join(covers_dir, name), os.path.join(up, "covers", name))
+    write(os.path.join(up, "channel.json"), channel_settings())   # AUTOUPD: copied into data/ by apply_channel
     write(os.path.join(up, "install_update.bat"), WIN_UPDATE, crlf=True)
     write(os.path.join(up, "install_update.command"), MAC_UPDATE, executable=True)
     write(os.path.join(up, "README-UPDATE-AR.html"), update_guide(version, counts, len(need), from_versions))
@@ -584,6 +603,7 @@ def build_common(stage, version, keep_user, model, info=None):
     write(os.path.join(stage, "data", "llm_settings.json"),
           json.dumps({"provider": "ollama", "model": model, "test_log": False}, ensure_ascii=False, indent=1) + "\n")
     write(os.path.join(stage, "VERSION"), version + "\n")
+    write(os.path.join(stage, "data", "channel.json"), channel_settings())
     return counts
 
 
@@ -661,6 +681,26 @@ def build_info(version, when, ref, dirty):
             "uncommitted_code_changes": bool(dirty)}
 
 
+def snapshot_gate(db=None, snap=None):
+    """-> None when data/catalog_snapshot.sql holds the live catalog, else why not (AUDFIX, Codex audit
+    2026-10-15 evening: the snapshot was exported at 21:23, REV imported 65 cards at 21:34, and a build
+    from it would not have carried them). Same test as `catalog_snapshot.py check`; read only."""
+    import catalog_snapshot as cs
+    db, snap = db or cs.DB, snap or cs.SNAP
+    if not os.path.exists(snap):
+        return f"release stopped: no catalog snapshot ({os.path.relpath(snap, ROOT)})"
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        same = cs.dump(con) == open(snap, encoding="utf-8").read()
+    finally:
+        con.close()
+    if same:
+        return None
+    return ("release stopped: the catalog snapshot is older than the database (an import or a server start came after "
+            "the last export). Run: backend/venv/bin/python scripts/catalog_snapshot.py export, then verify, commit it, "
+            "and build again (or pass --allow-stale-snapshot)")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--version", required=True, help='for example "0.9 beta"')
@@ -672,7 +712,13 @@ def main():
     ap.add_argument("--test-log", choices=("keep", "on", "off"), default="keep",
                     help="update package: turn «وضع الاختبار» on/off at the library (default: keep their setting)")
     ap.add_argument("--model", default=None, help="Ollama model written to data/llm_settings.json (default: the current one)")
+    ap.add_argument("--allow-stale-snapshot", action="store_true",
+                    help="build even when data/catalog_snapshot.sql does not match the database")
     args = ap.parse_args()
+    if not args.allow_stale_snapshot:
+        why = snapshot_gate()
+        if why:
+            raise SystemExit(why)
     model = args.model
     if not model:
         with open(os.path.join(ROOT, "data", "llm_settings.json"), encoding="utf-8") as f:

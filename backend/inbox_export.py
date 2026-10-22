@@ -87,6 +87,11 @@ ACTION_AR = {
     "author.award.add": "إضافة جائزة لمؤلف", "author.award.delete": "حذف جائزة مؤلف",
     "event.add": "إضافة فعالية", "event.update": "تعديل فعالية", "event.delete": "حذف فعالية",
     "sections.set": "تعديل أقسام المكتبة",
+    # «اختياراتنا هذا الشهر» (PICKS, 2026-10-14)
+    "picks.set": "اختياراتنا: وضع كتاب في خانة", "picks.pin": "اختياراتنا: تثبيت / فك تثبيت خانة",
+    "picks.clear": "اختياراتنا: تفريغ خانة", "picks.move": "اختياراتنا: تغيير الترتيب",
+    "picks.refresh": "اختياراتنا: تحديث الاقتراح التلقائي", "picks.approve": "اختياراتنا: اعتماد الشهر",
+    "picks.unapprove": "اختياراتنا: إلغاء اعتماد الشهر",
     "confirmations.corrections": "تطبيق تصحيحات الهوية",
 }
 ATTR_AR = {"format": "النوع", "age_suitability": "العمر المناسب", "moods": "المزاج", "pace": "الإيقاع",
@@ -453,6 +458,21 @@ def build(status="open", generated_by=None):
         out += ["> **لـ Claude:** هذه الردود كاملة (مع بيانات الكتاب الحالية والمرشّح الذي اختاره الموظف). "
                 "صحّح منها ما هو واضح وأرجع ملف تصحيحات بصيغة `confirmation-corrections-1` يطبّقه الموظفون من صفحة البلاغات.", "",
                 "```json", json.dumps({**cx, "answers": answers, "count": len(answers)}, ensure_ascii=False, indent=1), "```", ""]
-    counts = {"confirmations": len(answers), "test_conversations": len(convs) + convs_left, "reports": len(reports), "suggestions": len(suggestions), "questions": len(questions), "edits": len(edits),
+    # «ملاحظات من المطور» (QADFIX4, Ibrahim 2026-10-16): what staff did with each developer note
+    try:
+        import dev_notes
+        dnotes = [n for n in dev_notes.list_rows("all") if status == "all" or n.get("status") == status
+                  or (status == "open" and n.get("status") == "done" and n.get("handled_at"))]
+    except Exception:  # never break the export over this section
+        dnotes = []
+    out += [f"## 10. ملاحظات من المطور ({len(dnotes)})", ""]
+    if not dnotes:
+        out += ["لا يوجد.", ""]
+    for i, n in enumerate(dnotes, 1):
+        out += [f"### 10.{i} {_md(n.get('title'))} ({_md(n.get('ref'))})",
+                f"- الحالة: {STATUS_AR.get(n.get('status'), n.get('status'))}"
+                + (f" — {_md(n.get('handled_by')) or '—'} · {_when(n.get('handled_at'))}" if n.get("status") == "done" else "")
+                + (f" · تعليق الموظف: {_md(n.get('handled_note'))}" if n.get("handled_note") else ""), ""]
+    counts = {"dev_notes": len(dnotes), "confirmations": len(answers), "test_conversations": len(convs) + convs_left, "reports": len(reports), "suggestions": len(suggestions), "questions": len(questions), "edits": len(edits),
               "staff_changes": len(changes), "imports": len(imports), "ideas": len(ideas)}
     return "\n".join(out).rstrip() + "\n", counts

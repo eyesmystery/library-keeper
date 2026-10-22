@@ -1002,6 +1002,35 @@ def apply_settings(app, upd, notes, say=print):
         return {}
 
 
+def apply_channel(app, upd, notes):
+    """data/channel.json from the update (AUTOUPD: where to look for updates, and the read-only token when the
+    repository is private). The library's own file is replaced only by one that carries the same or more keys;
+    a failure here is a note, never a rollback."""
+    src = os.path.join(upd, "channel.json")
+    if not os.path.exists(src):
+        return False
+    try:
+        with open(src, encoding="utf-8") as f:
+            new = json.load(f)
+        target = os.path.join(app, "data", "channel.json")
+        cur = {}
+        if os.path.exists(target):
+            with open(target, encoding="utf-8") as f:
+                cur = json.load(f)
+        if cur.get("token") and not new.get("token"):
+            new["token"] = cur["token"]
+        merged = dict(cur, **new)
+        tmp = target + ".updating"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(merged, f, ensure_ascii=False, indent=1)
+            f.write("\n")
+        os.replace(tmp, target)
+        return True
+    except (OSError, ValueError) as e:
+        notes.append(f"channel settings were not changed: {e}")
+        return False
+
+
 def apply(app, upd, dry_run=False, port=PORT, say=print):
     app, upd = os.path.abspath(app), os.path.abspath(upd)
     db = os.path.join(app, "data", "library.db")
@@ -1080,6 +1109,7 @@ def apply(app, upd, dry_run=False, port=PORT, say=print):
                     pass
     if not dry_run:
         rep["settings"] = apply_settings(app, upd, rep["notes"], say)
+        rep["channel"] = apply_channel(app, upd, rep["notes"])
     # dry run: the matches are looked up in the live database without writing anything
     rep["inbox"] = apply_resolutions(db, upd, target, dry_run=dry_run)
     if rep["inbox"]["error"]:
@@ -1115,9 +1145,10 @@ def main():
     ap.add_argument("--app", default=os.path.dirname(here), help="the app folder (default: the folder that holds the update folder)")
     ap.add_argument("--update", default=here, help="the unpacked update folder (default: where this file is)")
     ap.add_argument("--dry-run", action="store_true", help="merge in a copy and write the report; change nothing")
+    ap.add_argument("--port", type=int, default=PORT, help="the app's port, checked to be free (AUTOUPD: scripts/auto_update.py)")
     args = ap.parse_args()
     try:
-        rep = apply(args.app, args.update, dry_run=args.dry_run)
+        rep = apply(args.app, args.update, dry_run=args.dry_run, port=args.port)
     except UpdateError as e:
         print("\n✗ لم يتم التحديث: " + str(e))
         return 1

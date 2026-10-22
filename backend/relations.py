@@ -120,7 +120,8 @@ def compute(books, profiles):
                     out.append((sb["book_id"], tb["book_id"], "easier_alternative", f"لغته {LANG_AR[tp['language_difficulty']]} بدل {LANG_AR[sp['language_difficulty']]}؛ {link}", 0.7))
     out += _same_topic(books, profiles, {(r[0], r[1]) for r in out if r[2] == "similar"})
     # keep the strongest few per (source, type)
-    out.sort(key=lambda r: (r[0], r[2], -r[4]))
+    # ties by target: the same relations kept in every run, whatever the string hashing (AUDFIX 2026-10-15)
+    out.sort(key=lambda r: (r[0], r[2], -r[4], r[1]))
     kept, count = [], {}
     for r in out:
         k = (r[0], r[2])
@@ -175,7 +176,7 @@ def _same_topic(books, profiles, already):
             continue
         if not sb.get("genre") or sb.get("genre") != tb.get("genre"):
             continue
-        ks = sorted(ks, key=lambda k: df[k])
+        ks = sorted(ks, key=lambda k: (df[k], k))  # ties by the word itself: the same reason in every run (AUDFIX)
         out.append((s, t, "same_topic", "يتقاطعان في: " + "، ".join(label[k] for k in ks[:3]),
                     round(min(0.5 + 0.05 * len(ks), 0.65), 2)))
     return out

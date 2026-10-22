@@ -85,4 +85,25 @@ r = c.post(f"/api/admin/books/{b1}/attributes/ending_tone", json={"action": "set
 ok(r.status_code == 200 and con().execute("select ending_tone from book_profiles where book_id=?", (b1,)).fetchone()[0] == "sad", "staff can set a v2 attribute; card recomputed")
 r = c.post(f"/api/admin/books/{b1}/attributes/moods", json={"action": "confirm", "evidence_id": [e for e in att["moods"]["evidence"]][0]["evidence_id"]})
 ok(r.status_code == 200 and con().execute("select style_complexity, ending_tone from book_profiles where book_id=?", (b1,)).fetchone() == ("literary", "sad"), "reviewing v1 attributes keeps v2 values")
+# out-of-range edition year from a source listing (book 4350: 2028) is not stored, and is listed for staff (AUDFIX 2026-10-14)
+import time
+Y = time.localtime().tm_year
+k = con()
+ids = []
+for t in ("سنة بعيدة", "سنة قادمة"):
+    ids.append(k.execute("INSERT INTO books (title, author, language, price, quantity, active, rewaa_sku, source) "
+                         "VALUES (?, 'كاتب', 'ar', 20, 1, 1, ?, 'rewaa')", (t, "9900" + str(len(ids) + 5))).lastrowid)
+    k.execute("INSERT INTO book_profiles (book_id, overall_status) VALUES (?, 'pending')", (ids[-1],))
+k.commit(); k.close()
+d2 = tempfile.mkdtemp()
+for bid, y in zip(ids, (Y + 2, Y + 1)):
+    json.dump({"book_id": bid, "match": {"status": "matched"}, "edition_language": "ar", "original_language": "ar",
+               "edition_year": y, "page_count": 150, "format": "biography", "rows": [R("format", "biography", 0.9, 0, site="web", scope="work")]},
+              open(os.path.join(d2, f"{bid}.json"), "w"), ensure_ascii=False)
+run = subprocess.run([sys.executable, script, DB, d2, "--apply"], capture_output=True, text=True)
+rep = json.load(open(os.path.join(d2, "import_report.json"), encoding="utf-8"))
+yrs = [con().execute("select publication_year, page_count from books where book_id=?", (i,)).fetchone() for i in ids]
+ok(run.returncode == 0 and yrs[0] == (None, 150), "edition year after next year not stored (rest of the record imported)")
+ok(any("out of range" in x for x in rep["issues"].get(str(ids[0]), [])), "out-of-range year listed in the import report for staff")
+ok(yrs[1] == (Y + 1, 150) and str(ids[1]) not in rep["issues"], "next year's edition still accepted")
 print(f"TOTAL PASS={P} FAIL={F}")

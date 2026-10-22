@@ -215,6 +215,25 @@ def load_gr():
             out[int(d["book_id"])] = d
         except (ValueError, KeyError):
             pass
+    # REV's own Goodreads pages (research/reviews_gr/<id>.json) already carry the work's first
+    # publication (page.first_published_ms = Work.details.publicationTime) — read them instead of
+    # fetching the same page again (Ibrahim 2026-10-15: sources other than our own Goodreads fetch)
+    for f in glob.glob(os.path.join(REVIEWS_GR, "*.json")):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+            bid = int(d["book_id"])
+        except (ValueError, KeyError, TypeError):
+            continue
+        p = d.get("page") or {}
+        if bid in out and out[bid].get("work_year"):
+            continue
+        y = gr_year(p.get("first_published_ms"))
+        if not y or not d.get("goodreads"):
+            continue
+        out[bid] = {"book_id": bid, "work_year": y, "original_title": (p.get("original_title") or "").strip() or None,
+                    "author": d.get("gr_author"), "found_by": d.get("found_by"), "url": d["goodreads"],
+                    "final_url": d["goodreads"], "edition_year": gr_year(p.get("published_ms")), "via": "reviews_gr",
+                    "fetched_at": datetime.datetime.fromtimestamp(os.path.getmtime(f)).strftime("%Y-%m-%d %H:%M")}
     return out
 
 
@@ -638,6 +657,8 @@ def apply(args):
         if b["original_year_source"] == "staff":
             counts["staff_kept"] += 1
             continue
+        if getattr(args, "only_missing", False) and b["original_year"] is not None:
+            continue
         names = author_names(conn, b)
         y, src, ref, at, why = choose(b, names, gr, ol, wd)
         if y is None:
@@ -667,6 +688,7 @@ def main():
     p.add_argument("--max-rests", type=int, default=6)
     p.add_argument("--limit", type=int, default=0)
     p.add_argument("--apply", action="store_true")
+    p.add_argument("--only-missing", action="store_true")   # fill books with no year yet; never change a year already set
     p.add_argument("--db")
     p.add_argument("--shard", type=int, default=0)     # several fetch-wd / fetch-ol processes side by side:
     p.add_argument("--shards", type=int, default=1)    # each takes the books whose id % shards == shard

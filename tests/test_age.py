@@ -26,9 +26,11 @@ ok(A.detect_audience(n("كتاب لطفلي")) == "children", "لطفلي -> chi
 kids_ok = [b for b in cards if cards[b].get("format") == "children" and suitable(b, "children")]
 ok(len(kids_ok) >= 30, f"children's books in catalog ({len(kids_ok)})")
 ok(all(cards[b].get("format") == "children" for b in cards if suitable(b, "children")), "a child is offered only the children's shelf")
-ok(all(cards[b].get("format") in ("young_adult", "children") for b in cards if suitable(b, "young_adult")), "a teenager is offered only the young-adult and children's shelves")
+# QADFIX12 #7 (Ibrahim 2026-10-22: «ما ابغى الجواب يكون مفلتر … مع تحذير للروايات الي فيها محتوى للكبار»): a teenager is offered
+# every book that fits the request, from any shelf; the reply warns about adult content. A child keeps the children's shelf.
+ok(any(cards[b].get("format") not in ("young_adult", "children") for b in cards if suitable(b, "young_adult")), "QADFIX12 #7: a teenager is offered books from any shelf")
 ok(not any("sexual_content" in (cards[b].get("sensitive_content") or []) and med(b, "sensitive_content", "sexual_content")
-           for b in cards if suitable(b, "children") or suitable(b, "young_adult")), "no book with sexual content is offered to a child or teenager")
+           for b in cards if suitable(b, "children")), "no book with sexual content is offered to a child")
 
 for q in ["ابغى قصة لبنتي عمرها 7 سنوات", "قصص اطفال مضحكة", "هدية لطفلي"]:
     r = c.post("/api/recommend", json={"query": q}).get_json()["results"]
@@ -94,16 +96,17 @@ def mk(age, flags):
     return {"confidence": conf, "severity": dict(flags), "sensitive_content": list(flags),
             "format": age if age in ("children", "young_adult") else "novel"}
 ok(A.age_allowed(mk("young_adult", {"strong_language": 1}), "young_adult"), "teen: mild strong-language warning does not block")
-ok(not A.age_allowed(mk("young_adult", {"strong_language": 2}), "young_adult"), "teen: clear strong-language warning blocks")
-ok(not A.age_allowed(mk("young_adult", {"sexual_content": None}), "young_adult"), "teen: a blocking flag with unknown severity still blocks (flag decides, as before)")
+ok(A.age_allowed(mk("young_adult", {"strong_language": 2}), "young_adult"), "QADFIX12 #7 teen: a strong-language warning no longer blocks (the reply warns)")
+ok(A.age_allowed(mk("young_adult", {"sexual_content": None}), "young_adult"), "QADFIX12 #7 teen: a content flag no longer blocks (the reply warns)")
+ok(not A.age_allowed(mk("young_adult", {"sexual_content": 3}), "young_adult", ("sexual_content",)), "QADFIX12 #7 teen: content the visitor asked to avoid still keeps a book out")
 ok(A.age_allowed(mk("young_adult", {"violence": None}), "young_adult"), "teen: violence with unknown severity is not assumed strong")
 ok(A.age_allowed(mk("children", {"grief": None}), "children"), "child: grief with unknown severity is not assumed strong")
 ok(A.age_allowed(mk("young_adult", {"violence": 2, "grief": 2}), "young_adult"), "teen: clear violence/grief allowed")
-ok(not A.age_allowed(mk("young_adult", {"violence": 3}), "young_adult"), "teen: strong violence blocks")
+ok(A.age_allowed(mk("young_adult", {"violence": 3}), "young_adult"), "QADFIX12 #7 teen: strong violence no longer blocks (the reply warns)")
 ok(not A.age_allowed(mk("children", {"violence": 1}), "children"), "child: any violence warning blocks")
 ok(A.age_allowed(mk("children", {"grief": 2}), "children") and not A.age_allowed(mk("children", {"grief": 3}), "children"), "child: grief blocks only when strong")
 ok(A.age_allowed(mk("adult", {"sexual_content": 3}), None), "adult reader: warnings do not block unless asked to avoid")
-ok(not A.age_allowed(mk("adult", {}), "children") and not A.age_allowed(mk("adult", {}), "young_adult"), "a book off the children's / young-adult shelves is not offered to a child or teenager")
+ok(not A.age_allowed(mk("adult", {}), "children") and A.age_allowed(mk("adult", {}), "young_adult"), "a book off the children's shelf is not offered to a child; a teenager gets it (QADFIX12 #7)")
 ok(A.age_allowed(mk("children", {}), "young_adult") and not A.age_allowed(mk("young_adult", {}), "children"), "a teenager may get a children's book; a child gets no young-adult book")
 ok(not A.age_allowed(mk("children", {"sexual_content": 1}), "children"), "child: sexual content blocks at any severity")
 print(f"TOTAL PASS={P} FAIL={F}")

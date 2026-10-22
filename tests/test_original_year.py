@@ -143,5 +143,23 @@ expect_unknown = 1901 if not (u["translator"] or (u["original_language"] or "ar"
 ok(u["original_year"] == expect_unknown and (expect_unknown is None or (u["original_year_source"] == "goodreads" and u["original_year_ref"].endswith("/5") and u["original_year_checked_at"])),
    f"apply writes year, source, page and date ({dict(u)})")
 ok(t["original_year"] == 1777 and t["original_year_source"] == "staff", "apply never overwrites a staff year")
+
+# --only-missing (MGR 2026-10-15): fills books with no year, never changes a year already set
+d2.execute("UPDATE books SET original_year=1850, original_year_source='wikidata' WHERE book_id=?", (unknown,))
+d2.execute("UPDATE books SET original_year=NULL, original_year_source=NULL WHERE book_id=?", (classic,)); d2.commit(); d2.close()
+json.dump({"book_id": classic, "work_year": 1902, "author": B[classic]["author"], "found_by": "isbn", "fetched_at": "2026-10-15 22:40",
+           "final_url": "https://www.goodreads.com/book/show/7", "original_title": None}, open(os.path.join(S.GR_DIR, f"{classic}.json"), "w"))
+class Args2: apply = True; db = dbcopy; only_missing = True
+S.apply(Args2())
+models.DB_PATH = _real_db
+d2 = sqlite3.connect(dbcopy); d2.row_factory = sqlite3.Row
+u2 = d2.execute("SELECT original_year, original_year_source FROM books WHERE book_id=?", (unknown,)).fetchone()
+t2 = d2.execute("SELECT original_year, original_year_source FROM books WHERE book_id=?", (recent,)).fetchone()
+ok(u2["original_year"] == 1850 and u2["original_year_source"] == "wikidata", "--only-missing keeps a year already set")
+c2 = d2.execute("SELECT original_year, original_year_source, translator, original_language, language FROM books WHERE book_id=?", (classic,)).fetchone()
+expect_classic = 1902 if not (c2["translator"] or (c2["original_language"] or "ar") not in ("", c2["language"] or "ar")) else None
+ok(c2["original_year"] == expect_classic and (expect_classic is None or c2["original_year_source"] == "goodreads"),
+   f"--only-missing still fills a book with no year (AUDFIX 2026-10-15) ({dict(c2)})")
+ok(t2["original_year"] == 1777 and t2["original_year_source"] == "staff", "--only-missing never overwrites a staff year")
 print(f"TOTAL PASS={P} FAIL={F}")
 sys.exit(1 if F else 0)

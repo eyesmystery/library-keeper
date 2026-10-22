@@ -25,7 +25,8 @@ ok(con.execute("select count(*) from books where shelf_location is not null and 
    "no invented shelf codes in the catalog")
 m = login(A.app.test_client())
 staff = login(A.app.test_client(), "staff")
-ok(staff.get("/api/admin/sections").status_code == 403 and A.app.test_client().get("/api/admin/sections").status_code == 401, "sections are manager-only")
+ok(staff.get("/api/admin/sections").status_code == 200 and A.app.test_client().get("/api/admin/sections").status_code == 401,
+   "sections: staff may open them (settings, Ibrahim 2026-10-13); anonymous may not")
 
 # start from a known state: one active section for novels, one inactive for children
 r = m.post("/api/admin/sections", json={"sections": [

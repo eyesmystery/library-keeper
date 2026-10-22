@@ -26,9 +26,7 @@ echo If Windows asks whether Python may communicate on networks, allow it on PRI
 echo Keep this window open and this computer awake. To stop the server: close this window.
 echo.
 start "" /min cmd /c "timeout /t 6 /nobreak >nul & start "" http://127.0.0.1:8802/admin"
-cd /d "%ROOT%backend"
 set "LIBRARY_KEEPER_HOST=0.0.0.0"
-"%PYW%" app.py
-echo.
-echo The server stopped. If this was not expected, read the lines above.
-pause
+rem run_server.py keeps the server running and installs an update the manager approved (AUTOUPD). One line, so that
+rem an update replacing this file while it runs cannot make Windows read the rest of the new file.
+"%PYW%" "%ROOT%scripts\run_server.py" & echo. & echo The server stopped. If this was not expected, read the lines above. & pause & exit /b

@@ -10,6 +10,14 @@ exported to data/catalog_snapshot.sql, which IS committed.
   backend/venv/bin/python scripts/catalog_snapshot.py check      # does the snapshot match the DB?
   backend/venv/bin/python scripts/catalog_snapshot.py verify     # rebuild the snapshot in memory and compare
                                                                  # schema, row counts and content, table by table
+  backend/venv/bin/python scripts/catalog_snapshot.py verify --strict   # the same, but every column must match
+
+Since 2026-10-15 (AUDFIX, audit 2026-10-14) `verify` keeps apart what every server start writes again
+(VOLATILE below: the relation ids and dates of the computed relations, rebuilt from the cards by
+relations.rebuild(), and authors.updated_at, touched by authors.sync()) from real content: a table
+that differs only there is reported as such, with the number of rows; any difference in the other
+columns is still a DIFF, listed edge by edge. It also says whether the snapshot's cards give the same
+computed relations as the database's cards with the current code (what a restore + server start makes).
 
 Since 2026-10-09 (audit 2026-10-08) the snapshot also carries the prizes of books and of authors, the
 screen adaptations and the library events. NOT exported:
@@ -39,6 +47,9 @@ TABLES = [("books", "book_id"), ("book_profiles", "book_id"), ("attribute_eviden
           ("events", "event_id")]
 # Deliberately left out (see the note at the top); `verify` names them so the gap is never silent.
 NOT_EXPORTED = ["book_embeddings"]
+# Columns every server start writes again (see the note at the top). `verify` (not --strict) compares the
+# rest of each row, keyed by its content instead of the regenerated id.
+VOLATILE = {"authors": ("updated_at",), "book_relations": ("relation_id", "created_at")}
 
 
 def _lit(v):
@@ -98,9 +109,58 @@ def rebuild(text):
     return con
 
 
-def compare(source, built):
+def _content_rows(con, table):
+    """The rows of `table` without its VOLATILE columns, as a sorted list (a multiset of contents)."""
+    skip = VOLATILE.get(table, ())
+    cols = [r[1] for r in con.execute(f"PRAGMA table_info({table})") if r[1] not in skip]
+    return sorted((tuple(r) for r in con.execute(f"SELECT {', '.join(cols)} FROM {table}")), key=repr), cols
+
+
+def _content_diff(source, built, table, show=3):
+    """-> (only in the database, only in the snapshot, lines naming a few of them) for the VOLATILE-free rows."""
+    from collections import Counter
+    a, cols = _content_rows(source, table)
+    b, _ = _content_rows(built, table)
+    ca, cb = Counter(a), Counter(b)
+    only_a, only_b = list((ca - cb).elements()), list((cb - ca).elements())
+    lines = []
+    for label, rows in (("database only", only_a), ("snapshot only", only_b)):
+        for r in sorted(rows, key=repr)[:show]:
+            lines.append(f"    {label}: " + ", ".join(f"{c}={v!r}" for c, v in zip(cols, r) if v is not None)[:300])
+    return only_a, only_b, lines
+
+
+def derived_relations_check(source, built):
+    """Do the snapshot's books and cards give the same computed relations as the database's, with the
+    current code? (What a restore followed by a server start would hold.) -> line or None."""
+    sys.path.insert(0, os.path.join(ROOT, "backend"))
+    try:
+        import relations
+    except Exception as exc:  # the check is extra information, never a reason to fail verify
+        return f"computed relations not re-derived ({exc})"
+    out = []
+    for con in (source, built):
+        con.row_factory = sqlite3.Row
+        books = [dict(r) for r in con.execute("SELECT * FROM books ORDER BY book_id")]
+        profiles = {r["book_id"]: dict(r) for r in con.execute("SELECT * FROM book_profiles")}
+        con.row_factory = None
+        out.append(sorted(relations.compute(books, profiles)))
+    stored = sorted(tuple(r) for r in source.execute(
+        "SELECT source_book_id, target_book_id, relation_type, reason_ar, confidence FROM book_relations "
+        "WHERE source = 'computed'"))
+    same = out[0] == out[1]
+    line = ("the snapshot's cards give the same computed relations as the database's" if same else
+            "the snapshot's cards give DIFFERENT computed relations from the database's") + f" ({len(out[0])})"
+    if stored != out[0]:
+        line += ("; the database's stored relations are not what the current code derives from its cards "
+                 "(they were made at the last server start; the next start rebuilds them)")
+    return line, same
+
+
+def compare(source, built, strict=False):
     """-> (report lines, problems). Every snapshot table of `source` must come back from the rebuilt
-    snapshot with the same schema (table and indexes), the same number of rows and the same content."""
+    snapshot with the same schema (table and indexes), the same number of rows and the same content
+    (without `strict`, the VOLATILE columns are left out of the content comparison and reported apart)."""
     a, b = table_facts(source), table_facts(built)
     lines, problems = [], []
     for table, _ in TABLES:
@@ -119,7 +179,19 @@ def compare(source, built):
         if a[table][1] != b[table][1]:
             bad.append(f"rows {a[table][1]} in the database, {b[table][1]} in the snapshot")
         elif a[table][2] != b[table][2]:
-            bad.append("same number of rows, different content")
+            if strict or table not in VOLATILE:
+                bad.append("same number of rows, different content")
+            else:
+                only_a, only_b, shown = _content_diff(source, built, table)
+                cols = "/".join(VOLATILE[table])
+                if only_a or only_b:
+                    problems.append(f"{table}: {len(only_a)} rows only in the database and {len(only_b)} only in the "
+                                    f"snapshot (compared without {cols})")
+                    problems.extend(shown)
+                    continue
+                lines.append(f"{table}: schema ok, {a[table][1]} rows, content ok; only {cols} differ "
+                             "(written again at every server start)")
+                continue
         if bad:
             problems.append(f"{table}: " + "; ".join(bad))
         else:
@@ -132,7 +204,7 @@ def compare(source, built):
     return lines, problems
 
 
-def main(cmd):
+def main(cmd, strict=False):
     if cmd == "verify":
         if not os.path.exists(SNAP):
             print("no snapshot file (run export)")
@@ -140,13 +212,22 @@ def main(cmd):
         con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
         built = rebuild(open(SNAP, encoding="utf-8").read())
         ok = built.execute("PRAGMA integrity_check").fetchone()[0]
-        lines, problems = compare(con, built)
+        lines, problems = compare(con, built, strict)
+        if not strict:
+            derived = derived_relations_check(con, built)
+            if isinstance(derived, tuple):
+                if derived[1]:
+                    lines.append(derived[0])
+                else:
+                    problems.append(derived[0])
+            elif derived:
+                lines.append(derived)
         con.close()
         built.close()
         for line in lines:
             print("ok   " + line)
         for line in problems:
-            print("DIFF " + line)
+            print(("       " + line.strip()) if line.startswith("    ") else "DIFF " + line)
         if ok != "ok":
             print(f"DIFF rebuilt snapshot fails integrity_check: {ok}")
         good = not problems and ok == "ok"
@@ -198,4 +279,4 @@ def main(cmd):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else ""))
+    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else "", strict="--strict" in sys.argv[2:]))

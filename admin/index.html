@@ -72,6 +72,11 @@
     img.cover{display:block;height:auto;object-fit:cover;background:var(--line)}
     .cover-row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}.cover-big{width:120px;aspect-ratio:2/3;border-radius:8px;object-fit:cover;background:var(--line);box-shadow:0 4px 14px rgba(0,0,0,.12)}
     .cover-none{display:grid;width:120px;aspect-ratio:2/3;place-items:center;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font-size:13px;text-align:center;padding:8px}
+    .cover-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-top:10px;align-items:start}
+    .cover-choice{display:flex;flex-direction:column;gap:6px;margin:0;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+    .cover-choice img{width:100%;aspect-ratio:2/3;object-fit:contain;border-radius:6px;background:var(--canvas)}
+    .cover-choice figcaption{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:12px;color:var(--muted)}.cover-choice figcaption b{color:var(--ink);font-weight:650}
+    .cover-choices>#coverChoicesClose{grid-column:1/-1;justify-self:start}
     .cover-actions{display:flex;flex-direction:column;gap:8px;min-width:180px}.cover-actions label.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;cursor:pointer}
     .cover-actions input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
     #snText{width:100%;min-height:84px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font:inherit;color:var(--ink);line-height:1.7;resize:vertical}
@@ -139,6 +144,22 @@
     .notbook.ask p{color:var(--ink)}
     .notbook .acts{display:flex;gap:8px;flex-wrap:wrap}
     .del-list{display:grid;gap:10px}
+    .al-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+    .al-row b{font-size:17px}.al-row .al-n{font-size:22px;font-weight:800;margin-inline-start:6px}
+    .al-row.quiet{opacity:.7}
+    .al-new{display:inline-block;margin-inline-start:8px;padding:2px 8px;border-radius:999px;background:var(--danger-soft);color:var(--danger);font-size:12px;font-weight:700}
+    .dn-card{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+    .dn-card h3{margin:0 0 6px;font-size:18px}.dn-card p{margin:0 0 10px;line-height:1.7}
+    .dn-card.done{opacity:.8}
+    .dn-acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .dn-acts textarea{flex:1 1 260px;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font:inherit}
+    .dn-books{margin-top:12px;display:grid;gap:8px}
+    .upd-bar{height:10px;border-radius:999px;background:var(--line);overflow:hidden;margin:0 0 10px}
+    .upd-bar span{display:block;height:100%;width:0;background:var(--brown);transition:width .3s}
+    #updText{white-space:pre-line}
+    .dn-book{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+    .dn-book span{font-size:13px;color:var(--muted)}
+    @media(max-width:700px){.al-row,.dn-book{grid-template-columns:1fr}}
     .org-row .ttl{display:block;padding:0;border:0;background:none;color:var(--ink);font:inherit;font-size:17px;font-weight:700;text-align:right;line-height:1.35;cursor:pointer}
     .org-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     .org-act select{min-height:44px;max-width:210px;padding:6px 10px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-size:13px}
@@ -258,6 +279,22 @@
     .settings-tab[aria-selected="true"]{background:var(--brown);color:var(--surface)}
     .settings-pane>.panel:last-child{margin-bottom:0}
     .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:18px}
+    /* «اختياراتنا هذا الشهر» (2026-10-14) */
+    .pk-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px}.pk-head>div:first-child{flex:1 1 320px}
+    .pk-status{margin:4px 0 12px;padding:10px 12px;border-radius:12px;background:var(--weak-soft);font-size:14px}
+    .pk-status.live{background:var(--primary-soft)}.pk-status.draft{background:var(--accent-soft)}
+    .pk-slots{display:grid;gap:0;margin:8px 0 0;padding:0;list-style:none}
+    .pk-row{display:grid;grid-template-columns:28px 64px 1fr auto;gap:12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}.pk-row:last-child{border-bottom:0}
+    .pk-n{font-size:20px;font-weight:700;color:var(--muted);text-align:center;padding-top:18px}
+    .pk-cover{width:64px;height:96px;border-radius:9px;object-fit:cover;background:var(--primary-soft);display:grid;place-items:center;font-size:24px;color:var(--muted)}
+    .pk-info{display:grid;gap:3px;min-width:0}.pk-info .pk-line{margin:2px 0 0;font-size:14px}
+    .pk-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.pk-tag{padding:2px 8px;border-radius:999px;background:var(--weak-soft);font-size:12px}
+    .pk-tag.pin{background:var(--primary-soft)}.pk-tag.warn{background:var(--danger-soft);color:var(--danger)}
+    .pk-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:230px}
+    .pk-cand{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+    .pk-cand .pk-cover{width:44px;height:66px;font-size:18px}
+    .pk-put{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}.pk-put .mini{min-width:44px}
+    @media(max-width:640px){.pk-row{grid-template-columns:24px 52px 1fr}.pk-row .pk-cover{width:52px;height:78px}.pk-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
     /* «الفعاليات» (2026-10-08) */
     .ev-form{display:grid;gap:6px;max-width:720px}.ev-form>label{margin-top:8px;font-weight:600}
     .ev-form input:not([type=file]),.ev-form textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}
@@ -463,7 +500,9 @@
     header.rail .tab::before{content:"";flex:none;width:20px;height:20px;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
     header.rail .tab:hover{background:var(--canvas);color:var(--ink)}
     header.rail .tab[aria-selected="true"]{background:var(--sage-soft);color:var(--brown);font-weight:700}
-    #tabBooks{--i:var(--i-books)}#tabInbox{--i:var(--i-chat)}#tabEvents{--i:var(--i-calendar)}#tabStats{--i:var(--i-chart)}#tabImport{--i:var(--i-upload)}#tabSettings{--i:var(--i-sliders)}
+    /* «التنبيهات»: a bell (Ibrahim 2026-10-17: «غير الايقونة. حطها جرس»); before this the tab had no --i and showed a filled square */
+    #tabAlerts{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5a6 6 0 0 1 12 0c0 4.2 1.4 6.3 2.3 7.3.3.3.1.7-.3.7H4c-.4 0-.6-.4-.3-.7.9-1 2.3-3.1 2.3-7.3z'/%3E%3Cpath d='M10 20.5a2.2 2.2 0 0 0 4 0'/%3E%3C/svg%3E")}
+    #tabBooks{--i:var(--i-books)}#tabInbox{--i:var(--i-chat)}#tabEvents{--i:var(--i-calendar)}#tabPicks{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z'/%3E%3C/svg%3E")}#tabStats{--i:var(--i-chart)}#tabImport{--i:var(--i-upload)}#tabSettings{--i:var(--i-sliders)}
     header.rail .tab .tab-n.alert{margin-inline-start:auto;font-size:13px}
     .who-av{display:none}header.rail .who{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;padding:16px 8px 0;border-top:1px solid var(--line)}
     header.rail #whoName{display:block;flex-basis:100%;margin-bottom:8px;font-size:14px;overflow-wrap:anywhere}
@@ -551,6 +590,13 @@
       .kpis{gap:8px}.kpi{padding:12px}.kpi b{font-size:28px}.kpi .label,.kpi .sub{font-size:14px}.panel-card{padding:16px}
       .plot{grid-template-columns:28px minmax(0,1fr);gap:6px}.days{gap:2px}.plot-scale,.days-axis{font-size:12px}.rank .bk{min-width:160px}
     }
+    #navQr{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7' rx='1'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1'/%3E%3Cpath d='M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3'/%3E%3C/svg%3E")}
+    .qr-dlg{width:min(92vw,380px);padding:24px;border:0;border-radius:22px;background:var(--surface);color:var(--ink);text-align:center;box-shadow:0 18px 50px rgba(59,31,20,.25)}
+    .qr-dlg::backdrop{background:rgba(30,20,15,.45)}
+    .qr-dlg h2{margin:0 0 12px;font-size:19px}
+    .qr-dlg .qr-box{width:min(76vw,300px);min-height:0;margin:0 auto 10px}
+    .qr-dlg .qr-status{margin:6px 0}.qr-dlg-url{margin:4px 0 14px;overflow-wrap:anywhere}
+    .qr-dlg-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
     @media print{
       @page{size:A5;margin:12mm}
       body{background:#fff}
@@ -575,6 +621,19 @@
     <div id="qpCode" class="qp-code"></div>
     <p class="qp-note">نسخة تجريبية</p>
   </div>
+  <!-- «رمز QR» in the menu (Ibrahim 2026-10-13: «ودي يكون في اختصار اسهل للوصول للQR … في القائمة على اليمين تحت
+       الاعدادات مجرد اضغط يفتح لي نافذة فيها QR») -->
+  <dialog id="qrDlg" class="qr-dlg" aria-labelledby="qrDlgTitle">
+    <h2 id="qrDlgTitle">رمز QR لصفحة الزائر</h2>
+    <div id="qrDlgBox" class="qr-box" aria-live="polite"><span class="diff">جاري التحميل…</span></div>
+    <p id="qrDlgState" class="qr-status"></p>
+    <p class="diff qr-dlg-url"><b id="qrDlgUrl" dir="ltr"></b></p>
+    <div class="qr-dlg-actions">
+      <button id="qrDlgPrint" class="btn" type="button">طباعة</button>
+      <button id="qrDlgPng" class="btn secondary" type="button">تنزيل صورة</button>
+      <button id="qrDlgClose" class="btn secondary" type="button">إغلاق</button>
+    </div>
+  </dialog>
   <div class="shell">
   <header class="rail">
     <div class="bar">
@@ -582,11 +641,14 @@
       <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="adminNav">القائمة</button>
       <nav id="adminNav" class="tabs" role="tablist" aria-label="أقسام الإدارة" aria-orientation="vertical">
         <button class="tab" role="tab" id="tabBooks" title="المكتبة" aria-selected="true" aria-controls="booksView">المكتبة</button>
+        <button class="tab" role="tab" id="tabAlerts" title="التنبيهات" aria-selected="false" aria-controls="alertsView">التنبيهات <span class="tab-n alert" id="alertsN" hidden></span></button>
         <button class="tab" role="tab" id="tabInbox" title="البلاغات" aria-selected="false" aria-controls="inboxView">البلاغات <span class="tab-n alert" id="inboxN" hidden></span></button>
+        <button class="tab" role="tab" id="tabPicks" title="اختياراتنا" aria-selected="false" aria-controls="picksView">اختياراتنا</button>
         <button class="tab" role="tab" id="tabEvents" title="الفعاليات" aria-selected="false" aria-controls="eventsView">الفعاليات</button>
         <button class="tab" role="tab" id="tabStats" title="الإحصاءات" aria-selected="false" aria-controls="statsView">الإحصاءات</button>
         <button class="tab" role="tab" id="tabImport" title="استيراد من رواء" aria-selected="false" aria-controls="importView">استيراد من رواء</button>
         <button class="tab" role="tab" id="tabSettings" title="الإعدادات" aria-selected="false" aria-controls="settingsView">الإعدادات</button>
+        <button class="tab nav-qr" id="navQr" type="button" title="رمز QR لصفحة الزائر" aria-haspopup="dialog">رمز QR</button>
       </nav>
       <div class="who" id="who" hidden><span class="who-av" id="whoAv" aria-hidden="true"></span><span id="whoName"></span>
         <button id="pwBtn" type="button" title="تغيير كلمة المرور"><span class="who-t">كلمة المرور</span></button><button id="logoutBtn" type="button" title="خروج"><span class="who-t">خروج</span></button></div>
@@ -745,6 +807,31 @@
       </div>
     </div>
 
+    <!-- «التنبيهات» + «ملاحظات من المطور» (QADFIX4, Ibrahim 2026-10-16): what needs a look now, and the developer's notes -->
+    <div id="alertsView" role="tabpanel" aria-labelledby="tabAlerts" hidden>
+      <div class="st-head">
+        <div><h2>التنبيهات</h2>
+          <p class="diff">كل ما ينتظر مراجعة الآن في مكان واحد: بلاغات الزوار واقتراحاتهم، التعديلات المطلوبة على الكتب، الكتب اللي تحتاج تأكيد هويتها، وملاحظات المطور. «جديد» يعني وصل بعد آخر مرة فتحت هذه الصفحة من هذا الجهاز.</p></div>
+      </div>
+      <p id="alertsState" class="count" role="status"></p>
+      <div id="alertsList" class="del-list"></div>
+      <article class="dn-card" id="updBox" style="margin-top:16px" aria-labelledby="updTitle" hidden>
+        <h3 id="updTitle" tabindex="-1">تحديثات «منار»</h3>
+        <p id="updText" role="status"></p>
+        <div class="upd-bar" id="updBar" hidden><span id="updBarFill"></span></div>
+        <div class="dn-acts" id="updActs"></div>
+      </article>
+      <div class="st-head" id="devHead" style="margin-top:22px">
+        <div><h2>ملاحظات من المطور</h2>
+          <p class="diff">طلبات من مطوّر التطبيق لفريق المكتبة. اقرأ الملاحظة، نفّذ المطلوب، ثم اضغط «تم» (ولك أن تكتب ما سويت). كل ضغطة تُسجَّل في سجل العمليات وتصل للمطور مع «تنزيل الكل في ملف».</p></div>
+        <div class="seg" id="devStatus" role="group" aria-label="حالة الملاحظات">
+          <button type="button" data-status="open" aria-pressed="true">مفتوحة</button><button type="button" data-status="done">تمّت</button><button type="button" data-status="all">الكل</button>
+        </div>
+      </div>
+      <p id="devState" class="count" role="status"></p>
+      <div id="devList" class="del-list"></div>
+    </div>
+
     <div id="inboxView" role="tabpanel" aria-labelledby="tabInbox" hidden>
       <div class="st-head">
         <div><h2>بلاغات الزوار واقتراحاتهم</h2>
@@ -781,6 +868,36 @@
         </div>
         <div style="overflow-x:auto;margin-top:10px"><table id="cxPlan" class="tbl"></table></div>
       </details>
+    </div>
+
+    <!-- «اختياراتنا هذا الشهر» (Ibrahim, 2026-10-14): the automatic ranking proposes five, staff approve -->
+    <div id="picksView" role="tabpanel" aria-labelledby="tabPicks" hidden>
+      <section class="panel" aria-labelledby="pkTitle">
+        <div class="pk-head">
+          <div><h2 id="pkTitle">اختياراتنا هذا الشهر</h2>
+            <p class="hint">خمسة كتب تظهر في الصفحة الأولى للزوار. الاقتراح التلقائي يرتّب كتبنا المتوفرة حسب قوائم الأكثر مبيعًا ورواجًا هذا الشهر (مثل نيل وفرات وأبجد)، والتقييم مع عدد المقيّمين، والجوائز، واختيارات زوارنا. ما تظهر للزوار إلا بعد ما تضغط «اعتماد».</p></div>
+          <div class="seg" role="group" aria-label="الشهر"><button type="button" id="pkThis" aria-pressed="true">هذا الشهر</button><button type="button" id="pkNext" aria-pressed="false">الشهر القادم</button></div>
+        </div>
+        <p id="pkStatus" class="pk-status" role="status"></p>
+        <div class="row">
+          <button id="pkApprove" class="btn" type="button">اعتماد ونشر للزوار</button>
+          <button id="pkRefresh" class="btn secondary" type="button" title="يبدّل الخانات غير المثبّتة بأفضل المرشحين">تحديث الاقتراح التلقائي</button>
+          <span id="pkState" class="state" role="status"></span>
+        </div>
+        <ol id="pkSlots" class="pk-slots"></ol>
+      </section>
+      <section class="panel" aria-labelledby="pkCandTitle">
+        <h2 id="pkCandTitle">مرشحون آخرون</h2>
+        <p class="hint">مرتّبون حسب النقاط. اضغط رقم الخانة لوضع الكتاب فيها؛ الكتاب اللي تختاره ما يغيّره التحديث التلقائي.</p>
+        <div id="pkCands"></div>
+        <label for="pkQ" style="display:block;margin-top:14px;font-weight:600">أو ابحث عن أي كتاب متوفر</label>
+        <input id="pkQ" class="wide" placeholder="جزء من العنوان أو اسم المؤلف" autocomplete="off" />
+        <div id="pkFound"></div>
+      </section>
+      <section class="panel" aria-labelledby="pkSigTitle">
+        <h2 id="pkSigTitle">من وين جات الإشارات</h2>
+        <div id="pkSignals" class="hint" style="margin:0"></div>
+      </section>
     </div>
 
     <!-- «الفعاليات» (Ibrahim, 2026-10-08): staff add events; upcoming ones show on the visitor start page -->
@@ -1087,7 +1204,7 @@
     });
 
     // The active section supplies the page heading.
-    const HEADS = { books: 'المكتبة', inbox: 'البلاغات', events: 'الفعاليات', stats: 'الإحصاءات', import: 'استيراد من رواء', settings: 'الإعدادات' };
+    const HEADS = { books: 'المكتبة', alerts: 'التنبيهات', inbox: 'البلاغات', picks: 'اختياراتنا', events: 'الفعاليات', stats: 'الإحصاءات', import: 'استيراد من رواء', settings: 'الإعدادات' };
     function setHead(which) { if (HEADS[which]) $('phTitle').textContent = HEADS[which]; }
     setHead('books');
     function setNavOpen(open, restoreFocus = false) {
@@ -1105,7 +1222,7 @@
       if (!keepMenu && !matchMedia('(min-width:980px)').matches && $('navToggle').getAttribute('aria-expanded') === 'true') {
         setNavOpen(false); $('phTitle').focus({ preventScroll: true });
       }
-      const tabs = { books: ['tabBooks', 'booksView'], inbox: ['tabInbox', 'inboxView'], events: ['tabEvents', 'eventsView'], stats: ['tabStats', 'statsView'], import: ['tabImport', 'importView'], settings: ['tabSettings', 'settingsView'] };
+      const tabs = { books: ['tabBooks', 'booksView'], alerts: ['tabAlerts', 'alertsView'], inbox: ['tabInbox', 'inboxView'], picks: ['tabPicks', 'picksView'], events: ['tabEvents', 'eventsView'], stats: ['tabStats', 'statsView'], import: ['tabImport', 'importView'], settings: ['tabSettings', 'settingsView'] };
       Object.entries(tabs).forEach(([key, [tab, view]]) => {
         $(tab).setAttribute('aria-selected', String(key === which)); $(tab).tabIndex = key === which ? 0 : -1; $(view).hidden = key !== which;
       });
@@ -1113,15 +1230,19 @@
       if (which === 'import') loadHistory();
       if (which === 'stats') loadStats();
       if (which === 'events') loadEvents();
+      if (which === 'picks') loadPicks();
       if (which === 'inbox') { loadInbox(); if (ME && ME.role === 'manager') loadConfirmCount(); } else loadInboxCount();
+      if (which === 'alerts') loadAlerts(); else loadAlertsCount();
       if (which === 'books') loadCatalog();
     }
     $('tabBooks').addEventListener('click', () => selectTab('books'));
     $('tabImport').addEventListener('click', () => selectTab('import'));
     $('tabStats').addEventListener('click', () => selectTab('stats'));
     $('tabInbox').addEventListener('click', () => selectTab('inbox'));
+    $('tabAlerts').addEventListener('click', () => selectTab('alerts'));
     $('tabSettings').addEventListener('click', () => selectTab('settings'));
     $('tabEvents').addEventListener('click', () => selectTab('events'));
+    $('tabPicks').addEventListener('click', () => selectTab('picks'));
     $('phGear').addEventListener('click', () => selectTab('settings'));
     $('adminNav').querySelectorAll('[role=tab]').forEach(tab => {
       tab.tabIndex = tab.getAttribute('aria-selected') === 'true' ? 0 : -1;
@@ -1135,6 +1256,286 @@
         const target = tabs[next], key = Object.keys(HEADS).find(k => 'tab' + k[0].toUpperCase() + k.slice(1) === target.id);
         selectTab(key, true); target.focus({ preventScroll: true });
       });
+    });
+
+    // ---------------- «التنبيهات» + «ملاحظات من المطور» (QADFIX4, Ibrahim 2026-10-16). See backend/dev_notes.py.
+    const ALERTS_SEEN_KEY = 'lk.alertsSeen';
+    function alertsSeen() { try { return JSON.parse(localStorage.getItem(ALERTS_SEEN_KEY) || '{}') || {}; } catch (e) { return {}; } }
+    function markAlertsSeen(items) {
+      try { const s = alertsSeen(); items.forEach(i => { if (i.latest) s[i.key] = i.latest; }); localStorage.setItem(ALERTS_SEEN_KEY, JSON.stringify(s)); } catch (e) { /* per-device convenience only */ }
+    }
+    function showAlertsBadge(n) {
+      $('alertsN').hidden = !n; $('alertsN').textContent = n ? num(n) : '';
+      $('tabAlerts').setAttribute('aria-label', n ? `التنبيهات، ${num(n)} تنتظر المراجعة` : 'التنبيهات');
+    }
+    async function loadAlertsCount() {
+      if (!ME) return;
+      try { const r = await rawFetch('/api/admin/inbox/alerts'); if (r.ok) showAlertsBadge((await r.json()).attention); } catch (e) { /* the badge stays */ }
+    }
+    function goAlert(go) {
+      const [view, sub] = go.split(':');
+      if (view === 'inbox') {
+        selectTab('inbox');
+        const id = { report: 'inboxTabReport', suggestion: 'inboxTabSuggestion', staff: 'inboxTabStaff', ideas: 'inboxTabIdeas' }[sub];
+        if (id && !$(id).hidden) $(id).click();
+      } else if (view === 'books') {
+        selectTab('books');
+        if (sub === 'confirm' && !$('libTabConfirm').hidden) $('libTabConfirm').click();
+      } else if (view === 'alerts' && sub === 'update') {
+        $('updBox').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('updTitle').focus({ preventScroll: true });
+      } else if (view === 'alerts') {
+        $('devHead').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('devHead').querySelector('h2').focus?.();
+      }
+    }
+    async function loadAlerts(devMsg) {
+      $('alertsState').textContent = 'جاري التحميل…';
+      try {
+        const r = await fetch('/api/admin/inbox/alerts');
+        if (!r.ok) throw new Error(r.status);
+        const d = await r.json(), seen = alertsSeen();
+        showAlertsBadge(d.attention);
+        const any = d.items.some(i => i.open);
+        $('alertsState').textContent = any ? '' : 'ما فيه شيء ينتظر المراجعة الآن.';
+        $('alertsList').innerHTML = d.items.map(i => {
+          const isNew = i.open && i.latest && (!seen[i.key] || i.latest > seen[i.key]);
+          return `<div class="al-row${i.open ? '' : ' quiet'}"><div><b>${esc(i.label)}</b><span class="al-n">${num(i.open)}</span>${isNew ? '<span class="al-new">جديد</span>' : ''}</div>
+            ${i.open ? `<button class="btn secondary" type="button" data-go="${esc(i.go)}">افتح</button>` : '<span class="diff">لا شيء</span>'}</div>`;
+        }).join('');
+        $('alertsList').querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => goAlert(b.dataset.go)));
+        markAlertsSeen(d.items);
+      } catch (e) { $('alertsState').textContent = 'تعذر تحميل التنبيهات.'; }
+      loadDevNotes(devMsg);
+      loadUpdate();
+    }
+    // «تحديثات منار» (AUTOUPD, Ibrahim 2026-10-16): an update Ibrahim sent, installed after the manager's approval.
+    let updPoll = null, updWasRestarting = false;
+    const mb = n => n ? (Math.round(n / 1e5) / 10).toLocaleString('ar-SA-u-nu-latn') + ' ميغابايت' : '';
+    async function loadUpdate(confirming) {
+      let s;
+      try {
+        const r = await rawFetch('/api/admin/inbox/channel');
+        if (!r.ok) throw new Error(r.status);
+        s = await r.json();
+      } catch (e) {
+        if (updWasRestarting) { $('updText').textContent = 'السيرفر يُعاد تشغيله لتثبيت التحديث… لا تغلق النافذة.'; schedUpd(3000); }
+        return;
+      }
+      $('updBox').hidden = false;
+      const u = s.update || {}, acts = [], bar = $('updBar');
+      let text = `الإصدار المثبت: ${s.installed_version || '؟'}`;
+      bar.hidden = true;
+      if (!s.has_key || !s.enabled) {
+        text += '\nقناة التحديثات غير مفعّلة في هذا الإصدار؛ التحديث القادم يفعّلها.';
+      } else if (u.status === 'available' || (u.status === 'failed' && confirming)) {
+        text += `\nتحديث جديد جاهز: ${u.version}${u.size ? ' (' + mb(u.size) + ')' : ''}` + (u.notes ? `\n\nالجديد فيه:\n${u.notes}` : '');
+        if (s.can_install) {
+          if (confirming) {
+            text += '\n\nأثناء التثبيت يتوقف التطبيق دقيقة أو دقيقتين ثم يرجع وحده. تُؤخذ نسخة احتياطية أولًا، وإذا فشل أي شيء يرجع التطبيق كما كان.';
+            acts.push(`<button class="btn" type="button" data-upd="go">نعم، ثبّت الآن</button>`, `<button class="btn secondary" type="button" data-upd="cancel">إلغاء</button>`);
+          } else acts.push(`<button class="btn" type="button" data-upd="ask">موافقة وتحديث</button>`);
+        } else text += '\nبانتظار موافقة مدير المكتبة.';
+      } else if (u.status === 'downloading') {
+        text += `\n${u.message || 'جاري تنزيل التحديث…'} ${u.progress || 0}%`; bar.hidden = false; $('updBarFill').style.width = (u.progress || 0) + '%'; schedUpd(1500);
+      } else if (u.status === 'checking') {
+        text += '\n' + (u.message || 'جاري فحص التحديث…'); schedUpd(2000);
+      } else if (u.status === 'restarting') {
+        updWasRestarting = true; text += '\n' + (u.message || 'السيرفر يُعاد تشغيله…'); schedUpd(3000);
+      } else if (u.status === 'ready') {
+        text += '\n' + u.message;
+      } else if (u.status === 'installed') {
+        text += `\n✓ ${u.message || 'تم التحديث.'}`;
+        if (updWasRestarting) { updWasRestarting = false; setTimeout(() => location.reload(), 2500); text += '\nتُحدَّث الصفحة الآن…'; }
+      } else if (u.status === 'failed') {
+        text += `\n✗ ${u.message || 'فشل التحديث.'}`;
+        updWasRestarting = false;
+        if (s.can_install && u.version && u.version !== s.installed_version) acts.push(`<button class="btn secondary" type="button" data-upd="ask">إعادة المحاولة</button>`);
+      } else {
+        text += '\nلا يوجد تحديث جديد.';
+      }
+      if (s.last_check) text += `\nآخر فحص: ${whenAr(s.last_check)}` + (s.last_error ? ` — ${s.last_error}` : '');
+      if (s.has_key && s.enabled && !['downloading', 'checking', 'restarting'].includes(u.status)) acts.push(`<button class="btn secondary" type="button" data-upd="check">تحقق الآن</button>`);
+      $('updText').textContent = text;
+      $('updActs').innerHTML = acts.join('');
+      $('updActs').querySelectorAll('[data-upd]').forEach(b => b.addEventListener('click', async () => {
+        const what = b.dataset.upd;
+        if (what === 'ask') return loadUpdate(true);
+        if (what === 'cancel') return loadUpdate(false);
+        b.disabled = true;
+        try {
+          if (what === 'check') {
+            $('updText').textContent = 'جاري التحقق…';
+            await fetch('/api/admin/inbox/channel/check', { method: 'POST' });
+            loadAlerts();
+            return;
+          }
+          const r2 = await fetch('/api/admin/channel/install', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ version: u.version }) });
+          if (!r2.ok) throw new Error((await r2.json().catch(() => ({}))).error || r2.status);
+          updWasRestarting = false;
+          loadUpdate();
+        } catch (e) { b.disabled = false; $('updText').textContent = 'تعذر: ' + e.message; }
+      }));
+    }
+    function schedUpd(ms) { clearTimeout(updPoll); updPoll = setTimeout(() => { if (!$('alertsView').hidden) loadUpdate(); }, ms); }
+    let devStatus = 'open';
+    $('devStatus').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      devStatus = b.dataset.status;
+      $('devStatus').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      loadDevNotes();
+    }));
+    function whenAr(iso) { try { return new Date(iso).toLocaleString('ar-SA-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return iso || ''; } }
+    async function loadDevNotes(msg) {
+      $('devState').textContent = msg || 'جاري التحميل…';
+      try {
+        const r = await fetch(`/api/admin/inbox/dev-notes?status=${devStatus}`);
+        if (!r.ok) throw new Error(r.status);
+        const d = await r.json();
+        $('devState').textContent = msg || (d.notes.length ? '' : (devStatus === 'open' ? 'ما فيه ملاحظات مفتوحة من المطور.' : 'لا يوجد.'));
+        $('devList').innerHTML = d.notes.map(n => `<article class="dn-card${n.status === 'done' ? ' done' : ''}" aria-labelledby="dn${n.note_id}">
+            <h3 id="dn${n.note_id}">${esc(n.title)}</h3>
+            ${n.body ? `<p>${esc(n.body)}</p>` : ''}
+            <p class="diff">${n.status === 'done' ? `تمّت — ${esc(n.handled_by || '')} · ${esc(whenAr(n.handled_at))}${n.handled_note ? ` · «${esc(n.handled_note)}»` : ''}` : 'مفتوحة'}</p>
+            <div class="dn-acts">
+              ${n.action && n.action.type === 'books' ? `<button class="btn secondary" type="button" data-dn-books="${n.note_id}" aria-expanded="false" aria-controls="dnb${n.note_id}">${esc(n.action.label || 'عرض الكتب')}</button>` : ''}
+              ${n.status === 'open'
+                ? `<textarea id="dnc${n.note_id}" maxlength="600" aria-label="ما سويت (اختياري)" placeholder="ما سويت (اختياري)"></textarea><button class="btn" type="button" data-dn="${n.note_id}" data-to="done">تم</button>`
+                : `<button class="btn secondary" type="button" data-dn="${n.note_id}" data-to="open">إعادة فتح</button>`}
+            </div>
+            <div class="dn-books" id="dnb${n.note_id}" hidden></div>
+          </article>`).join('');
+        $('devList').querySelectorAll('[data-dn]').forEach(b => b.addEventListener('click', async () => {
+          b.disabled = true;
+          const comment = $('dnc' + b.dataset.dn) ? $('dnc' + b.dataset.dn).value.trim() : '';
+          try {
+            const r2 = await fetch(`/api/admin/inbox/dev-notes/${b.dataset.dn}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: b.dataset.to, comment }) });
+            if (!r2.ok) throw new Error((await r2.json().catch(() => ({}))).error || r2.status);
+            await loadAlerts(b.dataset.to === 'done' ? 'تم تسجيلها، شكرًا لك.' : 'أُعيد فتح الملاحظة.');
+          } catch (e) { b.disabled = false; $('devState').textContent = 'تعذر الحفظ: ' + e.message; }
+        }));
+        $('devList').querySelectorAll('[data-dn-books]').forEach(b => b.addEventListener('click', async () => {
+          const box = $('dnb' + b.dataset.dnBooks);
+          if (!box.hidden) { box.hidden = true; b.setAttribute('aria-expanded', 'false'); return; }
+          box.hidden = false; b.setAttribute('aria-expanded', 'true'); box.innerHTML = '<p class="diff">جاري التحميل…</p>';
+          try {
+            const r3 = await fetch(`/api/admin/inbox/dev-notes/${b.dataset.dnBooks}/books`);
+            if (!r3.ok) throw new Error(r3.status);
+            const x = await r3.json();
+            box.innerHTML = `<p class="diff">${num(x.books.length)} كتابًا</p>` + x.books.map(k => `<div class="dn-book"><div><b>${esc(k.title)}</b>
+                <span>${esc(k.author || 'غير معروف')} · ${esc(k.publisher || '')}${k.translator ? ' · ترجمة ' + esc(k.translator) : ''}${k.research_status === 'needs_confirmation' ? ' · يحتاج تأكيد هوية' : ''}</span></div>
+                <button class="btn secondary" type="button" data-open-book="${k.book_id}">افتح البطاقة</button></div>`).join('');
+            box.querySelectorAll('[data-open-book]').forEach(o => o.addEventListener('click', () => openCard(Number(o.dataset.openBook))));
+          } catch (e) { box.innerHTML = '<p class="diff">تعذر تحميل القائمة.</p>'; }
+        }));
+      } catch (e) { $('devState').textContent = 'تعذر تحميل ملاحظات المطور.'; }
+    }
+
+    // ---------------- «اختياراتنا هذا الشهر» (2026-10-14): five slots, candidates, approve. See backend/picks.py.
+    const pk = { month: null, data: null, next: false };
+    const PK_MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const pkMonth = m => m ? `${PK_MONTHS[Number(m.slice(5, 7)) - 1]} ${num(Number(m.slice(0, 4))).replace(/٬|,/g, '')}` : '';
+    const pkCover = b => b && b.cover_url ? `<img class="pk-cover" src="${esc(b.cover_url)}" alt="" loading="lazy" />`
+      : `<span class="pk-cover" aria-hidden="true">${esc([...String((b && b.title) || 'ك')][0])}</span>`;
+    const pkPut = id => `<div class="pk-put" role="group" aria-label="ضعه في خانة"><span class="state">ضعه في خانة:</span>${[1, 2, 3, 4, 5].map(n => `<button type="button" class="mini" data-put="${id}" data-slot="${n}" aria-label="ضعه في الخانة ${num(n)}">${num(n)}</button>`).join('')}</div>`;
+    async function pkPost(body, done) {
+      const st = $('pkState');
+      st.textContent = 'جاري الحفظ…';
+      try {
+        const res = await fetch('/api/admin/picks', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.assign({ month: pk.month }, body)) });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) { st.textContent = d.error || 'تعذر الحفظ'; return false; }
+        st.textContent = done || 'تم';
+        await loadPicks(true);
+        return true;
+      } catch (e) { st.textContent = 'تعذر الحفظ (تأكد من الاتصال)'; return false; }
+    }
+    function pkWire(root) {
+      root.querySelectorAll('[data-put]').forEach(btn => btn.addEventListener('click', () =>
+        pkPost({ action: 'set', slot: Number(btn.dataset.slot), book_id: Number(btn.dataset.put) }, `انحط في الخانة ${num(Number(btn.dataset.slot))}`)));
+    }
+    function pkRender() {
+      const d = pk.data, live = d.live_month;
+      const approved = d.approved;
+      const status = $('pkStatus');
+      status.className = 'pk-status ' + (approved ? 'live' : 'draft');
+      status.textContent = approved
+        ? `اختيارات ${pkMonth(d.month)} معتمدة${approved.approved_by ? ' من ' + approved.approved_by : ''}${d.month === d.this_month ? ' وتظهر للزوار الآن.' : '، وتظهر للزوار أول ما يبدأ الشهر.'}`
+        : `مسودة ${pkMonth(d.month)}: ما تظهر للزوار إلا بعد الاعتماد. ` + (live ? `الزوار يشوفون الآن اختيارات ${pkMonth(live)}.` : 'ما فيه اختيارات معتمدة للحين، فالقسم مخفي عند الزوار.');
+      $('pkApprove').textContent = approved ? 'إلغاء الاعتماد' : 'اعتماد ونشر للزوار';
+      $('pkApprove').className = approved ? 'btn secondary' : 'btn';
+      $('pkSlots').innerHTML = d.slots.map(s => {
+        const b = s.book;
+        if (!b && s.cleared) return `<li class="pk-row"><span class="pk-n">${num(s.slot)}</span><span class="pk-cover" aria-hidden="true">＋</span><div class="pk-info"><strong>خانة فرّغها ${esc(s.updated_by || 'موظف')}</strong><span class="state">تبقى فاضية عند الزوار، وما يرجّع لها التحديث التلقائي كتابًا. لملئها اختر كتابًا من المرشحين تحت.</span></div></li>`;
+        if (!b) return `<li class="pk-row"><span class="pk-n">${num(s.slot)}</span><span class="pk-cover" aria-hidden="true">＋</span><div class="pk-info"><strong>خانة فاضية</strong><span class="state">اختر كتابًا من المرشحين تحت، أو اضغط «تحديث الاقتراح التلقائي».</span></div></li>`;
+        const tags = [s.pinned ? '<span class="pk-tag pin">📌 مثبّت</span>' : '', s.chosen_by === 'staff' ? `<span class="pk-tag">اختيار ${esc(s.updated_by || 'موظف')}</span>` : '<span class="pk-tag">اقتراح تلقائي</span>',
+          s.out_of_stock ? '<span class="pk-tag warn">نفد من المخزون — يظهر مكانه المرشح التالي</span>' : ''].join('');
+        return `<li class="pk-row"><span class="pk-n">${num(s.slot)}</span>${pkCover(b)}
+          <div class="pk-info"><strong>${esc(b.title)}</strong><span class="state">${esc(b.author || '')}</span>
+            ${s.line ? `<p class="pk-line">${esc(s.line)}</p>` : '<p class="pk-line state">ما له سطر قصير (خطّاف أو نبذة)</p>'}
+            ${s.reason ? `<span class="state">ليش: ${esc(s.reason)}</span>` : ''}<div class="pk-tags">${tags}</div></div>
+          <div class="pk-actions">
+            <button type="button" class="mini" data-pin="${s.slot}" data-on="${s.pinned ? 0 : 1}">${s.pinned ? 'فك التثبيت' : '📌 تثبيت'}</button>
+            ${s.slot > 1 ? `<button type="button" class="mini" data-move="${s.slot}" data-to="${s.slot - 1}" aria-label="قدّمه للخانة ${num(s.slot - 1)}">↑ قدّم</button>` : ''}
+            ${s.slot < 5 ? `<button type="button" class="mini" data-move="${s.slot}" data-to="${s.slot + 1}" aria-label="أخّره للخانة ${num(s.slot + 1)}">↓ أخّر</button>` : ''}
+            <button type="button" class="mini" data-clear="${s.slot}">تفريغ</button></div></li>`;
+      }).join('');
+      $('pkSlots').querySelectorAll('[data-pin]').forEach(btn => btn.addEventListener('click', () =>
+        pkPost({ action: 'pin', slot: Number(btn.dataset.pin), pinned: btn.dataset.on === '1' }, btn.dataset.on === '1' ? 'تم التثبيت' : 'تم فك التثبيت')));
+      $('pkSlots').querySelectorAll('[data-move]').forEach(btn => btn.addEventListener('click', () =>
+        pkPost({ action: 'move', slot: Number(btn.dataset.move), to: Number(btn.dataset.to) }, 'تم تغيير الترتيب')));
+      $('pkSlots').querySelectorAll('[data-clear]').forEach(btn => btn.addEventListener('click', () =>
+        pkPost({ action: 'clear', slot: Number(btn.dataset.clear) }, 'تم تفريغ الخانة')));
+      $('pkCands').innerHTML = d.candidates.length ? d.candidates.map(c => `<div class="pk-cand">${pkCover(c.book)}<div class="pk-info">
+          <strong>${esc(c.book.title)}</strong><span class="state">${esc(c.book.author || '')}${c.book.genre ? ' · ' + esc(c.book.genre) : ''}</span>
+          ${c.reasons.length ? `<span class="state">${esc(c.reasons.join('؛ '))}</span>` : '<span class="state">بدون إشارة قوية</span>'}${pkPut(c.book.book_id)}</div></div>`).join('')
+        : '<p class="state">ما فيه مرشحون آخرون.</p>';
+      pkWire($('pkCands'));
+      const sg = d.signals, lists = sg.lists || [];
+      $('pkSignals').innerHTML = (sg.built_at
+        ? `<p style="margin:0 0 6px">آخر تحديث للإشارات الخارجية: ${esc(String(sg.built_at).slice(0, 10))}${sg.month ? ` (قوائم ${esc(pkMonth(sg.month))})` : ''}. توصل مع تحديث التطبيق كل شهر.</p>`
+          + (lists.length ? `<ul style="margin:0;padding-inline-start:18px">${lists.map(l => `<li>${esc(l.label || '')}: ${num(l.matched)} كتاب منها متوفر عندنا</li>`).join('')}</ul>` : '')
+          + `<p style="margin:6px 0 0">تقييمات القرّاء المحفوظة: ${num(sg.ratings || 0)} كتاب.</p>`
+        : '<p style="margin:0">ما وصل ملف الإشارات الخارجية للحين؛ الاقتراح الآن من الجوائز واختيارات زوارنا وتقييماتهم فقط.</p>')
+        + '<p style="margin:6px 0 0">ما نقترح تلقائيًا: كتاب بلا غلاف أو بلا سطر قصير، كتاب «لا يناسب الأطفال»، أو كتاب كان من الاختيارات في الأشهر الثلاثة اللي قبل. تقدر تختارها بنفسك.</p>';
+    }
+    async function loadPicks(quiet = false) {
+      pk.month = pk.month || null;
+      const q = pk.next && pk.data ? `?month=${pk.data.next_month}` : (pk.month ? `?month=${pk.month}` : '');
+      if (!quiet) { $('pkSlots').innerHTML = '<li class="state">جاري التحميل…</li>'; $('pkState').textContent = ''; }
+      try {
+        const res = await fetch('/api/admin/picks' + q);
+        if (!res.ok) throw new Error(res.status);
+        pk.data = await res.json(); pk.month = pk.data.month;
+      } catch (e) { $('pkSlots').innerHTML = '<li class="state">تعذر تحميل الاختيارات</li>'; return; }
+      pkRender();
+    }
+    function pkSwitch(next) {
+      pk.next = next; pk.month = next && pk.data ? pk.data.next_month : (pk.data ? pk.data.this_month : null);
+      $('pkThis').setAttribute('aria-pressed', String(!next)); $('pkNext').setAttribute('aria-pressed', String(next));
+      $('pkFound').innerHTML = ''; $('pkQ').value = '';
+      loadPicks();
+    }
+    $('pkThis').addEventListener('click', () => pkSwitch(false));
+    $('pkNext').addEventListener('click', () => pkSwitch(true));
+    $('pkApprove').addEventListener('click', () => {
+      const approved = pk.data && pk.data.approved;
+      pkPost({ action: approved ? 'unapprove' : 'approve' }, approved ? 'انلغى الاعتماد' : 'تم الاعتماد');
+    });
+    $('pkRefresh').addEventListener('click', () => pkPost({ action: 'refresh' }, 'تم تحديث الاقتراح (الخانات المثبّتة واختيارات الموظفين والخانات المفرّغة باقية)'));
+    let pkTimer = null;
+    $('pkQ').addEventListener('input', () => {
+      clearTimeout(pkTimer);
+      pkTimer = setTimeout(async () => {
+        const q = $('pkQ').value.trim(), box = $('pkFound');
+        if (q.length < 2) { box.innerHTML = ''; return; }
+        try {
+          const res = await fetch('/api/admin/picks/search?q=' + encodeURIComponent(q));
+          const found = (await res.json()).books || [];
+          box.innerHTML = found.length ? found.map(b => `<div class="pk-cand">${pkCover(b)}<div class="pk-info"><strong>${esc(b.title)}</strong>
+            <span class="state">${esc(b.author || '')}${b.genre ? ' · ' + esc(b.genre) : ''}</span>${pkPut(b.book_id)}</div></div>`).join('')
+            : '<p class="state">ما لقينا كتابًا متوفرًا بهذا الاسم</p>';
+          pkWire(box);
+        } catch (e) { box.innerHTML = '<p class="state">تعذر البحث</p>'; }
+      }, 250);
     });
 
     // ---------------- «الفعاليات» (2026-10-08): add / edit / hide / delete; picture; optional book
@@ -1886,7 +2287,7 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('sheet').hidden) closeCard(); });
 
     // the year the work first came out, with where it was read and when (ORIGYR 2026-10-11)
-    const ORIG_YEAR_SOURCES = { goodreads: 'Goodreads', openlibrary: 'Open Library', wikidata: 'Wikidata', staff: 'إدخال الموظف' };
+    const ORIG_YEAR_SOURCES = { goodreads: 'Goodreads', openlibrary: 'Open Library', wikidata: 'Wikidata', loc: 'مكتبة الكونغرس', staff: 'إدخال الموظف' };
     function origYearText(b) {
       if (!b.original_year) return null;
       const src = ORIG_YEAR_SOURCES[b.original_year_source] || b.original_year_source || '';
@@ -2209,13 +2610,14 @@
             <div class="cover-row">
               ${b.cover_url ? `<img class="cover-big" src="${esc(b.cover_url)}" alt="غلاف ${esc(b.title)}" />` : '<div class="cover-none">لا يوجد غلاف بعد</div>'}
               <div class="cover-actions">
-                <span class="diff">${b.cover_url ? 'المصدر: ' + esc(COVER_SOURCES[b.cover_source] || b.cover_source || '—') : 'يُبحث تلقائيًا في Open Library ثم Goodreads ثم أبجد.'}</span>
-                <button id="coverFetch" class="btn" type="button">ابحث عن غلاف تلقائيًا</button>
+                <span class="diff">${b.cover_url ? 'المصدر: ' + esc(COVER_SOURCES[b.cover_source] || b.cover_source || '—') : 'يُبحث في صور النت عن «غلاف كتاب "العنوان"» وفي أبجد وGoodreads وOpen Library، وتختار أنت غلاف طبعتنا.'}</span>
+                <button id="coverFetch" class="btn" type="button">ابحث عن غلاف في النت</button>
                 <label class="btn" for="coverFile">ارفع صورة الغلاف</label><input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp" />
                 ${b.cover_url ? '<button id="coverRemove" class="btn" type="button">احذف الغلاف</button>' : ''}
               </div>
             </div>
             <p id="coverState" class="state" role="status"></p>
+            <div id="coverChoices" class="cover-choices" hidden></div>
           </section>
           <section class="block"><h3>نبذة عن الكتاب</h3>
             <p class="diff" style="margin:0 0 8px">جملتين أو ثلاث بكلامنا عن موضوع الكتاب، بدون نسخ من المواقع وبدون حرق. تستخدمها منار لتعريف الكتاب للزائر.</p>
@@ -2270,7 +2672,7 @@
       $('basicSave').addEventListener('click', () => saveBasic(b));
       if ($('saveAge')) $('saveAge').addEventListener('click', () => saveAge(b.book_id));
       $('saveSummary').addEventListener('click', () => saveSummary(b.book_id));
-      $('coverFetch').addEventListener('click', () => coverAction(b.book_id, 'fetch'));
+      $('coverFetch').addEventListener('click', () => coverSearch(b.book_id, b.title));
       $('coverFile').addEventListener('change', () => coverAction(b.book_id, 'upload'));
       if ($('coverRemove')) $('coverRemove').addEventListener('click', () => coverAction(b.book_id, 'remove'));
     }
@@ -2331,6 +2733,42 @@
         if (!res.ok) { st.textContent = COVER_ERRORS[d.error] || 'تعذر تنفيذ العملية (تأكد من اتصال الإنترنت).'; return; }
         await reopenCard(id, 'coverState', action === 'remove' ? 'تم حذف الغلاف' : 'تم حفظ الغلاف');
       } catch (e) { st.textContent = 'تعذر تنفيذ العملية'; }
+    }
+
+    // «ابحث عن غلاف في النت» (Ibrahim 2026-10-13): several sources, the staff member chooses the right cover
+    async function coverSearch(id, title) {
+      const st = $('coverState'), box = $('coverChoices');
+      st.textContent = 'جاري البحث في النت عن «غلاف كتاب "' + (title || '') + '"»… (قد يأخذ نصف دقيقة)';
+      box.hidden = true; box.innerHTML = ''; $('coverFetch').disabled = true;
+      try {
+        const res = await fetch(`/api/admin/books/${id}/cover/search`, { method: 'POST' });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) { st.textContent = 'تعذر البحث (تأكد من اتصال الإنترنت).'; return; }
+        const list = d.candidates || [];
+        if (!list.length) { st.textContent = 'ما لقينا غلاف في هذي المواقع. ارفعه يدويًا.'; return; }
+        st.textContent = `لقينا ${list.length} ${list.length === 1 ? 'صورة' : 'صور'}. اختر الغلاف الصحيح لهذي الطبعة، أو تجاهلها كلها.`;
+        box.innerHTML = list.map((c, i) => `<figure class="cover-choice">
+            <img src="${esc(c.preview)}" alt="خيار ${i + 1} من ${esc(c.label)}" />
+            <figcaption><b>${esc(c.label)}</b>${c.width ? `<span dir="ltr">${c.width}×${c.height}</span>` : ''}
+              ${c.page ? `<a href="${esc(c.page)}" target="_blank" rel="noopener noreferrer">المصدر</a>` : ''}</figcaption>
+            <button class="btn" type="button" data-i="${i}">اختر هذا</button></figure>`).join('') +
+          '<button id="coverChoicesClose" class="btn secondary" type="button">ولا واحد منها</button>';
+        box.hidden = false;
+        box.querySelectorAll('button[data-i]').forEach(btn => btn.addEventListener('click', async () => {
+          box.querySelectorAll('button').forEach(x => { x.disabled = true; });
+          st.textContent = 'جاري حفظ الغلاف…';
+          try {
+            const r = await fetch(`/api/admin/books/${id}/cover/choose`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: list[+btn.dataset.i].url }) });
+            const dd = await r.json().catch(() => ({}));
+            if (!r.ok) { st.textContent = dd.error === 'not offered' ? 'انتهت نتيجة البحث، ابحث مرة ثانية.' : 'تعذر حفظ هذي الصورة، جرّب غيرها.';
+              box.querySelectorAll('button').forEach(x => { x.disabled = false; }); return; }
+            await reopenCard(id, 'coverState', 'تم حفظ الغلاف');
+          } catch (e) { st.textContent = 'تعذر حفظ الغلاف'; box.querySelectorAll('button').forEach(x => { x.disabled = false; }); }
+        }));
+        $('coverChoicesClose').addEventListener('click', () => { box.hidden = true; box.innerHTML = ''; st.textContent = ''; });
+      } catch (e) { st.textContent = 'تعذر البحث'; }
+      finally { if ($('coverFetch')) $('coverFetch').disabled = false; }
     }
 
     function langOptions(current, allowUnknown) {
@@ -2843,10 +3281,11 @@
       $('whoName').textContent = `${ME.name} · ${ME.role_label}`;
       $('whoAv').textContent = String(ME.name || '؟').trim().charAt(0); $('who').title = $('whoName').textContent;
       const manager = ME.role === 'manager';
-      $('tabImport').hidden = !manager; $('tabSettings').hidden = !manager; $('tabStats').hidden = !manager; $('phGear').hidden = !manager;
+      // «الإعدادات» is open to staff too (Ibrahim 2026-10-13); import and statistics stay manager-only
+      $('tabImport').hidden = !manager; $('tabSettings').hidden = false; $('tabStats').hidden = !manager; $('phGear').hidden = false;
       $('cxFold').hidden = !manager;  // applying identity corrections stays manager-only, as in «استيراد من رواء»
       ['aPass', 'aPass2', 'pCur', 'pNew'].forEach(id => { $(id).value = ''; });
-      loadInboxCount();
+      loadInboxCount(); loadAlertsCount();
     }
     $('authForm').addEventListener('submit', async e => {
       e.preventDefault(); $('authErr').textContent = ''; $('authBtn').disabled = true;
@@ -2934,7 +3373,7 @@
       const res = await fetch('/api/admin/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ daily_model_calls: Number($('capInput').value) }) });
       $('capState').textContent = res.ok ? 'تم الحفظ' : 'قيمة غير صحيحة'; loadUsage(); loadAudit();
     });
-    const AUDIT_LABELS = { 'staff_idea.add': 'اقتراح موظف على التطبيق', 'staff_idea.done': 'معالجة اقتراح موظف', 'staff_idea.open': 'إعادة فتح اقتراح موظف', 'inbox.export': 'تنزيل ملف البلاغات', 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف',
+    const AUDIT_LABELS = { 'update.approved': 'موافقة على تحديث «منار»', 'update.installed': 'تثبيت تحديث «منار»', 'update.failed': 'فشل تحديث «منار» ورجوع للنسخة السابقة', 'dev_note.done': 'تمّت ملاحظة من المطور', 'dev_note.open': 'إعادة فتح ملاحظة من المطور', 'staff_idea.add': 'اقتراح موظف على التطبيق', 'staff_idea.done': 'معالجة اقتراح موظف', 'staff_idea.open': 'إعادة فتح اقتراح موظف', 'inbox.export': 'تنزيل ملف البلاغات', 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف',
       'user.password_changed': 'تغيير كلمة المرور', 'book.update': 'تعديل كتاب', 'card.confirm': 'تأكيد صفة', 'card.reject': 'حذف صفة',
       'card.restore': 'استرجاع صفة', 'card.set': 'تعيين صفة', 'card.add': 'إضافة صفة', 'model.set': 'تغيير النموذج',
       'key.saved': 'حفظ مفتاح', 'key.deleted': 'حذف مفتاح', 'endpoint.set': 'تغيير عنوان مزوّد', 'import.apply': 'استيراد من رواء',
@@ -3307,6 +3746,24 @@
       try { await navigator.clipboard.writeText(TRIAL_URL); $('qrCopyState').textContent = 'تم نسخ الرابط'; }
       catch (e) { $('qrCopyState').textContent = 'انسخه يدويًا: ' + TRIAL_URL; }
     });
+
+    // «رمز QR» in the menu: the same code as «الإعدادات ← رمز QR», in a window
+    $('navQr').addEventListener('click', async () => {
+      if ($('navToggle').getAttribute('aria-expanded') === 'true') setNavOpen(false);   // the phone menu
+      $('qrDlgBox').innerHTML = '<span class="diff">جاري التحميل…</span>'; $('qrDlgState').textContent = ''; $('qrDlgUrl').textContent = '';
+      const dlg = $('qrDlg');
+      if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+      await loadTrial();
+      $('qrDlgBox').innerHTML = $('qrBox').innerHTML;
+      $('qrDlgState').className = $('qrStatus').className; $('qrDlgState').textContent = $('qrStatus').textContent;
+      $('qrDlgUrl').textContent = TRIAL_URL || '';
+      $('qrDlgPrint').disabled = $('qrDlgPng').disabled = !TRIAL_URL;
+    });
+    const closeQrDlg = () => { const d = $('qrDlg'); if (typeof d.close === 'function') d.close(); else d.removeAttribute('open'); };
+    $('qrDlgClose').addEventListener('click', closeQrDlg);
+    $('qrDlg').addEventListener('click', e => { if (e.target === $('qrDlg')) closeQrDlg(); });   // a click on the dimmed area
+    $('qrDlgPrint').addEventListener('click', () => { closeQrDlg(); setTimeout(() => window.print(), 50); });
+    $('qrDlgPng').addEventListener('click', () => $('qrPngBtn').click());
 
     boot();
   </script>

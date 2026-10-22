@@ -47,7 +47,8 @@ out = A.run_chat([{"role": "user", "content": "أبغى كتاب قصير مثل
 listed = [r["id"] for f in seen["facts"] for r in f.get("related", [])]
 ok(target not in listed and target not in [b["book_id"] for b in out["books"]],
    "«قصير»: a 560-page related book is neither listed nor shown")
-ok(src in [b["book_id"] for b in out["books"]], "the book the visitor asked about by name is still shown")
+ok(src not in [b["book_id"] for b in out["books"]] and src in [f["id"] for f in seen["facts"]],
+   "«مثل X»: X stays in facts for the comparison but is not a card (QADFIX11, QAD 2026-10-21 case 11.1)")
 interpret({"length": "short"}, [])
 out = A.run_chat([{"role": "user", "content": "أبغى رواية"},
                   {"role": "assistant", "content": "هذي اقتراحات", "book_ids": [target]},

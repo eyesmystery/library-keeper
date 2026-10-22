@@ -10,6 +10,7 @@ The rounds kept finding the same families of errors, each patched case by case i
 Everything here is plain text work on the visitor's own words: no model, no database. app.py calls it.
 """
 import re
+import threading
 
 import keyword_prefs
 from keyword_prefs import normalize, strip_al
@@ -205,8 +206,18 @@ _NEXT = re.compile(r"(?:الجزء|الكتاب) (?:التالي|القادم|ا
                    r"|(?:^| )(?:تكملته|تكملتها|التكمله|تكمله)(?: |$)|next (?:part|book|one|volume)|(?:^| )sequel(?: |$)")
 
 
+# «هل له أجزاء ثانية؟»، «باقي السلسلة؟» (staff chat 2026-10-13 22:59, «اسم الريح»)
+_ALL = re.compile(r"(?:^| )(?:اجزاء|اجزاءه|اجزاوه|اجزاؤه|اجزائه|اجزاءها|اجزاوها|اجزاؤها|اجزائها|سلسلته|سلسلتها)(?: |$)"
+                  r"|(?:بقيه|باقي|كامل) (?:ال)?(?:اجزاء|سلسله)|other parts|more parts|rest of the series|other books in the series"
+                  # «كم جزء سلسلة كينغسبريدج؟» (open question 17, MGR 2026-10-17)
+                  r"|(?:^| )كم (?:عدد )?(?:جزء|اجزاء|مجلد|مجلدات)(?: |$)|how many (?:parts|volumes|books in (?:the |this )?series)"
+                  # QADFIX9 (QAD 2026-10-20, case 5.2): «ثلاثية التوأمين عندكم كاملة؟»
+                  r"|(?:^| )(?:ثلاثيه|رباعيه|خماسيه|سلسله|السلسله|الثلاثيه)(?: .*)? (?:كامله|كاملين|بالكامل|كلها)(?: |$)"
+                  r"|(?:^| )كل (?:ال)?(?:اجزاء|اجزائها|اجزاءها)(?: |$)|the whole (?:series|trilogy)|complete (?:series|trilogy)")
+
+
 def part_asked(text):
-    """«والجزء الثاني؟» -> 2, «وش الجزء اللي بعده؟» -> "next", else None."""
+    """«والجزء الثاني؟» -> 2, «وش الجزء اللي بعده؟» -> "next", «هل له أجزاء ثانية؟» -> "all", else None."""
     t = " ".join(normalize(text).split())
     for m in _PART.finditer(t):
         w = m.group(1)
@@ -214,7 +225,19 @@ def part_asked(text):
             return int(w)
         if w in _ORD:
             return _ORD[w]
-    return "next" if _NEXT.search(t) else None
+    if _NEXT.search(t):
+        return "next"
+    return "all" if _ALL.search(t) else None
+
+
+def series_others(anchor, all_books):
+    """The other books of the anchor's series in our records (by series_name, or catalogued under the first
+    part's title), in reading order."""
+    series = title_key(anchor.get("series_name")) or title_key(anchor.get("title"))
+    out = [b for b in all_books.values() if b["book_id"] != anchor["book_id"]
+           and series and title_key(b.get("series_name")) == series]
+    out.sort(key=lambda b: (b.get("series_position") or 99, b["book_id"]))
+    return out
 
 
 def next_part(anchor, want, all_books):
@@ -238,7 +261,9 @@ def next_part(anchor, want, all_books):
 # ---------------------------------------------------------------------------
 # Price: «رواية ما تتعدى ٢٥ ريال»، «بعشرة ريال»، «وش أرخص رواية؟»
 # ---------------------------------------------------------------------------
-_PRICE = re.compile(r"(\d{1,4})\s*(?:ريال|ريالات|ر س|sar|sr|riyal|riyals)(?:\s|$)")
+# QADFIX12 #10 (QAD 2026-10-22, case 44.2): the number stands on its own («٢٥ ريال»، «بـ٢٥ ريال»), never inside a word:
+# Arabizi «a2sar» (أقصر) is not «2 sar»
+_PRICE = re.compile(r"(?:^|(?<=\s))[وبل]?(\d{1,4})\s*(?:ريال|ريالات|ر س|sar|sr|riyal|riyals)(?:\s|$)")
 _PRICE_ANY = re.compile(r"(?:اي|مو مهم|مب مهم|مو شرط|ما يهم|ما يهمني) (?:ال)?(?:سعر|اسعار)|السعر (?:مو مهم|ما يهم|مب مهم)"
                         r"|any price|price (?:doesn t|does not) matter")
 _CHEAPEST = re.compile(r"(?:^| )(?:ال)?(?:ارخص|رخيص|رخيصه|cheapest|cheaper|cheap)(?: |$)|اقل سعر|lowest price")
@@ -300,6 +325,9 @@ def excluded_genres(user_messages):
         text = _EXIST_Q.sub(" ", " ".join(normalize(text).split()))
         # «لا، ابي قصص مصورة عربية» answers the question before it: that «لا» refuses nothing that follows
         text = re.sub(r"^(?:لا|لاء|no|nope)(?: |$)", "", text)
+        # QADFIX11 (QAD 2026-10-21, case 34.1): «إلا الروايات المترجمة» refuses translated ones only, not the kind
+        text = re.sub(r"(?:^| )(?:الا|غير|ماعدا|عدا|بدون|بلا|مو|مب|ما ابي|ماابي|ما ابغى)\s+(?:ال)?(?:روايات|روايه|قصص|كتب)\s+(?:ال)?(?:مترجمه|مترجم|مترجمات)(?= |$)",
+                      " ", " " + text + " ").strip()
         p, flags = keyword_prefs._parse_one(text)
         neg, pos = list(flags["genres_negated"]), list(p["genres"])
         t = " ".join(normalize(text).split())
@@ -356,13 +384,41 @@ _KID_AGE = re.compile(r"(?:^| )[وف]?ل?(?:بنتي|ابنتي|ولدي|ابن�
                       r"(?! ?(?:كتاب|كتب|صفحه|ريال|روايه|روايات|قصه|قصص|جزء|book|books|pages?))")
 
 
+# «عمره عشر سنين»، «بنتي ست سنوات»، «ten years old»: an age written as a word (QAD 2026-10-13, case 14: «عشر سنين»
+# was not read and the age was asked twice). Only next to an age word, so «عشر كتب» stays a count.
+_NUM_WORDS = {
+    "سنتين": 2, "ثلاث": 3, "ثلاثه": 3, "ثلث": 3, "اربع": 4, "اربعه": 4, "خمس": 5, "خمسه": 5, "ست": 6, "سته": 6,
+    "سبع": 7, "سبعه": 7, "ثمان": 8, "ثماني": 8, "ثمانيه": 8, "ثمن": 8, "تسع": 9, "تسعه": 9, "عشر": 10, "عشره": 10,
+    "احدعش": 11, "احدعشر": 11, "احد عشر": 11, "حداش": 11, "حدعش": 11, "اثنعش": 12, "اثنا عشر": 12, "اثني عشر": 12,
+    "اثنعشر": 12, "اطنعش": 12, "ثلاث عشره": 13, "ثلاث عشر": 13, "ثلطعش": 13, "ثلاثطعش": 13, "ثلتعش": 13,
+    "اربع عشره": 14, "اربع عشر": 14, "اربعطعش": 14, "ارباطعش": 14, "اربعتعش": 14, "خمس عشره": 15, "خمس عشر": 15,
+    "خمسطعش": 15, "خمستعش": 15, "ست عشره": 16, "ست عشر": 16, "ستطعش": 16, "سطعش": 16, "سبع عشره": 17,
+    "سبع عشر": 17, "سبعطعش": 17, "سبعتعش": 17, "ثمان عشره": 18, "ثماني عشره": 18, "ثمنطعش": 18, "ثمانطعش": 18,
+    "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+    "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17,
+}
+_NUM_ALT = "|".join(sorted((re.escape(k) for k in _NUM_WORDS), key=len, reverse=True))
+_NUM_AFTER = re.compile(r"((?:^| )(?:عمره|عمرها|عمري|عمر|عمرهم|عمرهما|age|aged)\s+)(" + _NUM_ALT + r")(?= |$)")
+_NUM_BEFORE = re.compile(r"((?:^| )[وب]?)(" + _NUM_ALT + r")(?= (?:سنه|سنين|سنوات|اعوام|عام|years?)(?: |$))")
+_KID_NUM = re.compile(r"((?:^| )[وف]?ل?(?:بنتي|ابنتي|ولدي|ابني|طفلي|طفلتي|حفيدي|حفيدتي|my daughter|my son)\s+)(" + _NUM_ALT
+                      + r")(?= |$)")
+
+
+def _num_words(t):
+    """Digits for an age written in words; «سنتين» alone is two years."""
+    t = re.sub(r"(?:^| )(?:عمره|عمرها|عمري)?\s*سنتين(?= |$)", lambda m: m.group(0).replace("سنتين", "2 سنين"), t)
+    for rx in (_NUM_AFTER, _NUM_BEFORE, _KID_NUM):
+        t = rx.sub(lambda m: m.group(1) + str(_NUM_WORDS[m.group(2)]), t)
+    return t
+
+
 def kid_ages(text):
-    t = " ".join(normalize(text).split())
+    t = _num_words(" ".join(normalize(text).split()))
     return [int(m.group(1)) for m in _KID_AGE.finditer(t)]
 
 
 def ages_in(text):
-    t = " ".join(normalize(text).split())
+    t = _num_words(" ".join(normalize(text).split()))
     found = {(m.start(1) if m.group(1) else m.start(2)): int(m.group(1) or m.group(2)) for m in _AGE.finditer(t)}
     for m in _KID_AGE.finditer(t):
         found.setdefault(m.start(1), int(m.group(1)))
@@ -373,22 +429,84 @@ def ages_in(text):
 # children («كتب عن الصحة النفسية للمراهقين، لي أنا كأم» got teen novels: QAD 2026-10-12, case 38)
 _PARENT = re.compile(r"(?:^| )(?:انا |لي )?(?:كام|كاب|كوالد|كوالده|كمعلم|كمعلمه|كمربي|كمربيه|كاخصائي|كاخصائيه|كولي امر|كولية امر)(?: |$)"
                      r"|(?:^| )(?:للوالدين|للاهل|لاولياء الامور|لولي الامر|للامهات|للاباء|للمربين|للمعلمين)(?: |$)"
-                     r"|as a (?:parent|mom|mother|dad|father|teacher)|for parents|for teachers")
+                     # «أنا معلمة وأبي كتاب عن إدارة الصف» (QAD 2026-10-13, case 13)
+                     r"|(?:^| )انا (?:معلم|معلمه|مدرس|مدرسه|ام|اب|ابو|والد|والده|مربي|مربيه|اخصائي|اخصائيه)(?: |$)"
+                     r"|as a (?:parent|mom|mother|dad|father|teacher)|for parents|for teachers"
+                     # QADFIX5 #9 (QAD 2026-10-17, case 36.2): «دليل عملي للتعامل مع المراهقين» — the parent reads it
+                     r"|(?:^| )(?:ل|لل)?(?:تعامل|التعامل|تربيه|تربية|فهم) (?:مع )?(?:ال)?(?:مراهقين|مراهق|مراهقه|ابناء|الابناء|اطفال|الاطفال|اولاد|العيال|طفل|طفله)(?: |$)"
+                     r"|(?:deal|dealing|cope|coping) with (?:teens|teenagers|kids|children)|raising (?:teens|teenagers|kids|children)|parenting"
+                     # «ولدي دخل سن المراهقة وصار عصبي، ابي كتاب يساعدني انا افهمه»، «بس الكتاب لي أنا مو له»
+                     # (QAD 2026-10-14, case 8: the father got a teen's age question and a criminology book)
+                     r"|(?:يساعدني|يفيدني|يعلمني) (?:انا )?(?:ك?يف )?(?:افهم|اتعامل|اتفاهم|اربي|اساعد|اتكلم|احتوي)"
+                     r"|(?:^| )(?:افهم|اتعامل مع|اتفاهم مع|اربي|احتوي|اساعد) (?:ولدي|ابني|بنتي|ابنتي|طفلي|طفلتي|اولادي|عيالي|اطفالي|بناتي|ولدنا|بنتنا)(?: |$)"
+                     r"|(?:^| )(?:الكتاب|الكتب) (?:لي|لنا) (?:انا|احنا)?(?: |$)|(?:^| )(?:لي|لنا) (?:انا |احنا )?(?:مو|مب|مش|وليس) (?:له|لها|لهم)(?: |$)"
+                     r"|help me (?:understand|deal with|handle|raise) (?:my|our) (?:son|daughter|kid|child|teen)"
+                     # QADFIX7 #4 (QAD 2026-10-19, case 47.1): «ابي كتاب لي يساعدني اتقرب منه»
+                     r"|(?:يساعدني|يفيدني|يعلمني|يخليني) (?:انا )?(?:ك?يف )?(?:اتقرب|اقرب|اقترب|اصاحب|اكسب|اتواصل|اصادق|افتح|اكون قريب)"
+                     r"|(?:^| )(?:اتقرب|اقرب|اقترب|اصاحب|اكسب) (?:من |مع )?(?:ولدي|ابني|بنتي|ابنتي|عيالي|اولادي|بناتي|منه|منها|منهم)(?: |$)"
+                     r"|help me (?:connect|bond|get closer) with"
+                     # QADFIX9 (QAD 2026-10-20, case 4.1): «أبي كتاب أقرأه أنا يفهمني نفسيتها»
+                     r"|(?:^| )(?:اقراه|اقراها|اقرأه) (?:انا|بنفسي)(?: |$)|(?:^| )(?:يفهمني|يخليني افهم|يعرفني) (?:نفسيتها|نفسيته|نفسيه|بنتي|ولدي|ابني|طفلي)"
+                     r"|(?:^| )(?:افهم|افهمها|افهمه) (?:نفسيتها|نفسيته|نفسيه|طبعها|طبعه)(?: |$)")
+_KID_WORD = re.compile(r"(?:^| )(?:ولدي|ابني|بنتي|ابنتي|طفلي|طفلتي|اولادي|عيالي|اطفالي|بناتي|ولدنا|بنتنا|my son|my daughter|my kid)(?: |$)")
+_FOR_ME = re.compile(r"(?:^| )(?:كتاب|كتب|شي|شيء|روايه) (?:لي|لنفسي)(?: انا)?(?: |$)|(?:^| )(?:a book|something) for (?:me|myself)")
 
 
 def parent_said(text):
-    return bool(_PARENT.search(" ".join(normalize(text).split())))
+    t = " ".join(normalize(text).split())
+    # QADFIX7 #4: «ولدي … ابي كتاب لي» — a book for the parent himself, the child is what it is about
+    return bool(_PARENT.search(t)) or bool(_KID_WORD.search(t) and _FOR_ME.search(t))
+
+
+_KIDDING = re.compile(r"(?:^| )(?:عمره|عمرها|عمر|سنه|سنين|سنوات|سنة|ولدي|بنتي|ابني)(?: |$)|\d")
+
+
+_model_reader = threading.local()
+
+
+def set_model_parent(flag):
+    """QADFIX12 #3 (QAD 2026-10-22, case 13.1): the interpreter read this turn as a grown-up asking for a book for
+    himself about a child («كتاب لي أنا عن تربية طفل عمره سنتين»), in whatever words. Set per request thread at the
+    start of each turn, so parent_reader() below honours the model and not only the phrasings in its lists."""
+    _model_reader.parent = bool(flag)
+
+
+def parent_reader(user_messages):
+    """The grown-up is the reader: said in the latest message, or said just before and the latest only
+    answers about the child («عمره ١٥») without asking for something for him (QAD 2026-10-14, case 8)."""
+    if not user_messages:
+        return False
+    if getattr(_model_reader, "parent", False):
+        return True
+    if parent_said(user_messages[-1]):
+        return True
+    last = " ".join(normalize(user_messages[-1]).split())
+    earlier = any(parent_said(t) for t in user_messages[-3:-1])
+    if not earlier or self_said(user_messages[-1]):
+        return False
+    # «عمره ١٥»، «١٥ سنة»: an answer about the child; «ابي له رواية» is a new wish for the child
+    return len(last.split()) <= 6 and bool(_KIDDING.search(last)) and not re.search(r"(?:^| )(?:له|لها|لهم)(?: |$)", last)
 
 
 # «وش التصنيفات اللي عندكم؟»، «كم كتاب عندكم؟»، «وش أكثر نوع عندكم؟»: a question about the library itself
 _OVERVIEW = re.compile(r"(?:^| )(?:ال)?(?:تصنيفات|اقسام|فئات)(?: |$)|(?:^| )(?:انواع|اصناف) (?:ال)?كتب"
-                       r"|كم (?:كتاب|عنوان|نسخه|عدد (?:ال)?كتب)(?P<rest>(?: \S+)*)|عدد (?:ال)?(?:كتب|عناوين)(?P<rest2>(?: \S+)*)"
-                       r"|اكثر (?:نوع|تصنيف|قسم|صنف)|(?:نوع|تصنيف|قسم) (?:عندكم )?(?:اكثر|الاكثر)"
+                       r"|كم (?:كتاب|عنوان|نسخه|عدد (?:ال)?كتب|روايه|روايات|قصه|قصص|ديوان|دواوين)(?P<rest>(?: \S+)*)"
+                       r"|عدد (?:ال)?(?:كتب|عناوين|روايات)(?P<rest2>(?: \S+)*)"
+                       r"|(?:اكثر|اقل) (?:نوع|تصنيف|قسم|صنف)|(?:نوع|تصنيف|قسم) (?:عندكم )?(?:اكثر|الاكثر|اقل|الاقل)"
                        r"|what (?:categories|genres|sections)|which (?:categories|genres)|how many books|most common (?:genre|category)")
 
 
 _OVERVIEW_TAIL = {normalize(w) for w in "عندكم عندك عندكم؟ بالمكتبه المكتبه في موجود موجوده متوفر متوفره كلها تقريبا "
-                  "اجمالا بالمحل المحل الحين حاليا الكتب المتوفره you have do in the store library total".split()}
+                  "اجمالا بالمحل المحل الحين حاليا الكتب المتوفره you have do in the store library total "
+                  # «كم كتاب عندكم تقريبًا؟ ووش أقل قسم» (QAD 2026-10-13, case 5)
+                  "و وش ووش ايش وايش اقل اكثر قسم القسم تصنيف التصنيف نوع الاقسام والاقسام التصنيفات عددها كم وكم "
+                  "فيه فيها كتب كتاب عناوين طيب يعني "
+                  # «كم كتاب عربي عندكم؟ وكم منها روايات؟»، «قصدي عدد الكتب العربية اللي بالمكتبة» (QAD 2026-10-15, case 50)
+                  "منها منهم منهن اللي الي قصدي اقصد بس عدد العدد اجمالي الاجمالي".split()}
+
+
+_OVERVIEW_LANG = {normalize(w) for w in "بالانجليزي بالإنجليزي بالانجليزيه بالإنجليزية انجليزي انجليزيه إنجليزي إنجليزية الانجليزي "
+                  "الانجليزيه بالعربي بالعربيه عربي عربيه العربي العربيه مترجم مترجمه مترجمة english arabic in".split()}
 
 
 def overview_asked(text):
@@ -397,8 +515,19 @@ def overview_asked(text):
     m = _OVERVIEW.search(t)
     if not m:
         return False
-    rest = (m.group("rest") or m.group("rest2") or "").split()
-    return all(w in _OVERVIEW_TAIL for w in rest)
+    rest = [w for w in (m.group("rest") or m.group("rest2") or "").split() if w not in _OVERVIEW_TAIL]
+    if not rest:
+        return True
+    # «وكم كتاب بالانجليزي؟»: the copies in a language are still the shelves (QAD 2026-10-14, case 38)
+    if len(rest) <= 2 and all(w in _OVERVIEW_LANG for w in rest):
+        return True
+    # «كم كتاب تاريخ عندكم؟»: a kind of book is still the shelves; a name or a subject is not;
+    # «كم كتاب عربي … روايات»: a language and a kind together (QAD 2026-10-15, case 50)
+    kind = [w for w in rest if w not in _OVERVIEW_LANG]
+    if not kind:
+        return len(rest) <= 3
+    p, _ = keyword_prefs._parse_one(" ".join(kind))
+    return len(rest) <= 4 and len(kind) <= 2 and bool(p["genres"]) and not p.get("authors")
 
 
 def reader_person(user_messages):
@@ -484,10 +613,216 @@ _REFINE = {normalize(w) for w in (
     "بالانجليزي بالانقليزي انجليزي انجليزيه الانجليزيه انقليزي بالانجليزيه لكاتب لكاتبه لمؤلف لمؤلفه كاتب كاتبه "
     "مؤلف مؤلفه سعودي سعوديه خليجي خليجيه مصري مصريه عراقي عراقيه سوري سوريه لبناني لبنانيه مغربي مغربيه "
     "اجنبي اجنبيه غربي غربيه مو مب غير "
-    "in arabic english translated original version edition please only just by an a author writer").split()}
+    "in arabic english translated original version edition please only just by an a author writer "
+    # «شي عربي» after «دراما عائلية» only adds the language (QADFIX6, QAD 2026-10-18 case 2.2)
+    "شي شيء something").split()}
 
 
 def refine_only(text):
     """The message only adds a language / translation / author origin («أبيها بالعربي»، «عربية»)."""
     words = normalize(re.sub(r"[؟?!.،,]", " ", text)).split()
     return bool(words) and len(words) <= 6 and all(w in _REFINE for w in words)
+
+
+# «فيه رواية اسمها الساعة الخامسة شي كذا»: the start of a title after «اسمها», with the visitor's «شي كذا» /
+# «تقريبًا» cut off (QAD 2026-10-13, case 30: the model asked about mood and «الساعة الخامسة والعشرون» was in stock)
+_NAMED = re.compile(r"(?:^| )(?:اسمها|اسمه|عنوانها|عنوانه|بعنوان|تسمي|تسمى|يسمي|يسمى|اسم الكتاب|اسم الروايه|called|titled|named)\s+(.+)$")
+_NAMED_TAIL = re.compile(r"\s+(?:شي كذا|شيء كذا|او شي.*|او كذا|او شي زي كذا|او شي قريب.*|تقريبا|على ما اذكر|ما اذكر.*|ما اتذكر.*"
+                         r"|مدري.*|اظن|احس|او something.*|or something.*|something like that|i think|maybe|كذا|زي كذا"
+                         # «اسمها «حدائق» شي، نسيت باقي العنوان» (QADFIX6, QAD 2026-10-18 case 19.1)
+                         r"|شي(?: \S+){0,2} نسيت.*|نسيت.*|مو متاكد.*|مب متاكد.*|forgot.*|شي)\s*$")
+
+
+def named_title(text):
+    t = " ".join(normalize(text).split())
+    m = _NAMED.search(t)
+    if not m or not re.search(r"(?:^| )[وبل]?(?:ال)?(?:روايه|كتاب|قصه|ديوان|مجموعه|سلسله|book|novel|story)(?: |$)", t[:m.start() + 1]):
+        return None   # «ولدي اسمه أحمد» is not a title
+    frag = m.group(1)
+    for _ in range(3):
+        frag = _NAMED_TAIL.sub("", frag).strip()
+    return frag if len(frag) >= 3 and len(frag.split()) <= 8 else None
+
+
+# «مرتفعات ويذرنغ» = «مرتفعات ويذرنج» = «مرتفعات وذرينغ»: a foreign name spelled in Arabic letters in several ways
+# (QAD 2026-10-13, case 29: only the English edition was found). Long vowels dropped, the letters used for
+# g / th / s / t folded together, «ال» taken off each word.
+_SKEL = str.maketrans({"غ": "ج", "ق": "ج", "ك": "ج", "ذ": "ز", "ث": "ز", "ظ": "ز", "ص": "س", "ط": "ت", "ض": "د",
+                       "ا": None, "و": None, "ي": None, "ى": None, "ه": None, "ة": None, "ع": None, "ء": None})
+
+
+def title_skeleton(text):
+    words = [strip_al(w) for w in title_key(text).split()]
+    return " ".join(w.translate(_SKEL) for w in words if w)
+
+
+# ---------------------------------------------------------------------------
+# Pages as a number (QADFIX4, QAD 2026-10-16 case 7.1): «كتب أقل من ١٠٠ صفحة» is a limit on page_count,
+# not the general «short» (one book was offered when 254 in stock have fewer than 100 pages)
+# ---------------------------------------------------------------------------
+# (?<!\S): a whole word, so «على الأقل ١٠٠» is not read as «أقل ١٠٠» (AUDFIX, audit 2026-10-16 P3)
+_PAGES_UNDER = re.compile(r"(?<!\S)(?:اقل من|اقل|تحت|ما يتعدي|ما تتعدي|ما يتجاوز|ما تتجاوز|لا يتعدي|لا تتعدي|لا يتجاوز|لا تتجاوز"
+                          r"|ما يزيد عن|ما تزيد عن|لا يزيد عن|لا تزيد عن|حدود|بحدود|less than|under|fewer than|below|max|maximum)"
+                          r"\s+(\d{2,4})\s*(?:صفحه|صفحات|صفحة|ص|pages?)(?:\s|$)")
+_PAGES_OVER = re.compile(r"(?:اكثر من|فوق|اكبر من|more than|over|at least|عل[يى] الاقل)\s+(\d{2,4})\s*(?:صفحه|صفحات|صفحة|ص|pages?)(?:\s|$)")
+_PAGES_BARE = re.compile(r"(?:^| )(\d{2,4})\s*(?:صفحه|صفحات|صفحة|pages)(?:\s|$)")
+_PAGES_ANY = re.compile(r"(?:اي|مو مهم|ما يهم) (?:عدد )?(?:ال)?صفحات|الطول (?:مو مهم|ما يهم)|any length")
+
+
+def page_limit(user_messages):
+    """-> (most pages, fewest pages) the visitor asked for as a number, each None when not said. The limit
+    stays through the conversation until another is named or it is lifted («مو مهم عدد الصفحات»)."""
+    lo = hi = None
+    for text in user_messages:
+        t = " ".join(num_canon(text).split())
+        if _PAGES_ANY.search(t):
+            lo = hi = None
+        m_hi, m_lo = _PAGES_UNDER.search(t), _PAGES_OVER.search(t)
+        if m_hi:
+            hi = int(m_hi.group(1))
+            if re.match(r"(?:اقل|تحت|less|under|fewer|below)", m_hi.group(0)):
+                hi -= 1   # «أقل من ١٠٠ صفحة»: 99 at most
+        if m_lo:
+            lo = int(m_lo.group(1))
+            if re.match(r"(?:اكثر|فوق|اكبر|more|over)", m_lo.group(0)):
+                lo += 1   # «أكثر من ١٠٠ صفحة»: 101 at least; «على الأقل ١٠٠» keeps 100 (AUDFIX, audit 2026-10-16 P3)
+        if not m_hi and not m_lo and _PAGES_BARE.search(t) and re.search(r"(?:^| )(?:حول|تقريبا|بحدود|around|about)(?: |$)", t):
+            n = int(_PAGES_BARE.search(t).group(1))
+            lo, hi = int(n * 0.8), int(n * 1.2)
+    return hi, lo
+
+
+def is_pages_phrase(phrase):
+    return bool(re.search(r"صفح|pages?(?: |$)", " ".join(normalize(phrase).split())))
+
+
+# ---------------------------------------------------------------------------
+# «اكتب لي قصيدة عن المكتبة» (QADFIX4, case 48.1): Manar does not write texts; she says so kindly and offers
+# books of that kind (poetry for a poem) instead of searching for a book «about the library»
+# ---------------------------------------------------------------------------
+_WRITE_ASK = re.compile(r"(?:^| )(?:اكتب|اكتبي|الف|الفي|ألف|ألفي|نظم|انظم|انظمي|write|compose)(?: لي| لنا| me| us)?\s+"
+                        r"(?:(?:ل[يى] |لنا )?(?:قصيده|قصيدة|شعر|بيت|ابيات|قصه|قصة|حكايه|حكاية|خاطره|خاطرة|مقال|مقاله|رساله|رسالة|نص|a poem|poem|a story|story|an essay|essay))")
+
+
+def write_asked(text):
+    """-> "poem" / "story" / "text" when the visitor asks Manar to write something herself, else None."""
+    t = " ".join(normalize(text).split())
+    m = _WRITE_ASK.search(t)
+    if not m:
+        return None
+    w = m.group(0)
+    if re.search(r"قصيد|شعر|بيت|ابيات|poem", w):
+        return "poem"
+    if re.search(r"قص|حكاي|story", w):
+        return "story"
+    return "text"
+
+
+# ---------------------------------------------------------------------------
+# A reply that says what was asked for is not in stock (QADFIX4: Ibrahim 2026-10-16 «اذا كان الجواب الأولي ان الكتاب
+# او السلسلة مو متوفرين … يحلل السؤال اكثر … ويشوف ايش الاحتمالات للطلب»)
+# ---------------------------------------------------------------------------
+_NOT_FOUND = re.compile(r"(?:غير|مو|مب|مش|ليس|ليست|ما هي|ماهي|ما هو|ماهو) ?(?:متوفر|متوفره|متاح|متاحه|موجود|موجوده)"
+                        r"|ما (?:عندنا|عندي|لقيت|لقينا|حصلت|حصلنا|وجدت|وجدنا|فيه|في)(?: |$)|ماعندنا|مالقيت|لم (?:اجد|نجد)"
+                        r"|ما عندي تفاصيل|ليس لدينا|لا يوجد|لا توجد|ما يوجد"
+                        # «العندليب … ليست عن الحروب الصليبية»: a book offered while saying it is not on the subject
+                        r"|(?:ليس|ليست|مو|مب|مش|ما هي|ماهي|ما هو|ماهو) (?:عن|بخصوص|حول|قريب|قريبه|له علاقه|لها علاقه) "
+                        r"|not (?:available|in stock)|(?:isn t|is not|aren t|are not) (?:available|here|in stock)"
+                        r"|(?:don t|do not|couldn t|could not|didn t) (?:have|find)|no books? (?:by|about|on)|found no|found nothing|nothing (?:about|on)")
+
+
+def says_not_found(reply):
+    return bool(_NOT_FOUND.search(" ".join(normalize(reply or "").split())))
+
+
+# ---------------------------------------------------------------------------
+# A book in stock is never called «غير متوفر» (QAD 2026-10-18, cases 30.2, 46.2, 46.3): the second look said
+# «"الجزيرة" و"الظلام" مو موجودتين» and «الكتابان المذكوران في الرد السابق غير متوفرين بالعربية» about books
+# in stock, in Arabic, some shown in the same reply. The sentence part that says so is replaced by a plain
+# «in stock» line, or dropped when it names no book.
+# ---------------------------------------------------------------------------
+_UNAVAIL = re.compile(r"(?:غير|مو|مب|مش|ليس|ليست|ما هي|ماهي|ما هو|ماهو|ماهم|ما هم|مهي|مهو) ?(?:متوفر|متوفره|متوفرين|متوفرتين|متوفران|متوفرتان"
+                      r"|متاح|متاحه|متاحين|موجود|موجوده|موجودين|موجودتين|موجودان|موجودتان)(?: |$)"
+                      r"|not (?:available|in stock)|(?:isn t|is not|aren t|are not) (?:available|in stock|here)")
+_PREV_REF = re.compile(r"(?:ال)?مذكور(?:ين|ان|تين|تان|ه)? (?:في |ب)(?:ال)?رد (?:ال)?سابق|(?:اللي|الي|التي|الذي|اللذين|اللتين) "
+                       r"(?:ذكرت|عرضت|اقترحت|رشحت)(?:ها|هم|ه|هما)? (?:قبل|سابقا|لك)|(?:ال)?(?:كتابين|كتابان|كتب) (?:ال)?سابق(?:ين|ان|ه)"
+                       r"|(?:the )?(?:books|ones|two) (?:i )?(?:mentioned|showed|suggested|offered) (?:before|earlier)")
+_LANG_AR = re.compile(r"(?:^| )(?:بال)?عربي(?:ه)?(?: |$)|(?:^| )ال?عربيه(?: |$)|in arabic")
+_LANG_EN = re.compile(r"(?:^| )(?:بال)?(?:انجليزي|انجليزيه|انقليزي|انقليزيه)(?: |$)|in english")
+_CLAUSE_END = re.compile(r"[.؟?!؛;\n]")
+
+
+def _clause_lang(c):
+    if _LANG_EN.search(c):
+        return "en"
+    if _LANG_AR.search(c):
+        return "ar"
+    return None
+
+
+def _in_stock_for(b, lang):
+    return _avail(b) and (lang is None or (b.get("language") or "ar") == lang)
+
+
+def fix_false_unavailable(reply, all_books, prev_ids=(), language="ar"):
+    """-> (reply, changed). all_books: {id: book}. prev_ids: books shown in the conversation before."""
+    if not reply or not _UNAVAIL.search(" ".join(normalize(reply).split())):
+        return reply, False
+    by_key = {}
+    for b in all_books.values():
+        by_key.setdefault(title_key(b.get("title") or ""), []).append(b)
+    out, pos, changed = [], 0, False
+    for m in re.finditer(r"[^.؟?!؛;\n]+[.؟?!؛;\n]?", reply):
+        sent = m.group(0)
+        # the part of the sentence from the clause that says «غير متوفر» (a clause starts after «،» or at «و»)
+        parts = re.split(r"(،|,)", sent)
+        clauses, buf = [], ""
+        for p in parts:
+            buf += p
+            if p in ("،", ","):
+                clauses.append(buf)
+                buf = ""
+        if buf:
+            clauses.append(buf)
+        kept = []
+        for idx, c in enumerate(clauses):
+            nc = " ".join(normalize(c).split())
+            if not _UNAVAIL.search(nc):
+                kept.append(c)
+                continue
+            lang = _clause_lang(nc)
+            titles = re.findall(r"«([^»]{2,120})»|\"([^\"]{2,120})\"", c)
+            titles = [a or b for a, b in titles]
+            books = [by_key.get(title_key(t), []) for t in titles]
+            stocked = [t for t, bs in zip(titles, books) if any(_in_stock_for(b, lang) for b in bs)]
+            false_named = bool(stocked)
+            missing = [t for t in titles if t not in stocked]
+            false_prev = (not titles and _PREV_REF.search(nc) and prev_ids
+                          and all(i in all_books and _in_stock_for(all_books[i], lang) for i in prev_ids))
+            if not (false_named or false_prev):
+                kept.append(c)
+                continue
+            changed = True
+            end = _CLAUSE_END.search(sent[-1:]) and sent[-1:] or ""
+            lead = "و" if c.strip().startswith("و") and kept else ""
+            if false_named:
+                names = " و".join(f"«{t}»" for t in stocked) if language != "en" else " and ".join(f"«{t}»" for t in stocked)
+                line = (f" {lead}عندنا نسخ متوفرة من {names}" if language != "en"
+                        else f" {'and ' if lead else ''}{names} {'is' if len(stocked) == 1 else 'are'} in stock")
+                if missing:   # «"الجزيرة" و"الظلام" مو موجودتين»: only «الجزيرة» is really not here
+                    gone = " و".join(f"«{t}»" for t in missing) if language != "en" else " and ".join(f"«{t}»" for t in missing)
+                    line = (f" {lead}ما عندنا نسخ من {gone} الآن، و{line.strip()[1:] if lead else line.strip()}" if language != "en"
+                            else f" {'and ' if lead else ''}{gone} {'is' if len(missing) == 1 else 'are'} not in stock now, but {line.strip()}")
+                kept.append(line)
+            # the rest of the sentence after it spoke of the same books («وما أقدر أؤكد توفرهما بلغة ثانية»)
+            kept.append(end)
+            break
+        s2 = "".join(kept)
+        s2 = re.sub(r"\s*[،,]\s*([.؟?!؛;\n]|$)", r"\1", s2)
+        if s2.strip() in ("", ".", "؛", ";"):
+            s2 = ""
+        out.append(reply[pos:m.start()] + s2)
+        pos = m.end()
+    out.append(reply[pos:])
+    fixed = re.sub(r"[ \t]{2,}", " ", "".join(out)).strip()
+    return (fixed, True) if changed else (reply, False)

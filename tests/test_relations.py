@@ -57,4 +57,22 @@ ok(any(f["id"] in rel_ids for f in seen["facts"][1:]), "related books join the f
 ok(all(A.is_available(dict(A.get_book(r))) for r in rel_ids), "only in-stock related books are offered")
 shown_rel = [b for b in out["books"] if b["match"] == "related"]
 ok(shown_rel and all(b["reason"] for b in shown_rel), "a shown related book keeps its reason")
+# AUDFIX 2026-10-15 (audit 2026-10-14, catalog snapshot P3): the computed relations must not depend on Python's
+# string hashing, so every server start writes the same relations and reasons for the same cards
+import subprocess
+probe = r'''
+import json, sys
+sys.path.insert(0, ".")
+import relations
+kw = lambda *k: json.dumps(list(k), ensure_ascii=False)
+books = [dict(book_id=1, title="محور", author="", language="ar", genre="رواية",
+              keywords=kw(*[w + str(j) for j in range(2, 7) for w in ("ألف", "باء")]))]
+books += [dict(book_id=j, title="كتاب " + str(j), author="", language="ar", genre="رواية", keywords=kw("ألف" + str(j), "باء" + str(j)))
+          for j in range(2, 7)]
+print(json.dumps(sorted(relations.compute(books, {})), ensure_ascii=False))
+'''
+outs = {subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True,
+                       env={**os.environ, "PYTHONHASHSEED": str(seed)}).stdout for seed in range(1, 7)}
+ok(len(outs) == 1 and "same_topic" in next(iter(outs)),
+   f"tied same-topic relations come out the same in every run ({len(outs)} distinct result(s) over 6 hash seeds)")
 print(f"TOTAL PASS={P} FAIL={F}")

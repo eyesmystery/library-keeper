@@ -84,3 +84,44 @@ def followup(conv):
         kind = m.group(1) if m and m.group(1) != "كتبًا" else "كتب"
         return f"{kind} فازت بجوائز مؤخرًا"
     return None
+
+
+# ------------------------------------------------------------------ «اختياراتنا» instead of sales figures
+# Ibrahim 2026-10-17 (open questions 9, 14): «ما نبغى نعتمد على الاكثر مبيعا لمكتبات اخرى. ممكن تقترح الكتب اللي من
+# اختياراتنا» — a sales question is answered with this month's picks of the library when there are any.
+def picks_answer(titles, language="ar"):
+    """-> (reply, suggestions) for a sales question answered with the library's picks of the month."""
+    if language == "en":
+        return ("We don't keep sales figures, but here are our picks of the month, chosen by the library: "
+                + ", ".join(f"«{t}»" for t in titles) + ". Shall I tell you more about one of them?",
+                ["Suggest something to my taste", "Books that won prizes recently"])
+    return ("ما عندنا أرقام مبيعات نعتمد عليها، لكن هذي «اختياراتنا هذا الشهر» من المكتبة: "
+            + "، ".join(f"«{t}»" for t in titles) + ". تبغى أعرّفك على واحد منها؟",
+            ["رشّحي لي حسب ذوقي", "كتب فازت بجوائز مؤخرًا"])
+
+
+# ------------------------------------------------------------------ book design: outside the library's field
+# Ibrahim 2026-10-17 (open question 4 «مصمّم غلاف «الطلياني»»): «الجواب خارج مجالنا. تصميم الكتاب يجاوب انه ما يعرف ومو
+# من اختصاص المكتبة». Not recorded as an unanswered question.
+_DESIGN = re.compile(
+    r"(?:مصمم|مصممه|المصمم|صمم|صممت|تصميم|رسام|راسم|رسم)\S*\s+(?:ال)?(?:غلاف|غلافه|غلافها|الغلاف)"
+    r"|(?:غلاف|غلافه|غلافها|الغلاف)\s+(?:\S+\s+){0,2}?(?:من|مين)\s+(?:صممه|صممها|رسمه|رسمها|مصممه)"
+    r"|(?:الاخراج|اخراج) الفني|تصميم (?:ال)?كتاب\b(?! عن)"
+    r"|who designed|cover design|cover art|cover illustrat|book design")
+_ABOUT = re.compile(r"(?:كتاب|كتب|روايه|روايات) (?:عن|في)|books? (?:about|on)")
+
+
+def design_asked(text):
+    """Does this message ask who designed a book or its cover (outside the library's field)?"""
+    t = _n(text)
+    return bool(_DESIGN.search(t)) and not _ABOUT.search(t)
+
+
+def design_answer(language="ar"):
+    if language == "en":
+        return ("I don't know who designed it — book and cover design are outside what the library covers. "
+                "I can help with the book itself: its subject, price, or books like it.",
+                ["Its subject", "Its price", "Books like it"])
+    return ("ما أعرف مين صمّمه، وتصميم الكتب وأغلفتها مو من اختصاص المكتبة. أقدر أساعدك في الكتاب نفسه: موضوعه أو سعره أو كتب تشبهه.",
+            ["موضوعه", "سعره", "كتب تشبهه"])
+

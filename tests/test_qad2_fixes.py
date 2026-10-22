@@ -49,6 +49,42 @@ interp({"audience": "young_adult", "genres": ["يافعين"]})
 out = say(two[0])
 ok(out.get("audience") is None and "القارئ هو الكبير السائل نفسه" in seen["guidance"], "the reply is told: books for the parent")
 ok(not any(books[f["id"]].get("genre") in A.CHILD_GENRES for f in seen["facts"]), "no children's or YA books offered to the mother")
+# audit 2026-10-12 evening #1: the check above passed or failed with the hash seed (seed 7 offered YA book 473).
+# The order the catalog comes in is shuffled here (8 orders, and the interpreter with / without «يافعين»), so a
+# tie broken one way or the other cannot bring a children's or YA book to the mother's facts or cards.
+import random as _rnd
+_orig_list_books = A.list_books
+_cat_rows = list(_orig_list_books(only_active=False))
+_bad = []
+for _s in range(8):
+    _rows = list(_cat_rows)
+    _rnd.Random(_s).shuffle(_rows)
+    A.list_books = lambda only_active=False, _r=_rows: [r for r in _r if not only_active or r.get("active")]
+    for _p in ({"audience": "young_adult", "genres": ["يافعين"]}, {}, {"genres": ["علم نفس"]}):
+        for _msg in (two[0], "عندكم كتب عن تربية المراهقين؟ لي أنا كأم", "ابي كتب عن قصص الأطفال للمعلمين",
+                     "I want books about teenagers' mental health, for me as a mother"):
+            interp(dict(_p))
+            _o = say(_msg)
+            _kids = [f["id"] for f in seen["facts"] if books[f["id"]].get("genre") in A.CHILD_GENRES]
+            _kids += [x["book_id"] for x in _o.get("books", []) if books.get(x["book_id"], {}).get("genre") in A.CHILD_GENRES]
+            if _kids:
+                _bad.append((_s, _msg, _kids))
+A.list_books = _orig_list_books
+ok(not _bad, "a parent / teacher reader («لي أنا كأم»، «للمعلمين»، «as a mother»): no children's or YA book in facts or cards, whatever the catalog order"
+   + (f" {_bad[:3]}" if _bad else ""))
+interp({"audience": "young_adult", "genres": ["يافعين"]})
+say(two[0], "x", two[1])
+ok(any(books[f["id"]].get("genre") == "يافعين" for f in seen["facts"]), "then «للمراهق نفسه … بنتي ١٥»: YA books for the daughter again")
+_ya = next(b for b in avail if b.get("genre") == "يافعين")
+interp({}, intent="about_book", titles=[_ya["title"]])
+say("عندكم «" + _ya["title"] + "»؟ لي أنا كأم")
+ok(_ya["book_id"] in [f["id"] for f in seen["facts"]], "a YA title the parent asks for by name is still answered")
+_fb = A.run_chat([{"role": "user", "content": two[0]}])   # no model: the keyword answer
+ok(_fb.get("understanding") == "keywords" and _fb["books"]
+   and not any(books[x["book_id"]].get("genre") in A.CHILD_GENRES for x in _fb["books"]),
+   "with the model down too: the mother gets no children's or YA book (all four were YA before)")
+_fb = A.run_chat([{"role": "user", "content": "ابي رواية يافعين لبنتي ١٥"}])
+ok(any(books[x["book_id"]].get("genre") == "يافعين" for x in _fb["books"]), "with the model down, a YA request for the daughter still gets YA")
 
 # ---------------------------------------------------------------- 2. the library in numbers (cases 8, 44)
 for q in ("وش التصنيفات اللي عندكم؟", "كم كتاب عندكم بالمكتبة؟", "طيب وش أكثر نوع عندكم؟", "How many books do you have?"):

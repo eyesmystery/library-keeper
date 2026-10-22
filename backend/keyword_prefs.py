@@ -188,13 +188,52 @@ ORIGIN_LANGUAGES = {
 ARABIC_ORIGIN = {"عربي", "عربيه", "العربي", "العربيه", "arabic"}
 EDITION_BEFORE = {"باللغه", "اللغه", "بلغه", "للغه", "لغه", "in", "into", "to"}
 TRANSLATED = ["مترجم", "مترجمه", "المترجم", "المترجمه", "translated"]
+# a language adjective that is also a given name: a name when the next word is «بن» / «آل» or a family name («الحمد»)
+NAME_LIKE_GIVEN = {"تركي"}
+NAME_NEXT = {normalize(w) for w in "بن ابن آل ال".split()}
+LANGUAGE_NEXT = {normalize(w) for w in "المعاصر الحديث القديم الكلاسيكي المترجم الاصل الاصلي الجميل الشهير".split()}
 
 
 AWARD_WORDS = {"any": {normalize(w) for w in "جائزه جايزه جوائز جائزة حائزه حايزه فائزه فايزه".split()},
                "nobel": {"نوبل"}, "booker_any": {"بوكر"}, "katara": {"كتارا"}, "pulitzer": {"بوليتزر"},
-               "goncourt": {"غونكور"}}
+               "goncourt": {"غونكور"}, "hugo": {normalize(w) for w in "هوغو هيوغو هوجو هيوجو hugo".split()},
+               "nebula": {normalize(w) for w in "نيبولا نيبيولا nebula".split()}, "locus": {normalize(w) for w in "لوكس لوكوس locus".split()}}
 SCREEN_WORDS = {"film": {normalize(w) for w in "فيلم فلم افلام فلما".split()},
-                "series": {normalize(w) for w in "مسلسل مسلسلات".split()}}
+                "series": {normalize(w) for w in "مسلسل مسلسلات".split()},
+                # «كتب صارت انمي او رسوم متحركة» (QAD 2026-10-14, case 27)
+                "animated": {normalize(w) for w in "انمي أنمي انيمي انمى كرتون كارتون انيميشن أنيميشن anime cartoon cartoons animated animation".split()}}
+ANIMATED_PHRASES = [normalize(p) for p in ("رسوم متحركة", "رسوم متحركه", "افلام كرتون", "فلم كرتون", "فيلم كرتون")]
+
+
+# «فيلم سينما قديم، أبيض وأسود» (QAD 2026-10-15, case 34): an old adaptation, made by 1975
+OLD_SCREEN_YEAR = 1975
+_BW = [normalize(p) for p in ("ابيض واسود", "أبيض وأسود", "الابيض والاسود", "الأبيض والأسود", "ابيض و اسود", "black and white", "b&w")]
+_OLD_WORDS = {normalize(w) for w in "قديم قديمه القديم القديمه زمان كلاسيكي كلاسيكيه الكلاسيكي الكلاسيكيه old classic".split()}
+
+
+def old_screen_said(normalized_text):
+    """«أبيض وأسود» anywhere, or «قديم / زمان / كلاسيكي» in the same message as a film / series word."""
+    words = normalize(normalized_text).split()
+    if any(find_phrase(words, ph) >= 0 for ph in _BW):
+        return True
+    screen = any(_variants(w) & (SCREEN_WORDS["film"] | SCREEN_WORDS["series"]) for w in words)
+    return screen and any(w in _OLD_WORDS for w in words)
+
+
+def old_film_said(normalized_text):
+    """QADFIX7 #9 (QAD 2026-10-19, case 29): «أبيض وأسود», or «قديم / زمان» with a film word — not with «مسلسل» alone."""
+    words = normalize(normalized_text).split()
+    if any(find_phrase(words, ph) >= 0 for ph in _BW):
+        return True
+    film = any(_variants(w) & SCREEN_WORDS["film"] for w in words)
+    return film and any(w in _OLD_WORDS for w in words)
+
+
+def animated_said(normalized_text):
+    """«صارت انمي»، «رسوم متحركة»، «كرتون»: an animated adaptation, not a live-action film."""
+    words = normalize(normalized_text).split()
+    return (any(_variants(w) & SCREEN_WORDS["animated"] for w in words)
+            or any(find_phrase(words, ph) >= 0 for ph in ANIMATED_PHRASES))
 
 
 def _empty():
@@ -272,6 +311,11 @@ def _parse_one(text, audience_fn=None):
         code = next((c for c, forms in ORIGIN_LANGUAGES.items() if _variants(w) & set(forms)), None)
         if code is None and w in ARABIC_ORIGIN:
             code = "ar"
+        if code and _variants(w) & NAME_LIKE_GIVEN and i + 1 < len(words) and (
+                words[i + 1] in NAME_NEXT or (words[i + 1].startswith("ال") and words[i + 1] not in LANGUAGE_NEXT)):
+            # «تركي» is also a given name: «هل تركي بن فهد آل سعود شاعر؟»، «كتب تركي الحمد» ask about a person,
+            # not Turkish literature (inbox 2026-10-11 §3.8; audit 2026-10-12 #8). «أدب تركي»، «رواية تركية» still count.
+            continue
         if code and i > 0 and words[i - 1] in EDITION_BEFORE:
             used.add(i)  # the language of the copy, not of the work
             continue
@@ -305,7 +349,10 @@ def _parse_one(text, audience_fn=None):
         kind = next((k for k, f in SCREEN_WORDS.items() if forms & f), None)
         if kind and not negated(words, i):
             used.add(i)
-            p["adaptation"] = "screen" if p["adaptation"] and p["adaptation"] != kind else kind
+            p["adaptation"] = ("animated" if "animated" in (kind, p["adaptation"])
+                               else "screen" if p["adaptation"] and p["adaptation"] != kind else kind)
+    if any(find_phrase(words, ph) >= 0 for ph in ANIMATED_PHRASES):
+        p["adaptation"] = "animated"
     if any(find_phrase(words, ph) >= 0 for ph in BEGINNER):
         p["reader_level"].append("beginner")
     if any(find_phrase(words, ph) >= 0 for ph in ADVANCED):

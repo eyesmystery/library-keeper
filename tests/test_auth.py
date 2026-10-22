@@ -54,9 +54,11 @@ attr = st.get("/api/admin/books/3").get_json()["attributes"][5]["key"]
 r = st.post(f"/api/admin/books/3/attributes/{attr}", json={"action": "confirm", "evidence_id": ev, "reviewer": "مزوّر"}, headers=sh)
 row = models.get_connection().execute("select verified_by from attribute_evidence where evidence_id=?", (ev,)).fetchone()[0]
 ok(r.status_code == 200 and row == "سارة", "review recorded under the real signed-in name, not a typed one")
-for path in ["/api/admin/llm", "/api/admin/users", "/api/admin/import/history", "/api/admin/testlog", "/api/admin/audit", "/api/admin/usage"]:
+for path in ["/api/admin/import/history", "/api/admin/stats"]:
     ok(st.get(path).status_code == 403, f"staff blocked from {path}")
-ok(st.post("/api/admin/llm", json={"provider": "none", "model": ""}, headers=sh).status_code == 403, "staff cannot change the model")
+# «الإعدادات» is open to staff (Ibrahim 2026-10-13): model, accounts, usage, test mode, audit log
+for path in ["/api/admin/llm", "/api/admin/users", "/api/admin/testlog", "/api/admin/audit", "/api/admin/usage"]:
+    ok(st.get(path).status_code == 200, f"staff may open {path} (settings)")
 
 # disable -> immediate sign-out; last manager protected
 ok(anon.post(f"/api/admin/users/{sara_id}", json={"active": False}, headers=h).status_code == 200, "manager disables staff")

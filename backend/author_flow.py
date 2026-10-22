@@ -88,7 +88,46 @@ def _picked(reply, options):
             return o
     common = set.intersection(*(set(key(o).split()) for o in options)) if options else set()
     hits = [o for o in options if words & (set(key(o).split()) - common)]
-    return hits[0] if len(hits) == 1 else None
+    if len(hits) == 1:
+        return hits[0]
+    return _picked_by_record(r, options)
+
+
+_KNOWN = re.compile(r'(?:^| )(?:ال)?(?:معروف|مشهور|مشهوره|معروفه|الكبير|famous|well known|known)(?: |$)')
+_PICK_STOP = {key(w) for w in 'الكاتب الكاتبه كاتب المؤلف مؤلف اللي الي ابي ابغى ابغي شي شيء له لها عن في من و او مو مش '
+              'هو هي اقصد قصدي يعني ايه ايوه نعم لا كتاب كتب the writer author i mean'.split()}
+
+
+def _picked_by_record(reply, options):
+    """«الكاتب المصري، ابي شي له عن الإيمان والعلم» after «تقصد مصطفى محمود ولا مصطفى محمود عواض؟»: the one
+    whose record fits what the visitor said — its country, what it is known for — or, for «المعروف», the one
+    with clearly more of our books (QAD 2026-10-13, case 27: the same question came back twice)."""
+    if not re.search(r'(?:^| )(?:ال)?(?:كاتب|كاتبه|مؤلف|مؤلفه|اديب|شاعر|دكتور)(?: |$)|اقصد|قصدي|writer|author|mean', reply) \
+            and not _KNOWN.search(reply):
+        return None   # a new request after the question («رواية رعب») is not an answer to it
+    try:
+        import authors
+        recs = [(o, authors.lookup(o)) for o in options]
+    except Exception:
+        return None
+    if not all(r for _, r in recs):
+        return None
+    words = {w for w in reply.split() if w not in _PICK_STOP and len(w) >= 3}
+    stems = {w[2:] if w.startswith('ال') and len(w) > 4 else w for w in words}
+    def _fits(rec):
+        text = key(' '.join([rec.get('origin') or ''] + [str(x) for x in (rec.get('known_for') or [])]
+                            + [str(x) for x in (rec.get('themes') or [])] + [rec.get('style_note_ar') or '']))
+        tw = set(text.split()) | {w[2:] if w.startswith('ال') and len(w) > 4 else w for w in text.split()}
+        return sum(1 for w in stems if w in tw or any(w in t or t in w for t in tw if len(t) >= 4 and len(w) >= 4))
+    scores = [(_fits(r), o) for o, r in recs]
+    best = max(s for s, _ in scores)
+    if best > 0 and sum(1 for s, _ in scores if s == best) == 1:
+        return next(o for s, o in scores if s == best)
+    if _KNOWN.search(reply) or {'الكاتب', 'كاتب'} & set(reply.split()):
+        counts = sorted(((len(authors.book_ids(r['author_id'])), o) for o, r in recs), reverse=True)
+        if len(counts) >= 2 and counts[0][0] >= 3 and counts[0][0] >= 2 * max(1, counts[1][0]):
+            return counts[0][1]
+    return None
 
 
 def _choice_made(conversation):
@@ -128,7 +167,7 @@ _COMMON_NAMES = {key(w) for w in (
     "الأول الثاني الثالث الابن الأب الصغير الكبير "
     "de la le van von der dos da di del al el bin ibn the jr sr ii iii").split()}
 NEAR_MAX_AUTHORS = 5   # more catalog people than this with the same family name: ask for the full name instead of listing
-NEAR_RE = re.compile(r'^(?:ما عندنا مؤلف باسم (?P<ar>[^«»]+?)، |We don’t have an author named (?P<en>[^«»]+?)\. )'
+NEAR_RE = re.compile(r'^(?:ما عندنا (?:مؤلف باسم |كتب لـ ?)(?P<ar>[^«»]+?)(?: الآن)?، |We don’t have (?:an author named |books by )(?P<en>[^«»]+?)(?: right now)?\. )'
                      r'(?:تقصد|Do you mean|Which one do you mean)')
 
 
@@ -144,6 +183,19 @@ def near_authors(written, by_display, books):
     """Catalog authors (display names) the visitor may mean by a name we do not have -> up to 5,
     or TOO_MANY when more people than that carry the family name."""
     words = key(written).split()
+    if len(words) == 1 and len(words[0]) >= 4 and words[0] not in _COMMON_NAMES and not words[0].isdigit():
+        # «ابي كتب زافوون»: one misspelt family name (a letter written twice) whose spelling variant is the
+        # family name of a catalog author -> «تقصد «كارلوس زافون»؟» (QAD 2026-10-14, case 13)
+        try:
+            import authors as _ar
+            w = _bare(_ar.key(words[0]))
+            one = {d for d in by_display if len(key(d).split()) >= 2
+                   and (_bare(key(d).split()[-1]) == w or _ar._same_word(w, _bare(_ar.key(d).split()[-1])))}
+        except Exception:
+            one = set()
+        if 1 <= len(one) <= NEAR_MAX_AUTHORS:
+            return sorted(one, key=key)
+        return []
     if len(words) < 2:
         return []
     family = words[-1]
@@ -195,7 +247,13 @@ def near_authors(written, by_display, books):
 
 
 def near_question(written, options, english=False):
-    lead = f'We don’t have an author named {written}. ' if english else f'ما عندنا مؤلف باسم {written}، '
+    # QADFIX5 #12 (QAD 2026-10-17, case 42.1): a full name («يوسف زيدان») is a real writer we have no book of —
+    # «ما عندنا كتب لـيوسف زيدان الآن»، not «ما عندنا مؤلف باسم …» (Ibrahim 2026-10-12: a known author is said to be known)
+    full = len(str(written).split()) >= 2
+    if english:
+        lead = f'We don’t have books by {written} right now. ' if full else f'We don’t have an author named {written}. '
+    else:
+        lead = f'ما عندنا كتب لـ{written} الآن، ' if full else f'ما عندنا مؤلف باسم {written}، '
     if len(options) == 1:
         return lead + (f'Do you mean «{options[0]}»?' if english else f'تقصد «{options[0]}»؟')
     return lead + choice_question(options, english)
@@ -331,6 +389,11 @@ def resolve(request, conversation, books, english=False):
         return None, None, False
     written = str(request.get('name_as_written') or '').strip()[:100]
     full = str(request.get('full_name') or '').strip()[:100]
+    # «طيب أي شي باسم معلوف عندكم؟» after «أمين معلوف»: the interpreter carries the full name on, but the visitor now
+    # names only the family name (QADFIX4 re-run, case 19.2)
+    _fam = re.search(r'(?:^| )(?:باسم|بأسم|اسمه|اسمها|اسم|عائله|لقب|لقبه|عيله)\s+(?:ال)?(\S{3,})', key(last_message))
+    if _fam and full and len(key(written or full).split()) >= 2 and _bare(_fam.group(1)) in {_bare(x) for x in key(full).split()[1:]}:
+        written = _fam.group(1)
     aliases = request.get('aliases') or []
     raw_names = [v for v in [written, full] + (aliases[:8] if isinstance(aliases, list) else []) if isinstance(v, str) and v.strip()]
     # Stored spellings of the same person (authors table, 2026-09-30): «زافون» or «فارغاس يوسا»
@@ -422,6 +485,13 @@ def resolve(request, conversation, books, english=False):
             and re.search(r'\sو\S|،|,|&|\sand\s|\sاو\s|\sأو\s', written)):
         return None, None, False
     if len(options) >= 2:
+        # «الكاتب المصري، ابي شي له عن الإيمان والعلم»: the message itself says which one (QAD 2026-10-13, case 27.2)
+        said_one = _picked_by_record(last, options[:5])
+        if said_one:
+            request.update(name_as_written=said_one, full_name=said_one, aliases=[])
+            if mode in ('similar', 'both'):
+                return None, None, False
+            return None, allowed(said_one), True
         question = choice_question(options[:5], english)
         if re.findall(r'«([^»]+)»', previous) and previous.startswith(question.split('«')[0]) and last in NO:
             return ('What is the author’s full name?' if english else 'وش اسم المؤلف كامل؟'), None, mode == 'works'
@@ -442,12 +512,34 @@ def resolve(request, conversation, books, english=False):
             near = near_authors(written, by_display, books)
             if near is TOO_MANY:
                 many = (f'We don’t have an author named {written}, and several of our authors share that family name. What is the full name of the author you mean?'
-                        if english else f'ما عندنا مؤلف باسم {written}، وعندنا أكثر من مؤلف بنفس اللقب. وش اسم المؤلف اللي تقصده كامل؟')
+                        if english else (f'ما عندنا كتب لـ{written} الآن، ' if len(str(written).split()) >= 2 else f'ما عندنا مؤلف باسم {written}، ') + 'وعندنا أكثر من مؤلف بنفس اللقب. وش اسم المؤلف اللي تقصده كامل؟')
                 if not any(c['role'] == 'assistant' and c['content'] == many for c in conversation):
                     return many, None, mode == 'works'
             elif near:
                 return near_question(written, near, english), None, mode == 'works'
 
+    # «أي شي باسم معلوف؟» right after «أمين معلوف» (none of whose books we have): the family name alone is now the
+    # request, and the catalog authors who carry it are offered by name before anything «like Amin Maalouf»
+    # (QADFIX4, Ibrahim 2026-10-16: «ليه ما استخدم اسم العائلة وسأل اذا يقصد ديفيد معلوف»; QAD case 19.2)
+    if written and len(key(written).split()) == 1 and full and key(full) != key(written) and options and not exact:
+        fam = [d for d in options if _bare(key(written)) in {_bare(x) for x in key(d).split()}]
+        if fam:
+            if english:
+                q = (f'We have no books by {full}, but we have «{fam[0]}», with the same family name. Do you mean him?' if len(fam) == 1
+                     else f'We have no books by {full}, but other authors share that family name. ' + choice_question(fam[:5], english))
+            else:
+                q = (f'ما عندنا كتب لـ{full}، لكن عندنا «{fam[0]}» بنفس اسم العائلة. تقصده؟' if len(fam) == 1
+                     else f'ما عندنا كتب لـ{full}، لكن عندنا مؤلفين بنفس اسم العائلة. ' + choice_question(fam[:5], english))
+            if previous == q:
+                if len(fam) == 1 and is_yes(last):
+                    request.update(name_as_written=fam[0], full_name=fam[0], aliases=[], mode='works')
+                    return None, allowed(fam[0]), True
+                picked = _picked_by_record(last, fam[:5]) if len(fam) > 1 else None
+                if picked:
+                    request.update(name_as_written=picked, full_name=picked, aliases=[], mode='works')
+                    return None, allowed(picked), True
+            else:
+                return q, None, False
     matches = set(options)
     # One candidate: ask with the model's full name only when the catalog holds that very name
     # (or its alias); a longer or differently written catalog name is proposed as it is written.
@@ -469,6 +561,13 @@ def resolve(request, conversation, books, english=False):
     ambiguous = len(key(written).split()) < 2 or (proposal and key(written) != key(proposal) and not exact
                                                    # "Nizar Qabbani" is a stored spelling of «نزار قباني»: no «Do you mean …?» (2026-10-12)
                                                    and key(written) not in record_keys)
+    # «وش عندكم لموراكامي؟»: a family name alone that only one catalog author carries needs no
+    # «تقصد هاروكي موراكامي؟» — his books are shown at once; with two or more authors of that name
+    # the question stays (Ibrahim 2026-10-15, QAD case 19.1)
+    if (ambiguous and written and len(options) == 1 and len(key(written).split()) == 1
+            and (_bare(key(written)) == _bare(key(options[0]).split()[-1])
+                 or any(_bare(key(written)) == _bare(key(a).split()[-1]) for a in allowed(options[0]) if key(a).split()))):
+        ambiguous = False
     # «أحب ماركيز، عطني شي بنفس الجو»: for likeness, a name our author records know needs no
     # «تقصد فلان؟» first; a request for his own books still confirms a one-word name (2026-10-07)
     if written and mode in ('similar', 'both') and known_record and len(options) <= 1:

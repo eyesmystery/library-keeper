@@ -26,7 +26,22 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "library.db")
 SEED_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "seed_books.json")
 
 
+def _guard_live_db():
+    """A test script run on its own must never open the project's real data/library.db (AGY-20261017-01: direct runs of
+    test_qadfix4 / test_age_edition / test_qad5_fixes on 2026-10-17 12:57 wrote fixtures into six real books). Tests run
+    through tests/run_all.py, which gives each suite a throwaway copy without .git; the real project folder has .git."""
+    import sys
+    main = os.path.basename((sys.argv[0] if sys.argv else "") or "")
+    if not (main.startswith("test_") and main.endswith(".py")):
+        return
+    project = os.path.dirname(os.path.dirname(os.path.realpath(DB_PATH)))
+    if os.path.exists(os.path.join(project, ".git")):
+        raise RuntimeError("Run tests through tests/run_all.py (a throwaway copy); a test script may not open the live "
+                           "data/library.db: " + os.path.realpath(DB_PATH))
+
+
 def get_connection() -> sqlite3.Connection:
+    _guard_live_db()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn

@@ -224,6 +224,19 @@ html[lang="en"] .start-card>p{font-size:18px}html[lang="en"] .start-button{font-
 /* no price recorded: no separator after the stock (2026-10-08) */
 .stock-note.no-price strong:after{content:none}
 
+/* «اختياراتنا هذا الشهر» (2026-10-14): five covers in a row that scrolls sideways */
+.picks-box{margin-top:22px}
+.picks-row{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.pick-card{display:grid;flex:0 0 142px;align-content:start;gap:9px;padding:8px 8px 12px;border:1px solid oklch(27.5% .058 40 / .13);border-radius:18px;background:var(--surface);color:var(--brown);text-align:start;scroll-snap-align:start;box-shadow:0 8px 20px oklch(27.5% .058 40 / .06);font:inherit;cursor:pointer}
+.pick-cover{display:grid;place-items:center;width:100%;aspect-ratio:2/3;overflow:hidden;border-radius:12px;background:var(--sage)}
+.pick-cover img{width:100%;height:100%;object-fit:cover}
+.pick-cover-mark{color:var(--brown);font-size:40px;font-weight:700;opacity:.55}
+.pick-text{display:grid;gap:3px;min-width:0;padding:0 2px}
+.pick-text strong{overflow:hidden;font-size:15px;font-weight:650;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pick-author{overflow:hidden;color:var(--muted);font-size:13px;white-space:nowrap;text-overflow:ellipsis}
+.pick-line{overflow:hidden;color:var(--brown);font-size:13px;line-height:1.45;opacity:.85;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.pick-card:hover,.pick-card:focus-visible{border-color:var(--coral)}
+@media(min-width:700px){.pick-card{flex-basis:160px}}
 /* «فعالياتنا» on the start page and the event page (2026-10-08) */
 .events-box{margin-top:22px}
 .events-title{margin:0 0 10px;color:var(--brown);font-size:18px;font-weight:650}

@@ -123,14 +123,15 @@ ok(r["books"] == [] and "ما لقينا في سجلاتنا كتابًا متو
 rows, total = open_questions.list_rows("open")
 ok(any(x["kind"] == "award" and "كتارا" in x["phrase"] for x in rows), "the unanswered prize is counted in «أسئلة بلا جواب»")
 script["interpret"] = {"intent": "about_book", "preferences": prefs(), "mentioned_titles": [allb[0]["title"]], "wants_new_options": False}
-script["respond"] = {"reply": "ما عندي تفاصيل عنه الآن", "show_book_ids": [], "suggestions": [], "unanswered": "من رسم الغلاف؟"}
-c.post("/api/chat", json={"messages": [{"role": "user", "content": "من رسم غلاف الكتاب؟"}]})
-c.post("/api/chat", json={"messages": [{"role": "user", "content": "من رسم غلاف الكتاب؟"}]})
+# (the cover question used here before is now outside the library's field and never logged: Ibrahim 2026-10-17)
+script["respond"] = {"reply": "ما عندي تفاصيل عنه الآن", "show_book_ids": [], "suggestions": [], "unanswered": "متى تُرجم للعربية أول مرة؟"}
+c.post("/api/chat", json={"messages": [{"role": "user", "content": "متى ترجم الكتاب للعربي أول مرة؟"}]})
+c.post("/api/chat", json={"messages": [{"role": "user", "content": "متى ترجم الكتاب للعربي أول مرة؟"}]})
 rows, _ = open_questions.list_rows("open")
 q = next((x for x in rows if x["kind"] == "question"), None)
 ok(q and q["times"] == 2 and q["book_title"] == allb[0]["title"], "a question the model could not answer is counted (twice = one row, 2 times)")
 ok("المعروف عن هذا العمل عمومًا" in chat.RESPOND_SYSTEM_AR and "لا تستعمل المعرفة العامة أبدًا في: الجوائز" in chat.RESPOND_SYSTEM_AR, "general-knowledge rule with its limits")
-ok(chat.respond([{"role": "user", "content": "x"}], "[]", "g")["unanswered"] == "من رسم الغلاف؟", "respond returns the unanswered phrase")
+ok(chat.respond([{"role": "user", "content": "x"}], "[]", "g")["unanswered"] == "متى تُرجم للعربية أول مرة؟", "respond returns the unanswered phrase")
 script["respond"] = {"reply": "تفضل", "show_book_ids": [], "suggestions": []}
 ok(chat.respond([{"role": "user", "content": "x"}], "[]", "g")["unanswered"] == "", "a model that omits it still works")
 open_questions.record("topic", "  " + "س" * 200)

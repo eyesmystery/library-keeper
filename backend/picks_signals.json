@@ -1,0 +1,11787 @@
+{
+"month": "2026-10",
+"built_at": "2026-10-14T21:01:37+03:00",
+"lists": [
+{
+"key": "neelwafurat",
+"label": "الأكثر مبيعًا في نيل وفرات (سبتمبر ٢٠٢٦)",
+"url": "https://www.neelwafurat.com/catbs.aspx?file=00&search=books",
+"fetched_at": "2026-10-14T21:30:00+03:00",
+"books": [
+{
+"book_id": 3280,
+"rank": 8
+},
+{
+"book_id": 3627,
+"rank": 18
+},
+{
+"book_id": 3074,
+"rank": 23
+},
+{
+"book_id": 3098,
+"rank": 29
+},
+{
+"book_id": 4349,
+"rank": 33
+},
+{
+"book_id": 5242,
+"rank": 49
+},
+{
+"book_id": 1047,
+"rank": 59
+},
+{
+"book_id": 5513,
+"rank": 67
+},
+{
+"book_id": 2701,
+"rank": 72
+},
+{
+"book_id": 986,
+"rank": 75
+},
+{
+"book_id": 2581,
+"rank": 85
+},
+{
+"book_id": 4800,
+"rank": 87
+},
+{
+"book_id": 4755,
+"rank": 95
+},
+{
+"book_id": 769,
+"rank": 113
+},
+{
+"book_id": 3579,
+"rank": 113
+},
+{
+"book_id": 994,
+"rank": 119
+}
+]
+},
+{
+"key": "abjjad_trending",
+"label": "الأكثر رواجًا الآن في أبجد",
+"url": "https://www.abjjad.com/books",
+"fetched_at": "2026-10-14T21:30:00+03:00",
+"books": [
+{
+"book_id": 1988,
+"rank": 12
+},
+{
+"book_id": 5390,
+"rank": 20
+}
+]
+},
+{
+"key": "abjjad_most_read",
+"label": "الأكثر قراءة في أبجد",
+"url": "https://www.abjjad.com/books",
+"fetched_at": "2026-10-14T21:30:00+03:00",
+"books": [
+{
+"book_id": 1988,
+"rank": 3
+},
+{
+"book_id": 3065,
+"rank": 13
+},
+{
+"book_id": 3074,
+"rank": 14
+},
+{
+"book_id": 5390,
+"rank": 17
+},
+{
+"book_id": 5378,
+"rank": 18
+},
+{
+"book_id": 5532,
+"rank": 19
+},
+{
+"book_id": 4558,
+"rank": 20
+}
+]
+}
+],
+"ratings": {
+"3721": {
+"avg": 4.0,
+"count": 2,
+"source": "goodreads"
+},
+"2833": {
+"avg": 3.81,
+"count": 1530,
+"source": "goodreads"
+},
+"3371": {
+"avg": 4.19,
+"count": 5980,
+"source": "goodreads"
+},
+"2999": {
+"avg": 3.49,
+"count": 729,
+"source": "goodreads"
+},
+"1659": {
+"avg": 3.8,
+"count": 1509,
+"source": "goodreads"
+},
+"2976": {
+"avg": 4.16,
+"count": 135,
+"source": "goodreads"
+},
+"816": {
+"avg": 3.82,
+"count": 33,
+"source": "goodreads"
+},
+"1823": {
+"avg": 4.19,
+"count": 16,
+"source": "goodreads"
+},
+"1989": {
+"avg": 3.91,
+"count": 452,
+"source": "goodreads"
+},
+"545": {
+"avg": 3.0,
+"count": 15,
+"source": "goodreads"
+},
+"1570": {
+"avg": 3.61,
+"count": 198,
+"source": "goodreads"
+},
+"4288": {
+"avg": 3.13,
+"count": 184,
+"source": "goodreads"
+},
+"3058": {
+"avg": 3.76,
+"count": 20181,
+"source": "goodreads"
+},
+"4267": {
+"avg": 4.06,
+"count": 28183,
+"source": "goodreads"
+},
+"1435": {
+"avg": 3.6,
+"count": 15,
+"source": "goodreads"
+},
+"1966": {
+"avg": 3.5,
+"count": 6,
+"source": "goodreads"
+},
+"2537": {
+"avg": 3.6,
+"count": 146,
+"source": "goodreads"
+},
+"4119": {
+"avg": 3.46,
+"count": 124,
+"source": "goodreads"
+},
+"3326": {
+"avg": 4.18,
+"count": 907,
+"source": "goodreads"
+},
+"3799": {
+"avg": 4.0,
+"count": 6558,
+"source": "goodreads"
+},
+"3633": {
+"avg": 3.7,
+"count": 1702,
+"source": "goodreads"
+},
+"1527": {
+"avg": 3.85,
+"count": 1004,
+"source": "goodreads"
+},
+"5564": {
+"avg": 3.82,
+"count": 118,
+"source": "goodreads"
+},
+"841": {
+"avg": 4.06,
+"count": 3000,
+"source": "goodreads"
+},
+"1198": {
+"avg": 3.86,
+"count": 1462,
+"source": "goodreads"
+},
+"4230": {
+"avg": 3.6,
+"count": 2695,
+"source": "goodreads"
+},
+"1032": {
+"avg": 3.99,
+"count": 154714,
+"source": "goodreads"
+},
+"3330": {
+"avg": 4.03,
+"count": 3138,
+"source": "goodreads"
+},
+"2034": {
+"avg": 4.15,
+"count": 92,
+"source": "goodreads"
+},
+"2937": {
+"avg": 3.84,
+"count": 1383,
+"source": "goodreads"
+},
+"504": {
+"avg": 4.02,
+"count": 133,
+"source": "goodreads"
+},
+"3019": {
+"avg": 3.56,
+"count": 9,
+"source": "goodreads"
+},
+"1024": {
+"avg": 4.33,
+"count": 3,
+"source": "goodreads"
+},
+"4226": {
+"avg": 3.88,
+"count": 15035,
+"source": "goodreads"
+},
+"2258": {
+"avg": 3.59,
+"count": 14946,
+"source": "goodreads"
+},
+"2576": {
+"avg": 4.18,
+"count": 240,
+"source": "goodreads"
+},
+"2825": {
+"avg": 3.7,
+"count": 27,
+"source": "goodreads"
+},
+"3737": {
+"avg": 4.03,
+"count": 395,
+"source": "goodreads"
+},
+"2960": {
+"avg": 3.79,
+"count": 2894,
+"source": "goodreads"
+},
+"3672": {
+"avg": 4.19,
+"count": 16,
+"source": "goodreads"
+},
+"2599": {
+"avg": 3.73,
+"count": 100,
+"source": "goodreads"
+},
+"1566": {
+"avg": 3.92,
+"count": 74,
+"source": "goodreads"
+},
+"553": {
+"avg": 3.18,
+"count": 94,
+"source": "goodreads"
+},
+"1136": {
+"avg": 3.48,
+"count": 23,
+"source": "goodreads"
+},
+"5175": {
+"avg": 3.36,
+"count": 220,
+"source": "goodreads"
+},
+"800": {
+"avg": 3.9,
+"count": 67589,
+"source": "goodreads"
+},
+"945": {
+"avg": 3.39,
+"count": 933,
+"source": "goodreads"
+},
+"1970": {
+"avg": 4.38,
+"count": 13,
+"source": "goodreads"
+},
+"1589": {
+"avg": 3.87,
+"count": 85,
+"source": "goodreads"
+},
+"1264": {
+"avg": 3.63,
+"count": 131,
+"source": "goodreads"
+},
+"1634": {
+"avg": 3.3,
+"count": 2912,
+"source": "goodreads"
+},
+"3609": {
+"avg": 3.99,
+"count": 32517,
+"source": "goodreads"
+},
+"601": {
+"avg": 4.31,
+"count": 52,
+"source": "goodreads"
+},
+"4436": {
+"avg": 3.6,
+"count": 23701,
+"source": "goodreads"
+},
+"2018": {
+"avg": 3.5,
+"count": 92,
+"source": "goodreads"
+},
+"5227": {
+"avg": 4.15,
+"count": 102785,
+"source": "goodreads"
+},
+"5698": {
+"avg": 4.11,
+"count": 156,
+"source": "goodreads"
+},
+"1321": {
+"avg": 4.01,
+"count": 56572,
+"source": "goodreads"
+},
+"1771": {
+"avg": 3.5,
+"count": 2,
+"source": "goodreads"
+},
+"3465": {
+"avg": 3.78,
+"count": 16604,
+"source": "goodreads"
+},
+"1008": {
+"avg": 4.15,
+"count": 20,
+"source": "goodreads"
+},
+"3170": {
+"avg": 3.0,
+"count": 1,
+"source": "goodreads"
+},
+"1663": {
+"avg": 3.78,
+"count": 3655,
+"source": "goodreads"
+},
+"1376": {
+"avg": 3.71,
+"count": 3323371,
+"source": "goodreads"
+},
+"4174": {
+"avg": 3.72,
+"count": 3757,
+"source": "goodreads"
+},
+"5335": {
+"avg": 4.21,
+"count": 233230,
+"source": "goodreads"
+},
+"590": {
+"avg": 3.72,
+"count": 9363,
+"source": "goodreads"
+},
+"3598": {
+"avg": 3.96,
+"count": 579793,
+"source": "goodreads"
+},
+"2389": {
+"avg": 3.32,
+"count": 13747,
+"source": "goodreads"
+},
+"969": {
+"avg": 3.73,
+"count": 11,
+"source": "goodreads"
+},
+"2223": {
+"avg": 4.22,
+"count": 14711,
+"source": "goodreads"
+},
+"3577": {
+"avg": 3.49,
+"count": 564,
+"source": "goodreads"
+},
+"3648": {
+"avg": 3.6,
+"count": 6077,
+"source": "goodreads"
+},
+"1675": {
+"avg": 3.69,
+"count": 2998,
+"source": "goodreads"
+},
+"5266": {
+"avg": 3.99,
+"count": 3775,
+"source": "goodreads"
+},
+"5289": {
+"avg": 3.73,
+"count": 48,
+"source": "goodreads"
+},
+"5323": {
+"avg": 4.13,
+"count": 1155398,
+"source": "goodreads"
+},
+"1730": {
+"avg": 3.5,
+"count": 5232,
+"source": "goodreads"
+},
+"2235": {
+"avg": 3.24,
+"count": 4985,
+"source": "goodreads"
+},
+"3977": {
+"avg": 3.6,
+"count": 2249,
+"source": "goodreads"
+},
+"1419": {
+"avg": 4.35,
+"count": 206,
+"source": "goodreads"
+},
+"3424": {
+"avg": 3.81,
+"count": 775,
+"source": "goodreads"
+},
+"1049": {
+"avg": 3.51,
+"count": 128,
+"source": "goodreads"
+},
+"1622": {
+"avg": 3.26,
+"count": 23,
+"source": "goodreads"
+},
+"4070": {
+"avg": 3.87,
+"count": 228,
+"source": "goodreads"
+},
+"1272": {
+"avg": 3.44,
+"count": 85,
+"source": "goodreads"
+},
+"3473": {
+"avg": 4.1,
+"count": 1380201,
+"source": "goodreads"
+},
+"3920": {
+"avg": 3.71,
+"count": 66,
+"source": "goodreads"
+},
+"2798": {
+"avg": 3.7,
+"count": 20,
+"source": "goodreads"
+},
+"3865": {
+"avg": 3.06,
+"count": 2025,
+"source": "goodreads"
+},
+"3166": {
+"avg": 3.84,
+"count": 338,
+"source": "goodreads"
+},
+"3541": {
+"avg": 4.4,
+"count": 5,
+"source": "goodreads"
+},
+"549": {
+"avg": 4.55,
+"count": 26276,
+"source": "goodreads"
+},
+"5495": {
+"avg": 3.28,
+"count": 214,
+"source": "goodreads"
+},
+"1985": {
+"avg": 3.83,
+"count": 69,
+"source": "goodreads"
+},
+"5180": {
+"avg": 3.38,
+"count": 90,
+"source": "goodreads"
+},
+"3404": {
+"avg": 3.67,
+"count": 4274,
+"source": "goodreads"
+},
+"1069": {
+"avg": 3.88,
+"count": 1921,
+"source": "goodreads"
+},
+"3687": {
+"avg": 4.08,
+"count": 26,
+"source": "goodreads"
+},
+"2995": {
+"avg": 3.81,
+"count": 5927,
+"source": "goodreads"
+},
+"1340": {
+"avg": 3.68,
+"count": 17278,
+"source": "goodreads"
+},
+"1205": {
+"avg": 4.01,
+"count": 124805,
+"source": "goodreads"
+},
+"1655": {
+"avg": 3.95,
+"count": 20,
+"source": "goodreads"
+},
+"3668": {
+"avg": 3.65,
+"count": 2251,
+"source": "goodreads"
+},
+"4904": {
+"avg": 3.91,
+"count": 611509,
+"source": "goodreads"
+},
+"2079": {
+"avg": 3.89,
+"count": 43977,
+"source": "goodreads"
+},
+"1878": {
+"avg": 4.36,
+"count": 2956,
+"source": "goodreads"
+},
+"1481": {
+"avg": 4.14,
+"count": 28,
+"source": "goodreads"
+},
+"2242": {
+"avg": 3.6,
+"count": 60,
+"source": "goodreads"
+},
+"1747": {
+"avg": 3.68,
+"count": 5956,
+"source": "goodreads"
+},
+"2868": {
+"avg": 3.33,
+"count": 33,
+"source": "goodreads"
+},
+"1317": {
+"avg": 3.9,
+"count": 10935,
+"source": "goodreads"
+},
+"5211": {
+"avg": 3.89,
+"count": 582398,
+"source": "goodreads"
+},
+"637": {
+"avg": 4.08,
+"count": 4265,
+"source": "goodreads"
+},
+"1602": {
+"avg": 4.02,
+"count": 50,
+"source": "goodreads"
+},
+"3795": {
+"avg": 3.11,
+"count": 253,
+"source": "goodreads"
+},
+"2887": {
+"avg": 3.86,
+"count": 390892,
+"source": "goodreads"
+},
+"1252": {
+"avg": 3.83,
+"count": 3335,
+"source": "goodreads"
+},
+"508": {
+"avg": 2.61,
+"count": 59,
+"source": "goodreads"
+},
+"3150": {
+"avg": 2.25,
+"count": 4,
+"source": "goodreads"
+},
+"1497": {
+"avg": 3.86,
+"count": 8800,
+"source": "goodreads"
+},
+"2254": {
+"avg": 4.1,
+"count": 44010,
+"source": "goodreads"
+},
+"2604": {
+"avg": 3.69,
+"count": 7985,
+"source": "goodreads"
+},
+"3445": {
+"avg": 3.75,
+"count": 12,
+"source": "goodreads"
+},
+"1028": {
+"avg": 4.13,
+"count": 24,
+"source": "goodreads"
+},
+"4800": {
+"avg": 3.94,
+"count": 828,
+"source": "goodreads"
+},
+"2487": {
+"avg": 4.01,
+"count": 3823,
+"source": "goodreads"
+},
+"4103": {
+"avg": 3.61,
+"count": 3378,
+"source": "goodreads"
+},
+"1301": {
+"avg": 4.05,
+"count": 10471,
+"source": "goodreads"
+},
+"2891": {
+"avg": 3.9,
+"count": 4037,
+"source": "goodreads"
+},
+"3783": {
+"avg": 3.41,
+"count": 445,
+"source": "goodreads"
+},
+"3804": {
+"avg": 3.66,
+"count": 59519,
+"source": "goodreads"
+},
+"1993": {
+"avg": 4.08,
+"count": 13,
+"source": "goodreads"
+},
+"3107": {
+"avg": 3.52,
+"count": 87,
+"source": "goodreads"
+},
+"3557": {
+"avg": 3.6,
+"count": 5,
+"source": "goodreads"
+},
+"3042": {
+"avg": 3.71,
+"count": 17,
+"source": "goodreads"
+},
+"3412": {
+"avg": 3.97,
+"count": 1775,
+"source": "goodreads"
+},
+"1356": {
+"avg": 2.0,
+"count": 8,
+"source": "goodreads"
+},
+"699": {
+"avg": 4.25,
+"count": 13379,
+"source": "goodreads"
+},
+"3691": {
+"avg": 4.71,
+"count": 7,
+"source": "goodreads"
+},
+"2080": {
+"avg": 3.61,
+"count": 631,
+"source": "goodreads"
+},
+"3384": {
+"avg": 3.87,
+"count": 2122,
+"source": "goodreads"
+},
+"1643": {
+"avg": 4.12,
+"count": 1337,
+"source": "goodreads"
+},
+"1213": {
+"avg": 4.16,
+"count": 10012,
+"source": "goodreads"
+},
+"4206": {
+"avg": 4.26,
+"count": 197365,
+"source": "goodreads"
+},
+"3469": {
+"avg": 3.96,
+"count": 684650,
+"source": "goodreads"
+},
+"932": {
+"avg": 3.62,
+"count": 572,
+"source": "goodreads"
+},
+"5417": {
+"avg": 3.21,
+"count": 242,
+"source": "goodreads"
+},
+"3890": {
+"avg": 3.99,
+"count": 47,
+"source": "goodreads"
+},
+"877": {
+"avg": 3.26,
+"count": 247,
+"source": "goodreads"
+},
+"1511": {
+"avg": 3.93,
+"count": 20628,
+"source": "goodreads"
+},
+"2917": {
+"avg": 4.3,
+"count": 5024637,
+"source": "goodreads"
+},
+"1268": {
+"avg": 3.89,
+"count": 18,
+"source": "goodreads"
+},
+"3740": {
+"avg": 3.95,
+"count": 139,
+"source": "goodreads"
+},
+"1287": {
+"avg": 3.23,
+"count": 1888,
+"source": "goodreads"
+},
+"3310": {
+"avg": 3.41,
+"count": 87,
+"source": "goodreads"
+},
+"2151": {
+"avg": 4.01,
+"count": 2458,
+"source": "goodreads"
+},
+"5440": {
+"avg": 3.18,
+"count": 11,
+"source": "goodreads"
+},
+"1403": {
+"avg": 4.21,
+"count": 1197777,
+"source": "goodreads"
+},
+"4744": {
+"avg": 4.26,
+"count": 13918,
+"source": "goodreads"
+},
+"3081": {
+"avg": 4.0,
+"count": 2,
+"source": "goodreads"
+},
+"5155": {
+"avg": 3.5,
+"count": 12,
+"source": "goodreads"
+},
+"3982": {
+"avg": 3.79,
+"count": 224,
+"source": "goodreads"
+},
+"1815": {
+"avg": 3.0,
+"count": 1,
+"source": "goodreads"
+},
+"3652": {
+"avg": 3.53,
+"count": 30,
+"source": "goodreads"
+},
+"2043": {
+"avg": 3.92,
+"count": 2014116,
+"source": "goodreads"
+},
+"2556": {
+"avg": 3.97,
+"count": 548,
+"source": "goodreads"
+},
+"4178": {
+"avg": 2.5,
+"count": 2,
+"source": "goodreads"
+},
+"3347": {
+"avg": 3.69,
+"count": 24862,
+"source": "goodreads"
+},
+"3717": {
+"avg": 3.0,
+"count": 2,
+"source": "goodreads"
+},
+"1045": {
+"avg": 4.08,
+"count": 1497,
+"source": "goodreads"
+},
+"3582": {
+"avg": 3.53,
+"count": 460,
+"source": "goodreads"
+},
+"3428": {
+"avg": 3.45,
+"count": 130,
+"source": "goodreads"
+},
+"1415": {
+"avg": 4.35,
+"count": 206,
+"source": "goodreads"
+},
+"3097": {
+"avg": 3.95,
+"count": 15,
+"source": "goodreads"
+},
+"565": {
+"avg": 4.55,
+"count": 26276,
+"source": "goodreads"
+},
+"1550": {
+"avg": 2.87,
+"count": 476,
+"source": "goodreads"
+},
+"2405": {
+"avg": 3.0,
+"count": 1,
+"source": "goodreads"
+},
+"1383": {
+"avg": 3.96,
+"count": 2070,
+"source": "goodreads"
+},
+"4181": {
+"avg": 4.28,
+"count": 10013,
+"source": "goodreads"
+},
+"3644": {
+"avg": 4.15,
+"count": 571952,
+"source": "goodreads"
+},
+"2956": {
+"avg": 3.45,
+"count": 20,
+"source": "goodreads"
+},
+"1229": {
+"avg": 4.01,
+"count": 21582,
+"source": "goodreads"
+},
+"3701": {
+"avg": 3.58,
+"count": 12,
+"source": "goodreads"
+},
+"5285": {
+"avg": 3.76,
+"count": 37,
+"source": "goodreads"
+},
+"924": {
+"avg": 3.87,
+"count": 5956,
+"source": "goodreads"
+},
+"4210": {
+"avg": 4.0,
+"count": 7,
+"source": "goodreads"
+},
+"1012": {
+"avg": 3.4,
+"count": 472,
+"source": "goodreads"
+},
+"3613": {
+"avg": 3.97,
+"count": 189,
+"source": "goodreads"
+},
+"2901": {
+"avg": 3.0,
+"count": 34,
+"source": "goodreads"
+},
+"2452": {
+"avg": 2.96,
+"count": 24,
+"source": "goodreads"
+},
+"2002": {
+"avg": 4.5,
+"count": 4,
+"source": "goodreads"
+},
+"4139": {
+"avg": 3.53,
+"count": 161,
+"source": "goodreads"
+},
+"1291": {
+"avg": 3.76,
+"count": 2155,
+"source": "goodreads"
+},
+"4093": {
+"avg": 4.36,
+"count": 214909,
+"source": "goodreads"
+},
+"3756": {
+"avg": 3.0,
+"count": 1,
+"source": "goodreads"
+},
+"2844": {
+"avg": 4.01,
+"count": 86,
+"source": "goodreads"
+},
+"3242": {
+"avg": 3.82,
+"count": 64438,
+"source": "goodreads"
+},
+"3612": {
+"avg": 4.2,
+"count": 833021,
+"source": "goodreads"
+},
+"2003": {
+"avg": 3.69,
+"count": 204,
+"source": "goodreads"
+},
+"2146": {
+"avg": 4.34,
+"count": 4574,
+"source": "goodreads"
+},
+"4138": {
+"avg": 3.77,
+"count": 57,
+"source": "goodreads"
+},
+"3307": {
+"avg": 4.27,
+"count": 602,
+"source": "goodreads"
+},
+"1290": {
+"avg": 3.85,
+"count": 6151,
+"source": "goodreads"
+},
+"3757": {
+"avg": 3.39,
+"count": 923,
+"source": "goodreads"
+},
+"925": {
+"avg": 3.87,
+"count": 1824,
+"source": "goodreads"
+},
+"5400": {
+"avg": 3.86,
+"count": 27831,
+"source": "goodreads"
+},
+"4211": {
+"avg": 2.92,
+"count": 25,
+"source": "goodreads"
+},
+"1013": {
+"avg": 3.65,
+"count": 539,
+"source": "goodreads"
+},
+"1506": {
+"avg": 3.65,
+"count": 332,
+"source": "goodreads"
+},
+"4180": {
+"avg": 2.6,
+"count": 82,
+"source": "goodreads"
+},
+"3215": {
+"avg": 3.96,
+"count": 182,
+"source": "goodreads"
+},
+"708": {
+"avg": 3.75,
+"count": 5684,
+"source": "goodreads"
+},
+"3350": {
+"avg": 3.89,
+"count": 320,
+"source": "goodreads"
+},
+"2541": {
+"avg": 3.8,
+"count": 2211,
+"source": "goodreads"
+},
+"3583": {
+"avg": 2.61,
+"count": 71,
+"source": "goodreads"
+},
+"1414": {
+"avg": 4.12,
+"count": 1681,
+"source": "goodreads"
+},
+"1947": {
+"avg": 4.0,
+"count": 51,
+"source": "goodreads"
+},
+"972": {
+"avg": 4.25,
+"count": 806,
+"source": "goodreads"
+},
+"2392": {
+"avg": 3.97,
+"count": 39480,
+"source": "goodreads"
+},
+"1802": {
+"avg": 3.92,
+"count": 10268,
+"source": "goodreads"
+},
+"1101": {
+"avg": 3.6,
+"count": 1530,
+"source": "goodreads"
+},
+"564": {
+"avg": 3.67,
+"count": 129,
+"source": "goodreads"
+},
+"3096": {
+"avg": 3.24,
+"count": 295,
+"source": "goodreads"
+},
+"4753": {
+"avg": 3.78,
+"count": 22986,
+"source": "goodreads"
+},
+"1551": {
+"avg": 3.08,
+"count": 1574,
+"source": "goodreads"
+},
+"3653": {
+"avg": 3.85,
+"count": 236,
+"source": "goodreads"
+},
+"1394": {
+"avg": 3.8,
+"count": 269,
+"source": "goodreads"
+},
+"2042": {
+"avg": 3.74,
+"count": 99,
+"source": "goodreads"
+},
+"3346": {
+"avg": 2.88,
+"count": 8,
+"source": "goodreads"
+},
+"2384": {
+"avg": 3.67,
+"count": 2298,
+"source": "goodreads"
+},
+"964": {
+"avg": 3.79,
+"count": 4968,
+"source": "goodreads"
+},
+"1052": {
+"avg": 3.51,
+"count": 53,
+"source": "goodreads"
+},
+"572": {
+"avg": 3.83,
+"count": 2721,
+"source": "goodreads"
+},
+"5154": {
+"avg": 3.74,
+"count": 31,
+"source": "goodreads"
+},
+"3983": {
+"avg": 3.63,
+"count": 638,
+"source": "goodreads"
+},
+"2015": {
+"avg": 4.32,
+"count": 31349,
+"source": "goodreads"
+},
+"1269": {
+"avg": 3.67,
+"count": 67,
+"source": "goodreads"
+},
+"3741": {
+"avg": 3.59,
+"count": 32,
+"source": "goodreads"
+},
+"1286": {
+"avg": 4.18,
+"count": 2242,
+"source": "goodreads"
+},
+"3311": {
+"avg": 3.63,
+"count": 179,
+"source": "goodreads"
+},
+"2150": {
+"avg": 3.63,
+"count": 16,
+"source": "goodreads"
+},
+"3038": {
+"avg": 4.0,
+"count": 6,
+"source": "goodreads"
+},
+"1005": {
+"avg": 4.03,
+"count": 89,
+"source": "goodreads"
+},
+"4207": {
+"avg": 3.94,
+"count": 599504,
+"source": "goodreads"
+},
+"1455": {
+"avg": 3.87,
+"count": 4175,
+"source": "goodreads"
+},
+"3192": {
+"avg": 3.99,
+"count": 10580,
+"source": "goodreads"
+},
+"5416": {
+"avg": 3.64,
+"count": 5405,
+"source": "goodreads"
+},
+"2296": {
+"avg": 4.1,
+"count": 2974,
+"source": "goodreads"
+},
+"876": {
+"avg": 3.61,
+"count": 38,
+"source": "goodreads"
+},
+"1510": {
+"avg": 3.27,
+"count": 11,
+"source": "goodreads"
+},
+"2828": {
+"avg": 3.99,
+"count": 172,
+"source": "goodreads"
+},
+"1707": {
+"avg": 3.9,
+"count": 1050,
+"source": "goodreads"
+},
+"1357": {
+"avg": 3.82,
+"count": 2349,
+"source": "goodreads"
+},
+"2982": {
+"avg": 3.4,
+"count": 238,
+"source": "goodreads"
+},
+"3690": {
+"avg": 3.94,
+"count": 32533,
+"source": "goodreads"
+},
+"3385": {
+"avg": 4.04,
+"count": 8119,
+"source": "goodreads"
+},
+"677": {
+"avg": 3.8,
+"count": 70491,
+"source": "goodreads"
+},
+"2347": {
+"avg": 4.38,
+"count": 13,
+"source": "goodreads"
+},
+"1091": {
+"avg": 3.98,
+"count": 82,
+"source": "goodreads"
+},
+"4786": {
+"avg": 3.85,
+"count": 7686,
+"source": "goodreads"
+},
+"1584": {
+"avg": 3.49,
+"count": 222,
+"source": "goodreads"
+},
+"4102": {
+"avg": 3.68,
+"count": 2396,
+"source": "goodreads"
+},
+"1300": {
+"avg": 4.1,
+"count": 735,
+"source": "goodreads"
+},
+"1750": {
+"avg": 3.52,
+"count": 33,
+"source": "goodreads"
+},
+"1245": {
+"avg": 4.06,
+"count": 835,
+"source": "goodreads"
+},
+"3782": {
+"avg": 4.11,
+"count": 578905,
+"source": "goodreads"
+},
+"4417": {
+"avg": 3.96,
+"count": 22497,
+"source": "goodreads"
+},
+"620": {
+"avg": 3.83,
+"count": 31029,
+"source": "goodreads"
+},
+"2039": {
+"avg": 3.93,
+"count": 645,
+"source": "goodreads"
+},
+"5206": {
+"avg": 3.81,
+"count": 3349,
+"source": "goodreads"
+},
+"509": {
+"avg": 3.78,
+"count": 76,
+"source": "goodreads"
+},
+"3151": {
+"avg": 3.77,
+"count": 115,
+"source": "goodreads"
+},
+"2740": {
+"avg": 4.11,
+"count": 8212,
+"source": "goodreads"
+},
+"3852": {
+"avg": 3.5,
+"count": 2,
+"source": "goodreads"
+},
+"2605": {
+"avg": 3.54,
+"count": 1759,
+"source": "goodreads"
+},
+"3444": {
+"avg": 3.61,
+"count": 9083,
+"source": "goodreads"
+},
+"1479": {
+"avg": 3.0,
+"count": 2,
+"source": "goodreads"
+},
+"1029": {
+"avg": 3.61,
+"count": 641,
+"source": "goodreads"
+},
+"1316": {
+"avg": 4.01,
+"count": 117424,
+"source": "goodreads"
+},
+"4114": {
+"avg": 3.86,
+"count": 90436,
+"source": "goodreads"
+},
+"5355": {
+"avg": 4.16,
+"count": 262495,
+"source": "goodreads"
+},
+"5210": {
+"avg": 3.74,
+"count": 1056,
+"source": "goodreads"
+},
+"3794": {
+"avg": 3.85,
+"count": 345,
+"source": "goodreads"
+},
+"1879": {
+"avg": 4.09,
+"count": 102865,
+"source": "goodreads"
+},
+"2756": {
+"avg": 3.9,
+"count": 2087,
+"source": "goodreads"
+},
+"2306": {
+"avg": 3.88,
+"count": 1815,
+"source": "goodreads"
+},
+"4378": {
+"avg": 3.2,
+"count": 5,
+"source": "goodreads"
+},
+"1480": {
+"avg": 3.36,
+"count": 11,
+"source": "goodreads"
+},
+"3452": {
+"avg": 4.0,
+"count": 50866,
+"source": "goodreads"
+},
+"3901": {
+"avg": 4.39,
+"count": 267,
+"source": "goodreads"
+},
+"4143": {
+"avg": 3.56,
+"count": 407,
+"source": "goodreads"
+},
+"1711": {
+"avg": 4.06,
+"count": 5125,
+"source": "goodreads"
+},
+"3393": {
+"avg": 3.22,
+"count": 27,
+"source": "goodreads"
+},
+"2428": {
+"avg": 3.68,
+"count": 1050,
+"source": "goodreads"
+},
+"2078": {
+"avg": 4.05,
+"count": 14519,
+"source": "goodreads"
+},
+"4285": {
+"avg": 3.6,
+"count": 13509,
+"source": "goodreads"
+},
+"548": {
+"avg": 3.79,
+"count": 30535,
+"source": "goodreads"
+},
+"2214": {
+"avg": 3.43,
+"count": 14,
+"source": "goodreads"
+},
+"5181": {
+"avg": 3.72,
+"count": 5766,
+"source": "goodreads"
+},
+"1068": {
+"avg": 4.27,
+"count": 15,
+"source": "goodreads"
+},
+"929": {
+"avg": 3.82,
+"count": 4360,
+"source": "goodreads"
+},
+"2776": {
+"avg": 3.75,
+"count": 6385,
+"source": "goodreads"
+},
+"1273": {
+"avg": 4.03,
+"count": 4364,
+"source": "goodreads"
+},
+"2234": {
+"avg": 3.8,
+"count": 2377,
+"source": "goodreads"
+},
+"3976": {
+"avg": 4.03,
+"count": 178,
+"source": "goodreads"
+},
+"1418": {
+"avg": 4.09,
+"count": 3697,
+"source": "goodreads"
+},
+"1048": {
+"avg": 4.5,
+"count": 4,
+"source": "goodreads"
+},
+"568": {
+"avg": 3.98,
+"count": 492,
+"source": "goodreads"
+},
+"991": {
+"avg": 3.99,
+"count": 3511,
+"source": "goodreads"
+},
+"2371": {
+"avg": 3.71,
+"count": 14116,
+"source": "goodreads"
+},
+"5288": {
+"avg": 3.8,
+"count": 11040,
+"source": "goodreads"
+},
+"1361": {
+"avg": 4.2,
+"count": 23424,
+"source": "goodreads"
+},
+"3063": {
+"avg": 3.78,
+"count": 589,
+"source": "goodreads"
+},
+"3599": {
+"avg": 3.81,
+"count": 3674,
+"source": "goodreads"
+},
+"2672": {
+"avg": 5.0,
+"count": 2,
+"source": "goodreads"
+},
+"968": {
+"avg": 4.24,
+"count": 334,
+"source": "goodreads"
+},
+"2222": {
+"avg": 3.7,
+"count": 1881,
+"source": "goodreads"
+},
+"2737": {
+"avg": 3.73,
+"count": 11,
+"source": "goodreads"
+},
+"1818": {
+"avg": 3.97,
+"count": 37,
+"source": "goodreads"
+},
+"5158": {
+"avg": 4.27,
+"count": 131715,
+"source": "goodreads"
+},
+"2367": {
+"avg": 3.75,
+"count": 23946,
+"source": "goodreads"
+},
+"987": {
+"avg": 3.53,
+"count": 849,
+"source": "goodreads"
+},
+"3576": {
+"avg": 4.09,
+"count": 93166,
+"source": "goodreads"
+},
+"5621": {
+"avg": 4.44,
+"count": 4367,
+"source": "goodreads"
+},
+"1398": {
+"avg": 3.72,
+"count": 327,
+"source": "goodreads"
+},
+"4525": {
+"avg": 3.6,
+"count": 15,
+"source": "goodreads"
+},
+"1377": {
+"avg": 2.86,
+"count": 1934,
+"source": "goodreads"
+},
+"3034": {
+"avg": 3.86,
+"count": 88,
+"source": "goodreads"
+},
+"529": {
+"avg": 3.57,
+"count": 2266,
+"source": "goodreads"
+},
+"2760": {
+"avg": 3.9,
+"count": 61,
+"source": "goodreads"
+},
+"3872": {
+"avg": 2.78,
+"count": 69,
+"source": "goodreads"
+},
+"1635": {
+"avg": 4.83,
+"count": 12,
+"source": "goodreads"
+},
+"2449": {
+"avg": 4.15,
+"count": 22,
+"source": "goodreads"
+},
+"5363": {
+"avg": 3.94,
+"count": 564277,
+"source": "goodreads"
+},
+"745": {
+"avg": 3.46,
+"count": 13,
+"source": "goodreads"
+},
+"1567": {
+"avg": 4.05,
+"count": 154,
+"source": "goodreads"
+},
+"4765": {
+"avg": 3.5,
+"count": 3146,
+"source": "goodreads"
+},
+"4335": {
+"avg": 3.72,
+"count": 7284,
+"source": "goodreads"
+},
+"1971": {
+"avg": 3.8,
+"count": 15650,
+"source": "goodreads"
+},
+"4270": {
+"avg": 3.98,
+"count": 25294,
+"source": "goodreads"
+},
+"1072": {
+"avg": 3.49,
+"count": 1790,
+"source": "goodreads"
+},
+"4159": {
+"avg": 3.89,
+"count": 38,
+"source": "goodreads"
+},
+"3366": {
+"avg": 2.35,
+"count": 311,
+"source": "goodreads"
+},
+"2961": {
+"avg": 3.85,
+"count": 16589,
+"source": "goodreads"
+},
+"3389": {
+"avg": 4.08,
+"count": 5095,
+"source": "goodreads"
+},
+"2432": {
+"avg": 3.16,
+"count": 152,
+"source": "goodreads"
+},
+"5573": {
+"avg": 4.27,
+"count": 18890,
+"source": "goodreads"
+},
+"5123": {
+"avg": 4.18,
+"count": 30366,
+"source": "goodreads"
+},
+"1160": {
+"avg": 1.0,
+"count": 1,
+"source": "goodreads"
+},
+"1530": {
+"avg": 3.96,
+"count": 27972,
+"source": "goodreads"
+},
+"4227": {
+"avg": 3.05,
+"count": 219,
+"source": "goodreads"
+},
+"3448": {
+"avg": 4.01,
+"count": 3200,
+"source": "goodreads"
+},
+"2873": {
+"avg": 3.56,
+"count": 3174,
+"source": "goodreads"
+},
+"2170": {
+"avg": 3.7,
+"count": 160,
+"source": "goodreads"
+},
+"1249": {
+"avg": 4.17,
+"count": 30099,
+"source": "goodreads"
+},
+"1526": {
+"avg": 3.75,
+"count": 32,
+"source": "goodreads"
+},
+"5135": {
+"avg": 3.12,
+"count": 77,
+"source": "goodreads"
+},
+"1930": {
+"avg": 4.4,
+"count": 2240,
+"source": "goodreads"
+},
+"1033": {
+"avg": 3.47,
+"count": 202,
+"source": "goodreads"
+},
+"2536": {
+"avg": 3.57,
+"count": 170,
+"source": "goodreads"
+},
+"5359": {
+"avg": 3.7,
+"count": 26863,
+"source": "goodreads"
+},
+"4118": {
+"avg": 3.92,
+"count": 6769,
+"source": "goodreads"
+},
+"3777": {
+"avg": 3.57,
+"count": 2264,
+"source": "goodreads"
+},
+"2865": {
+"avg": 4.31,
+"count": 4937,
+"source": "goodreads"
+},
+"3262": {
+"avg": 4.12,
+"count": 20953,
+"source": "goodreads"
+},
+"3798": {
+"avg": 3.17,
+"count": 401,
+"source": "goodreads"
+},
+"2189": {
+"avg": 3.82,
+"count": 49,
+"source": "goodreads"
+},
+"2023": {
+"avg": 4.02,
+"count": 3955,
+"source": "goodreads"
+},
+"5162": {
+"avg": 4.03,
+"count": 4827818,
+"source": "goodreads"
+},
+"3409": {
+"avg": 3.85,
+"count": 5448,
+"source": "goodreads"
+},
+"1967": {
+"avg": 4.25,
+"count": 4,
+"source": "goodreads"
+},
+"2832": {
+"avg": 3.71,
+"count": 779,
+"source": "goodreads"
+},
+"3370": {
+"avg": 3.83,
+"count": 6,
+"source": "goodreads"
+},
+"2998": {
+"avg": 3.86,
+"count": 42,
+"source": "goodreads"
+},
+"2561": {
+"avg": 3.64,
+"count": 47,
+"source": "goodreads"
+},
+"2074": {
+"avg": 4.15,
+"count": 35144,
+"source": "goodreads"
+},
+"1208": {
+"avg": 3.83,
+"count": 7873,
+"source": "goodreads"
+},
+"3235": {
+"avg": 4.35,
+"count": 199,
+"source": "goodreads"
+},
+"5169": {
+"avg": 3.5,
+"count": 38687,
+"source": "goodreads"
+},
+"2356": {
+"avg": 3.8,
+"count": 9042,
+"source": "goodreads"
+},
+"5493": {
+"avg": 3.91,
+"count": 17145,
+"source": "goodreads"
+},
+"3814": {
+"avg": 3.3,
+"count": 37,
+"source": "goodreads"
+},
+"1080": {
+"avg": 3.19,
+"count": 1860,
+"source": "goodreads"
+},
+"4282": {
+"avg": 3.77,
+"count": 12248,
+"source": "goodreads"
+},
+"2213": {
+"avg": 4.32,
+"count": 61812,
+"source": "goodreads"
+},
+"3951": {
+"avg": 3.85,
+"count": 2552,
+"source": "goodreads"
+},
+"3681": {
+"avg": 3.45,
+"count": 6520,
+"source": "goodreads"
+},
+"4144": {
+"avg": 3.42,
+"count": 2619,
+"source": "goodreads"
+},
+"723": {
+"avg": 4.16,
+"count": 1197,
+"source": "goodreads"
+},
+"2585": {
+"avg": 4.44,
+"count": 98,
+"source": "goodreads"
+},
+"4451": {
+"avg": 3.36,
+"count": 23318,
+"source": "goodreads"
+},
+"3394": {
+"avg": 4.07,
+"count": 18663,
+"source": "goodreads"
+},
+"1487": {
+"avg": 4.09,
+"count": 32,
+"source": "goodreads"
+},
+"1891": {
+"avg": 3.87,
+"count": 400,
+"source": "goodreads"
+},
+"1192": {
+"avg": 3.58,
+"count": 77,
+"source": "goodreads"
+},
+"1468": {
+"avg": 3.79,
+"count": 34,
+"source": "goodreads"
+},
+"3455": {
+"avg": 3.96,
+"count": 2175,
+"source": "goodreads"
+},
+"3286": {
+"avg": 4.3,
+"count": 451,
+"source": "goodreads"
+},
+"774": {
+"avg": 4.34,
+"count": 2614523,
+"source": "goodreads"
+},
+"1741": {
+"avg": 3.7,
+"count": 88,
+"source": "goodreads"
+},
+"4113": {
+"avg": 3.86,
+"count": 64364,
+"source": "goodreads"
+},
+"1311": {
+"avg": 3.82,
+"count": 7657,
+"source": "goodreads"
+},
+"3269": {
+"avg": 4.25,
+"count": 848746,
+"source": "goodreads"
+},
+"3793": {
+"avg": 3.83,
+"count": 3992,
+"source": "goodreads"
+},
+"4056": {
+"avg": 4.14,
+"count": 4355,
+"source": "goodreads"
+},
+"5217": {
+"avg": 3.46,
+"count": 2994,
+"source": "goodreads"
+},
+"2747": {
+"avg": 3.67,
+"count": 252,
+"source": "goodreads"
+},
+"4739": {
+"avg": 3.4,
+"count": 1779,
+"source": "goodreads"
+},
+"1491": {
+"avg": 4.16,
+"count": 8238,
+"source": "goodreads"
+},
+"3156": {
+"avg": 2.86,
+"count": 14,
+"source": "goodreads"
+},
+"4386": {
+"avg": 3.6,
+"count": 9520,
+"source": "goodreads"
+},
+"3443": {
+"avg": 4.77,
+"count": 35,
+"source": "goodreads"
+},
+"2252": {
+"avg": 3.78,
+"count": 20487,
+"source": "goodreads"
+},
+"1887": {
+"avg": 3.54,
+"count": 70,
+"source": "goodreads"
+},
+"2602": {
+"avg": 3.91,
+"count": 499,
+"source": "goodreads"
+},
+"918": {
+"avg": 3.87,
+"count": 2122,
+"source": "goodreads"
+},
+"1307": {
+"avg": 3.92,
+"count": 371,
+"source": "goodreads"
+},
+"4105": {
+"avg": 4.47,
+"count": 197312,
+"source": "goodreads"
+},
+"3290": {
+"avg": 4.26,
+"count": 3505,
+"source": "goodreads"
+},
+"2481": {
+"avg": 4.16,
+"count": 32,
+"source": "goodreads"
+},
+"2194": {
+"avg": 3.36,
+"count": 14,
+"source": "goodreads"
+},
+"3785": {
+"avg": 3.69,
+"count": 762,
+"source": "goodreads"
+},
+"1242": {
+"avg": 3.51,
+"count": 348,
+"source": "goodreads"
+},
+"4410": {
+"avg": 4.16,
+"count": 25157,
+"source": "goodreads"
+},
+"1096": {
+"avg": 3.15,
+"count": 104,
+"source": "goodreads"
+},
+"559": {
+"avg": 3.85,
+"count": 79,
+"source": "goodreads"
+},
+"1995": {
+"avg": 4.1,
+"count": 10,
+"source": "goodreads"
+},
+"5190": {
+"avg": 3.85,
+"count": 5271,
+"source": "goodreads"
+},
+"3947": {
+"avg": 3.45,
+"count": 5050,
+"source": "goodreads"
+},
+"3044": {
+"avg": 2.0,
+"count": 1,
+"source": "goodreads"
+},
+"3414": {
+"avg": 4.14,
+"count": 7408,
+"source": "goodreads"
+},
+"1429": {
+"avg": 4.29,
+"count": 31,
+"source": "goodreads"
+},
+"735": {
+"avg": 4.21,
+"count": 10671,
+"source": "goodreads"
+},
+"2985": {
+"avg": 3.7,
+"count": 164433,
+"source": "goodreads"
+},
+"1350": {
+"avg": 3.79,
+"count": 69412,
+"source": "goodreads"
+},
+"1645": {
+"avg": 3.56,
+"count": 346,
+"source": "goodreads"
+},
+"670": {
+"avg": 4.07,
+"count": 1258,
+"source": "goodreads"
+},
+"4447": {
+"avg": 4.03,
+"count": 42347,
+"source": "goodreads"
+},
+"1215": {
+"avg": 3.9,
+"count": 728,
+"source": "goodreads"
+},
+"2593": {
+"avg": 3.15,
+"count": 1226,
+"source": "goodreads"
+},
+"5256": {
+"avg": 3.77,
+"count": 1119,
+"source": "goodreads"
+},
+"2784": {
+"avg": 4.18,
+"count": 60,
+"source": "goodreads"
+},
+"4200": {
+"avg": 4.2,
+"count": 23647,
+"source": "goodreads"
+},
+"1147": {
+"avg": 4.0,
+"count": 20,
+"source": "goodreads"
+},
+"1517": {
+"avg": 3.88,
+"count": 1221,
+"source": "goodreads"
+},
+"5807": {
+"avg": 3.96,
+"count": 557,
+"source": "goodreads"
+},
+"3879": {
+"avg": 3.4,
+"count": 421,
+"source": "goodreads"
+},
+"3603": {
+"avg": 4.33,
+"count": 109704,
+"source": "goodreads"
+},
+"1794": {
+"avg": 3.98,
+"count": 41,
+"source": "goodreads"
+},
+"2012": {
+"avg": 4.2,
+"count": 54,
+"source": "goodreads"
+},
+"2157": {
+"avg": 3.8,
+"count": 130922,
+"source": "goodreads"
+},
+"1281": {
+"avg": 3.14,
+"count": 14,
+"source": "goodreads"
+},
+"3746": {
+"avg": 4.07,
+"count": 505,
+"source": "goodreads"
+},
+"4129": {
+"avg": 4.01,
+"count": 863,
+"source": "goodreads"
+},
+"4257": {
+"avg": 4.0,
+"count": 5,
+"source": "goodreads"
+},
+"1956": {
+"avg": 3.53,
+"count": 4901,
+"source": "goodreads"
+},
+"963": {
+"avg": 3.69,
+"count": 16,
+"source": "goodreads"
+},
+"2383": {
+"avg": 3.27,
+"count": 11626,
+"source": "goodreads"
+},
+"3984": {
+"avg": 3.65,
+"count": 186,
+"source": "goodreads"
+},
+"5503": {
+"avg": 3.09,
+"count": 233,
+"source": "goodreads"
+},
+"575": {
+"avg": 3.88,
+"count": 1975,
+"source": "goodreads"
+},
+"1540": {
+"avg": 3.16,
+"count": 2603,
+"source": "goodreads"
+},
+"2946": {
+"avg": 3.21,
+"count": 208,
+"source": "goodreads"
+},
+"4191": {
+"avg": 3.39,
+"count": 2815,
+"source": "goodreads"
+},
+"1686": {
+"avg": 4.7,
+"count": 154,
+"source": "goodreads"
+},
+"2803": {
+"avg": 4.33,
+"count": 12,
+"source": "goodreads"
+},
+"5295": {
+"avg": 3.84,
+"count": 37395,
+"source": "goodreads"
+},
+"2550": {
+"avg": 3.49,
+"count": 217937,
+"source": "goodreads"
+},
+"975": {
+"avg": 4.23,
+"count": 126,
+"source": "goodreads"
+},
+"1940": {
+"avg": 3.75,
+"count": 449,
+"source": "goodreads"
+},
+"4241": {
+"avg": 4.11,
+"count": 2220,
+"source": "goodreads"
+},
+"1556": {
+"avg": 3.52,
+"count": 82,
+"source": "goodreads"
+},
+"3091": {
+"avg": 3.0,
+"count": 73,
+"source": "goodreads"
+},
+"563": {
+"avg": 4.06,
+"count": 114,
+"source": "goodreads"
+},
+"1805": {
+"avg": 3.92,
+"count": 264,
+"source": "goodreads"
+},
+"3992": {
+"avg": 3.0,
+"count": 2,
+"source": "goodreads"
+},
+"2680": {
+"avg": 4.32,
+"count": 19,
+"source": "goodreads"
+},
+"4187": {
+"avg": 3.75,
+"count": 4271,
+"source": "goodreads"
+},
+"2950": {
+"avg": 3.76,
+"count": 21,
+"source": "goodreads"
+},
+"2403": {
+"avg": 3.78,
+"count": 13418,
+"source": "goodreads"
+},
+"5283": {
+"avg": 3.85,
+"count": 123,
+"source": "goodreads"
+},
+"2546": {
+"avg": 3.95,
+"count": 1448,
+"source": "goodreads"
+},
+"4168": {
+"avg": 3.74,
+"count": 11068,
+"source": "goodreads"
+},
+"1690": {
+"avg": 4.16,
+"count": 136,
+"source": "goodreads"
+},
+"3357": {
+"avg": 4.08,
+"count": 266,
+"source": "goodreads"
+},
+"1444": {
+"avg": 3.38,
+"count": 26,
+"source": "goodreads"
+},
+"3029": {
+"avg": 3.05,
+"count": 19,
+"source": "goodreads"
+},
+"4216": {
+"avg": 3.89,
+"count": 22060,
+"source": "goodreads"
+},
+"888": {
+"avg": 3.69,
+"count": 16,
+"source": "goodreads"
+},
+"3880": {
+"avg": 3.28,
+"count": 787,
+"source": "goodreads"
+},
+"1917": {
+"avg": 4.03,
+"count": 12190,
+"source": "goodreads"
+},
+"867": {
+"avg": 3.46,
+"count": 754,
+"source": "goodreads"
+},
+"534": {
+"avg": 3.28,
+"count": 54,
+"source": "goodreads"
+},
+"1501": {
+"avg": 4.5,
+"count": 10,
+"source": "goodreads"
+},
+"1278": {
+"avg": 3.83,
+"count": 17868,
+"source": "goodreads"
+},
+"3615": {
+"avg": 3.92,
+"count": 12759,
+"source": "goodreads"
+},
+"2907": {
+"avg": 3.29,
+"count": 21,
+"source": "goodreads"
+},
+"3300": {
+"avg": 4.13,
+"count": 224,
+"source": "goodreads"
+},
+"4095": {
+"avg": 3.89,
+"count": 2828,
+"source": "goodreads"
+},
+"3750": {
+"avg": 4.11,
+"count": 148,
+"source": "goodreads"
+},
+"2141": {
+"avg": 3.46,
+"count": 71,
+"source": "goodreads"
+},
+"5684": {
+"avg": 4.01,
+"count": 469,
+"source": "goodreads"
+},
+"5309": {
+"avg": 4.06,
+"count": 78773,
+"source": "goodreads"
+},
+"2566": {
+"avg": 4.3,
+"count": 221,
+"source": "goodreads"
+},
+"3727": {
+"avg": 5.0,
+"count": 5,
+"source": "goodreads"
+},
+"2835": {
+"avg": 4.19,
+"count": 195,
+"source": "goodreads"
+},
+"4148": {
+"avg": 4.09,
+"count": 11,
+"source": "goodreads"
+},
+"3662": {
+"avg": 3.28,
+"count": 324,
+"source": "goodreads"
+},
+"3398": {
+"avg": 3.82,
+"count": 339,
+"source": "goodreads"
+},
+"543": {
+"avg": 3.8,
+"count": 10,
+"source": "goodreads"
+},
+"5535": {
+"avg": 3.87,
+"count": 21096,
+"source": "goodreads"
+},
+"955": {
+"avg": 2.99,
+"count": 1426,
+"source": "goodreads"
+},
+"4261": {
+"avg": 3.78,
+"count": 11836,
+"source": "goodreads"
+},
+"1599": {
+"avg": 3.4,
+"count": 243,
+"source": "goodreads"
+},
+"1433": {
+"avg": 3.68,
+"count": 22,
+"source": "goodreads"
+},
+"2531": {
+"avg": 4.23,
+"count": 38608,
+"source": "goodreads"
+},
+"1258": {
+"avg": 3.75,
+"count": 9142,
+"source": "goodreads"
+},
+"1608": {
+"avg": 3.5,
+"count": 26,
+"source": "goodreads"
+},
+"3635": {
+"avg": 4.12,
+"count": 1323,
+"source": "goodreads"
+},
+"847": {
+"avg": 4.0,
+"count": 8,
+"source": "goodreads"
+},
+"1521": {
+"avg": 3.97,
+"count": 4725,
+"source": "goodreads"
+},
+"1171": {
+"avg": 4.11,
+"count": 61124,
+"source": "goodreads"
+},
+"2248": {
+"avg": 4.04,
+"count": 588144,
+"source": "goodreads"
+},
+"1937": {
+"avg": 3.94,
+"count": 1029,
+"source": "goodreads"
+},
+"5427": {
+"avg": 3.95,
+"count": 90893,
+"source": "goodreads"
+},
+"902": {
+"avg": 3.37,
+"count": 118,
+"source": "goodreads"
+},
+"3766": {
+"avg": 4.18,
+"count": 432,
+"source": "goodreads"
+},
+"2931": {
+"avg": 3.81,
+"count": 696,
+"source": "goodreads"
+},
+"3623": {
+"avg": 3.94,
+"count": 180332,
+"source": "goodreads"
+},
+"3273": {
+"avg": 3.76,
+"count": 7184,
+"source": "goodreads"
+},
+"3789": {
+"avg": 3.41,
+"count": 191,
+"source": "goodreads"
+},
+"1167": {
+"avg": 4.11,
+"count": 21668,
+"source": "goodreads"
+},
+"4365": {
+"avg": 3.56,
+"count": 6567,
+"source": "goodreads"
+},
+"1537": {
+"avg": 3.91,
+"count": 23,
+"source": "goodreads"
+},
+"502": {
+"avg": 3.58,
+"count": 24,
+"source": "goodreads"
+},
+"1022": {
+"avg": 3.78,
+"count": 9,
+"source": "goodreads"
+},
+"1472": {
+"avg": 4.31,
+"count": 120,
+"source": "goodreads"
+},
+"3361": {
+"avg": 3.89,
+"count": 64,
+"source": "goodreads"
+},
+"2989": {
+"avg": 3.97,
+"count": 100919,
+"source": "goodreads"
+},
+"2435": {
+"avg": 4.12,
+"count": 19430,
+"source": "goodreads"
+},
+"1219": {
+"avg": 4.07,
+"count": 485,
+"source": "goodreads"
+},
+"2966": {
+"avg": 3.65,
+"count": 108,
+"source": "goodreads"
+},
+"3674": {
+"avg": 4.5,
+"count": 8,
+"source": "goodreads"
+},
+"1649": {
+"avg": 3.53,
+"count": 790,
+"source": "goodreads"
+},
+"5173": {
+"avg": 3.57,
+"count": 14,
+"source": "goodreads"
+},
+"1833": {
+"avg": 3.76,
+"count": 21,
+"source": "goodreads"
+},
+"555": {
+"avg": 4.32,
+"count": 52390,
+"source": "goodreads"
+},
+"4762": {
+"avg": 3.76,
+"count": 81101,
+"source": "goodreads"
+},
+"1560": {
+"avg": 4.43,
+"count": 1811,
+"source": "goodreads"
+},
+"1976": {
+"avg": 3.5,
+"count": 4,
+"source": "goodreads"
+},
+"4060": {
+"avg": 4.0,
+"count": 9,
+"source": "goodreads"
+},
+"1262": {
+"avg": 3.5,
+"count": 38652,
+"source": "goodreads"
+},
+"1632": {
+"avg": 4.41,
+"count": 337,
+"source": "goodreads"
+},
+"1327": {
+"avg": 3.41,
+"count": 2551,
+"source": "goodreads"
+},
+"4125": {
+"avg": 3.23,
+"count": 659,
+"source": "goodreads"
+},
+"1777": {
+"avg": 4.0,
+"count": 1,
+"source": "goodreads"
+},
+"2622": {
+"avg": 4.28,
+"count": 382,
+"source": "goodreads"
+},
+"3176": {
+"avg": 4.05,
+"count": 219,
+"source": "goodreads"
+},
+"3658": {
+"avg": 3.42,
+"count": 369,
+"source": "goodreads"
+},
+"1665": {
+"avg": 4.55,
+"count": 210,
+"source": "goodreads"
+},
+"650": {
+"avg": 3.91,
+"count": 25203,
+"source": "goodreads"
+},
+"3208": {
+"avg": 4.1,
+"count": 379,
+"source": "goodreads"
+},
+"1235": {
+"avg": 4.0,
+"count": 3578,
+"source": "goodreads"
+},
+"4037": {
+"avg": 4.33,
+"count": 21,
+"source": "goodreads"
+},
+"2419": {
+"avg": 3.59,
+"count": 59,
+"source": "goodreads"
+},
+"715": {
+"avg": 4.14,
+"count": 52850,
+"source": "goodreads"
+},
+"4172": {
+"avg": 3.74,
+"count": 4601,
+"source": "goodreads"
+},
+"1370": {
+"avg": 3.41,
+"count": 29,
+"source": "goodreads"
+},
+"3967": {
+"avg": 4.6,
+"count": 2086,
+"source": "goodreads"
+},
+"3571": {
+"avg": 4.02,
+"count": 334662,
+"source": "goodreads"
+},
+"3988": {
+"avg": 4.07,
+"count": 597,
+"source": "goodreads"
+},
+"4021": {
+"avg": 3.0,
+"count": 5,
+"source": "goodreads"
+},
+"1389": {
+"avg": 3.51,
+"count": 641,
+"source": "goodreads"
+},
+"1673": {
+"avg": 4.36,
+"count": 1540,
+"source": "goodreads"
+},
+"1366": {
+"avg": 3.78,
+"count": 466,
+"source": "goodreads"
+},
+"2819": {
+"avg": 4.02,
+"count": 1661,
+"source": "goodreads"
+},
+"703": {
+"avg": 4.32,
+"count": 14302,
+"source": "goodreads"
+},
+"580": {
+"avg": 3.67,
+"count": 299,
+"source": "goodreads"
+},
+"3971": {
+"avg": 3.36,
+"count": 296,
+"source": "goodreads"
+},
+"1809": {
+"avg": 3.8,
+"count": 201,
+"source": "goodreads"
+},
+"1624": {
+"avg": 3.26,
+"count": 27,
+"source": "goodreads"
+},
+"1274": {
+"avg": 4.11,
+"count": 140,
+"source": "goodreads"
+},
+"2008": {
+"avg": 3.79,
+"count": 48,
+"source": "goodreads"
+},
+"4133": {
+"avg": 3.93,
+"count": 147729,
+"source": "goodreads"
+},
+"1331": {
+"avg": 3.98,
+"count": 53871,
+"source": "goodreads"
+},
+"3926": {
+"avg": 3.53,
+"count": 15,
+"source": "goodreads"
+},
+"1018": {
+"avg": 3.86,
+"count": 36,
+"source": "goodreads"
+},
+"3160": {
+"avg": 3.67,
+"count": 3,
+"source": "goodreads"
+},
+"3863": {
+"avg": 3.64,
+"count": 319,
+"source": "goodreads"
+},
+"2265": {
+"avg": 4.08,
+"count": 4235,
+"source": "goodreads"
+},
+"1019": {
+"avg": 3.72,
+"count": 35542,
+"source": "goodreads"
+},
+"3024": {
+"avg": 3.89,
+"count": 9,
+"source": "goodreads"
+},
+"1449": {
+"avg": 3.91,
+"count": 1056,
+"source": "goodreads"
+},
+"3161": {
+"avg": 3.0,
+"count": 2,
+"source": "goodreads"
+},
+"3531": {
+"avg": 3.33,
+"count": 3,
+"source": "goodreads"
+},
+"2770": {
+"avg": 3.8,
+"count": 6720,
+"source": "goodreads"
+},
+"1625": {
+"avg": 3.81,
+"count": 140,
+"source": "goodreads"
+},
+"5689": {
+"avg": 3.87,
+"count": 60,
+"source": "goodreads"
+},
+"1760": {
+"avg": 4.14,
+"count": 1070,
+"source": "goodreads"
+},
+"4098": {
+"avg": 3.9,
+"count": 16758,
+"source": "goodreads"
+},
+"4132": {
+"avg": 3.41,
+"count": 18409,
+"source": "goodreads"
+},
+"581": {
+"avg": 3.72,
+"count": 5759,
+"source": "goodreads"
+},
+"3589": {
+"avg": 3.59,
+"count": 2337,
+"source": "goodreads"
+},
+"2398": {
+"avg": 3.53,
+"count": 156,
+"source": "goodreads"
+},
+"1808": {
+"avg": 2.67,
+"count": 12,
+"source": "goodreads"
+},
+"3136": {
+"avg": 3.92,
+"count": 13,
+"source": "goodreads"
+},
+"1672": {
+"avg": 4.33,
+"count": 6,
+"source": "goodreads"
+},
+"1737": {
+"avg": 4.23,
+"count": 43272,
+"source": "goodreads"
+},
+"702": {
+"avg": 3.24,
+"count": 41,
+"source": "goodreads"
+},
+"5324": {
+"avg": 3.79,
+"count": 202,
+"source": "goodreads"
+},
+"2224": {
+"avg": 3.5,
+"count": 5595,
+"source": "goodreads"
+},
+"1058": {
+"avg": 3.0,
+"count": 1,
+"source": "goodreads"
+},
+"1408": {
+"avg": 4.5,
+"count": 2,
+"source": "goodreads"
+},
+"3989": {
+"avg": 3.55,
+"count": 162,
+"source": "goodreads"
+},
+"1664": {
+"avg": 3.88,
+"count": 8,
+"source": "goodreads"
+},
+"3659": {
+"avg": 3.89,
+"count": 18,
+"source": "goodreads"
+},
+"1234": {
+"avg": 4.47,
+"count": 13604,
+"source": "goodreads"
+},
+"5277": {
+"avg": 3.56,
+"count": 191,
+"source": "goodreads"
+},
+"5298": {
+"avg": 3.85,
+"count": 26,
+"source": "goodreads"
+},
+"4173": {
+"avg": 3.2,
+"count": 140,
+"source": "goodreads"
+},
+"3462": {
+"avg": 3.86,
+"count": 221586,
+"source": "goodreads"
+},
+"3198": {
+"avg": 2.82,
+"count": 11,
+"source": "goodreads"
+},
+"3032": {
+"avg": 4.06,
+"count": 105,
+"source": "goodreads"
+},
+"2273": {
+"avg": 3.86,
+"count": 904,
+"source": "goodreads"
+},
+"5559": {
+"avg": 3.53,
+"count": 257,
+"source": "goodreads"
+},
+"3177": {
+"avg": 3.88,
+"count": 16,
+"source": "goodreads"
+},
+"1633": {
+"avg": 5.0,
+"count": 1,
+"source": "goodreads"
+},
+"1326": {
+"avg": 3.67,
+"count": 6,
+"source": "goodreads"
+},
+"2859": {
+"avg": 4.26,
+"count": 89,
+"source": "goodreads"
+},
+"5365": {
+"avg": 3.42,
+"count": 26,
+"source": "goodreads"
+},
+"5522": {
+"avg": 3.73,
+"count": 26,
+"source": "goodreads"
+},
+"1561": {
+"avg": 3.5,
+"count": 255,
+"source": "goodreads"
+},
+"4276": {
+"avg": 3.75,
+"count": 20,
+"source": "goodreads"
+},
+"2658": {
+"avg": 4.5,
+"count": 2,
+"source": "goodreads"
+},
+"1977": {
+"avg": 3.92,
+"count": 13,
+"source": "goodreads"
+},
+"2988": {
+"avg": 3.52,
+"count": 52,
+"source": "goodreads"
+},
+"2121": {
+"avg": 2.25,
+"count": 4,
+"source": "goodreads"
+},
+"2434": {
+"avg": 3.87,
+"count": 34123,
+"source": "goodreads"
+},
+"2064": {
+"avg": 3.82,
+"count": 1942,
+"source": "goodreads"
+},
+"1218": {
+"avg": 4.11,
+"count": 304,
+"source": "goodreads"
+},
+"3675": {
+"avg": 3.4,
+"count": 43,
+"source": "goodreads"
+},
+"1536": {
+"avg": 3.77,
+"count": 2162,
+"source": "goodreads"
+},
+"4734": {
+"avg": 3.25,
+"count": 1014,
+"source": "goodreads"
+},
+"5826": {
+"avg": 3.44,
+"count": 72,
+"source": "goodreads"
+},
+"503": {
+"avg": 4.09,
+"count": 17450,
+"source": "goodreads"
+},
+"1920": {
+"avg": 3.92,
+"count": 1333,
+"source": "goodreads"
+},
+"4221": {
+"avg": 3.88,
+"count": 1386,
+"source": "goodreads"
+},
+"1023": {
+"avg": 3.69,
+"count": 105,
+"source": "goodreads"
+},
+"1473": {
+"avg": 3.98,
+"count": 280,
+"source": "goodreads"
+},
+"2176": {
+"avg": 4.32,
+"count": 3288,
+"source": "goodreads"
+},
+"2526": {
+"avg": 3.94,
+"count": 1209,
+"source": "goodreads"
+},
+"2875": {
+"avg": 4.18,
+"count": 608,
+"source": "goodreads"
+},
+"4108": {
+"avg": 3.63,
+"count": 12167,
+"source": "goodreads"
+},
+"3337": {
+"avg": 3.41,
+"count": 412,
+"source": "goodreads"
+},
+"780": {
+"avg": 4.26,
+"count": 20006,
+"source": "goodreads"
+},
+"2199": {
+"avg": 3.99,
+"count": 2142,
+"source": "goodreads"
+},
+"1520": {
+"avg": 3.84,
+"count": 25045,
+"source": "goodreads"
+},
+"1170": {
+"avg": 4.67,
+"count": 9,
+"source": "goodreads"
+},
+"3008": {
+"avg": 3.78,
+"count": 23,
+"source": "goodreads"
+},
+"4237": {
+"avg": 4.21,
+"count": 247,
+"source": "goodreads"
+},
+"2249": {
+"avg": 4.09,
+"count": 102955,
+"source": "goodreads"
+},
+"5426": {
+"avg": 3.57,
+"count": 101427,
+"source": "goodreads"
+},
+"3771": {
+"avg": 4.09,
+"count": 419,
+"source": "goodreads"
+},
+"2530": {
+"avg": 3.72,
+"count": 435,
+"source": "goodreads"
+},
+"2160": {
+"avg": 3.79,
+"count": 1163,
+"source": "goodreads"
+},
+"1259": {
+"avg": 3.81,
+"count": 2308,
+"source": "goodreads"
+},
+"2926": {
+"avg": 3.85,
+"count": 473291,
+"source": "goodreads"
+},
+"4775": {
+"avg": 3.81,
+"count": 52614,
+"source": "goodreads"
+},
+"1824": {
+"avg": 4.22,
+"count": 27,
+"source": "goodreads"
+},
+"3819": {
+"avg": 4.05,
+"count": 26076,
+"source": "goodreads"
+},
+"2137": {
+"avg": 4.16,
+"count": 355858,
+"source": "goodreads"
+},
+"2567": {
+"avg": 3.6,
+"count": 998,
+"source": "goodreads"
+},
+"4149": {
+"avg": 3.45,
+"count": 1356,
+"source": "goodreads"
+},
+"3376": {
+"avg": 3.18,
+"count": 17,
+"source": "goodreads"
+},
+"3663": {
+"avg": 4.0,
+"count": 1,
+"source": "goodreads"
+},
+"2072": {
+"avg": 4.0,
+"count": 665,
+"source": "goodreads"
+},
+"2005": {
+"avg": 4.2,
+"count": 15,
+"source": "goodreads"
+},
+"1279": {
+"avg": 4.01,
+"count": 50512,
+"source": "goodreads"
+},
+"2843": {
+"avg": 4.53,
+"count": 15,
+"source": "goodreads"
+},
+"1445": {
+"avg": 4.73,
+"count": 75,
+"source": "goodreads"
+},
+"3028": {
+"avg": 4.19,
+"count": 10194,
+"source": "goodreads"
+},
+"4217": {
+"avg": 3.99,
+"count": 28658,
+"source": "goodreads"
+},
+"3881": {
+"avg": 3.94,
+"count": 212,
+"source": "goodreads"
+},
+"2793": {
+"avg": 4.25,
+"count": 16,
+"source": "goodreads"
+},
+"1916": {
+"avg": 3.9,
+"count": 60,
+"source": "goodreads"
+},
+"866": {
+"avg": 4.24,
+"count": 50,
+"source": "goodreads"
+},
+"5797": {
+"avg": 3.95,
+"count": 16804,
+"source": "goodreads"
+},
+"2402": {
+"avg": 3.03,
+"count": 29,
+"source": "goodreads"
+},
+"3706": {
+"avg": 4.25,
+"count": 4,
+"source": "goodreads"
+},
+"3356": {
+"avg": 4.11,
+"count": 425,
+"source": "goodreads"
+},
+"974": {
+"avg": 4.38,
+"count": 40,
+"source": "goodreads"
+},
+"1941": {
+"avg": 2.89,
+"count": 19,
+"source": "goodreads"
+},
+"1042": {
+"avg": 4.18,
+"count": 40,
+"source": "goodreads"
+},
+"1412": {
+"avg": 3.82,
+"count": 1163,
+"source": "goodreads"
+},
+"1557": {
+"avg": 3.0,
+"count": 22,
+"source": "goodreads"
+},
+"562": {
+"avg": 4.31,
+"count": 2027,
+"source": "goodreads"
+},
+"3090": {
+"avg": 4.37,
+"count": 60,
+"source": "goodreads"
+},
+"831": {
+"avg": 2.97,
+"count": 30,
+"source": "goodreads"
+},
+"5144": {
+"avg": 3.18,
+"count": 94,
+"source": "goodreads"
+},
+"3205": {
+"avg": 4.09,
+"count": 123,
+"source": "goodreads"
+},
+"2947": {
+"avg": 3.24,
+"count": 17,
+"source": "goodreads"
+},
+"3710": {
+"avg": 3.81,
+"count": 31,
+"source": "goodreads"
+},
+"2551": {
+"avg": 3.7,
+"count": 211,
+"source": "goodreads"
+},
+"1404": {
+"avg": 3.84,
+"count": 4936,
+"source": "goodreads"
+},
+"3069": {
+"avg": 3.81,
+"count": 429369,
+"source": "goodreads"
+},
+"1957": {
+"avg": 3.54,
+"count": 28,
+"source": "goodreads"
+},
+"2382": {
+"avg": 3.61,
+"count": 3736,
+"source": "goodreads"
+},
+"5447": {
+"avg": 4.23,
+"count": 14058,
+"source": "goodreads"
+},
+"5152": {
+"avg": 3.79,
+"count": 526,
+"source": "goodreads"
+},
+"3985": {
+"avg": 3.57,
+"count": 102,
+"source": "goodreads"
+},
+"5502": {
+"avg": 3.84,
+"count": 9386,
+"source": "goodreads"
+},
+"827": {
+"avg": 4.3,
+"count": 730,
+"source": "goodreads"
+},
+"574": {
+"avg": 4.0,
+"count": 6108,
+"source": "goodreads"
+},
+"2910": {
+"avg": 3.76,
+"count": 37,
+"source": "goodreads"
+},
+"2013": {
+"avg": 3.78,
+"count": 849777,
+"source": "goodreads"
+},
+"5693": {
+"avg": 4.2,
+"count": 28138,
+"source": "goodreads"
+},
+"4082": {
+"avg": 4.47,
+"count": 260451,
+"source": "goodreads"
+},
+"4128": {
+"avg": 3.91,
+"count": 1349,
+"source": "goodreads"
+},
+"4201": {
+"avg": 3.93,
+"count": 7427,
+"source": "goodreads"
+},
+"1003": {
+"avg": 3.41,
+"count": 128,
+"source": "goodreads"
+},
+"3194": {
+"avg": 4.09,
+"count": 71768,
+"source": "goodreads"
+},
+"1453": {
+"avg": 3.88,
+"count": 24,
+"source": "goodreads"
+},
+"1146": {
+"avg": 2.61,
+"count": 62,
+"source": "goodreads"
+},
+"4344": {
+"avg": 3.91,
+"count": 137033,
+"source": "goodreads"
+},
+"1516": {
+"avg": 3.2,
+"count": 10,
+"source": "goodreads"
+},
+"523": {
+"avg": 4.09,
+"count": 2333,
+"source": "goodreads"
+},
+"1701": {
+"avg": 4.23,
+"count": 335899,
+"source": "goodreads"
+},
+"3383": {
+"avg": 3.93,
+"count": 7166,
+"source": "goodreads"
+},
+"4446": {
+"avg": 4.14,
+"count": 44602,
+"source": "goodreads"
+},
+"5257": {
+"avg": 3.92,
+"count": 2014116,
+"source": "goodreads"
+},
+"3100": {
+"avg": 3.36,
+"count": 11,
+"source": "goodreads"
+},
+"558": {
+"avg": 3.98,
+"count": 346,
+"source": "goodreads"
+},
+"2711": {
+"avg": 3.72,
+"count": 4627,
+"source": "goodreads"
+},
+"1994": {
+"avg": 3.44,
+"count": 45,
+"source": "goodreads"
+},
+"5191": {
+"avg": 3.79,
+"count": 2843,
+"source": "goodreads"
+},
+"3946": {
+"avg": 3.73,
+"count": 11,
+"source": "goodreads"
+},
+"2204": {
+"avg": 3.56,
+"count": 15294,
+"source": "goodreads"
+},
+"1078": {
+"avg": 3.12,
+"count": 793,
+"source": "goodreads"
+},
+"3045": {
+"avg": 3.4,
+"count": 5,
+"source": "goodreads"
+},
+"1306": {
+"avg": 3.93,
+"count": 41,
+"source": "goodreads"
+},
+"2480": {
+"avg": 3.19,
+"count": 32,
+"source": "goodreads"
+},
+"4041": {
+"avg": 4.0,
+"count": 1,
+"source": "goodreads"
+},
+"1243": {
+"avg": 3.43,
+"count": 12143,
+"source": "goodreads"
+},
+"5579": {
+"avg": 3.53,
+"count": 257,
+"source": "goodreads"
+},
+"2746": {
+"avg": 4.35,
+"count": 861053,
+"source": "goodreads"
+},
+"1490": {
+"avg": 3.33,
+"count": 3,
+"source": "goodreads"
+},
+"3012": {
+"avg": 3.0,
+"count": 5,
+"source": "goodreads"
+},
+"2253": {
+"avg": 3.61,
+"count": 342,
+"source": "goodreads"
+},
+"1886": {
+"avg": 3.27,
+"count": 22,
+"source": "goodreads"
+},
+"3911": {
+"avg": 3.67,
+"count": 3,
+"source": "goodreads"
+},
+"2496": {
+"avg": 4.11,
+"count": 2220,
+"source": "goodreads"
+},
+"3287": {
+"avg": 4.0,
+"count": 9,
+"source": "goodreads"
+},
+"1740": {
+"avg": 3.7,
+"count": 3223,
+"source": "goodreads"
+},
+"4112": {
+"avg": 3.55,
+"count": 603,
+"source": "goodreads"
+},
+"1310": {
+"avg": 4.21,
+"count": 12995,
+"source": "goodreads"
+},
+"3638": {
+"avg": 4.12,
+"count": 1751,
+"source": "goodreads"
+},
+"1255": {
+"avg": 3.27,
+"count": 52,
+"source": "goodreads"
+},
+"3268": {
+"avg": 4.25,
+"count": 4,
+"source": "goodreads"
+},
+"3792": {
+"avg": 3.27,
+"count": 60,
+"source": "goodreads"
+},
+"2029": {
+"avg": 3.93,
+"count": 74994,
+"source": "goodreads"
+},
+"5216": {
+"avg": 3.95,
+"count": 293331,
+"source": "goodreads"
+},
+"1890": {
+"avg": 4.25,
+"count": 51,
+"source": "goodreads"
+},
+"688": {
+"avg": 4.03,
+"count": 192263,
+"source": "goodreads"
+},
+"2992": {
+"avg": 3.8,
+"count": 23397,
+"source": "goodreads"
+},
+"722": {
+"avg": 3.13,
+"count": 16,
+"source": "goodreads"
+},
+"2091": {
+"avg": 3.96,
+"count": 1606,
+"source": "goodreads"
+},
+"2584": {
+"avg": 4.05,
+"count": 1247,
+"source": "goodreads"
+},
+"667": {
+"avg": 3.87,
+"count": 132,
+"source": "goodreads"
+},
+"1652": {
+"avg": 4.12,
+"count": 75441,
+"source": "goodreads"
+},
+"1982": {
+"avg": 3.27,
+"count": 15,
+"source": "goodreads"
+},
+"5168": {
+"avg": 3.86,
+"count": 7820,
+"source": "goodreads"
+},
+"4283": {
+"avg": 3.98,
+"count": 12206,
+"source": "goodreads"
+},
+"3116": {
+"avg": 3.0,
+"count": 1,
+"source": "goodreads"
+},
+"1594": {
+"avg": 4.26,
+"count": 1592,
+"source": "goodreads"
+},
+"4097": {
+"avg": 3.55,
+"count": 11,
+"source": "goodreads"
+},
+"2456": {
+"avg": 3.59,
+"count": 370,
+"source": "goodreads"
+},
+"536": {
+"avg": 4.0,
+"count": 7,
+"source": "goodreads"
+},
+"1503": {
+"avg": 3.87,
+"count": 475,
+"source": "goodreads"
+},
+"5540": {
+"avg": 4.5,
+"count": 12,
+"source": "goodreads"
+},
+"1915": {
+"avg": 3.21,
+"count": 79,
+"source": "goodreads"
+},
+"3181": {
+"avg": 3.81,
+"count": 151,
+"source": "goodreads"
+},
+"1016": {
+"avg": 3.64,
+"count": 339,
+"source": "goodreads"
+},
+"1692": {
+"avg": 4.33,
+"count": 3,
+"source": "goodreads"
+},
+"1368": {
+"avg": 4.2,
+"count": 796974,
+"source": "goodreads"
+},
+"3355": {
+"avg": 3.5,
+"count": 20,
+"source": "goodreads"
+},
+"5281": {
+"avg": 3.86,
+"count": 44,
+"source": "goodreads"
+},
+"2051": {
+"avg": 3.79,
+"count": 34,
+"source": "goodreads"
+},
+"2401": {
+"avg": 3.73,
+"count": 8608,
+"source": "goodreads"
+},
+"3640": {
+"avg": 4.11,
+"count": 2234,
+"source": "goodreads"
+},
+"4185": {
+"avg": 4.06,
+"count": 4534,
+"source": "goodreads"
+},
+"648": {
+"avg": 3.55,
+"count": 1901,
+"source": "goodreads"
+},
+"1807": {
+"avg": 4.23,
+"count": 70,
+"source": "goodreads"
+},
+"2378": {
+"avg": 3.9,
+"count": 27487,
+"source": "goodreads"
+},
+"2682": {
+"avg": 4.78,
+"count": 36,
+"source": "goodreads"
+},
+"3139": {
+"avg": 3.6,
+"count": 151,
+"source": "goodreads"
+},
+"1104": {
+"avg": 3.74,
+"count": 253,
+"source": "goodreads"
+},
+"1554": {
+"avg": 3.84,
+"count": 162,
+"source": "goodreads"
+},
+"561": {
+"avg": 4.15,
+"count": 596,
+"source": "goodreads"
+},
+"3093": {
+"avg": 3.43,
+"count": 121,
+"source": "goodreads"
+},
+"4756": {
+"avg": 4.0,
+"count": 8,
+"source": "goodreads"
+},
+"4243": {
+"avg": 3.81,
+"count": 2010343,
+"source": "goodreads"
+},
+"2397": {
+"avg": 3.29,
+"count": 2325,
+"source": "goodreads"
+},
+"2552": {
+"avg": 3.67,
+"count": 27,
+"source": "goodreads"
+},
+"1684": {
+"avg": 3.92,
+"count": 247571,
+"source": "goodreads"
+},
+"3206": {
+"avg": 3.85,
+"count": 13,
+"source": "goodreads"
+},
+"1391": {
+"avg": 4.32,
+"count": 1991,
+"source": "goodreads"
+},
+"3656": {
+"avg": 3.67,
+"count": 3,
+"source": "goodreads"
+},
+"2944": {
+"avg": 3.79,
+"count": 24643,
+"source": "goodreads"
+},
+"2417": {
+"avg": 4.3,
+"count": 287,
+"source": "goodreads"
+},
+"2047": {
+"avg": 3.93,
+"count": 1471,
+"source": "goodreads"
+},
+"577": {
+"avg": 3.8,
+"count": 591,
+"source": "goodreads"
+},
+"1112": {
+"avg": 3.98,
+"count": 101,
+"source": "goodreads"
+},
+"3986": {
+"avg": 4.02,
+"count": 267,
+"source": "goodreads"
+},
+"824": {
+"avg": 3.75,
+"count": 20,
+"source": "goodreads"
+},
+"1811": {
+"avg": 3.51,
+"count": 116,
+"source": "goodreads"
+},
+"5444": {
+"avg": 3.67,
+"count": 18,
+"source": "goodreads"
+},
+"4255": {
+"avg": 3.83,
+"count": 10049,
+"source": "goodreads"
+},
+"3590": {
+"avg": 3.28,
+"count": 365,
+"source": "goodreads"
+},
+"1283": {
+"avg": 4.04,
+"count": 4073,
+"source": "goodreads"
+},
+"3744": {
+"avg": 3.5,
+"count": 351,
+"source": "goodreads"
+},
+"4081": {
+"avg": 3.89,
+"count": 100855,
+"source": "goodreads"
+},
+"1779": {
+"avg": 3.5,
+"count": 12,
+"source": "goodreads"
+},
+"1329": {
+"avg": 4.19,
+"count": 15195,
+"source": "goodreads"
+},
+"5690": {
+"avg": 4.0,
+"count": 17,
+"source": "goodreads"
+},
+"2010": {
+"avg": 4.01,
+"count": 328,
+"source": "goodreads"
+},
+"3601": {
+"avg": 3.09,
+"count": 46,
+"source": "goodreads"
+},
+"2913": {
+"avg": 3.75,
+"count": 44,
+"source": "goodreads"
+},
+"609": {
+"avg": 4.14,
+"count": 3974,
+"source": "goodreads"
+},
+"2769": {
+"avg": 4.33,
+"count": 285241,
+"source": "goodreads"
+},
+"2293": {
+"avg": 4.03,
+"count": 29344,
+"source": "goodreads"
+},
+"1515": {
+"avg": 3.93,
+"count": 12959,
+"source": "goodreads"
+},
+"3197": {
+"avg": 4.04,
+"count": 509,
+"source": "goodreads"
+},
+"1450": {
+"avg": 3.07,
+"count": 15,
+"source": "goodreads"
+},
+"1903": {
+"avg": 3.33,
+"count": 27,
+"source": "goodreads"
+},
+"2591": {
+"avg": 3.83,
+"count": 5998,
+"source": "goodreads"
+},
+"1647": {
+"avg": 3.16,
+"count": 370,
+"source": "goodreads"
+},
+"3380": {
+"avg": 3.47,
+"count": 99,
+"source": "goodreads"
+},
+"4445": {
+"avg": 4.04,
+"count": 74,
+"source": "goodreads"
+},
+"1217": {
+"avg": 3.3,
+"count": 120,
+"source": "goodreads"
+},
+"4015": {
+"avg": 4.0,
+"count": 2,
+"source": "goodreads"
+},
+"1702": {
+"avg": 3.75,
+"count": 558,
+"source": "goodreads"
+},
+"3695": {
+"avg": 3.07,
+"count": 15,
+"source": "goodreads"
+},
+"5311": {
+"avg": 4.3,
+"count": 845,
+"source": "goodreads"
+},
+"2084": {
+"avg": 3.74,
+"count": 16218,
+"source": "goodreads"
+},
+"1581": {
+"avg": 3.6,
+"count": 83,
+"source": "goodreads"
+},
+"4279": {
+"avg": 3.79,
+"count": 2905,
+"source": "goodreads"
+},
+"4783": {
+"avg": 3.87,
+"count": 28374,
+"source": "goodreads"
+},
+"3046": {
+"avg": 3.5,
+"count": 15687,
+"source": "goodreads"
+},
+"3416": {
+"avg": 4.03,
+"count": 242,
+"source": "goodreads"
+},
+"3945": {
+"avg": 3.65,
+"count": 40,
+"source": "goodreads"
+},
+"2712": {
+"avg": 4.41,
+"count": 373,
+"source": "goodreads"
+},
+"3103": {
+"avg": 3.56,
+"count": 18,
+"source": "goodreads"
+},
+"3787": {
+"avg": 3.83,
+"count": 90,
+"source": "goodreads"
+},
+"4412": {
+"avg": 3.8,
+"count": 6275,
+"source": "goodreads"
+},
+"1610": {
+"avg": 2.78,
+"count": 37,
+"source": "goodreads"
+},
+"2196": {
+"avg": 4.01,
+"count": 459,
+"source": "goodreads"
+},
+"2529": {
+"avg": 3.35,
+"count": 20,
+"source": "goodreads"
+},
+"2483": {
+"avg": 4.15,
+"count": 51727,
+"source": "goodreads"
+},
+"1305": {
+"avg": 3.86,
+"count": 7,
+"source": "goodreads"
+},
+"3768": {
+"avg": 3.81,
+"count": 139,
+"source": "goodreads"
+},
+"1755": {
+"avg": 4.28,
+"count": 1912733,
+"source": "goodreads"
+},
+"3292": {
+"avg": 4.16,
+"count": 2959,
+"source": "goodreads"
+},
+"2250": {
+"avg": 3.54,
+"count": 338,
+"source": "goodreads"
+},
+"1186": {
+"avg": 3.7,
+"count": 40,
+"source": "goodreads"
+},
+"3011": {
+"avg": 3.88,
+"count": 16,
+"source": "goodreads"
+},
+"1539": {
+"avg": 3.21,
+"count": 1235,
+"source": "goodreads"
+},
+"1493": {
+"avg": 3.9,
+"count": 1523,
+"source": "goodreads"
+},
+"3154": {
+"avg": 4.27,
+"count": 11,
+"source": "goodreads"
+},
+"5215": {
+"avg": 3.85,
+"count": 234622,
+"source": "goodreads"
+},
+"4404": {
+"avg": 3.62,
+"count": 8151,
+"source": "goodreads"
+},
+"1256": {
+"avg": 3.53,
+"count": 4223,
+"source": "goodreads"
+},
+"799": {
+"avg": 4.04,
+"count": 2435,
+"source": "goodreads"
+},
+"4111": {
+"avg": 3.99,
+"count": 16828,
+"source": "goodreads"
+},
+"1313": {
+"avg": 3.8,
+"count": 5669,
+"source": "goodreads"
+},
+"1190": {
+"avg": 3.92,
+"count": 36,
+"source": "goodreads"
+},
+"4392": {
+"avg": 3.79,
+"count": 16252,
+"source": "goodreads"
+},
+"2616": {
+"avg": 4.25,
+"count": 108,
+"source": "goodreads"
+},
+"2246": {
+"avg": 4.09,
+"count": 102955,
+"source": "goodreads"
+},
+"849": {
+"avg": 4.01,
+"count": 845,
+"source": "goodreads"
+},
+"2303": {
+"avg": 3.85,
+"count": 404,
+"source": "goodreads"
+},
+"1485": {
+"avg": 4.13,
+"count": 24,
+"source": "goodreads"
+},
+"664": {
+"avg": 3.69,
+"count": 21810,
+"source": "goodreads"
+},
+"3396": {
+"avg": 3.69,
+"count": 32,
+"source": "goodreads"
+},
+"4453": {
+"avg": 3.69,
+"count": 16768,
+"source": "goodreads"
+},
+"1651": {
+"avg": 3.43,
+"count": 2081,
+"source": "goodreads"
+},
+"5307": {
+"avg": 4.01,
+"count": 124876,
+"source": "goodreads"
+},
+"3379": {
+"avg": 3.25,
+"count": 28,
+"source": "goodreads"
+},
+"2991": {
+"avg": 3.84,
+"count": 10021,
+"source": "goodreads"
+},
+"3683": {
+"avg": 3.31,
+"count": 245,
+"source": "goodreads"
+},
+"3729": {
+"avg": 3.36,
+"count": 11,
+"source": "goodreads"
+},
+"3400": {
+"avg": 2.97,
+"count": 266,
+"source": "goodreads"
+},
+"3050": {
+"avg": 4.0,
+"count": 1024,
+"source": "goodreads"
+},
+"1082": {
+"avg": 3.48,
+"count": 7645,
+"source": "goodreads"
+},
+"3545": {
+"avg": 4.24,
+"count": 546,
+"source": "goodreads"
+},
+"1578": {
+"avg": 4.1,
+"count": 7040,
+"source": "goodreads"
+},
+"1981": {
+"avg": 3.95,
+"count": 4244,
+"source": "goodreads"
+},
+"2773": {
+"avg": 4.06,
+"count": 9314,
+"source": "goodreads"
+},
+"3861": {
+"avg": 5.0,
+"count": 1,
+"source": "goodreads"
+},
+"4218": {
+"avg": 3.99,
+"count": 4301,
+"source": "goodreads"
+},
+"1919": {
+"avg": 3.78,
+"count": 776,
+"source": "goodreads"
+},
+"1299": {
+"avg": 3.78,
+"count": 8444,
+"source": "goodreads"
+},
+"4131": {
+"avg": 3.23,
+"count": 69,
+"source": "goodreads"
+},
+"1333": {
+"avg": 3.84,
+"count": 1206,
+"source": "goodreads"
+},
+"5235": {
+"avg": 3.76,
+"count": 37,
+"source": "goodreads"
+},
+"5665": {
+"avg": 4.12,
+"count": 78725,
+"source": "goodreads"
+},
+"2909": {
+"avg": 4.06,
+"count": 51,
+"source": "goodreads"
+},
+"4424": {
+"avg": 3.81,
+"count": 29139,
+"source": "goodreads"
+},
+"1276": {
+"avg": 3.72,
+"count": 31734,
+"source": "goodreads"
+},
+"4074": {
+"avg": 3.85,
+"count": 801,
+"source": "goodreads"
+},
+"1108": {
+"avg": 3.77,
+"count": 146,
+"source": "goodreads"
+},
+"3135": {
+"avg": 3.71,
+"count": 360,
+"source": "goodreads"
+},
+"1364": {
+"avg": 4.08,
+"count": 435,
+"source": "goodreads"
+},
+"4166": {
+"avg": 3.15,
+"count": 2991,
+"source": "goodreads"
+},
+"1221": {
+"avg": 3.59,
+"count": 17,
+"source": "goodreads"
+},
+"1671": {
+"avg": 3.83,
+"count": 49533,
+"source": "goodreads"
+},
+"828": {
+"avg": 3.83,
+"count": 142,
+"source": "goodreads"
+},
+"982": {
+"avg": 4.12,
+"count": 267,
+"source": "goodreads"
+},
+"3089": {
+"avg": 4.18,
+"count": 28,
+"source": "goodreads"
+},
+"2677": {
+"avg": 5.0,
+"count": 3,
+"source": "goodreads"
+},
+"2227": {
+"avg": 3.38,
+"count": 1900,
+"source": "goodreads"
+},
+"717": {
+"avg": 4.13,
+"count": 23,
+"source": "goodreads"
+},
+"1722": {
+"avg": 3.45,
+"count": 4031,
+"source": "goodreads"
+},
+"1688": {
+"avg": 4.14,
+"count": 57217,
+"source": "goodreads"
+},
+"4170": {
+"avg": 4.08,
+"count": 32769,
+"source": "goodreads"
+},
+"1667": {
+"avg": 3.98,
+"count": 791,
+"source": "goodreads"
+},
+"2948": {
+"avg": 4.05,
+"count": 266965,
+"source": "goodreads"
+},
+"1237": {
+"avg": 3.54,
+"count": 48,
+"source": "goodreads"
+},
+"1519": {
+"avg": 3.69,
+"count": 771,
+"source": "goodreads"
+},
+"1149": {
+"avg": 3.81,
+"count": 67,
+"source": "goodreads"
+},
+"2765": {
+"avg": 3.9,
+"count": 1967,
+"source": "goodreads"
+},
+"890": {
+"avg": 3.68,
+"count": 4904,
+"source": "goodreads"
+},
+"2509": {
+"avg": 4.0,
+"count": 63,
+"source": "goodreads"
+},
+"3318": {
+"avg": 3.81,
+"count": 1309,
+"source": "goodreads"
+},
+"4127": {
+"avg": 3.73,
+"count": 590,
+"source": "goodreads"
+},
+"3748": {
+"avg": 4.01,
+"count": 171,
+"source": "goodreads"
+},
+"1260": {
+"avg": 3.93,
+"count": 6155438,
+"source": "goodreads"
+},
+"5673": {
+"avg": 4.43,
+"count": 77031,
+"source": "goodreads"
+},
+"4275": {
+"avg": 3.99,
+"count": 23900,
+"source": "goodreads"
+},
+"557": {
+"avg": 3.66,
+"count": 383,
+"source": "goodreads"
+},
+"1562": {
+"avg": 3.28,
+"count": 18,
+"source": "goodreads"
+},
+"1831": {
+"avg": 4.33,
+"count": 3,
+"source": "goodreads"
+},
+"3226": {
+"avg": 4.09,
+"count": 1016,
+"source": "goodreads"
+},
+"3676": {
+"avg": 3.62,
+"count": 3231,
+"source": "goodreads"
+},
+"2964": {
+"avg": 3.65,
+"count": 17,
+"source": "goodreads"
+},
+"2572": {
+"avg": 4.17,
+"count": 298,
+"source": "goodreads"
+},
+"3363": {
+"avg": 4.1,
+"count": 2120,
+"source": "goodreads"
+},
+"691": {
+"avg": 3.87,
+"count": 980825,
+"source": "goodreads"
+},
+"4222": {
+"avg": 3.89,
+"count": 46121,
+"source": "goodreads"
+},
+"1470": {
+"avg": 4.38,
+"count": 8,
+"source": "goodreads"
+},
+"916": {
+"avg": 3.53,
+"count": 460,
+"source": "goodreads"
+},
+"2749": {
+"avg": 4.02,
+"count": 14751,
+"source": "goodreads"
+},
+"853": {
+"avg": 3.93,
+"count": 80,
+"source": "goodreads"
+},
+"3158": {
+"avg": 3.75,
+"count": 8,
+"source": "goodreads"
+},
+"1165": {
+"avg": 3.5,
+"count": 4,
+"source": "goodreads"
+},
+"4367": {
+"avg": 3.04,
+"count": 5257,
+"source": "goodreads"
+},
+"3621": {
+"avg": 4.25,
+"count": 3429,
+"source": "goodreads"
+},
+"1759": {
+"avg": 4.88,
+"count": 17,
+"source": "goodreads"
+},
+"3764": {
+"avg": 4.67,
+"count": 3,
+"source": "goodreads"
+},
+"3334": {
+"avg": 3.79,
+"count": 230,
+"source": "goodreads"
+},
+"2175": {
+"avg": 3.83,
+"count": 67104,
+"source": "goodreads"
+},
+"4234": {
+"avg": 3.89,
+"count": 18,
+"source": "goodreads"
+},
+"5130": {
+"avg": 4.16,
+"count": 355882,
+"source": "goodreads"
+},
+"4058": {
+"avg": 3.96,
+"count": 5055,
+"source": "goodreads"
+},
+"3267": {
+"avg": 3.31,
+"count": 106,
+"source": "goodreads"
+},
+"4408": {
+"avg": 3.66,
+"count": 10394,
+"source": "goodreads"
+},
+"2533": {
+"avg": 3.89,
+"count": 46,
+"source": "goodreads"
+},
+"2163": {
+"avg": 3.18,
+"count": 802,
+"source": "goodreads"
+},
+"2499": {
+"avg": 4.24,
+"count": 4107,
+"source": "goodreads"
+},
+"2860": {
+"avg": 3.8,
+"count": 1736,
+"source": "goodreads"
+},
+"3772": {
+"avg": 4.25,
+"count": 4,
+"source": "goodreads"
+},
+"957": {
+"avg": 3.84,
+"count": 51,
+"source": "goodreads"
+},
+"5188": {
+"avg": 4.02,
+"count": 20175,
+"source": "goodreads"
+},
+"1962": {
+"avg": 4.02,
+"count": 4844,
+"source": "goodreads"
+},
+"1827": {
+"avg": 1.83,
+"count": 6,
+"source": "goodreads"
+},
+"3549": {
+"avg": 3.0,
+"count": 4,
+"source": "goodreads"
+},
+"2071": {
+"avg": 3.48,
+"count": 355,
+"source": "goodreads"
+},
+"3660": {
+"avg": 3.41,
+"count": 412,
+"source": "goodreads"
+},
+"1718": {
+"avg": 4.08,
+"count": 11759,
+"source": "goodreads"
+},
+"1348": {
+"avg": 3.96,
+"count": 45020,
+"source": "goodreads"
+},
+"2564": {
+"avg": 3.84,
+"count": 2726,
+"source": "goodreads"
+},
+"2070": {
+"avg": 3.88,
+"count": 2992,
+"source": "goodreads"
+},
+"669": {
+"avg": 3.98,
+"count": 26764,
+"source": "goodreads"
+},
+"1719": {
+"avg": 3.91,
+"count": 11277,
+"source": "goodreads"
+},
+"3724": {
+"avg": 3.33,
+"count": 3,
+"source": "goodreads"
+},
+"1349": {
+"avg": 2.0,
+"count": 1,
+"source": "goodreads"
+},
+"3374": {
+"avg": 4.06,
+"count": 94,
+"source": "goodreads"
+},
+"2565": {
+"avg": 3.79,
+"count": 457,
+"source": "goodreads"
+},
+"4262": {
+"avg": 4.0,
+"count": 16615,
+"source": "goodreads"
+},
+"4798": {
+"avg": 3.67,
+"count": 145,
+"source": "goodreads"
+},
+"956": {
+"avg": 3.65,
+"count": 2603,
+"source": "goodreads"
+},
+"1826": {
+"avg": 4.2,
+"count": 74,
+"source": "goodreads"
+},
+"5166": {
+"avg": 4.3,
+"count": 260,
+"source": "goodreads"
+},
+"1125": {
+"avg": 4.5,
+"count": 2,
+"source": "goodreads"
+},
+"1575": {
+"avg": 3.39,
+"count": 214,
+"source": "goodreads"
+},
+"4059": {
+"avg": 4.08,
+"count": 52,
+"source": "goodreads"
+},
+"3266": {
+"avg": 3.67,
+"count": 181,
+"source": "goodreads"
+},
+"2924": {
+"avg": 3.99,
+"count": 3049,
+"source": "goodreads"
+},
+"2027": {
+"avg": 3.79,
+"count": 69412,
+"source": "goodreads"
+},
+"2162": {
+"avg": 3.83,
+"count": 4139,
+"source": "goodreads"
+},
+"2498": {
+"avg": 3.75,
+"count": 19911,
+"source": "goodreads"
+},
+"3323": {
+"avg": 4.1,
+"count": 61,
+"source": "goodreads"
+},
+"3773": {
+"avg": 3.98,
+"count": 56,
+"source": "goodreads"
+},
+"901": {
+"avg": 3.83,
+"count": 30,
+"source": "goodreads"
+},
+"1467": {
+"avg": 4.49,
+"count": 129,
+"source": "goodreads"
+},
+"1037": {
+"avg": 3.58,
+"count": 40,
+"source": "goodreads"
+},
+"844": {
+"avg": 3.84,
+"count": 121,
+"source": "goodreads"
+},
+"2031": {
+"avg": 3.64,
+"count": 2276,
+"source": "goodreads"
+},
+"2898": {
+"avg": 3.52,
+"count": 691,
+"source": "goodreads"
+},
+"3765": {
+"avg": 3.99,
+"count": 181,
+"source": "goodreads"
+},
+"2877": {
+"avg": 3.86,
+"count": 313,
+"source": "goodreads"
+},
+"1308": {
+"avg": 4.02,
+"count": 76760,
+"source": "goodreads"
+},
+"2524": {
+"avg": 4.18,
+"count": 1568,
+"source": "goodreads"
+},
+"4223": {
+"avg": 3.84,
+"count": 907,
+"source": "goodreads"
+},
+"1888": {
+"avg": 3.0,
+"count": 4,
+"source": "goodreads"
+},
+"3159": {
+"avg": 3.97,
+"count": 32,
+"source": "goodreads"
+},
+"1534": {
+"avg": 3.08,
+"count": 79,
+"source": "goodreads"
+},
+"4448": {
+"avg": 3.72,
+"count": 2148,
+"source": "goodreads"
+},
+"2066": {
+"avg": 3.82,
+"count": 17,
+"source": "goodreads"
+},
+"1975": {
+"avg": 3.86,
+"count": 1284,
+"source": "goodreads"
+},
+"1076": {
+"avg": 2.53,
+"count": 548,
+"source": "goodreads"
+},
+"4274": {
+"avg": 4.17,
+"count": 197046,
+"source": "goodreads"
+},
+"1563": {
+"avg": 4.17,
+"count": 12,
+"source": "goodreads"
+},
+"1133": {
+"avg": 3.87,
+"count": 69,
+"source": "goodreads"
+},
+"1830": {
+"avg": 3.71,
+"count": 14,
+"source": "goodreads"
+},
+"2158": {
+"avg": 3.99,
+"count": 888014,
+"source": "goodreads"
+},
+"1324": {
+"avg": 3.46,
+"count": 2994,
+"source": "goodreads"
+},
+"4126": {
+"avg": 3.8,
+"count": 642,
+"source": "goodreads"
+},
+"741": {
+"avg": 3.52,
+"count": 44,
+"source": "goodreads"
+},
+"4063": {
+"avg": 3.88,
+"count": 4203,
+"source": "goodreads"
+},
+"1261": {
+"avg": 3.58,
+"count": 202,
+"source": "goodreads"
+},
+"5672": {
+"avg": 3.8,
+"count": 4672,
+"source": "goodreads"
+},
+"1148": {
+"avg": 3.15,
+"count": 299,
+"source": "goodreads"
+},
+"3175": {
+"avg": 3.71,
+"count": 391,
+"source": "goodreads"
+},
+"2764": {
+"avg": 3.58,
+"count": 12,
+"source": "goodreads"
+},
+"2271": {
+"avg": 4.25,
+"count": 1301,
+"source": "goodreads"
+},
+"3899": {
+"avg": 4.21,
+"count": 1129,
+"source": "goodreads"
+},
+"3933": {
+"avg": 3.46,
+"count": 69,
+"source": "goodreads"
+},
+"3030": {
+"avg": 3.64,
+"count": 240,
+"source": "goodreads"
+},
+"1723": {
+"avg": 3.81,
+"count": 2057,
+"source": "goodreads"
+},
+"1373": {
+"avg": 4.34,
+"count": 927,
+"source": "goodreads"
+},
+"653": {
+"avg": 4.0,
+"count": 80709,
+"source": "goodreads"
+},
+"829": {
+"avg": 3.7,
+"count": 40907,
+"source": "goodreads"
+},
+"2363": {
+"avg": 3.72,
+"count": 20006,
+"source": "goodreads"
+},
+"3088": {
+"avg": 4.33,
+"count": 150,
+"source": "goodreads"
+},
+"4258": {
+"avg": 3.6,
+"count": 10,
+"source": "goodreads"
+},
+"595": {
+"avg": 4.5,
+"count": 10,
+"source": "goodreads"
+},
+"1959": {
+"avg": 4.32,
+"count": 14311,
+"source": "goodreads"
+},
+"2676": {
+"avg": 4.82,
+"count": 11,
+"source": "goodreads"
+},
+"2226": {
+"avg": 3.83,
+"count": 3490,
+"source": "goodreads"
+},
+"2549": {
+"avg": 4.18,
+"count": 125819,
+"source": "goodreads"
+},
+"1365": {
+"avg": 3.88,
+"count": 338,
+"source": "goodreads"
+},
+"3358": {
+"avg": 4.07,
+"count": 457,
+"source": "goodreads"
+},
+"1220": {
+"avg": 4.24,
+"count": 134,
+"source": "goodreads"
+},
+"4188": {
+"avg": 3.66,
+"count": 6334,
+"source": "goodreads"
+},
+"1559": {
+"avg": 3.33,
+"count": 15,
+"source": "goodreads"
+},
+"3134": {
+"avg": 3.91,
+"count": 940,
+"source": "goodreads"
+},
+"1109": {
+"avg": 4.13,
+"count": 16,
+"source": "goodreads"
+},
+"3972": {
+"avg": 3.79,
+"count": 275,
+"source": "goodreads"
+},
+"3421": {
+"avg": 3.2,
+"count": 117,
+"source": "goodreads"
+},
+"3071": {
+"avg": 4.45,
+"count": 2673,
+"source": "goodreads"
+},
+"583": {
+"avg": 4.0,
+"count": 8731,
+"source": "goodreads"
+},
+"4130": {
+"avg": 3.65,
+"count": 999,
+"source": "goodreads"
+},
+"1332": {
+"avg": 3.2,
+"count": 20280,
+"source": "goodreads"
+},
+"2908": {
+"avg": 3.91,
+"count": 222,
+"source": "goodreads"
+},
+"1277": {
+"avg": 4.11,
+"count": 16329,
+"source": "goodreads"
+},
+"2772": {
+"avg": 4.15,
+"count": 5013,
+"source": "goodreads"
+},
+"3163": {
+"avg": 3.63,
+"count": 24,
+"source": "goodreads"
+},
+"4219": {
+"avg": 4.5,
+"count": 2,
+"source": "goodreads"
+},
+"1918": {
+"avg": 3.92,
+"count": 272,
+"source": "goodreads"
+},
+"2267": {
+"avg": 3.69,
+"count": 1823,
+"source": "goodreads"
+},
+"5185": {
+"avg": 3.85,
+"count": 234622,
+"source": "goodreads"
+},
+"1596": {
+"avg": 3.61,
+"count": 341,
+"source": "goodreads"
+},
+"1579": {
+"avg": 3.46,
+"count": 13,
+"source": "goodreads"
+},
+"1980": {
+"avg": 3.56,
+"count": 4271,
+"source": "goodreads"
+},
+"2355": {
+"avg": 3.86,
+"count": 56,
+"source": "goodreads"
+},
+"3817": {
+"avg": 3.43,
+"count": 823,
+"source": "goodreads"
+},
+"665": {
+"avg": 3.71,
+"count": 414,
+"source": "goodreads"
+},
+"2586": {
+"avg": 4.16,
+"count": 269,
+"source": "goodreads"
+},
+"2569": {
+"avg": 4.12,
+"count": 1596,
+"source": "goodreads"
+},
+"2139": {
+"avg": 4.02,
+"count": 12605,
+"source": "goodreads"
+},
+"3378": {
+"avg": 4.26,
+"count": 621,
+"source": "goodreads"
+},
+"2990": {
+"avg": 4.03,
+"count": 333,
+"source": "goodreads"
+},
+"4147": {
+"avg": 3.54,
+"count": 1759,
+"source": "goodreads"
+},
+"720": {
+"avg": 3.96,
+"count": 290,
+"source": "goodreads"
+},
+"4239": {
+"avg": 4.04,
+"count": 92117,
+"source": "goodreads"
+},
+"1191": {
+"avg": 3.98,
+"count": 165,
+"source": "goodreads"
+},
+"4393": {
+"avg": 3.53,
+"count": 43,
+"source": "goodreads"
+},
+"2617": {
+"avg": 2.86,
+"count": 14,
+"source": "goodreads"
+},
+"1938": {
+"avg": 3.22,
+"count": 27,
+"source": "goodreads"
+},
+"3905": {
+"avg": 3.95,
+"count": 296,
+"source": "goodreads"
+},
+"848": {
+"avg": 4.2,
+"count": 73565,
+"source": "goodreads"
+},
+"1484": {
+"avg": 4.75,
+"count": 4,
+"source": "goodreads"
+},
+"3513": {
+"avg": 4.5,
+"count": 16,
+"source": "goodreads"
+},
+"2928": {
+"avg": 3.71,
+"count": 514,
+"source": "goodreads"
+},
+"1607": {
+"avg": 2.82,
+"count": 101,
+"source": "goodreads"
+},
+"632": {
+"avg": 3.99,
+"count": 15737,
+"source": "goodreads"
+},
+"798": {
+"avg": 3.42,
+"count": 838,
+"source": "goodreads"
+},
+"1257": {
+"avg": 3.4,
+"count": 10,
+"source": "goodreads"
+},
+"1312": {
+"avg": 3.7,
+"count": 1839,
+"source": "goodreads"
+},
+"2251": {
+"avg": 3.92,
+"count": 1128,
+"source": "goodreads"
+},
+"5594": {
+"avg": 4.57,
+"count": 14,
+"source": "goodreads"
+},
+"1884": {
+"avg": 3.66,
+"count": 76860,
+"source": "goodreads"
+},
+"3913": {
+"avg": 3.75,
+"count": 12,
+"source": "goodreads"
+},
+"1187": {
+"avg": 4.03,
+"count": 5118,
+"source": "goodreads"
+},
+"1538": {
+"avg": 3.87,
+"count": 820,
+"source": "goodreads"
+},
+"3155": {
+"avg": 3.92,
+"count": 418,
+"source": "goodreads"
+},
+"3786": {
+"avg": 3.38,
+"count": 90,
+"source": "goodreads"
+},
+"1241": {
+"avg": 4.03,
+"count": 15962,
+"source": "goodreads"
+},
+"624": {
+"avg": 3.52,
+"count": 1622,
+"source": "goodreads"
+},
+"1611": {
+"avg": 3.63,
+"count": 109,
+"source": "goodreads"
+},
+"5202": {
+"avg": 4.0,
+"count": 1,
+"source": "goodreads"
+},
+"1304": {
+"avg": 3.92,
+"count": 47359,
+"source": "goodreads"
+},
+"4106": {
+"avg": 3.21,
+"count": 3762,
+"source": "goodreads"
+},
+"1754": {
+"avg": 4.43,
+"count": 28,
+"source": "goodreads"
+},
+"3293": {
+"avg": 4.37,
+"count": 60,
+"source": "goodreads"
+},
+"1580": {
+"avg": 3.68,
+"count": 1392,
+"source": "goodreads"
+},
+"4278": {
+"avg": 2.61,
+"count": 74,
+"source": "goodreads"
+},
+"3047": {
+"avg": 3.61,
+"count": 538,
+"source": "goodreads"
+},
+"3944": {
+"avg": 3.63,
+"count": 24,
+"source": "goodreads"
+},
+"2656": {
+"avg": 5.0,
+"count": 2,
+"source": "goodreads"
+},
+"3102": {
+"avg": 3.95,
+"count": 22,
+"source": "goodreads"
+},
+"1646": {
+"avg": 4.46,
+"count": 956,
+"source": "goodreads"
+},
+"673": {
+"avg": 3.81,
+"count": 2375,
+"source": "goodreads"
+},
+"3381": {
+"avg": 3.85,
+"count": 61,
+"source": "goodreads"
+},
+"1216": {
+"avg": 2.69,
+"count": 13,
+"source": "goodreads"
+},
+"1703": {
+"avg": 4.67,
+"count": 18,
+"source": "goodreads"
+},
+"2986": {
+"avg": 3.78,
+"count": 295,
+"source": "goodreads"
+},
+"1353": {
+"avg": 3.89,
+"count": 23650,
+"source": "goodreads"
+},
+"5310": {
+"avg": 4.21,
+"count": 5785968,
+"source": "goodreads"
+},
+"3179": {
+"avg": 3.79,
+"count": 48,
+"source": "goodreads"
+},
+"1001": {
+"avg": 4.17,
+"count": 458,
+"source": "goodreads"
+},
+"937": {
+"avg": 3.68,
+"count": 172,
+"source": "goodreads"
+},
+"1902": {
+"avg": 3.71,
+"count": 52,
+"source": "goodreads"
+},
+"1328": {
+"avg": 4.2,
+"count": 47662,
+"source": "goodreads"
+},
+"3315": {
+"avg": 4.33,
+"count": 312232,
+"source": "goodreads"
+},
+"2154": {
+"avg": 3.82,
+"count": 48937,
+"source": "goodreads"
+},
+"5691": {
+"avg": 3.51,
+"count": 137,
+"source": "goodreads"
+},
+"2011": {
+"avg": 4.2,
+"count": 711192,
+"source": "goodreads"
+},
+"2441": {
+"avg": 3.89,
+"count": 39773,
+"source": "goodreads"
+},
+"1797": {
+"avg": 3.45,
+"count": 11,
+"source": "goodreads"
+},
+"576": {
+"avg": 4.05,
+"count": 1204,
+"source": "goodreads"
+},
+"1543": {
+"avg": 3.86,
+"count": 4437,
+"source": "goodreads"
+},
+"3987": {
+"avg": 3.95,
+"count": 459,
+"source": "goodreads"
+},
+"5150": {
+"avg": 3.77,
+"count": 231,
+"source": "goodreads"
+},
+"825": {
+"avg": 4.0,
+"count": 912,
+"source": "goodreads"
+},
+"1810": {
+"avg": 4.34,
+"count": 47,
+"source": "goodreads"
+},
+"1955": {
+"avg": 2.96,
+"count": 24,
+"source": "goodreads"
+},
+"2380": {
+"avg": 2.71,
+"count": 42,
+"source": "goodreads"
+},
+"4254": {
+"avg": 4.0,
+"count": 2,
+"source": "goodreads"
+},
+"5296": {
+"avg": 3.93,
+"count": 1723,
+"source": "goodreads"
+},
+"2553": {
+"avg": 3.93,
+"count": 5149,
+"source": "goodreads"
+},
+"3342": {
+"avg": 3.33,
+"count": 6,
+"source": "goodreads"
+},
+"1685": {
+"avg": 3.84,
+"count": 77865,
+"source": "goodreads"
+},
+"3712": {
+"avg": 4.6,
+"count": 5,
+"source": "goodreads"
+},
+"3207": {
+"avg": 3.77,
+"count": 151,
+"source": "goodreads"
+},
+"2945": {
+"avg": 3.53,
+"count": 19,
+"source": "goodreads"
+},
+"5629": {
+"avg": 3.3,
+"count": 891,
+"source": "goodreads"
+},
+"2416": {
+"avg": 3.38,
+"count": 90,
+"source": "goodreads"
+},
+"1806": {
+"avg": 4.0,
+"count": 15,
+"source": "goodreads"
+},
+"833": {
+"avg": 3.25,
+"count": 4,
+"source": "goodreads"
+},
+"999": {
+"avg": 3.71,
+"count": 13937,
+"source": "goodreads"
+},
+"2379": {
+"avg": 3.73,
+"count": 17580,
+"source": "goodreads"
+},
+"3138": {
+"avg": 4.18,
+"count": 8097,
+"source": "goodreads"
+},
+"3092": {
+"avg": 4.0,
+"count": 2,
+"source": "goodreads"
+},
+"560": {
+"avg": 3.33,
+"count": 254,
+"source": "goodreads"
+},
+"4242": {
+"avg": 3.72,
+"count": 671,
+"source": "goodreads"
+},
+"1410": {
+"avg": 3.6,
+"count": 3950,
+"source": "goodreads"
+},
+"2396": {
+"avg": 3.9,
+"count": 129,
+"source": "goodreads"
+},
+"3704": {
+"avg": 3.5,
+"count": 2,
+"source": "goodreads"
+},
+"1739": {
+"avg": 5.0,
+"count": 1,
+"source": "goodreads"
+},
+"1693": {
+"avg": 3.88,
+"count": 438817,
+"source": "goodreads"
+},
+"1369": {
+"avg": 3.96,
+"count": 45069,
+"source": "goodreads"
+},
+"2050": {
+"avg": 3.69,
+"count": 1703,
+"source": "goodreads"
+},
+"2400": {
+"avg": 3.73,
+"count": 456,
+"source": "goodreads"
+},
+"3211": {
+"avg": 3.64,
+"count": 683,
+"source": "goodreads"
+},
+"2284": {
+"avg": 4.06,
+"count": 8484,
+"source": "goodreads"
+},
+"1447": {
+"avg": 3.96,
+"count": 25,
+"source": "goodreads"
+},
+"3180": {
+"avg": 3.94,
+"count": 111,
+"source": "goodreads"
+},
+"1017": {
+"avg": 3.93,
+"count": 80,
+"source": "goodreads"
+},
+"2841": {
+"avg": 3.31,
+"count": 145,
+"source": "goodreads"
+},
+"1294": {
+"avg": 3.57,
+"count": 208,
+"source": "goodreads"
+},
+"4079": {
+"avg": 4.01,
+"count": 61706,
+"source": "goodreads"
+},
+"3616": {
+"avg": 4.37,
+"count": 6070,
+"source": "goodreads"
+},
+"2007": {
+"avg": 4.34,
+"count": 202,
+"source": "goodreads"
+},
+"3164": {
+"avg": 3.83,
+"count": 1595,
+"source": "goodreads"
+},
+"1159": {
+"avg": 4.33,
+"count": 61,
+"source": "goodreads"
+},
+"2775": {
+"avg": 4.08,
+"count": 4103,
+"source": "goodreads"
+},
+"2260": {
+"avg": 4.07,
+"count": 4396,
+"source": "goodreads"
+},
+"3888": {
+"avg": 3.64,
+"count": 351,
+"source": "goodreads"
+},
+"3471": {
+"avg": 3.67,
+"count": 427091,
+"source": "goodreads"
+},
+"2519": {
+"avg": 3.16,
+"count": 2605,
+"source": "goodreads"
+},
+"1335": {
+"avg": 3.0,
+"count": 1,
+"source": "goodreads"
+},
+"4137": {
+"avg": 3.44,
+"count": 133,
+"source": "goodreads"
+},
+"4072": {
+"avg": 4.24,
+"count": 37,
+"source": "goodreads"
+},
+"1270": {
+"avg": 4.0,
+"count": 121,
+"source": "goodreads"
+},
+"5233": {
+"avg": 4.21,
+"count": 34,
+"source": "goodreads"
+},
+"5663": {
+"avg": 3.9,
+"count": 80664,
+"source": "goodreads"
+},
+"2722": {
+"avg": 3.09,
+"count": 11,
+"source": "goodreads"
+},
+"3563": {
+"avg": 3.8,
+"count": 27849,
+"source": "goodreads"
+},
+"3099": {
+"avg": 3.41,
+"count": 142,
+"source": "goodreads"
+},
+"3133": {
+"avg": 3.71,
+"count": 7,
+"source": "goodreads"
+},
+"4249": {
+"avg": 3.8,
+"count": 854,
+"source": "goodreads"
+},
+"584": {
+"avg": 3.94,
+"count": 65,
+"source": "goodreads"
+},
+"3975": {
+"avg": 3.4,
+"count": 344,
+"source": "goodreads"
+},
+"1732": {
+"avg": 4.01,
+"count": 351,
+"source": "goodreads"
+},
+"1118": {
+"avg": 2.5,
+"count": 2,
+"source": "goodreads"
+},
+"1548": {
+"avg": 5.0,
+"count": 1,
+"source": "goodreads"
+},
+"3826": {
+"avg": 4.0,
+"count": 1,
+"source": "goodreads"
+},
+"984": {
+"avg": 3.9,
+"count": 214,
+"source": "goodreads"
+},
+"3963": {
+"avg": 3.68,
+"count": 4111,
+"source": "goodreads"
+},
+"5337": {
+"avg": 3.91,
+"count": 137036,
+"source": "goodreads"
+},
+"2558": {
+"avg": 3.95,
+"count": 9456,
+"source": "goodreads"
+},
+"1724": {
+"avg": 3.15,
+"count": 6675,
+"source": "goodreads"
+},
+"4176": {
+"avg": 4.12,
+"count": 8757,
+"source": "goodreads"
+},
+"4199": {
+"avg": 3.66,
+"count": 2812,
+"source": "goodreads"
+},
+"1661": {
+"avg": 3.33,
+"count": 3,
+"source": "goodreads"
+},
+"1231": {
+"avg": 3.56,
+"count": 5346,
+"source": "goodreads"
+},
+"3871": {
+"avg": 3.39,
+"count": 661,
+"source": "goodreads"
+},
+"3488": {
+"avg": 2.63,
+"count": 43,
+"source": "goodreads"
+},
+"3037": {
+"avg": 4.0,
+"count": 5,
+"source": "goodreads"
+},
+"3934": {
+"avg": 3.6,
+"count": 10,
+"source": "goodreads"
+},
+"1289": {
+"avg": 3.77,
+"count": 13,
+"source": "goodreads"
+},
+"1773": {
+"avg": 4.02,
+"count": 13698,
+"source": "goodreads"
+},
+"1266": {
+"avg": 3.84,
+"count": 3959,
+"source": "goodreads"
+},
+"1636": {
+"avg": 3.77,
+"count": 30,
+"source": "goodreads"
+},
+"2919": {
+"avg": 3.89,
+"count": 2931,
+"source": "goodreads"
+},
+"5462": {
+"avg": 3.54,
+"count": 64613,
+"source": "goodreads"
+},
+"1972": {
+"avg": 2.67,
+"count": 3,
+"source": "goodreads"
+},
+"5198": {
+"avg": 3.88,
+"count": 285421,
+"source": "goodreads"
+},
+"5527": {
+"avg": 3.93,
+"count": 14,
+"source": "goodreads"
+},
+"1564": {
+"avg": 3.67,
+"count": 21,
+"source": "goodreads"
+},
+"551": {
+"avg": 2.67,
+"count": 9,
+"source": "goodreads"
+},
+"1134": {
+"avg": 4.0,
+"count": 11,
+"source": "goodreads"
+},
+"3670": {
+"avg": 3.73,
+"count": 57,
+"source": "goodreads"
+},
+"1358": {
+"avg": 3.75,
+"count": 4,
+"source": "goodreads"
+},
+"697": {
+"avg": 4.54,
+"count": 68601,
+"source": "goodreads"
+},
+"1708": {
+"avg": 4.17,
+"count": 2897,
+"source": "goodreads"
+},
+"2827": {
+"avg": 4.28,
+"count": 36,
+"source": "goodreads"
+},
+"1925": {
+"avg": 4.02,
+"count": 1987,
+"source": "goodreads"
+},
+"910": {
+"avg": 3.72,
+"count": 9958,
+"source": "goodreads"
+},
+"4224": {
+"avg": 3.64,
+"count": 4784,
+"source": "goodreads"
+},
+"1476": {
+"avg": 3.83,
+"count": 132,
+"source": "goodreads"
+},
+"1499": {
+"avg": 3.67,
+"count": 4204,
+"source": "goodreads"
+},
+"4731": {
+"avg": 2.87,
+"count": 39,
+"source": "goodreads"
+},
+"506": {
+"avg": 3.92,
+"count": 64,
+"source": "goodreads"
+},
+"1533": {
+"avg": 3.8,
+"count": 161,
+"source": "goodreads"
+},
+"3627": {
+"avg": 3.91,
+"count": 209035,
+"source": "goodreads"
+},
+"2935": {
+"avg": 3.77,
+"count": 43589,
+"source": "goodreads"
+},
+"3277": {
+"avg": 4.1,
+"count": 29,
+"source": "goodreads"
+},
+"5209": {
+"avg": 3.63,
+"count": 225654,
+"source": "goodreads"
+},
+"2173": {
+"avg": 3.66,
+"count": 822,
+"source": "goodreads"
+},
+"2489": {
+"avg": 3.92,
+"count": 973,
+"source": "goodreads"
+},
+"1460": {
+"avg": 4.34,
+"count": 140,
+"source": "goodreads"
+},
+"4232": {
+"avg": 3.5,
+"count": 2,
+"source": "goodreads"
+},
+"1933": {
+"avg": 3.25,
+"count": 51,
+"source": "goodreads"
+},
+"2759": {
+"avg": 3.46,
+"count": 7420,
+"source": "goodreads"
+},
+"1175": {
+"avg": 4.21,
+"count": 14,
+"source": "goodreads"
+},
+"2020": {
+"avg": 3.78,
+"count": 280427,
+"source": "goodreads"
+},
+"2889": {
+"avg": 4.28,
+"count": 58,
+"source": "goodreads"
+},
+"2923": {
+"avg": 3.36,
+"count": 11,
+"source": "goodreads"
+},
+"1319": {
+"avg": 3.77,
+"count": 460,
+"source": "goodreads"
+},
+"3774": {
+"avg": 4.0,
+"count": 12,
+"source": "goodreads"
+},
+"2535": {
+"avg": 3.24,
+"count": 3112,
+"source": "goodreads"
+},
+"5474": {
+"avg": 3.95,
+"count": 91750,
+"source": "goodreads"
+},
+"4265": {
+"avg": 3.93,
+"count": 37225,
+"source": "goodreads"
+},
+"1122": {
+"avg": 3.53,
+"count": 5114,
+"source": "goodreads"
+},
+"547": {
+"avg": 3.78,
+"count": 174,
+"source": "goodreads"
+},
+"4770": {
+"avg": 3.35,
+"count": 3985,
+"source": "goodreads"
+},
+"1572": {
+"avg": 3.42,
+"count": 26,
+"source": "goodreads"
+},
+"1821": {
+"avg": 2.0,
+"count": 1,
+"source": "goodreads"
+},
+"3666": {
+"avg": 3.42,
+"count": 163,
+"source": "goodreads"
+},
+"2562": {
+"avg": 3.66,
+"count": 112,
+"source": "goodreads"
+},
+"3723": {
+"avg": 3.69,
+"count": 67,
+"source": "goodreads"
+},
+"3373": {
+"avg": 3.94,
+"count": 450,
+"source": "goodreads"
+},
+"3689": {
+"avg": 3.9,
+"count": 126,
+"source": "goodreads"
+},
+"1339": {
+"avg": 2.2,
+"count": 5,
+"source": "goodreads"
+},
+"2145": {
+"avg": 3.83,
+"count": 4267,
+"source": "goodreads"
+},
+"5395": {
+"avg": 4.33,
+"count": 25371,
+"source": "goodreads"
+},
+"619": {
+"avg": 3.49,
+"count": 72,
+"source": "goodreads"
+},
+"2779": {
+"avg": 4.06,
+"count": 1023,
+"source": "goodreads"
+},
+"5546": {
+"avg": 3.99,
+"count": 6993,
+"source": "goodreads"
+},
+"1505": {
+"avg": 4.08,
+"count": 2241,
+"source": "goodreads"
+},
+"1155": {
+"avg": 3.51,
+"count": 118,
+"source": "goodreads"
+},
+"4357": {
+"avg": 3.67,
+"count": 48232,
+"source": "goodreads"
+},
+"3187": {
+"avg": 4.34,
+"count": 41,
+"source": "goodreads"
+},
+"3884": {
+"avg": 3.35,
+"count": 232,
+"source": "goodreads"
+},
+"926": {
+"avg": 3.84,
+"count": 6184,
+"source": "goodreads"
+},
+"3646": {
+"avg": 4.01,
+"count": 27132,
+"source": "goodreads"
+},
+"4183": {
+"avg": 4.4,
+"count": 21564,
+"source": "goodreads"
+},
+"2407": {
+"avg": 3.56,
+"count": 18,
+"source": "goodreads"
+},
+"567": {
+"avg": 4.12,
+"count": 225,
+"source": "goodreads"
+},
+"3095": {
+"avg": 3.39,
+"count": 178,
+"source": "goodreads"
+},
+"4750": {
+"avg": 3.82,
+"count": 1380930,
+"source": "goodreads"
+},
+"1552": {
+"avg": 3.87,
+"count": 132,
+"source": "goodreads"
+},
+"834": {
+"avg": 4.46,
+"count": 5294,
+"source": "goodreads"
+},
+"3979": {
+"avg": 3.46,
+"count": 266,
+"source": "goodreads"
+},
+"971": {
+"avg": 4.29,
+"count": 436,
+"source": "goodreads"
+},
+"2391": {
+"avg": 4.01,
+"count": 52027,
+"source": "goodreads"
+},
+"4245": {
+"avg": 3.59,
+"count": 24356,
+"source": "goodreads"
+},
+"3580": {
+"avg": 3.42,
+"count": 208,
+"source": "goodreads"
+},
+"1417": {
+"avg": 3.62,
+"count": 14258,
+"source": "goodreads"
+},
+"3715": {
+"avg": 4.0,
+"count": 13,
+"source": "goodreads"
+},
+"2554": {
+"avg": 3.9,
+"count": 185,
+"source": "goodreads"
+},
+"2411": {
+"avg": 2.8,
+"count": 5,
+"source": "goodreads"
+},
+"2041": {
+"avg": 3.92,
+"count": 2234,
+"source": "goodreads"
+},
+"2942": {
+"avg": 4.04,
+"count": 1609,
+"source": "goodreads"
+},
+"658": {
+"avg": 3.93,
+"count": 27625,
+"source": "goodreads"
+},
+"3980": {
+"avg": 3.89,
+"count": 862,
+"source": "goodreads"
+},
+"2738": {
+"avg": 4.35,
+"count": 7069,
+"source": "goodreads"
+},
+"5507": {
+"avg": 3.14,
+"count": 91,
+"source": "goodreads"
+},
+"822": {
+"avg": 3.96,
+"count": 357,
+"source": "goodreads"
+},
+"3579": {
+"avg": 4.03,
+"count": 1534086,
+"source": "goodreads"
+},
+"1544": {
+"avg": 3.86,
+"count": 35,
+"source": "goodreads"
+},
+"571": {
+"avg": 3.9,
+"count": 2158,
+"source": "goodreads"
+},
+"1401": {
+"avg": 3.69,
+"count": 5374,
+"source": "goodreads"
+},
+"4253": {
+"avg": 3.22,
+"count": 125,
+"source": "goodreads"
+},
+"2153": {
+"avg": 3.29,
+"count": 1201,
+"source": "goodreads"
+},
+"3742": {
+"avg": 3.04,
+"count": 26,
+"source": "goodreads"
+},
+"4087": {
+"avg": 4.01,
+"count": 68454,
+"source": "goodreads"
+},
+"1285": {
+"avg": 3.8,
+"count": 624,
+"source": "goodreads"
+},
+"3607": {
+"avg": 4.1,
+"count": 179,
+"source": "goodreads"
+},
+"2915": {
+"avg": 4.12,
+"count": 4976,
+"source": "goodreads"
+},
+"3257": {
+"avg": 3.95,
+"count": 257,
+"source": "goodreads"
+},
+"2016": {
+"avg": 3.88,
+"count": 70305,
+"source": "goodreads"
+},
+"2295": {
+"avg": 3.96,
+"count": 7998,
+"source": "goodreads"
+},
+"875": {
+"avg": 3.08,
+"count": 39,
+"source": "goodreads"
+},
+"1905": {
+"avg": 4.0,
+"count": 11,
+"source": "goodreads"
+},
+"930": {
+"avg": 3.96,
+"count": 24788,
+"source": "goodreads"
+},
+"3892": {
+"avg": 4.26,
+"count": 316,
+"source": "goodreads"
+},
+"1006": {
+"avg": 3.87,
+"count": 449,
+"source": "goodreads"
+},
+"4204": {
+"avg": 3.62,
+"count": 2941,
+"source": "goodreads"
+},
+"3386": {
+"avg": 3.98,
+"count": 2702,
+"source": "goodreads"
+},
+"1641": {
+"avg": 3.4,
+"count": 4554,
+"source": "goodreads"
+},
+"4013": {
+"avg": 2.75,
+"count": 4,
+"source": "goodreads"
+},
+"1211": {
+"avg": 3.33,
+"count": 15,
+"source": "goodreads"
+},
+"2597": {
+"avg": 3.79,
+"count": 333,
+"source": "goodreads"
+},
+"2082": {
+"avg": 3.83,
+"count": 433,
+"source": "goodreads"
+},
+"1704": {
+"avg": 3.62,
+"count": 336,
+"source": "goodreads"
+},
+"731": {
+"avg": 4.08,
+"count": 1842,
+"source": "goodreads"
+},
+"2981": {
+"avg": 4.34,
+"count": 9316,
+"source": "goodreads"
+},
+"4290": {
+"avg": 3.92,
+"count": 15912,
+"source": "goodreads"
+},
+"1991": {
+"avg": 3.97,
+"count": 29993,
+"source": "goodreads"
+},
+"1616": {
+"avg": 3.47,
+"count": 263,
+"source": "goodreads"
+},
+"2939": {
+"avg": 3.6,
+"count": 43,
+"source": "goodreads"
+},
+"4101": {
+"avg": 3.51,
+"count": 2424,
+"source": "goodreads"
+},
+"1303": {
+"avg": 3.33,
+"count": 2766,
+"source": "goodreads"
+},
+"3294": {
+"avg": 4.24,
+"count": 1056,
+"source": "goodreads"
+},
+"2485": {
+"avg": 4.0,
+"count": 13713,
+"source": "goodreads"
+},
+"1180": {
+"avg": 4.3,
+"count": 20,
+"source": "goodreads"
+},
+"3447": {
+"avg": 3.89,
+"count": 12850,
+"source": "goodreads"
+},
+"3017": {
+"avg": 3.0,
+"count": 2,
+"source": "goodreads"
+},
+"1883": {
+"avg": 4.16,
+"count": 113131,
+"source": "goodreads"
+},
+"2256": {
+"avg": 3.86,
+"count": 413,
+"source": "goodreads"
+},
+"3914": {
+"avg": 3.8,
+"count": 90,
+"source": "goodreads"
+},
+"2606": {
+"avg": 4.13,
+"count": 883,
+"source": "goodreads"
+},
+"1495": {
+"avg": 3.71,
+"count": 7026,
+"source": "goodreads"
+},
+"1600": {
+"avg": 4.0,
+"count": 9,
+"source": "goodreads"
+},
+"2885": {
+"avg": 3.73,
+"count": 259,
+"source": "goodreads"
+},
+"3797": {
+"avg": 3.2,
+"count": 114,
+"source": "goodreads"
+},
+"5213": {
+"avg": 3.83,
+"count": 362948,
+"source": "goodreads"
+},
+"2169": {
+"avg": 4.29,
+"count": 1774418,
+"source": "goodreads"
+},
+"3778": {
+"avg": 3.94,
+"count": 18087,
+"source": "goodreads"
+},
+"3328": {
+"avg": 5.0,
+"count": 1,
+"source": "goodreads"
+},
+"1315": {
+"avg": 3.74,
+"count": 82949,
+"source": "goodreads"
+},
+"4117": {
+"avg": 3.95,
+"count": 101,
+"source": "goodreads"
+},
+"2240": {
+"avg": 3.46,
+"count": 180,
+"source": "goodreads"
+},
+"3451": {
+"avg": 3.84,
+"count": 19653,
+"source": "goodreads"
+},
+"4394": {
+"avg": 3.83,
+"count": 57758,
+"source": "goodreads"
+},
+"1179": {
+"avg": 2.33,
+"count": 3,
+"source": "goodreads"
+},
+"1529": {
+"avg": 3.74,
+"count": 41059,
+"source": "goodreads"
+},
+"1657": {
+"avg": 4.03,
+"count": 155,
+"source": "goodreads"
+},
+"1342": {
+"avg": 3.82,
+"count": 3480,
+"source": "goodreads"
+},
+"1712": {
+"avg": 4.19,
+"count": 51650,
+"source": "goodreads"
+},
+"4269": {
+"avg": 3.59,
+"count": 595,
+"source": "goodreads"
+},
+"2217": {
+"avg": 4.16,
+"count": 9864,
+"source": "goodreads"
+},
+"1987": {
+"avg": 3.98,
+"count": 3678,
+"source": "goodreads"
+},
+"2702": {
+"avg": 3.59,
+"count": 443,
+"source": "goodreads"
+},
+"818": {
+"avg": 3.8,
+"count": 234,
+"source": "goodreads"
+},
+"4286": {
+"avg": 3.29,
+"count": 368,
+"source": "goodreads"
+},
+"3407": {
+"avg": 4.05,
+"count": 10942,
+"source": "goodreads"
+},
+"3057": {
+"avg": 3.52,
+"count": 261,
+"source": "goodreads"
+},
+"5183": {
+"avg": 3.65,
+"count": 4122,
+"source": "goodreads"
+},
+"3954": {
+"avg": 4.14,
+"count": 2159,
+"source": "goodreads"
+},
+"1969": {
+"avg": 4.27,
+"count": 15,
+"source": "goodreads"
+},
+"5496": {
+"avg": 3.97,
+"count": 253659,
+"source": "goodreads"
+},
+"1986": {
+"avg": 3.45,
+"count": 5211,
+"source": "goodreads"
+},
+"3811": {
+"avg": 3.64,
+"count": 55,
+"source": "goodreads"
+},
+"4287": {
+"avg": 3.83,
+"count": 50083,
+"source": "goodreads"
+},
+"1085": {
+"avg": 3.48,
+"count": 4318,
+"source": "goodreads"
+},
+"2580": {
+"avg": 3.85,
+"count": 365,
+"source": "goodreads"
+},
+"1206": {
+"avg": 3.33,
+"count": 3,
+"source": "goodreads"
+},
+"1656": {
+"avg": 4.06,
+"count": 9211,
+"source": "goodreads"
+},
+"3391": {
+"avg": 4.08,
+"count": 5343,
+"source": "goodreads"
+},
+"4141": {
+"avg": 3.84,
+"count": 625,
+"source": "goodreads"
+},
+"1713": {
+"avg": 4.03,
+"count": 649,
+"source": "goodreads"
+},
+"3903": {
+"avg": 3.61,
+"count": 398,
+"source": "goodreads"
+},
+"1894": {
+"avg": 3.91,
+"count": 205735,
+"source": "goodreads"
+},
+"3145": {
+"avg": 4.23,
+"count": 566,
+"source": "goodreads"
+},
+"1178": {
+"avg": 3.84,
+"count": 341,
+"source": "goodreads"
+},
+"1528": {
+"avg": 4.74,
+"count": 27,
+"source": "goodreads"
+},
+"2754": {
+"avg": 3.76,
+"count": 481,
+"source": "goodreads"
+},
+"1601": {
+"avg": 3.56,
+"count": 191,
+"source": "goodreads"
+},
+"3796": {
+"avg": 3.86,
+"count": 7642,
+"source": "goodreads"
+},
+"5212": {
+"avg": 3.65,
+"count": 19311,
+"source": "goodreads"
+},
+"5642": {
+"avg": 4.28,
+"count": 43,
+"source": "goodreads"
+},
+"2538": {
+"avg": 4.01,
+"count": 22775,
+"source": "goodreads"
+},
+"3779": {
+"avg": 3.13,
+"count": 445,
+"source": "goodreads"
+},
+"3283": {
+"avg": 4.17,
+"count": 137970,
+"source": "goodreads"
+},
+"1314": {
+"avg": 4.0,
+"count": 147,
+"source": "goodreads"
+},
+"3329": {
+"avg": 3.19,
+"count": 21,
+"source": "goodreads"
+},
+"4116": {
+"avg": 3.82,
+"count": 14987,
+"source": "goodreads"
+},
+"4229": {
+"avg": 3.78,
+"count": 554,
+"source": "goodreads"
+},
+"3016": {
+"avg": 3.82,
+"count": 11,
+"source": "goodreads"
+},
+"1882": {
+"avg": 3.46,
+"count": 138,
+"source": "goodreads"
+},
+"2742": {
+"avg": 3.99,
+"count": 3870,
+"source": "goodreads"
+},
+"3153": {
+"avg": 3.94,
+"count": 243,
+"source": "goodreads"
+},
+"1494": {
+"avg": 3.0,
+"count": 2,
+"source": "goodreads"
+},
+"5204": {
+"avg": 3.83,
+"count": 4710,
+"source": "goodreads"
+},
+"1247": {
+"avg": 4.12,
+"count": 13629,
+"source": "goodreads"
+},
+"2892": {
+"avg": 3.76,
+"count": 141,
+"source": "goodreads"
+},
+"4100": {
+"avg": 3.95,
+"count": 3116,
+"source": "goodreads"
+},
+"3295": {
+"avg": 3.6,
+"count": 31,
+"source": "goodreads"
+},
+"2484": {
+"avg": 3.0,
+"count": 1,
+"source": "goodreads"
+},
+"1586": {
+"avg": 4.16,
+"count": 4431,
+"source": "goodreads"
+},
+"3411": {
+"avg": 3.03,
+"count": 374,
+"source": "goodreads"
+},
+"3554": {
+"avg": 4.24,
+"count": 29,
+"source": "goodreads"
+},
+"3807": {
+"avg": 4.07,
+"count": 17218,
+"source": "goodreads"
+},
+"1990": {
+"avg": 3.86,
+"count": 575,
+"source": "goodreads"
+},
+"1210": {
+"avg": 4.27,
+"count": 39031,
+"source": "goodreads"
+},
+"2083": {
+"avg": 4.17,
+"count": 570,
+"source": "goodreads"
+},
+"3738": {
+"avg": 3.72,
+"count": 59412,
+"source": "goodreads"
+},
+"1705": {
+"avg": 3.3,
+"count": 2519,
+"source": "goodreads"
+},
+"4157": {
+"avg": 3.67,
+"count": 15,
+"source": "goodreads"
+},
+"1142": {
+"avg": 3.65,
+"count": 85,
+"source": "goodreads"
+},
+"1512": {
+"avg": 4.33,
+"count": 6,
+"source": "goodreads"
+},
+"874": {
+"avg": 5.0,
+"count": 1,
+"source": "goodreads"
+},
+"4205": {
+"avg": 4.09,
+"count": 1343706,
+"source": "goodreads"
+},
+"2152": {
+"avg": 2.81,
+"count": 31,
+"source": "goodreads"
+},
+"2502": {
+"avg": 3.81,
+"count": 10108,
+"source": "goodreads"
+},
+"4086": {
+"avg": 4.02,
+"count": 36696,
+"source": "goodreads"
+},
+"1284": {
+"avg": 3.88,
+"count": 7279,
+"source": "goodreads"
+},
+"3313": {
+"avg": 3.8,
+"count": 96,
+"source": "goodreads"
+},
+"4439": {
+"avg": 4.33,
+"count": 188183,
+"source": "goodreads"
+},
+"2017": {
+"avg": 4.15,
+"count": 1087570,
+"source": "goodreads"
+},
+"2369": {
+"avg": 3.83,
+"count": 1359,
+"source": "goodreads"
+},
+"989": {
+"avg": 3.6,
+"count": 68,
+"source": "goodreads"
+},
+"2739": {
+"avg": 3.25,
+"count": 504,
+"source": "goodreads"
+},
+"5506": {
+"avg": 3.32,
+"count": 102,
+"source": "goodreads"
+},
+"1545": {
+"avg": 3.77,
+"count": 8517,
+"source": "goodreads"
+},
+"3597": {
+"avg": 3.0,
+"count": 25,
+"source": "goodreads"
+},
+"4252": {
+"avg": 4.15,
+"count": 18969,
+"source": "goodreads"
+},
+"966": {
+"avg": 2.0,
+"count": 1,
+"source": "goodreads"
+},
+"5443": {
+"avg": 3.8,
+"count": 896899,
+"source": "goodreads"
+},
+"2386": {
+"avg": 3.5,
+"count": 1284,
+"source": "goodreads"
+},
+"1953": {
+"avg": 4.11,
+"count": 70,
+"source": "goodreads"
+},
+"3344": {
+"avg": 3.83,
+"count": 29,
+"source": "goodreads"
+},
+"3714": {
+"avg": 4.34,
+"count": 123,
+"source": "goodreads"
+},
+"1729": {
+"avg": 3.83,
+"count": 6,
+"source": "goodreads"
+},
+"2555": {
+"avg": 3.89,
+"count": 69329,
+"source": "goodreads"
+},
+"2040": {
+"avg": 3.92,
+"count": 488601,
+"source": "goodreads"
+},
+"5785": {
+"avg": 4.19,
+"count": 203,
+"source": "goodreads"
+},
+"4194": {
+"avg": 3.8,
+"count": 2662,
+"source": "goodreads"
+},
+"2943": {
+"avg": 3.86,
+"count": 48,
+"source": "goodreads"
+},
+"835": {
+"avg": 3.0,
+"count": 7,
+"source": "goodreads"
+},
+"1800": {
+"avg": 3.65,
+"count": 106,
+"source": "goodreads"
+},
+"3978": {
+"avg": 3.72,
+"count": 134,
+"source": "goodreads"
+},
+"970": {
+"avg": 3.96,
+"count": 74,
+"source": "goodreads"
+},
+"1046": {
+"avg": 2.78,
+"count": 9,
+"source": "goodreads"
+},
+"4244": {
+"avg": 3.33,
+"count": 114,
+"source": "goodreads"
+},
+"1416": {
+"avg": 4.4,
+"count": 9992,
+"source": "goodreads"
+},
+"5286": {
+"avg": 3.51,
+"count": 416,
+"source": "goodreads"
+},
+"3702": {
+"avg": 2.8,
+"count": 5,
+"source": "goodreads"
+},
+"3352": {
+"avg": 3.46,
+"count": 253,
+"source": "goodreads"
+},
+"1695": {
+"avg": 3.39,
+"count": 3412,
+"source": "goodreads"
+},
+"2955": {
+"avg": 4.04,
+"count": 38846,
+"source": "goodreads"
+},
+"3647": {
+"avg": 4.48,
+"count": 788,
+"source": "goodreads"
+},
+"4028": {
+"avg": 3.0,
+"count": 5,
+"source": "goodreads"
+},
+"2056": {
+"avg": 3.8,
+"count": 83,
+"source": "goodreads"
+},
+"2406": {
+"avg": 3.47,
+"count": 8926,
+"source": "goodreads"
+},
+"2778": {
+"avg": 3.88,
+"count": 3868,
+"source": "goodreads"
+},
+"3539": {
+"avg": 4.0,
+"count": 4,
+"source": "goodreads"
+},
+"1504": {
+"avg": 3.55,
+"count": 20,
+"source": "goodreads"
+},
+"1011": {
+"avg": 4.16,
+"count": 16663,
+"source": "goodreads"
+},
+"1338": {
+"avg": 3.56,
+"count": 136,
+"source": "goodreads"
+},
+"1292": {
+"avg": 3.96,
+"count": 140,
+"source": "goodreads"
+},
+"2847": {
+"avg": 4.06,
+"count": 17,
+"source": "goodreads"
+},
+"2514": {
+"avg": 3.83,
+"count": 174,
+"source": "goodreads"
+},
+"3240": {
+"avg": 3.73,
+"count": 8608,
+"source": "goodreads"
+},
+"2902": {
+"avg": 3.64,
+"count": 67,
+"source": "goodreads"
+},
+"3610": {
+"avg": 4.01,
+"count": 22971,
+"source": "goodreads"
+},
+"2076": {
+"avg": 4.21,
+"count": 1968,
+"source": "goodreads"
+},
+"2830": {
+"avg": 3.79,
+"count": 28,
+"source": "goodreads"
+},
+"3688": {
+"avg": 3.75,
+"count": 361,
+"source": "goodreads"
+},
+"1965": {
+"avg": 4.5,
+"count": 8,
+"source": "goodreads"
+},
+"1066": {
+"avg": 3.33,
+"count": 1052,
+"source": "goodreads"
+},
+"1123": {
+"avg": 4.2,
+"count": 264,
+"source": "goodreads"
+},
+"1089": {
+"avg": 3.57,
+"count": 2264,
+"source": "goodreads"
+},
+"546": {
+"avg": 2.95,
+"count": 56,
+"source": "goodreads"
+},
+"1573": {
+"avg": 4.0,
+"count": 2,
+"source": "goodreads"
+},
+"2922": {
+"avg": 4.34,
+"count": 9316,
+"source": "goodreads"
+},
+"3630": {
+"avg": 3.97,
+"count": 719458,
+"source": "goodreads"
+},
+"3325": {
+"avg": 4.25,
+"count": 705,
+"source": "goodreads"
+},
+"1318": {
+"avg": 3.73,
+"count": 36038,
+"source": "goodreads"
+},
+"2534": {
+"avg": 3.92,
+"count": 186,
+"source": "goodreads"
+},
+"2164": {
+"avg": 4.13,
+"count": 818125,
+"source": "goodreads"
+},
+"4233": {
+"avg": 3.6,
+"count": 31353,
+"source": "goodreads"
+},
+"907": {
+"avg": 4.02,
+"count": 61804,
+"source": "goodreads"
+},
+"2758": {
+"avg": 3.98,
+"count": 5928,
+"source": "goodreads"
+},
+"1877": {
+"avg": 3.73,
+"count": 848,
+"source": "goodreads"
+},
+"1524": {
+"avg": 4.33,
+"count": 3,
+"source": "goodreads"
+},
+"1174": {
+"avg": 4.0,
+"count": 1,
+"source": "goodreads"
+},
+"3149": {
+"avg": 4.01,
+"count": 7044,
+"source": "goodreads"
+},
+"3626": {
+"avg": 4.06,
+"count": 1357395,
+"source": "goodreads"
+},
+"2934": {
+"avg": 4.11,
+"count": 3946,
+"source": "goodreads"
+},
+"5208": {
+"avg": 3.35,
+"count": 5930,
+"source": "goodreads"
+},
+"5658": {
+"avg": 3.82,
+"count": 68,
+"source": "goodreads"
+},
+"2172": {
+"avg": 4.0,
+"count": 2,
+"source": "goodreads"
+},
+"2488": {
+"avg": 3.36,
+"count": 138,
+"source": "goodreads"
+},
+"911": {
+"avg": 3.78,
+"count": 7050,
+"source": "goodreads"
+},
+"1027": {
+"avg": 3.55,
+"count": 12597,
+"source": "goodreads"
+},
+"4225": {
+"avg": 4.04,
+"count": 14393,
+"source": "goodreads"
+},
+"1498": {
+"avg": 3.69,
+"count": 2502,
+"source": "goodreads"
+},
+"1162": {
+"avg": 3.42,
+"count": 12,
+"source": "goodreads"
+},
+"3671": {
+"avg": 3.81,
+"count": 72,
+"source": "goodreads"
+},
+"2963": {
+"avg": 3.95,
+"count": 99,
+"source": "goodreads"
+},
+"3364": {
+"avg": 3.99,
+"count": 3702,
+"source": "goodreads"
+},
+"2575": {
+"avg": 3.51,
+"count": 1953,
+"source": "goodreads"
+},
+"1420": {
+"avg": 2.17,
+"count": 6,
+"source": "goodreads"
+},
+"946": {
+"avg": 2.6,
+"count": 10,
+"source": "goodreads"
+},
+"1973": {
+"avg": 3.25,
+"count": 8,
+"source": "goodreads"
+},
+"5199": {
+"avg": 3.0,
+"count": 3,
+"source": "goodreads"
+},
+"2719": {
+"avg": 3.99,
+"count": 328318,
+"source": "goodreads"
+},
+"1565": {
+"avg": 3.24,
+"count": 21,
+"source": "goodreads"
+},
+"550": {
+"avg": 3.68,
+"count": 25,
+"source": "goodreads"
+},
+"3108": {
+"avg": 3.72,
+"count": 7555,
+"source": "goodreads"
+},
+"1135": {
+"avg": 3.69,
+"count": 26,
+"source": "goodreads"
+},
+"4120": {
+"avg": 3.68,
+"count": 9321,
+"source": "goodreads"
+},
+"1288": {
+"avg": 4.06,
+"count": 16325,
+"source": "goodreads"
+},
+"4065": {
+"avg": 4.01,
+"count": 108,
+"source": "goodreads"
+},
+"1637": {
+"avg": 3.91,
+"count": 1140,
+"source": "goodreads"
+},
+"2918": {
+"avg": 4.37,
+"count": 21097,
+"source": "goodreads"
+},
+"4435": {
+"avg": 3.79,
+"count": 40958,
+"source": "goodreads"
+},
+"2762": {
+"avg": 3.82,
+"count": 81812,
+"source": "goodreads"
+},
+"3173": {
+"avg": 4.24,
+"count": 33,
+"source": "goodreads"
+},
+"897": {
+"avg": 3.93,
+"count": 7166,
+"source": "goodreads"
+},
+"3935": {
+"avg": 3.89,
+"count": 19,
+"source": "goodreads"
+},
+"1908": {
+"avg": 3.84,
+"count": 45,
+"source": "goodreads"
+},
+"1725": {
+"avg": 3.89,
+"count": 1003,
+"source": "goodreads"
+},
+"3718": {
+"avg": 4.16,
+"count": 1060,
+"source": "goodreads"
+},
+"3348": {
+"avg": 3.87,
+"count": 53,
+"source": "goodreads"
+},
+"4177": {
+"avg": 3.78,
+"count": 4706,
+"source": "goodreads"
+},
+"4032": {
+"avg": 4.25,
+"count": 4,
+"source": "goodreads"
+},
+"1230": {
+"avg": 3.4,
+"count": 1175,
+"source": "goodreads"
+},
+"2735": {
+"avg": 4.69,
+"count": 48,
+"source": "goodreads"
+},
+"985": {
+"avg": 3.82,
+"count": 264,
+"source": "goodreads"
+},
+"3962": {
+"avg": 3.71,
+"count": 3468,
+"source": "goodreads"
+},
+"2670": {
+"avg": 3.0,
+"count": 1,
+"source": "goodreads"
+},
+"3431": {
+"avg": 3.13,
+"count": 950,
+"source": "goodreads"
+},
+"1699": {
+"avg": 4.54,
+"count": 194,
+"source": "goodreads"
+},
+"4161": {
+"avg": 3.85,
+"count": 13,
+"source": "goodreads"
+},
+"1226": {
+"avg": 4.24,
+"count": 3240,
+"source": "goodreads"
+},
+"2959": {
+"avg": 4.09,
+"count": 96,
+"source": "goodreads"
+},
+"1676": {
+"avg": 3.79,
+"count": 9342,
+"source": "goodreads"
+},
+"839": {
+"avg": 3.36,
+"count": 11,
+"source": "goodreads"
+},
+"3562": {
+"avg": 3.95,
+"count": 6374,
+"source": "goodreads"
+},
+"4248": {
+"avg": 3.82,
+"count": 8326,
+"source": "goodreads"
+},
+"3077": {
+"avg": 4.37,
+"count": 19,
+"source": "goodreads"
+},
+"2236": {
+"avg": 3.98,
+"count": 129335,
+"source": "goodreads"
+},
+"3974": {
+"avg": 3.46,
+"count": 328,
+"source": "goodreads"
+},
+"2148": {
+"avg": 3.49,
+"count": 1976,
+"source": "goodreads"
+},
+"1764": {
+"avg": 4.05,
+"count": 188,
+"source": "goodreads"
+},
+"4136": {
+"avg": 3.91,
+"count": 99,
+"source": "goodreads"
+},
+"1621": {
+"avg": 3.55,
+"count": 29,
+"source": "goodreads"
+},
+"1271": {
+"avg": 3.55,
+"count": 44738,
+"source": "goodreads"
+},
+"5662": {
+"avg": 3.93,
+"count": 424562,
+"source": "goodreads"
+},
+"2774": {
+"avg": 3.72,
+"count": 25054,
+"source": "goodreads"
+},
+"3889": {
+"avg": 3.63,
+"count": 82,
+"source": "goodreads"
+},
+"3020": {
+"avg": 4.33,
+"count": 3,
+"source": "goodreads"
+},
+"3470": {
+"avg": 4.05,
+"count": 137350,
+"source": "goodreads"
+},
+"683": {
+"avg": 4.0,
+"count": 4,
+"source": "abjjad"
+},
+"2425": {
+"avg": 3.62,
+"count": 16,
+"source": "abjjad"
+},
+"1209": {
+"avg": 3.6,
+"count": 52,
+"source": "abjjad"
+},
+"5533": {
+"avg": 4.5,
+"count": 58,
+"source": "abjjad"
+},
+"5163": {
+"avg": 4.33,
+"count": 3,
+"source": "abjjad"
+},
+"1120": {
+"avg": 3.75,
+"count": 4,
+"source": "abjjad"
+},
+"5476": {
+"avg": 4.36,
+"count": 25,
+"source": "abjjad"
+},
+"953": {
+"avg": 3.42,
+"count": 55,
+"source": "abjjad"
+},
+"2022": {
+"avg": 3.57,
+"count": 51,
+"source": "abjjad"
+},
+"512": {
+"avg": 4.6,
+"count": 5,
+"source": "abjjad"
+},
+"1177": {
+"avg": 3.67,
+"count": 6,
+"source": "abjjad"
+},
+"5134": {
+"avg": 3.33,
+"count": 9,
+"source": "abjjad"
+},
+"5421": {
+"avg": 4.63,
+"count": 59,
+"source": "abjjad"
+},
+"1462": {
+"avg": 3.86,
+"count": 7,
+"source": "abjjad"
+},
+"2872": {
+"avg": 4.19,
+"count": 59,
+"source": "abjjad"
+},
+"2464": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"1618": {
+"avg": 3.81,
+"count": 37,
+"source": "abjjad"
+},
+"857": {
+"avg": 3.86,
+"count": 14,
+"source": "abjjad"
+},
+"5572": {
+"avg": 3.25,
+"count": 4,
+"source": "abjjad"
+},
+"4363": {
+"avg": 3.5,
+"count": 2,
+"source": "abjjad"
+},
+"5821": {
+"avg": 3.23,
+"count": 52,
+"source": "abjjad"
+},
+"3449": {
+"avg": 4.26,
+"count": 31,
+"source": "abjjad"
+},
+"1927": {
+"avg": 3.97,
+"count": 37,
+"source": "abjjad"
+},
+"5437": {
+"avg": 4.44,
+"count": 18,
+"source": "abjjad"
+},
+"4334": {
+"avg": 3.67,
+"count": 3,
+"source": "abjjad"
+},
+"3808": {
+"avg": 3.56,
+"count": 25,
+"source": "abjjad"
+},
+"5460": {
+"avg": 3.76,
+"count": 38,
+"source": "abjjad"
+},
+"1423": {
+"avg": 3.54,
+"count": 52,
+"source": "abjjad"
+},
+"2448": {
+"avg": 4.0,
+"count": 6,
+"source": "abjjad"
+},
+"5362": {
+"avg": 3.98,
+"count": 57,
+"source": "abjjad"
+},
+"4123": {
+"avg": 4.33,
+"count": 3,
+"source": "abjjad"
+},
+"4573": {
+"avg": 2.0,
+"count": 1,
+"source": "abjjad"
+},
+"4089": {
+"avg": 4.38,
+"count": 60,
+"source": "abjjad"
+},
+"3520": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"656": {
+"avg": 3.46,
+"count": 13,
+"source": "abjjad"
+},
+"4461": {
+"avg": 3.84,
+"count": 32,
+"source": "abjjad"
+},
+"1233": {
+"avg": 4.0,
+"count": 3,
+"source": "abjjad"
+},
+"4524": {
+"avg": 4.03,
+"count": 58,
+"source": "abjjad"
+},
+"5509": {
+"avg": 4.0,
+"count": 5,
+"source": "abjjad"
+},
+"1819": {
+"avg": 3.67,
+"count": 3,
+"source": "abjjad"
+},
+"986": {
+"avg": 4.68,
+"count": 53,
+"source": "abjjad"
+},
+"4477": {
+"avg": 4.0,
+"count": 60,
+"source": "abjjad"
+},
+"5636": {
+"avg": 4.16,
+"count": 55,
+"source": "abjjad"
+},
+"1360": {
+"avg": 2.0,
+"count": 1,
+"source": "abjjad"
+},
+"4498": {
+"avg": 4.43,
+"count": 58,
+"source": "abjjad"
+},
+"5661": {
+"avg": 3.92,
+"count": 12,
+"source": "abjjad"
+},
+"4565": {
+"avg": 3.87,
+"count": 23,
+"source": "abjjad"
+},
+"2350": {
+"avg": 3.81,
+"count": 16,
+"source": "abjjad"
+},
+"4512": {
+"avg": 4.33,
+"count": 9,
+"source": "abjjad"
+},
+"1710": {
+"avg": 3.62,
+"count": 37,
+"source": "abjjad"
+},
+"3392": {
+"avg": 4.0,
+"count": 7,
+"source": "abjjad"
+},
+"660": {
+"avg": 5.0,
+"count": 5,
+"source": "abjjad"
+},
+"5246": {
+"avg": 3.75,
+"count": 4,
+"source": "abjjad"
+},
+"3146": {
+"avg": 3.91,
+"count": 56,
+"source": "abjjad"
+},
+"1897": {
+"avg": 4.75,
+"count": 4,
+"source": "abjjad"
+},
+"4545": {
+"avg": 4.4,
+"count": 55,
+"source": "abjjad"
+},
+"5704": {
+"avg": 4.33,
+"count": 24,
+"source": "abjjad"
+},
+"5641": {
+"avg": 4.45,
+"count": 53,
+"source": "abjjad"
+},
+"1614": {
+"avg": 4.07,
+"count": 60,
+"source": "abjjad"
+},
+"5657": {
+"avg": 3.97,
+"count": 59,
+"source": "abjjad"
+},
+"5207": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"5483": {
+"avg": 4.73,
+"count": 48,
+"source": "abjjad"
+},
+"949": {
+"avg": 4.32,
+"count": 60,
+"source": "abjjad"
+},
+"4504": {
+"avg": 4.38,
+"count": 16,
+"source": "abjjad"
+},
+"5315": {
+"avg": 4.53,
+"count": 57,
+"source": "abjjad"
+},
+"2595": {
+"avg": 4.09,
+"count": 55,
+"source": "abjjad"
+},
+"5250": {
+"avg": 3.89,
+"count": 55,
+"source": "abjjad"
+},
+"1454": {
+"avg": 4.25,
+"count": 20,
+"source": "abjjad"
+},
+"1141": {
+"avg": 4.16,
+"count": 58,
+"source": "abjjad"
+},
+"2014": {
+"avg": 4.2,
+"count": 10,
+"source": "abjjad"
+},
+"5381": {
+"avg": 3.88,
+"count": 57,
+"source": "abjjad"
+},
+"2444": {
+"avg": 4.38,
+"count": 40,
+"source": "abjjad"
+},
+"2852": {
+"avg": 3.74,
+"count": 54,
+"source": "abjjad"
+},
+"965": {
+"avg": 4.49,
+"count": 59,
+"source": "abjjad"
+},
+"1053": {
+"avg": 4.42,
+"count": 19,
+"source": "abjjad"
+},
+"5856": {
+"avg": 4.19,
+"count": 16,
+"source": "abjjad"
+},
+"1116": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"5505": {
+"avg": 4.59,
+"count": 17,
+"source": "abjjad"
+},
+"1395": {
+"avg": 3.64,
+"count": 53,
+"source": "abjjad"
+},
+"1680": {
+"avg": 5.0,
+"count": 2,
+"source": "abjjad"
+},
+"4482": {
+"avg": 4.18,
+"count": 60,
+"source": "abjjad"
+},
+"1946": {
+"avg": 3.87,
+"count": 15,
+"source": "abjjad"
+},
+"5456": {
+"avg": 3.44,
+"count": 9,
+"source": "abjjad"
+},
+"2393": {
+"avg": 3.03,
+"count": 32,
+"source": "abjjad"
+},
+"973": {
+"avg": 4.25,
+"count": 24,
+"source": "abjjad"
+},
+"5513": {
+"avg": 5.0,
+"count": 3,
+"source": "abjjad"
+},
+"4752": {
+"avg": 3.0,
+"count": 1,
+"source": "abjjad"
+},
+"5790": {
+"avg": 4.0,
+"count": 4,
+"source": "abjjad"
+},
+"4494": {
+"avg": 4.25,
+"count": 59,
+"source": "abjjad"
+},
+"1911": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"5817": {
+"avg": 4.2,
+"count": 60,
+"source": "abjjad"
+},
+"4355": {
+"avg": 4.47,
+"count": 59,
+"source": "abjjad"
+},
+"3869": {
+"avg": 3.93,
+"count": 42,
+"source": "abjjad"
+},
+"5397": {
+"avg": 1.0,
+"count": 1,
+"source": "abjjad"
+},
+"5378": {
+"avg": 4.09,
+"count": 56,
+"source": "abjjad"
+},
+"3306": {
+"avg": 4.08,
+"count": 24,
+"source": "abjjad"
+},
+"4569": {
+"avg": 3.7,
+"count": 54,
+"source": "abjjad"
+},
+"4587": {
+"avg": 3.91,
+"count": 11,
+"source": "abjjad"
+},
+"2845": {
+"avg": 4.77,
+"count": 22,
+"source": "abjjad"
+},
+"3887": {
+"avg": 3.95,
+"count": 56,
+"source": "abjjad"
+},
+"1443": {
+"avg": 3.71,
+"count": 34,
+"source": "abjjad"
+},
+"1156": {
+"avg": 3.9,
+"count": 39,
+"source": "abjjad"
+},
+"4354": {
+"avg": 4.24,
+"count": 37,
+"source": "abjjad"
+},
+"5791": {
+"avg": 4.4,
+"count": 5,
+"source": "abjjad"
+},
+"1382": {
+"avg": 4.51,
+"count": 55,
+"source": "abjjad"
+},
+"1228": {
+"avg": 5.0,
+"count": 6,
+"source": "abjjad"
+},
+"4495": {
+"avg": 4.15,
+"count": 60,
+"source": "abjjad"
+},
+"1044": {
+"avg": 4.22,
+"count": 37,
+"source": "abjjad"
+},
+"5457": {
+"avg": 4.06,
+"count": 36,
+"source": "abjjad"
+},
+"2412": {
+"avg": 4.64,
+"count": 11,
+"source": "abjjad"
+},
+"5338": {
+"avg": 4.07,
+"count": 58,
+"source": "abjjad"
+},
+"4179": {
+"avg": 4.07,
+"count": 59,
+"source": "abjjad"
+},
+"4529": {
+"avg": 4.28,
+"count": 57,
+"source": "abjjad"
+},
+"1402": {
+"avg": 4.07,
+"count": 56,
+"source": "abjjad"
+},
+"5857": {
+"avg": 4.0,
+"count": 1,
+"source": "abjjad"
+},
+"1814": {
+"avg": 5.0,
+"count": 2,
+"source": "abjjad"
+},
+"5504": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"5380": {
+"avg": 4.02,
+"count": 48,
+"source": "abjjad"
+},
+"2916": {
+"avg": 4.27,
+"count": 11,
+"source": "abjjad"
+},
+"3604": {
+"avg": 4.12,
+"count": 49,
+"source": "abjjad"
+},
+"1793": {
+"avg": 2.33,
+"count": 3,
+"source": "abjjad"
+},
+"2853": {
+"avg": 4.43,
+"count": 60,
+"source": "abjjad"
+},
+"3468": {
+"avg": 4.1,
+"count": 59,
+"source": "abjjad"
+},
+"4342": {
+"avg": 4.57,
+"count": 51,
+"source": "abjjad"
+},
+"1140": {
+"avg": 3.25,
+"count": 4,
+"source": "abjjad"
+},
+"5251": {
+"avg": 4.05,
+"count": 37,
+"source": "abjjad"
+},
+"2594": {
+"avg": 4.4,
+"count": 57,
+"source": "abjjad"
+},
+"5528": {
+"avg": 3.25,
+"count": 4,
+"source": "abjjad"
+},
+"1992": {
+"avg": 4.25,
+"count": 60,
+"source": "abjjad"
+},
+"5482": {
+"avg": 4.05,
+"count": 60,
+"source": "abjjad"
+},
+"4339": {
+"avg": 3.68,
+"count": 47,
+"source": "abjjad"
+},
+"948": {
+"avg": 3.2,
+"count": 51,
+"source": "abjjad"
+},
+"2202": {
+"avg": 3.82,
+"count": 11,
+"source": "abjjad"
+},
+"2486": {
+"avg": 3.74,
+"count": 43,
+"source": "abjjad"
+},
+"2890": {
+"avg": 4.22,
+"count": 60,
+"source": "abjjad"
+},
+"5656": {
+"avg": 3.92,
+"count": 51,
+"source": "abjjad"
+},
+"1880": {
+"avg": 4.0,
+"count": 1,
+"source": "abjjad"
+},
+"1183": {
+"avg": 4.0,
+"count": 3,
+"source": "abjjad"
+},
+"2869": {
+"avg": 4.12,
+"count": 8,
+"source": "abjjad"
+},
+"2490": {
+"avg": 3.79,
+"count": 29,
+"source": "abjjad"
+},
+"5640": {
+"avg": 4.43,
+"count": 7,
+"source": "abjjad"
+},
+"4513": {
+"avg": 4.55,
+"count": 56,
+"source": "abjjad"
+},
+"3669": {
+"avg": 3.57,
+"count": 60,
+"source": "abjjad"
+},
+"5247": {
+"avg": 4.0,
+"count": 5,
+"source": "abjjad"
+},
+"1984": {
+"avg": 3.95,
+"count": 59,
+"source": "abjjad"
+},
+"2701": {
+"avg": 3.33,
+"count": 3,
+"source": "abjjad"
+},
+"1438": {
+"avg": 4.4,
+"count": 5,
+"source": "abjjad"
+},
+"3055": {
+"avg": 2.96,
+"count": 48,
+"source": "abjjad"
+},
+"3472": {
+"avg": 4.68,
+"count": 57,
+"source": "abjjad"
+},
+"5660": {
+"avg": 4.5,
+"count": 4,
+"source": "abjjad"
+},
+"4564": {
+"avg": 4.49,
+"count": 59,
+"source": "abjjad"
+},
+"5375": {
+"avg": 4.02,
+"count": 41,
+"source": "abjjad"
+},
+"3425": {
+"avg": 3.75,
+"count": 8,
+"source": "abjjad"
+},
+"3075": {
+"avg": 3.92,
+"count": 36,
+"source": "abjjad"
+},
+"1224": {
+"avg": 2.75,
+"count": 4,
+"source": "abjjad"
+},
+"4476": {
+"avg": 4.3,
+"count": 33,
+"source": "abjjad"
+},
+"5637": {
+"avg": 4.43,
+"count": 23,
+"source": "abjjad"
+},
+"4499": {
+"avg": 4.61,
+"count": 49,
+"source": "abjjad"
+},
+"5508": {
+"avg": 3.7,
+"count": 37,
+"source": "abjjad"
+},
+"657": {
+"avg": 4.26,
+"count": 39,
+"source": "abjjad"
+},
+"1232": {
+"avg": 3.5,
+"count": 2,
+"source": "abjjad"
+},
+"1459": {
+"avg": 4.43,
+"count": 7,
+"source": "abjjad"
+},
+"3464": {
+"avg": 4.3,
+"count": 10,
+"source": "abjjad"
+},
+"3258": {
+"avg": 3.95,
+"count": 58,
+"source": "abjjad"
+},
+"2019": {
+"avg": 3.89,
+"count": 9,
+"source": "abjjad"
+},
+"5226": {
+"avg": 4.21,
+"count": 43,
+"source": "abjjad"
+},
+"1320": {
+"avg": 4.09,
+"count": 22,
+"source": "abjjad"
+},
+"4572": {
+"avg": 4.2,
+"count": 10,
+"source": "abjjad"
+},
+"5174": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"5524": {
+"avg": 4.26,
+"count": 19,
+"source": "abjjad"
+},
+"5461": {
+"avg": 3.74,
+"count": 58,
+"source": "abjjad"
+},
+"944": {
+"avg": 4.2,
+"count": 25,
+"source": "abjjad"
+},
+"1422": {
+"avg": 4.26,
+"count": 31,
+"source": "abjjad"
+},
+"4509": {
+"avg": 4.02,
+"count": 60,
+"source": "abjjad"
+},
+"2598": {
+"avg": 4.56,
+"count": 39,
+"source": "abjjad"
+},
+"4362": {
+"avg": 3.98,
+"count": 56,
+"source": "abjjad"
+},
+"5820": {
+"avg": 3.14,
+"count": 44,
+"source": "abjjad"
+},
+"1025": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"5436": {
+"avg": 3.25,
+"count": 8,
+"source": "abjjad"
+},
+"769": {
+"avg": 3.56,
+"count": 16,
+"source": "abjjad"
+},
+"2035": {
+"avg": 4.14,
+"count": 56,
+"source": "abjjad"
+},
+"1199": {
+"avg": 3.67,
+"count": 6,
+"source": "abjjad"
+},
+"1463": {
+"avg": 3.9,
+"count": 10,
+"source": "abjjad"
+},
+"4548": {
+"avg": 4.12,
+"count": 34,
+"source": "abjjad"
+},
+"5532": {
+"avg": 3.83,
+"count": 52,
+"source": "abjjad"
+},
+"1822": {
+"avg": 4.52,
+"count": 60,
+"source": "abjjad"
+},
+"1988": {
+"avg": 4.46,
+"count": 52,
+"source": "abjjad"
+},
+"1121": {
+"avg": 4.24,
+"count": 59,
+"source": "abjjad"
+},
+"3059": {
+"avg": 4.61,
+"count": 31,
+"source": "abjjad"
+},
+"1434": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"5477": {
+"avg": 4.8,
+"count": 10,
+"source": "abjjad"
+},
+"1829": {
+"avg": 3.41,
+"count": 44,
+"source": "abjjad"
+},
+"959": {
+"avg": 4.18,
+"count": 17,
+"source": "abjjad"
+},
+"5581": {
+"avg": 3.25,
+"count": 4,
+"source": "abjjad"
+},
+"1038": {
+"avg": 4.29,
+"count": 7,
+"source": "abjjad"
+},
+"5702": {
+"avg": 3.79,
+"count": 58,
+"source": "abjjad"
+},
+"4543": {
+"avg": 4.2,
+"count": 49,
+"source": "abjjad"
+},
+"1604": {
+"avg": 4.22,
+"count": 60,
+"source": "abjjad"
+},
+"2478": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"5647": {
+"avg": 4.5,
+"count": 14,
+"source": "abjjad"
+},
+"4369": {
+"avg": 4.07,
+"count": 14,
+"source": "abjjad"
+},
+"1184": {
+"avg": 3.0,
+"count": 1,
+"source": "abjjad"
+},
+"4555": {
+"avg": 4.48,
+"count": 60,
+"source": "abjjad"
+},
+"5651": {
+"avg": 4.25,
+"count": 32,
+"source": "abjjad"
+},
+"5201": {
+"avg": 3.4,
+"count": 5,
+"source": "abjjad"
+},
+"4040": {
+"avg": 3.87,
+"count": 53,
+"source": "abjjad"
+},
+"1612": {
+"avg": 4.29,
+"count": 59,
+"source": "abjjad"
+},
+"5485": {
+"avg": 3.6,
+"count": 5,
+"source": "abjjad"
+},
+"5313": {
+"avg": 3.98,
+"count": 56,
+"source": "abjjad"
+},
+"4502": {
+"avg": 3.86,
+"count": 42,
+"source": "abjjad"
+},
+"1002": {
+"avg": 4.67,
+"count": 60,
+"source": "abjjad"
+},
+"871": {
+"avg": 4.38,
+"count": 58,
+"source": "abjjad"
+},
+"2442": {
+"avg": 4.17,
+"count": 6,
+"source": "abjjad"
+},
+"5368": {
+"avg": 3.85,
+"count": 26,
+"source": "abjjad"
+},
+"3438": {
+"avg": 4.46,
+"count": 54,
+"source": "abjjad"
+},
+"1055": {
+"avg": 4.67,
+"count": 6,
+"source": "abjjad"
+},
+"3592": {
+"avg": 3.98,
+"count": 50,
+"source": "abjjad"
+},
+"5446": {
+"avg": 3.8,
+"count": 5,
+"source": "abjjad"
+},
+"5153": {
+"avg": 4.52,
+"count": 56,
+"source": "abjjad"
+},
+"1813": {
+"avg": 4.42,
+"count": 59,
+"source": "abjjad"
+},
+"1110": {
+"avg": 4.67,
+"count": 9,
+"source": "abjjad"
+},
+"2045": {
+"avg": 4.27,
+"count": 59,
+"source": "abjjad"
+},
+"5780": {
+"avg": 3.86,
+"count": 58,
+"source": "abjjad"
+},
+"1239": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"1393": {
+"avg": 3.93,
+"count": 56,
+"source": "abjjad"
+},
+"4484": {
+"avg": 3.9,
+"count": 50,
+"source": "abjjad"
+},
+"1043": {
+"avg": 3.83,
+"count": 6,
+"source": "abjjad"
+},
+"1106": {
+"avg": 3.82,
+"count": 17,
+"source": "abjjad"
+},
+"5145": {
+"avg": 3.69,
+"count": 29,
+"source": "abjjad"
+},
+"5796": {
+"avg": 4.06,
+"count": 53,
+"source": "abjjad"
+},
+"4492": {
+"avg": 4.6,
+"count": 53,
+"source": "abjjad"
+},
+"1014": {
+"avg": 4.8,
+"count": 59,
+"source": "abjjad"
+},
+"2287": {
+"avg": 3.48,
+"count": 31,
+"source": "abjjad"
+},
+"5391": {
+"avg": 4.32,
+"count": 47,
+"source": "abjjad"
+},
+"2454": {
+"avg": 3.25,
+"count": 4,
+"source": "abjjad"
+},
+"2004": {
+"avg": 3.83,
+"count": 6,
+"source": "abjjad"
+},
+"4580": {
+"avg": 3.86,
+"count": 21,
+"source": "abjjad"
+},
+"2842": {
+"avg": 5.0,
+"count": 2,
+"source": "abjjad"
+},
+"1126": {
+"avg": 4.5,
+"count": 6,
+"source": "abjjad"
+},
+"1825": {
+"avg": 4.41,
+"count": 59,
+"source": "abjjad"
+},
+"2862": {
+"avg": 3.67,
+"count": 55,
+"source": "abjjad"
+},
+"2474": {
+"avg": 4.5,
+"count": 10,
+"source": "abjjad"
+},
+"4373": {
+"avg": 3.44,
+"count": 9,
+"source": "abjjad"
+},
+"3459": {
+"avg": 3.61,
+"count": 59,
+"source": "abjjad"
+},
+"1034": {
+"avg": 3.87,
+"count": 15,
+"source": "abjjad"
+},
+"2874": {
+"avg": 4.73,
+"count": 11,
+"source": "abjjad"
+},
+"2032": {
+"avg": 3.88,
+"count": 16,
+"source": "abjjad"
+},
+"2462": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"2198": {
+"avg": 3.76,
+"count": 37,
+"source": "abjjad"
+},
+"851": {
+"avg": 3.84,
+"count": 38,
+"source": "abjjad"
+},
+"1921": {
+"avg": 3.92,
+"count": 53,
+"source": "abjjad"
+},
+"4220": {
+"avg": 4.11,
+"count": 35,
+"source": "abjjad"
+},
+"2570": {
+"avg": 4.25,
+"count": 24,
+"source": "abjjad"
+},
+"1999": {
+"avg": 4.67,
+"count": 12,
+"source": "abjjad"
+},
+"2209": {
+"avg": 4.0,
+"count": 5,
+"source": "abjjad"
+},
+"5221": {
+"avg": 4.29,
+"count": 7,
+"source": "abjjad"
+},
+"1798": {
+"avg": 3.43,
+"count": 30,
+"source": "abjjad"
+},
+"2858": {
+"avg": 3.83,
+"count": 60,
+"source": "abjjad"
+},
+"4575": {
+"avg": 4.25,
+"count": 4,
+"source": "abjjad"
+},
+"938": {
+"avg": 3.94,
+"count": 16,
+"source": "abjjad"
+},
+"4719": {
+"avg": 4.0,
+"count": 6,
+"source": "abjjad"
+},
+"4467": {
+"avg": 3.73,
+"count": 37,
+"source": "abjjad"
+},
+"5626": {
+"avg": 4.02,
+"count": 59,
+"source": "abjjad"
+},
+"4488": {
+"avg": 4.35,
+"count": 60,
+"source": "abjjad"
+},
+"3064": {
+"avg": 3.15,
+"count": 48,
+"source": "abjjad"
+},
+"3434": {
+"avg": 4.18,
+"count": 11,
+"source": "abjjad"
+},
+"5260": {
+"avg": 4.29,
+"count": 14,
+"source": "abjjad"
+},
+"4471": {
+"avg": 3.85,
+"count": 46,
+"source": "abjjad"
+},
+"4534": {
+"avg": 4.37,
+"count": 60,
+"source": "abjjad"
+},
+"3072": {
+"avg": 3.63,
+"count": 57,
+"source": "abjjad"
+},
+"3588": {
+"avg": 4.07,
+"count": 14,
+"source": "abjjad"
+},
+"996": {
+"avg": 4.38,
+"count": 58,
+"source": "abjjad"
+},
+"5519": {
+"avg": 4.32,
+"count": 19,
+"source": "abjjad"
+},
+"4758": {
+"avg": 3.62,
+"count": 16,
+"source": "abjjad"
+},
+"3567": {
+"avg": 4.3,
+"count": 50,
+"source": "abjjad"
+},
+"5667": {
+"avg": 3.55,
+"count": 11,
+"source": "abjjad"
+},
+"4563": {
+"avg": 4.24,
+"count": 59,
+"source": "abjjad"
+},
+"3475": {
+"avg": 4.14,
+"count": 59,
+"source": "abjjad"
+},
+"3474": {
+"avg": 3.63,
+"count": 35,
+"source": "abjjad"
+},
+"2009": {
+"avg": 4.19,
+"count": 57,
+"source": "abjjad"
+},
+"5666": {
+"avg": 3.93,
+"count": 59,
+"source": "abjjad"
+},
+"5373": {
+"avg": 2.6,
+"count": 10,
+"source": "abjjad"
+},
+"4562": {
+"avg": 4.47,
+"count": 58,
+"source": "abjjad"
+},
+"1330": {
+"avg": 4.6,
+"count": 5,
+"source": "abjjad"
+},
+"3970": {
+"avg": 3.75,
+"count": 57,
+"source": "abjjad"
+},
+"978": {
+"avg": 4.15,
+"count": 26,
+"source": "abjjad"
+},
+"997": {
+"avg": 4.64,
+"count": 22,
+"source": "abjjad"
+},
+"2377": {
+"avg": 4.0,
+"count": 4,
+"source": "abjjad"
+},
+"5261": {
+"avg": 3.81,
+"count": 57,
+"source": "abjjad"
+},
+"4470": {
+"avg": 3.93,
+"count": 60,
+"source": "abjjad"
+},
+"2674": {
+"avg": 3.0,
+"count": 1,
+"source": "abjjad"
+},
+"3435": {
+"avg": 3.96,
+"count": 28,
+"source": "abjjad"
+},
+"4466": {
+"avg": 4.13,
+"count": 60,
+"source": "abjjad"
+},
+"2048": {
+"avg": 4.27,
+"count": 59,
+"source": "abjjad"
+},
+"5627": {
+"avg": 4.21,
+"count": 14,
+"source": "abjjad"
+},
+"5332": {
+"avg": 4.04,
+"count": 28,
+"source": "abjjad"
+},
+"4523": {
+"avg": 3.48,
+"count": 60,
+"source": "abjjad"
+},
+"1371": {
+"avg": 3.65,
+"count": 37,
+"source": "abjjad"
+},
+"4489": {
+"avg": 3.94,
+"count": 49,
+"source": "abjjad"
+},
+"893": {
+"avg": 4.05,
+"count": 37,
+"source": "abjjad"
+},
+"4348": {
+"avg": 3.87,
+"count": 30,
+"source": "abjjad"
+},
+"5670": {
+"avg": 4.45,
+"count": 40,
+"source": "abjjad"
+},
+"4574": {
+"avg": 1.0,
+"count": 1,
+"source": "abjjad"
+},
+"1998": {
+"avg": 4.6,
+"count": 5,
+"source": "abjjad"
+},
+"1832": {
+"avg": 4.18,
+"count": 22,
+"source": "abjjad"
+},
+"942": {
+"avg": 3.82,
+"count": 34,
+"source": "abjjad"
+},
+"4364": {
+"avg": 4.25,
+"count": 59,
+"source": "abjjad"
+},
+"5349": {
+"avg": 3.7,
+"count": 10,
+"source": "abjjad"
+},
+"4558": {
+"avg": 4.53,
+"count": 51,
+"source": "abjjad"
+},
+"2930": {
+"avg": 4.25,
+"count": 44,
+"source": "abjjad"
+},
+"3272": {
+"avg": 3.67,
+"count": 3,
+"source": "abjjad"
+},
+"2463": {
+"avg": 4.9,
+"count": 10,
+"source": "abjjad"
+},
+"4372": {
+"avg": 4.25,
+"count": 59,
+"source": "abjjad"
+},
+"1465": {
+"avg": 3.16,
+"count": 51,
+"source": "abjjad"
+},
+"3458": {
+"avg": 3.58,
+"count": 24,
+"source": "abjjad"
+},
+"1035": {
+"avg": 4.29,
+"count": 52,
+"source": "abjjad"
+},
+"2025": {
+"avg": 3.75,
+"count": 8,
+"source": "abjjad"
+},
+"1127": {
+"avg": 4.0,
+"count": 2,
+"source": "abjjad"
+},
+"954": {
+"avg": 4.11,
+"count": 19,
+"source": "abjjad"
+},
+"5471": {
+"avg": 4.26,
+"count": 58,
+"source": "abjjad"
+},
+"5308": {
+"avg": 4.22,
+"count": 60,
+"source": "abjjad"
+},
+"684": {
+"avg": 4.0,
+"count": 51,
+"source": "abjjad"
+},
+"2455": {
+"avg": 3.0,
+"count": 2,
+"source": "abjjad"
+},
+"5390": {
+"avg": 4.5,
+"count": 48,
+"source": "abjjad"
+},
+"3751": {
+"avg": 4.24,
+"count": 21,
+"source": "abjjad"
+},
+"4094": {
+"avg": 4.02,
+"count": 53,
+"source": "abjjad"
+},
+"1296": {
+"avg": 4.04,
+"count": 50,
+"source": "abjjad"
+},
+"5685": {
+"avg": 4.34,
+"count": 47,
+"source": "abjjad"
+},
+"1015": {
+"avg": 3.69,
+"count": 59,
+"source": "abjjad"
+},
+"923": {
+"avg": 4.26,
+"count": 57,
+"source": "abjjad"
+},
+"5406": {
+"avg": 4.12,
+"count": 33,
+"source": "abjjad"
+},
+"1150": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"2951": {
+"avg": 3.74,
+"count": 42,
+"source": "abjjad"
+},
+"1384": {
+"avg": 4.17,
+"count": 58,
+"source": "abjjad"
+},
+"5778": {
+"avg": 3.68,
+"count": 37,
+"source": "abjjad"
+},
+"4493": {
+"avg": 3.8,
+"count": 54,
+"source": "abjjad"
+},
+"1107": {
+"avg": 5.0,
+"count": 5,
+"source": "abjjad"
+},
+"1804": {
+"avg": 4.53,
+"count": 59,
+"source": "abjjad"
+},
+"1238": {
+"avg": 5.0,
+"count": 2,
+"source": "abjjad"
+},
+"4190": {
+"avg": 4.54,
+"count": 54,
+"source": "abjjad"
+},
+"4485": {
+"avg": 4.05,
+"count": 60,
+"source": "abjjad"
+},
+"3439": {
+"avg": 3.89,
+"count": 19,
+"source": "abjjad"
+},
+"1054": {
+"avg": 3.71,
+"count": 41,
+"source": "abjjad"
+},
+"962": {
+"avg": 3.98,
+"count": 54,
+"source": "abjjad"
+},
+"1812": {
+"avg": 4.67,
+"count": 15,
+"source": "abjjad"
+},
+"1795": {
+"avg": 4.58,
+"count": 59,
+"source": "abjjad"
+},
+"5369": {
+"avg": 3.89,
+"count": 28,
+"source": "abjjad"
+},
+"4578": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"1280": {
+"avg": 4.08,
+"count": 12,
+"source": "abjjad"
+},
+"5806": {
+"avg": 4.42,
+"count": 60,
+"source": "abjjad"
+},
+"870": {
+"avg": 4.22,
+"count": 59,
+"source": "abjjad"
+},
+"5312": {
+"avg": 4.14,
+"count": 57,
+"source": "abjjad"
+},
+"2984": {
+"avg": 4.13,
+"count": 30,
+"source": "abjjad"
+},
+"1351": {
+"avg": 3.58,
+"count": 19,
+"source": "abjjad"
+},
+"1582": {
+"avg": 4.27,
+"count": 11,
+"source": "abjjad"
+},
+"1428": {
+"avg": 4.0,
+"count": 4,
+"source": "abjjad"
+},
+"1756": {
+"avg": 4.0,
+"count": 2,
+"source": "abjjad"
+},
+"4554": {
+"avg": 4.59,
+"count": 59,
+"source": "abjjad"
+},
+"763": {
+"avg": 3.29,
+"count": 59,
+"source": "abjjad"
+},
+"5715": {
+"avg": 4.03,
+"count": 32,
+"source": "abjjad"
+},
+"5345": {
+"avg": 4.25,
+"count": 8,
+"source": "abjjad"
+},
+"5200": {
+"avg": 1.0,
+"count": 1,
+"source": "abjjad"
+},
+"4368": {
+"avg": 5.0,
+"count": 8,
+"source": "abjjad"
+},
+"3442": {
+"avg": 4.65,
+"count": 26,
+"source": "abjjad"
+},
+"1185": {
+"avg": 2.5,
+"count": 2,
+"source": "abjjad"
+},
+"5703": {
+"avg": 4.49,
+"count": 43,
+"source": "abjjad"
+},
+"775": {
+"avg": 4.78,
+"count": 9,
+"source": "abjjad"
+},
+"1605": {
+"avg": 4.09,
+"count": 58,
+"source": "abjjad"
+},
+"2479": {
+"avg": 4.6,
+"count": 10,
+"source": "abjjad"
+},
+"5646": {
+"avg": 3.33,
+"count": 3,
+"source": "abjjad"
+},
+"1039": {
+"avg": 4.05,
+"count": 22,
+"source": "abjjad"
+},
+"3454": {
+"avg": 3.66,
+"count": 38,
+"source": "abjjad"
+},
+"3680": {
+"avg": 3.18,
+"count": 11,
+"source": "abjjad"
+},
+"2838": {
+"avg": 4.28,
+"count": 57,
+"source": "abjjad"
+},
+"4515": {
+"avg": 3.98,
+"count": 59,
+"source": "abjjad"
+},
+"1202": {
+"avg": 4.5,
+"count": 6,
+"source": "abjjad"
+},
+"3395": {
+"avg": 4.39,
+"count": 59,
+"source": "abjjad"
+},
+"5492": {
+"avg": 4.0,
+"count": 17,
+"source": "abjjad"
+},
+"1828": {
+"avg": 4.13,
+"count": 60,
+"source": "abjjad"
+},
+"3546": {
+"avg": 4.0,
+"count": 2,
+"source": "abjjad"
+},
+"3403": {
+"avg": 3.67,
+"count": 6,
+"source": "abjjad"
+},
+"3053": {
+"avg": 4.37,
+"count": 54,
+"source": "abjjad"
+},
+"958": {
+"avg": 3.66,
+"count": 59,
+"source": "abjjad"
+},
+"5686": {
+"avg": 3.7,
+"count": 50,
+"source": "abjjad"
+},
+"2840": {
+"avg": 3.62,
+"count": 60,
+"source": "abjjad"
+},
+"1295": {
+"avg": 3.0,
+"count": 2,
+"source": "abjjad"
+},
+"4078": {
+"avg": 4.43,
+"count": 60,
+"source": "abjjad"
+},
+"4582": {
+"avg": 3.75,
+"count": 4,
+"source": "abjjad"
+},
+"3247": {
+"avg": 4.27,
+"count": 11,
+"source": "abjjad"
+},
+"2006": {
+"avg": 4.14,
+"count": 7,
+"source": "abjjad"
+},
+"5813": {
+"avg": 4.0,
+"count": 18,
+"source": "abjjad"
+},
+"4351": {
+"avg": 4.36,
+"count": 55,
+"source": "abjjad"
+},
+"1153": {
+"avg": 3.5,
+"count": 2,
+"source": "abjjad"
+},
+"1446": {
+"avg": 4.72,
+"count": 60,
+"source": "abjjad"
+},
+"4490": {
+"avg": 4.36,
+"count": 58,
+"source": "abjjad"
+},
+"998": {
+"avg": 4.81,
+"count": 54,
+"source": "abjjad"
+},
+"5452": {
+"avg": 3.95,
+"count": 20,
+"source": "abjjad"
+},
+"4486": {
+"avg": 3.92,
+"count": 59,
+"source": "abjjad"
+},
+"4469": {
+"avg": 4.38,
+"count": 40,
+"source": "abjjad"
+},
+"5628": {
+"avg": 3.82,
+"count": 22,
+"source": "abjjad"
+},
+"5278": {
+"avg": 3.83,
+"count": 6,
+"source": "abjjad"
+},
+"5782": {
+"avg": 2.4,
+"count": 48,
+"source": "abjjad"
+},
+"5852": {
+"avg": 3.7,
+"count": 57,
+"source": "abjjad"
+},
+"1954": {
+"avg": 3.2,
+"count": 5,
+"source": "abjjad"
+},
+"961": {
+"avg": 4.21,
+"count": 19,
+"source": "abjjad"
+},
+"1057": {
+"avg": 4.5,
+"count": 60,
+"source": "abjjad"
+},
+"2856": {
+"avg": 3.72,
+"count": 58,
+"source": "abjjad"
+},
+"2155": {
+"avg": 4.17,
+"count": 58,
+"source": "abjjad"
+},
+"873": {
+"avg": 4.22,
+"count": 9,
+"source": "abjjad"
+},
+"4347": {
+"avg": 3.92,
+"count": 13,
+"source": "abjjad"
+},
+"5805": {
+"avg": 4.44,
+"count": 9,
+"source": "abjjad"
+},
+"4202": {
+"avg": 4.07,
+"count": 60,
+"source": "abjjad"
+},
+"5413": {
+"avg": 2.91,
+"count": 11,
+"source": "abjjad"
+},
+"936": {
+"avg": 4.1,
+"count": 20,
+"source": "abjjad"
+},
+"4500": {
+"avg": 4.11,
+"count": 55,
+"source": "abjjad"
+},
+"1978": {
+"avg": 4.0,
+"count": 1,
+"source": "abjjad"
+},
+"1997": {
+"avg": 4.19,
+"count": 57,
+"source": "abjjad"
+},
+"5653": {
+"avg": 3.86,
+"count": 21,
+"source": "abjjad"
+},
+"5203": {
+"avg": 4.67,
+"count": 3,
+"source": "abjjad"
+},
+"5346": {
+"avg": 4.0,
+"count": 8,
+"source": "abjjad"
+},
+"4557": {
+"avg": 4.0,
+"count": 52,
+"source": "abjjad"
+},
+"5595": {
+"avg": 3.91,
+"count": 11,
+"source": "abjjad"
+},
+"2600": {
+"avg": 4.51,
+"count": 59,
+"source": "abjjad"
+},
+"3441": {
+"avg": 3.4,
+"count": 10,
+"source": "abjjad"
+},
+"5645": {
+"avg": 1.0,
+"count": 1,
+"source": "abjjad"
+},
+"4541": {
+"avg": 4.0,
+"count": 5,
+"source": "abjjad"
+},
+"5583": {
+"avg": 4.24,
+"count": 59,
+"source": "abjjad"
+},
+"2587": {
+"avg": 3.61,
+"count": 18,
+"source": "abjjad"
+},
+"2568": {
+"avg": 3.73,
+"count": 30,
+"source": "abjjad"
+},
+"4795": {
+"avg": 5.0,
+"count": 2,
+"source": "abjjad"
+},
+"5491": {
+"avg": 4.0,
+"count": 25,
+"source": "abjjad"
+},
+"869": {
+"avg": 4.0,
+"count": 11,
+"source": "abjjad"
+},
+"5409": {
+"avg": 5.0,
+"count": 2,
+"source": "abjjad"
+},
+"4561": {
+"avg": 4.05,
+"count": 37,
+"source": "abjjad"
+},
+"994": {
+"avg": 4.17,
+"count": 58,
+"source": "abjjad"
+},
+"2374": {
+"avg": 4.68,
+"count": 53,
+"source": "abjjad"
+},
+"3070": {
+"avg": 4.05,
+"count": 59,
+"source": "abjjad"
+},
+"5777": {
+"avg": 3.82,
+"count": 22,
+"source": "abjjad"
+},
+"4473": {
+"avg": 4.32,
+"count": 59,
+"source": "abjjad"
+},
+"5798": {
+"avg": 4.33,
+"count": 18,
+"source": "abjjad"
+},
+"3573": {
+"avg": 4.14,
+"count": 49,
+"source": "abjjad"
+},
+"3066": {
+"avg": 3.26,
+"count": 53,
+"source": "abjjad"
+},
+"4520": {
+"avg": 4.22,
+"count": 58,
+"source": "abjjad"
+},
+"5331": {
+"avg": 4.13,
+"count": 47,
+"source": "abjjad"
+},
+"5274": {
+"avg": 4.0,
+"count": 2,
+"source": "abjjad"
+},
+"4465": {
+"avg": 3.85,
+"count": 26,
+"source": "abjjad"
+},
+"4035": {
+"avg": 4.0,
+"count": 2,
+"source": "abjjad"
+},
+"3898": {
+"avg": 4.38,
+"count": 37,
+"source": "abjjad"
+},
+"4577": {
+"avg": 4.67,
+"count": 3,
+"source": "abjjad"
+},
+"5389": {
+"avg": 4.31,
+"count": 58,
+"source": "abjjad"
+},
+"1974": {
+"avg": 4.9,
+"count": 59,
+"source": "abjjad"
+},
+"5464": {
+"avg": 4.0,
+"count": 1,
+"source": "abjjad"
+},
+"1427": {
+"avg": 4.0,
+"count": 1,
+"source": "abjjad"
+},
+"1077": {
+"avg": 4.0,
+"count": 57,
+"source": "abjjad"
+},
+"5521": {
+"avg": 4.0,
+"count": 3,
+"source": "abjjad"
+},
+"2437": {
+"avg": 4.0,
+"count": 1,
+"source": "abjjad"
+},
+"1020": {
+"avg": 4.57,
+"count": 53,
+"source": "abjjad"
+},
+"5433": {
+"avg": 3.0,
+"count": 3,
+"source": "abjjad"
+},
+"1923": {
+"avg": 3.4,
+"count": 53,
+"source": "abjjad"
+},
+"5825": {
+"avg": 3.02,
+"count": 53,
+"source": "abjjad"
+},
+"4737": {
+"avg": 3.87,
+"count": 15,
+"source": "abjjad"
+},
+"2460": {
+"avg": 3.23,
+"count": 53,
+"source": "abjjad"
+},
+"2933": {
+"avg": 4.41,
+"count": 59,
+"source": "abjjad"
+},
+"2876": {
+"avg": 3.68,
+"count": 47,
+"source": "abjjad"
+},
+"1309": {
+"avg": 2.67,
+"count": 3,
+"source": "abjjad"
+},
+"3908": {
+"avg": 4.2,
+"count": 10,
+"source": "abjjad"
+},
+"1036": {
+"avg": 4.21,
+"count": 19,
+"source": "abjjad"
+},
+"4371": {
+"avg": 4.1,
+"count": 60,
+"source": "abjjad"
+},
+"845": {
+"avg": 4.25,
+"count": 12,
+"source": "abjjad"
+},
+"795": {
+"avg": 4.0,
+"count": 1,
+"source": "abjjad"
+},
+"5649": {
+"avg": 3.93,
+"count": 14,
+"source": "abjjad"
+},
+"2476": {
+"avg": 3.2,
+"count": 5,
+"source": "abjjad"
+},
+"2358": {
+"avg": 4.07,
+"count": 60,
+"source": "abjjad"
+},
+"1124": {
+"avg": 3.87,
+"count": 15,
+"source": "abjjad"
+},
+"2836": {
+"avg": 4.54,
+"count": 59,
+"source": "abjjad"
+},
+"5473": {
+"avg": 4.41,
+"count": 29,
+"source": "abjjad"
+},
+"1963": {
+"avg": 3.8,
+"count": 20,
+"source": "abjjad"
+},
+"2709": {
+"avg": 4.5,
+"count": 56,
+"source": "abjjad"
+},
+"5648": {
+"avg": 4.37,
+"count": 59,
+"source": "abjjad"
+},
+"2477": {
+"avg": 4.0,
+"count": 1,
+"source": "abjjad"
+},
+"2861": {
+"avg": 4.31,
+"count": 59,
+"source": "abjjad"
+},
+"4370": {
+"avg": 3.98,
+"count": 60,
+"source": "abjjad"
+},
+"5131": {
+"avg": 3.3,
+"count": 43,
+"source": "abjjad"
+},
+"1922": {
+"avg": 4.07,
+"count": 56,
+"source": "abjjad"
+},
+"852": {
+"avg": 4.0,
+"count": 2,
+"source": "abjjad"
+},
+"1164": {
+"avg": 4.13,
+"count": 54,
+"source": "abjjad"
+},
+"4366": {
+"avg": 3.3,
+"count": 10,
+"source": "abjjad"
+},
+"501": {
+"avg": 3.75,
+"count": 28,
+"source": "abjjad"
+},
+"2573": {
+"avg": 4.5,
+"count": 60,
+"source": "abjjad"
+},
+"5170": {
+"avg": 3.48,
+"count": 58,
+"source": "abjjad"
+},
+"2508": {
+"avg": 3.77,
+"count": 44,
+"source": "abjjad"
+},
+"3749": {
+"avg": 4.24,
+"count": 21,
+"source": "abjjad"
+},
+"4576": {
+"avg": 4.54,
+"count": 59,
+"source": "abjjad"
+},
+"5222": {
+"avg": 3.89,
+"count": 19,
+"source": "abjjad"
+},
+"5808": {
+"avg": 4.47,
+"count": 15,
+"source": "abjjad"
+},
+"3876": {
+"avg": 3.68,
+"count": 38,
+"source": "abjjad"
+},
+"4521": {
+"avg": 4.0,
+"count": 56,
+"source": "abjjad"
+},
+"4171": {
+"avg": 4.45,
+"count": 55,
+"source": "abjjad"
+},
+"4464": {
+"avg": 3.78,
+"count": 60,
+"source": "abjjad"
+},
+"1236": {
+"avg": 4.62,
+"count": 8,
+"source": "abjjad"
+},
+"3122": {
+"avg": 3.0,
+"count": 3,
+"source": "abjjad"
+},
+"3067": {
+"avg": 4.17,
+"count": 18,
+"source": "abjjad"
+},
+"3437": {
+"avg": 4.2,
+"count": 56,
+"source": "abjjad"
+},
+"4537": {
+"avg": 4.41,
+"count": 58,
+"source": "abjjad"
+},
+"4472": {
+"avg": 4.55,
+"count": 56,
+"source": "abjjad"
+},
+"5633": {
+"avg": 4.13,
+"count": 54,
+"source": "abjjad"
+},
+"995": {
+"avg": 3.85,
+"count": 59,
+"source": "abjjad"
+},
+"1298": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"4560": {
+"avg": 3.21,
+"count": 56,
+"source": "abjjad"
+},
+"5371": {
+"avg": 3.89,
+"count": 9,
+"source": "abjjad"
+},
+"3051": {
+"avg": 3.98,
+"count": 59,
+"source": "abjjad"
+},
+"5490": {
+"avg": 3.33,
+"count": 6,
+"source": "abjjad"
+},
+"1200": {
+"avg": 3.82,
+"count": 22,
+"source": "abjjad"
+},
+"5306": {
+"avg": 4.33,
+"count": 3,
+"source": "abjjad"
+},
+"1345": {
+"avg": 3.5,
+"count": 2,
+"source": "abjjad"
+},
+"3456": {
+"avg": 3.5,
+"count": 6,
+"source": "abjjad"
+},
+"5214": {
+"avg": 4.06,
+"count": 34,
+"source": "abjjad"
+},
+"5644": {
+"avg": 3.83,
+"count": 6,
+"source": "abjjad"
+},
+"4540": {
+"avg": 3.64,
+"count": 11,
+"source": "abjjad"
+},
+"4110": {
+"avg": 3.94,
+"count": 54,
+"source": "abjjad"
+},
+"3440": {
+"avg": 3.47,
+"count": 36,
+"source": "abjjad"
+},
+"5828": {
+"avg": 4.83,
+"count": 59,
+"source": "abjjad"
+},
+"5652": {
+"avg": 4.42,
+"count": 52,
+"source": "abjjad"
+},
+"5347": {
+"avg": 3.86,
+"count": 28,
+"source": "abjjad"
+},
+"4556": {
+"avg": 4.2,
+"count": 55,
+"source": "abjjad"
+},
+"5469": {
+"avg": 4.11,
+"count": 54,
+"source": "abjjad"
+},
+"1979": {
+"avg": 3.77,
+"count": 60,
+"source": "abjjad"
+},
+"3801": {
+"avg": 3.22,
+"count": 45,
+"source": "abjjad"
+},
+"1996": {
+"avg": 4.42,
+"count": 57,
+"source": "abjjad"
+},
+"4501": {
+"avg": 4.14,
+"count": 59,
+"source": "abjjad"
+},
+"2085": {
+"avg": 3.4,
+"count": 5,
+"source": "abjjad"
+},
+"1144": {
+"avg": 4.0,
+"count": 2,
+"source": "abjjad"
+},
+"4203": {
+"avg": 4.16,
+"count": 58,
+"source": "abjjad"
+},
+"5412": {
+"avg": 4.62,
+"count": 8,
+"source": "abjjad"
+},
+"3895": {
+"avg": 4.15,
+"count": 59,
+"source": "abjjad"
+},
+"1282": {
+"avg": 4.56,
+"count": 16,
+"source": "abjjad"
+},
+"3600": {
+"avg": 3.76,
+"count": 21,
+"source": "abjjad"
+},
+"2912": {
+"avg": 4.4,
+"count": 5,
+"source": "abjjad"
+},
+"1113": {
+"avg": 4.23,
+"count": 13,
+"source": "abjjad"
+},
+"5500": {
+"avg": 3.73,
+"count": 11,
+"source": "abjjad"
+},
+"5445": {
+"avg": 4.29,
+"count": 51,
+"source": "abjjad"
+},
+"4487": {
+"avg": 4.33,
+"count": 58,
+"source": "abjjad"
+},
+"5279": {
+"avg": 4.0,
+"count": 28,
+"source": "abjjad"
+},
+"2046": {
+"avg": 4.18,
+"count": 22,
+"source": "abjjad"
+},
+"3587": {
+"avg": 3.93,
+"count": 58,
+"source": "abjjad"
+},
+"3354": {
+"avg": 4.13,
+"count": 30,
+"source": "abjjad"
+},
+"4491": {
+"avg": 3.85,
+"count": 55,
+"source": "abjjad"
+},
+"5795": {
+"avg": 3.83,
+"count": 59,
+"source": "abjjad"
+},
+"4184": {
+"avg": 4.49,
+"count": 59,
+"source": "abjjad"
+},
+"3641": {
+"avg": 3.68,
+"count": 44,
+"source": "abjjad"
+},
+"5812": {
+"avg": 4.32,
+"count": 47,
+"source": "abjjad"
+},
+"4350": {
+"avg": 4.34,
+"count": 59,
+"source": "abjjad"
+},
+"864": {
+"avg": 4.02,
+"count": 59,
+"source": "abjjad"
+},
+"5687": {
+"avg": 4.53,
+"count": 53,
+"source": "abjjad"
+},
+"4583": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"3867": {
+"avg": 4.12,
+"count": 59,
+"source": "abjjad"
+},
+"4567": {
+"avg": 4.25,
+"count": 60,
+"source": "abjjad"
+},
+"992": {
+"avg": 3.6,
+"count": 5,
+"source": "abjjad"
+},
+"2372": {
+"avg": 3.82,
+"count": 57,
+"source": "abjjad"
+},
+"3426": {
+"avg": 3.29,
+"count": 24,
+"source": "abjjad"
+},
+"5458": {
+"avg": 3.76,
+"count": 34,
+"source": "abjjad"
+},
+"1948": {
+"avg": 3.38,
+"count": 13,
+"source": "abjjad"
+},
+"1362": {
+"avg": 3.78,
+"count": 32,
+"source": "abjjad"
+},
+"4530": {
+"avg": 3.75,
+"count": 4,
+"source": "abjjad"
+},
+"1227": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"4475": {
+"avg": 4.42,
+"count": 57,
+"source": "abjjad"
+},
+"3575": {
+"avg": 3.12,
+"count": 32,
+"source": "abjjad"
+},
+"4526": {
+"avg": 4.0,
+"count": 12,
+"source": "abjjad"
+},
+"711": {
+"avg": 3.87,
+"count": 15,
+"source": "abjjad"
+},
+"4463": {
+"avg": 4.41,
+"count": 58,
+"source": "abjjad"
+},
+"5622": {
+"avg": 3.5,
+"count": 6,
+"source": "abjjad"
+},
+"4121": {
+"avg": 3.53,
+"count": 58,
+"source": "abjjad"
+},
+"1323": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"4571": {
+"avg": 4.21,
+"count": 53,
+"source": "abjjad"
+},
+"947": {
+"avg": 3.69,
+"count": 58,
+"source": "abjjad"
+},
+"3109": {
+"avg": 3.76,
+"count": 41,
+"source": "abjjad"
+},
+"4336": {
+"avg": 4.31,
+"count": 59,
+"source": "abjjad"
+},
+"3365": {
+"avg": 2.81,
+"count": 16,
+"source": "abjjad"
+},
+"2574": {
+"avg": 4.65,
+"count": 51,
+"source": "abjjad"
+},
+"5435": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"4361": {
+"avg": 3.67,
+"count": 3,
+"source": "abjjad"
+},
+"5823": {
+"avg": 3.41,
+"count": 44,
+"source": "abjjad"
+},
+"855": {
+"avg": 4.47,
+"count": 59,
+"source": "abjjad"
+},
+"5659": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"2466": {
+"avg": 4.33,
+"count": 3,
+"source": "abjjad"
+},
+"4398": {
+"avg": 3.32,
+"count": 38,
+"source": "abjjad"
+},
+"1030": {
+"avg": 4.3,
+"count": 54,
+"source": "abjjad"
+},
+"5423": {
+"avg": 4.57,
+"count": 14,
+"source": "abjjad"
+},
+"2470": {
+"avg": 3.67,
+"count": 18,
+"source": "abjjad"
+},
+"2866": {
+"avg": 3.91,
+"count": 56,
+"source": "abjjad"
+},
+"951": {
+"avg": 3.98,
+"count": 59,
+"source": "abjjad"
+},
+"4459": {
+"avg": 4.23,
+"count": 53,
+"source": "abjjad"
+},
+"3236": {
+"avg": 3.86,
+"count": 21,
+"source": "abjjad"
+},
+"2831": {
+"avg": 4.13,
+"count": 60,
+"source": "abjjad"
+},
+"1293": {
+"avg": 3.67,
+"count": 3,
+"source": "abjjad"
+},
+"4091": {
+"avg": 4.47,
+"count": 53,
+"source": "abjjad"
+},
+"1769": {
+"avg": 3.97,
+"count": 29,
+"source": "abjjad"
+},
+"2515": {
+"avg": 4.02,
+"count": 48,
+"source": "abjjad"
+},
+"2000": {
+"avg": 4.02,
+"count": 56,
+"source": "abjjad"
+},
+"4584": {
+"avg": 4.33,
+"count": 3,
+"source": "abjjad"
+},
+"863": {
+"avg": 4.5,
+"count": 2,
+"source": "abjjad"
+},
+"1010": {
+"avg": 3.82,
+"count": 60,
+"source": "abjjad"
+},
+"5403": {
+"avg": 4.0,
+"count": 22,
+"source": "abjjad"
+},
+"2811": {
+"avg": 4.32,
+"count": 47,
+"source": "abjjad"
+},
+"4496": {
+"avg": 3.58,
+"count": 57,
+"source": "abjjad"
+},
+"3353": {
+"avg": 5.0,
+"count": 2,
+"source": "abjjad"
+},
+"1381": {
+"avg": 4.48,
+"count": 54,
+"source": "abjjad"
+},
+"4479": {
+"avg": 4.28,
+"count": 58,
+"source": "abjjad"
+},
+"5268": {
+"avg": 4.39,
+"count": 41,
+"source": "abjjad"
+},
+"1801": {
+"avg": 4.33,
+"count": 58,
+"source": "abjjad"
+},
+"5141": {
+"avg": 3.46,
+"count": 13,
+"source": "abjjad"
+},
+"5454": {
+"avg": 3.28,
+"count": 57,
+"source": "abjjad"
+},
+"1047": {
+"avg": 4.19,
+"count": 16,
+"source": "abjjad"
+},
+"1682": {
+"avg": 4.0,
+"count": 13,
+"source": "abjjad"
+},
+"4480": {
+"avg": 4.22,
+"count": 54,
+"source": "abjjad"
+},
+"5291": {
+"avg": 4.0,
+"count": 25,
+"source": "abjjad"
+},
+"5784": {
+"avg": 3.7,
+"count": 40,
+"source": "abjjad"
+},
+"988": {
+"avg": 4.44,
+"count": 55,
+"source": "abjjad"
+},
+"2368": {
+"avg": 4.6,
+"count": 5,
+"source": "abjjad"
+},
+"5854": {
+"avg": 4.0,
+"count": 1,
+"source": "abjjad"
+},
+"1114": {
+"avg": 4.2,
+"count": 5,
+"source": "abjjad"
+},
+"1051": {
+"avg": 3.78,
+"count": 9,
+"source": "abjjad"
+},
+"5442": {
+"avg": 3.92,
+"count": 13,
+"source": "abjjad"
+},
+"2850": {
+"avg": 4.34,
+"count": 58,
+"source": "abjjad"
+},
+"5229": {
+"avg": 4.5,
+"count": 6,
+"source": "abjjad"
+},
+"2446": {
+"avg": 3.06,
+"count": 18,
+"source": "abjjad"
+},
+"5803": {
+"avg": 3.73,
+"count": 56,
+"source": "abjjad"
+},
+"5415": {
+"avg": 4.08,
+"count": 40,
+"source": "abjjad"
+},
+"5252": {
+"avg": 3.8,
+"count": 5,
+"source": "abjjad"
+},
+"2578": {
+"avg": 4.08,
+"count": 59,
+"source": "abjjad"
+},
+"4506": {
+"avg": 4.4,
+"count": 58,
+"source": "abjjad"
+},
+"4156": {
+"avg": 4.2,
+"count": 56,
+"source": "abjjad"
+},
+"3410": {
+"avg": 4.08,
+"count": 24,
+"source": "abjjad"
+},
+"1138": {
+"avg": 3.4,
+"count": 5,
+"source": "abjjad"
+},
+"3806": {
+"avg": 3.66,
+"count": 53,
+"source": "abjjad"
+},
+"5655": {
+"avg": 3.8,
+"count": 5,
+"source": "abjjad"
+},
+"5205": {
+"avg": 1.0,
+"count": 1,
+"source": "abjjad"
+},
+"1246": {
+"avg": 4.13,
+"count": 39,
+"source": "abjjad"
+},
+"3781": {
+"avg": 4.22,
+"count": 60,
+"source": "abjjad"
+},
+"2893": {
+"avg": 3.0,
+"count": 1,
+"source": "abjjad"
+},
+"4414": {
+"avg": 4.0,
+"count": 8,
+"source": "abjjad"
+},
+"4551": {
+"avg": 4.11,
+"count": 57,
+"source": "abjjad"
+},
+"5340": {
+"avg": 3.95,
+"count": 37,
+"source": "abjjad"
+},
+"5439": {
+"avg": 3.78,
+"count": 58,
+"source": "abjjad"
+},
+"859": {
+"avg": 4.15,
+"count": 20,
+"source": "abjjad"
+},
+"1250": {
+"avg": 3.75,
+"count": 4,
+"source": "abjjad"
+},
+"5643": {
+"avg": 4.17,
+"count": 6,
+"source": "abjjad"
+},
+"2493": {
+"avg": 4.41,
+"count": 59,
+"source": "abjjad"
+},
+"4547": {
+"avg": 4.25,
+"count": 20,
+"source": "abjjad"
+},
+"3902": {
+"avg": 3.81,
+"count": 48,
+"source": "abjjad"
+},
+"5839": {
+"avg": 4.67,
+"count": 6,
+"source": "abjjad"
+},
+"2581": {
+"avg": 4.28,
+"count": 58,
+"source": "abjjad"
+},
+"1207": {
+"avg": 4.0,
+"count": 6,
+"source": "abjjad"
+},
+"3390": {
+"avg": 3.5,
+"count": 2,
+"source": "abjjad"
+},
+"2997": {
+"avg": 4.38,
+"count": 50,
+"source": "abjjad"
+},
+"5301": {
+"avg": 3.68,
+"count": 57,
+"source": "abjjad"
+},
+"4793": {
+"avg": 4.5,
+"count": 18,
+"source": "abjjad"
+},
+"5478": {
+"avg": 4.11,
+"count": 18,
+"source": "abjjad"
+},
+"1968": {
+"avg": 3.67,
+"count": 6,
+"source": "abjjad"
+},
+"2352": {
+"avg": 3.75,
+"count": 4,
+"source": "abjjad"
+},
+"1590": {
+"avg": 3.98,
+"count": 58,
+"source": "abjjad"
+},
+"2216": {
+"avg": 4.5,
+"count": 4,
+"source": "abjjad"
+},
+"5479": {
+"avg": 4.53,
+"count": 36,
+"source": "abjjad"
+},
+"2353": {
+"avg": 3.58,
+"count": 45,
+"source": "abjjad"
+},
+"3684": {
+"avg": 4.17,
+"count": 60,
+"source": "abjjad"
+},
+"4511": {
+"avg": 4.32,
+"count": 59,
+"source": "abjjad"
+},
+"5300": {
+"avg": 4.16,
+"count": 58,
+"source": "abjjad"
+},
+"3450": {
+"avg": 4.08,
+"count": 60,
+"source": "abjjad"
+},
+"1251": {
+"avg": 4.36,
+"count": 11,
+"source": "abjjad"
+},
+"2187": {
+"avg": 4.31,
+"count": 58,
+"source": "abjjad"
+},
+"5357": {
+"avg": 4.08,
+"count": 60,
+"source": "abjjad"
+},
+"5707": {
+"avg": 3.86,
+"count": 59,
+"source": "abjjad"
+},
+"3446": {
+"avg": 3.77,
+"count": 13,
+"source": "abjjad"
+},
+"5438": {
+"avg": 4.5,
+"count": 14,
+"source": "abjjad"
+},
+"2607": {
+"avg": 3.75,
+"count": 57,
+"source": "abjjad"
+},
+"5654": {
+"avg": 2.0,
+"count": 1,
+"source": "abjjad"
+},
+"1617": {
+"avg": 3.76,
+"count": 58,
+"source": "abjjad"
+},
+"4550": {
+"avg": 4.15,
+"count": 60,
+"source": "abjjad"
+},
+"5341": {
+"avg": 4.0,
+"count": 9,
+"source": "abjjad"
+},
+"1139": {
+"avg": 2.67,
+"count": 3,
+"source": "abjjad"
+},
+"5480": {
+"avg": 3.72,
+"count": 58,
+"source": "abjjad"
+},
+"5253": {
+"avg": 4.6,
+"count": 5,
+"source": "abjjad"
+},
+"5316": {
+"avg": 4.45,
+"count": 58,
+"source": "abjjad"
+},
+"2579": {
+"avg": 4.83,
+"count": 12,
+"source": "abjjad"
+},
+"4507": {
+"avg": 4.54,
+"count": 59,
+"source": "abjjad"
+},
+"1355": {
+"avg": 1.0,
+"count": 1,
+"source": "abjjad"
+},
+"5414": {
+"avg": 3.6,
+"count": 10,
+"source": "abjjad"
+},
+"3893": {
+"avg": 4.23,
+"count": 56,
+"source": "abjjad"
+},
+"1007": {
+"avg": 5.0,
+"count": 4,
+"source": "abjjad"
+},
+"1457": {
+"avg": 3.88,
+"count": 58,
+"source": "abjjad"
+},
+"2851": {
+"avg": 4.21,
+"count": 14,
+"source": "abjjad"
+},
+"1115": {
+"avg": 3.76,
+"count": 17,
+"source": "abjjad"
+},
+"3128": {
+"avg": 4.25,
+"count": 12,
+"source": "abjjad"
+},
+"1683": {
+"avg": 4.86,
+"count": 58,
+"source": "abjjad"
+},
+"4481": {
+"avg": 4.53,
+"count": 58,
+"source": "abjjad"
+},
+"1103": {
+"avg": 4.69,
+"count": 13,
+"source": "abjjad"
+},
+"1553": {
+"avg": 3.87,
+"count": 53,
+"source": "abjjad"
+},
+"1945": {
+"avg": 3.98,
+"count": 45,
+"source": "abjjad"
+},
+"3581": {
+"avg": 4.27,
+"count": 56,
+"source": "abjjad"
+},
+"2810": {
+"avg": 4.0,
+"count": 11,
+"source": "abjjad"
+},
+"4497": {
+"avg": 4.16,
+"count": 37,
+"source": "abjjad"
+},
+"1380": {
+"avg": 4.05,
+"count": 41,
+"source": "abjjad"
+},
+"4478": {
+"avg": 4.32,
+"count": 59,
+"source": "abjjad"
+},
+"5793": {
+"avg": 3.8,
+"count": 5,
+"source": "abjjad"
+},
+"5639": {
+"avg": 4.0,
+"count": 6,
+"source": "abjjad"
+},
+"3885": {
+"avg": 4.27,
+"count": 60,
+"source": "abjjad"
+},
+"3755": {
+"avg": 3.93,
+"count": 56,
+"source": "abjjad"
+},
+"2451": {
+"avg": 3.77,
+"count": 22,
+"source": "abjjad"
+},
+"4585": {
+"avg": 5.0,
+"count": 2,
+"source": "abjjad"
+},
+"5475": {
+"avg": 4.16,
+"count": 55,
+"source": "abjjad"
+},
+"950": {
+"avg": 4.08,
+"count": 60,
+"source": "abjjad"
+},
+"1820": {
+"avg": 4.4,
+"count": 58,
+"source": "abjjad"
+},
+"2021": {
+"avg": 4.17,
+"count": 59,
+"source": "abjjad"
+},
+"3775": {
+"avg": 3.8,
+"count": 44,
+"source": "abjjad"
+},
+"4399": {
+"avg": 3.73,
+"count": 11,
+"source": "abjjad"
+},
+"1031": {
+"avg": 3.7,
+"count": 56,
+"source": "abjjad"
+},
+"4726": {
+"avg": 4.13,
+"count": 39,
+"source": "abjjad"
+},
+"3763": {
+"avg": 3.0,
+"count": 18,
+"source": "abjjad"
+},
+"2871": {
+"avg": 3.92,
+"count": 36,
+"source": "abjjad"
+},
+"3299": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"5434": {
+"avg": 4.54,
+"count": 24,
+"source": "abjjad"
+},
+"4360": {
+"avg": 4.24,
+"count": 59,
+"source": "abjjad"
+},
+"5822": {
+"avg": 4.07,
+"count": 59,
+"source": "abjjad"
+},
+"854": {
+"avg": 3.5,
+"count": 4,
+"source": "abjjad"
+},
+"5571": {
+"avg": 4.17,
+"count": 6,
+"source": "abjjad"
+},
+"696": {
+"avg": 4.03,
+"count": 35,
+"source": "abjjad"
+},
+"5463": {
+"avg": 3.98,
+"count": 60,
+"source": "abjjad"
+},
+"5526": {
+"avg": 3.33,
+"count": 3,
+"source": "abjjad"
+},
+"1322": {
+"avg": 4.25,
+"count": 4,
+"source": "abjjad"
+},
+"4570": {
+"avg": 3.8,
+"count": 46,
+"source": "abjjad"
+},
+"5674": {
+"avg": 3.95,
+"count": 58,
+"source": "abjjad"
+},
+"1267": {
+"avg": 4.0,
+"count": 9,
+"source": "abjjad"
+},
+"5418": {
+"avg": 3.68,
+"count": 47,
+"source": "abjjad"
+},
+"5336": {
+"avg": 3.85,
+"count": 13,
+"source": "abjjad"
+},
+"4527": {
+"avg": 3.68,
+"count": 57,
+"source": "abjjad"
+},
+"4462": {
+"avg": 4.2,
+"count": 60,
+"source": "abjjad"
+},
+"5273": {
+"avg": 3.28,
+"count": 58,
+"source": "abjjad"
+},
+"5623": {
+"avg": 3.86,
+"count": 14,
+"source": "abjjad"
+},
+"3124": {
+"avg": 5.0,
+"count": 1,
+"source": "abjjad"
+},
+"1119": {
+"avg": 4.42,
+"count": 57,
+"source": "abjjad"
+},
+"3061": {
+"avg": 4.48,
+"count": 54,
+"source": "abjjad"
+},
+"4531": {
+"avg": 5.0,
+"count": 2,
+"source": "abjjad"
+},
+"4474": {
+"avg": 3.72,
+"count": 29,
+"source": "abjjad"
+},
+"2373": {
+"avg": 4.67,
+"count": 6,
+"source": "abjjad"
+},
+"993": {
+"avg": 3.92,
+"count": 12,
+"source": "abjjad"
+},
+"3427": {
+"avg": 4.33,
+"count": 3,
+"source": "abjjad"
+},
+"5377": {
+"avg": 4.31,
+"count": 13,
+"source": "abjjad"
+},
+"2518": {
+"avg": 4.91,
+"count": 11,
+"source": "abjjad"
+},
+"4566": {
+"avg": 4.2,
+"count": 56,
+"source": "abjjad"
+},
+"1334": {
+"avg": 4.0,
+"count": 2,
+"source": "abjjad"
+},
+"5818": {
+"avg": 3.91,
+"count": 56,
+"source": "abjjad"
+}
+}
+}

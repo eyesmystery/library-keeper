@@ -20,6 +20,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -255,26 +256,54 @@ def codex_path():
     return None
 
 
+_codex_lock = threading.Lock()
+CODEX_TRANSIENT_TTL = 5      # seconds a failed run of the check is kept (a real answer is kept max_age)
+CODEX_OK_GRACE = 600         # a login seen this recently is not undone by one failed run of the check
+
+
 def codex_login_status(max_age=60):
-    """(ready: bool, note: str). Runs `codex login status`; never reads the token file."""
-    now = time.time()
-    if _codex_status["value"] is not None and now - _codex_status["at"] < max_age:
-        return _codex_status["value"]
-    path = codex_path()
-    if not path:
-        value = (False, "ما لقينا برنامج Codex على الجهاز (ثبّته ثم نفّذ codex login في Terminal)")
-    else:
-        try:
-            r = subprocess.run([path, "login", "status"], capture_output=True, text=True, timeout=10)
-            text = (r.stdout + r.stderr).strip()
-            if r.returncode == 0 and "not" not in text.lower():
-                value = (True, "مسجّل دخول بحساب ChatGPT عبر Codex")
-            else:
-                value = (False, "Codex غير مسجّل دخول: نفّذ codex login في Terminal")
-        except (OSError, subprocess.SubprocessError):
-            value = (False, "تعذر تشغيل Codex")
-    _codex_status.update(at=now, value=value)
-    return value
+    """(ready: bool, note: str). Runs `codex login status`; never reads the token file.
+
+    QADFIX13 #3 (AGY-20261021-01 (a), Codex audit 2026-10-22 P2): one timed-out run of the check used to keep
+    «تعذر تشغيل Codex» for a whole minute although the login was fine. A failed run is not a logout: when the login
+    was confirmed in the last 10 minutes it stays ready; otherwise the check is tried once more, and a failure is kept
+    only 5 seconds. One check runs at a time (a lock), so many visitors do not start many `codex` processes."""
+    def cached():
+        v = _codex_status["value"]
+        ttl = min(max_age, CODEX_TRANSIENT_TTL) if _codex_status.get("transient") else max_age
+        return v if v is not None and time.time() - _codex_status["at"] < ttl else None
+    v = cached()
+    if v is not None:
+        return v
+    with _codex_lock:
+        v = cached()
+        if v is not None:
+            return v
+        path, transient, value = codex_path(), False, None
+        if not path:
+            value = (False, "ما لقينا برنامج Codex على الجهاز (ثبّته ثم نفّذ codex login في Terminal)")
+        else:
+            for attempt in (1, 2):
+                try:
+                    r = subprocess.run([path, "login", "status"], capture_output=True, text=True, timeout=10)
+                    text = (r.stdout + r.stderr).strip()
+                    if r.returncode == 0 and "not" not in text.lower():
+                        value = (True, "مسجّل دخول بحساب ChatGPT عبر Codex")
+                    else:
+                        value = (False, "Codex غير مسجّل دخول: نفّذ codex login في Terminal")
+                    transient = False
+                    break
+                except (OSError, subprocess.SubprocessError):
+                    transient = True
+                    if time.time() - _codex_status.get("last_ok", 0.0) < CODEX_OK_GRACE:
+                        value = (True, "مسجّل دخول بحساب ChatGPT عبر Codex")
+                        break
+                    value = (False, "تعذر تشغيل Codex")
+        now = time.time()
+        if value[0] and not transient:
+            _codex_status["last_ok"] = now
+        _codex_status.update(at=now, value=value, transient=transient)
+        return value
 
 
 # The model list in ~/.codex/models_cache.json is written by the newest Codex on the Mac
@@ -888,7 +917,7 @@ USE_CASES = ["habit_start", "light_reading", "coffee", "travel", "gift", "book_c
 LEVELS = ["beginner", "regular", "advanced"]
 # language the work was originally written in (same codes as books.original_language)
 # prizes the visitor may ask for (backend/honors.py keys); "any" = any prize (2026-10-08)
-AWARD_KEYS = ["ipaf", "booker", "intl_booker", "nobel", "zayed", "katara", "mahfouz", "sharjah", "pulitzer", "goncourt", "any"]
+AWARD_KEYS = ["ipaf", "booker", "intl_booker", "nobel", "zayed", "katara", "mahfouz", "sharjah", "pulitzer", "goncourt", "hugo", "nebula", "locus", "any"]
 ORIGIN_LANGS = ["ar", "en", "fr", "es", "de", "ru", "it", "pt", "ja", "zh", "ko", "tr", "fa", "ur", "hi",
                 "sv", "no", "da", "nl", "pl", "cs", "hu", "el", "grc", "he", "la", "bs"]
 
@@ -914,7 +943,7 @@ PREFS_SCHEMA = {
         "translated": {"type": "string", "enum": ["yes", "no", "any"]},
         "awards": _arr(AWARD_KEYS),
         "award_year": {"type": "integer"},
-        "adaptation": {"type": "string", "enum": ["film", "series", "screen", "none"]},
+        "adaptation": {"type": "string", "enum": ["film", "series", "screen", "animated", "none"]},
         "audience": {"type": "string", "enum": AUDIENCES + ["any"]},
         "avoid_content": _arr(SENSITIVE),
     },
@@ -929,15 +958,16 @@ PREFS_RULES = """Preference rules:
 - Respect negation: "ما أبغى شي حزين" / "مو حزين" / "بدون حزن" -> moods_exclude ["sad"].
 - Dialect: "يونّس/تونّس/وناسة/يضحك" -> funny (+ light weight); "يشد/ما ينترك/ما أنام منه" -> suspenseful + fast pace; "يريح/يروق/يفتح النفس" -> comforting/warm/uplifting + light weight; "ثقيل/يوجع/مؤلم" -> heavy; "خفيف/مع القهوة" -> light weight, light_reading/coffee; "أبدأ القراءة/أول كتاب/مبتدئ" -> habit_start + beginner; "هدية" -> gift.
 - length: "short" for قصير/ما يكون طويل, "long" for طويل/ملحمة, else "any".
+- A story that is realistic («شي واقعي»، «قصة واقعية»، "something realistic") -> genres رواية and subgenres «واقعية».
 - genres only if named or clearly implied (رواية/قصة -> رواية; شعر/ديوان -> شعر; فلسفة -> فكر; علم الاجتماع -> علم اجتماع; كوميكس/مانغا/رواية مصورة -> قصص مصورة; مقالات/رسائل/نصوص نثرية -> مقالات ونصوص; نقد أدبي/كتب عن الكتابة والقراءة -> نقد أدبي; سينما/موسيقى/فنون -> فنون وسينما).
 - authors: names as written. title_keywords: only for a specific title.
-- subgenres: ONLY subgenres explicitly requested by the visitor, in Arabic (fantasy -> فانتازيا). Never infer a subgenre from an author's name, including requests for similar books. These are supported fields. Include only positive wishes, never negated ones.
+- subgenres: ONLY subgenres explicitly requested by the visitor, in Arabic (fantasy -> فانتازيا). Never infer a subgenre from an author's name, including requests for similar books. These are supported fields. Include only positive wishes, never negated ones. A word that only describes the kind of book («شعر حديث»، «شعر نبطي»، «شعر فصيح»، «رواية قصيرة الفصول») is a subgenre, never a subject in unsupported_requests.
 - audience: who will read it. "children" for a child up to 12 (طفل/ولدي الصغير/بنتي عمرها 8/قصص أطفال/ابتدائي); "young_adult" for 13-17 (مراهق/ولدي في المتوسط أو الثانوي/يافعين/عمره 15); "adult" only if an adult reader is stated; else "any".
 - avoid_content: content the visitor wants to avoid ("بدون عنف" -> violence; "ما فيه مشاهد جريئة/محترم للعائلة" -> sexual_content; "بدون رعب" -> horror).
 - original_languages: codes of the language the work was ORIGINALLY written in, when the visitor asks for the literature of a language or nation: "مترجم من الإيطالية"/"رواية إيطالية"/"كاتب إيطالي" -> ["it"]; "أدب روسي" -> ["ru"]; "رواية يابانية" -> ["ja"]; "أدب لاتيني/أمريكا اللاتينية" -> ["es", "pt"]; "رواية عربية"/"كاتب عربي" -> ["ar"]. Codes: {ORIGIN_CODES}. In "أدب ياباني"/"الأدب الروسي" the word أدب means literature in general: do NOT set genres to "أدب" for it. A country as a TOPIC or setting ("كتاب عن اليابان", "تدور أحداثها في إيطاليا") is NOT a language: put it in unsupported_requests.
 - translated: "yes" when they ask for a translated work (مترجم/أدب مترجم/أدب عالمي); "no" when they ask for an Arabic original (عربي غير مترجم/مو مترجم); else "any".
-- awards: prizes the book (or its author) must have: "حائزة على جائزة"/"كتاب أخذ جائزة"/"روايات فائزة" -> ["any"]; "البوكر" -> ["ipaf", "booker"] (in Arabic it usually means the Arabic Booker, so both); "البوكر العربية"/"الجائزة العالمية للرواية العربية" -> ["ipaf"]; "البوكر الدولية" -> ["intl_booker"]; "نوبل" -> ["nobel"]; "جائزة الشيخ زايد" -> ["zayed"]; "كتارا" -> ["katara"]; "جائزة نجيب محفوظ" -> ["mahfouz"]; "جائزة الشارقة" -> ["sharjah"]; "بوليتزر" -> ["pulitzer"]; "غونكور" -> ["goncourt"]; another named prize -> ["any"] and its name in unsupported_requests. award_year: the year named with the prize ("البوكر ٢٠٢٢" -> 2022), else 0. A prize is never a subject: do not put it in unsupported_requests unless it is not in this list.
-- adaptation: "تحولت لفيلم"/"صار فيلم"/"عليها فيلم" -> "film"; "مسلسل" -> "series"; "فيلم أو مسلسل"/"انعرضت"/"تحولت لعمل" -> "screen"; else "none".
+- awards: prizes the book (or its author) must have: "حائزة على جائزة"/"كتاب أخذ جائزة"/"روايات فائزة" -> ["any"]; "البوكر" -> ["ipaf", "booker"] (in Arabic it usually means the Arabic Booker, so both); "البوكر العربية"/"الجائزة العالمية للرواية العربية" -> ["ipaf"]; "البوكر الدولية" -> ["intl_booker"]; "نوبل" -> ["nobel"]; "جائزة الشيخ زايد" -> ["zayed"]; "كتارا" -> ["katara"]; "جائزة نجيب محفوظ" -> ["mahfouz"]; "جائزة الشارقة" -> ["sharjah"]; "بوليتزر" -> ["pulitzer"]; "غونكور" -> ["goncourt"]; "هوغو"/"هيوغو"/"Hugo" -> ["hugo"]; "نيبولا"/"Nebula" -> ["nebula"]; "لوكس"/"لوكَس"/"Locus" -> ["locus"]; "جوائز الخيال العلمي" -> ["hugo", "nebula", "locus"]; another named prize -> ["any"] and its name in unsupported_requests. award_year: the year named with the prize ("البوكر ٢٠٢٢" -> 2022), else 0. A prize is never a subject: do not put it in unsupported_requests unless it is not in this list.
+- adaptation: "تحولت لفيلم"/"صار فيلم"/"عليها فيلم" -> "film"; "مسلسل" -> "series"; "فيلم أو مسلسل"/"انعرضت"/"تحولت لعمل" -> "screen"; "انمي"/"رسوم متحركة"/"كرتون" -> "animated"; else "none".
 - unsupported_requests: short Arabic phrases for wishes these fields cannot express. ALWAYS list first the SUBJECT the visitor wants to read about, one subject per item in 1-2 plain words as a book title would name it: "كتاب في تاريخ الأندلس" -> ["الأندلس"]; "أنظم وقتي وأترك التسويف" -> ["التسويف", "تنظيم الوقت"]; "خيال علمي عن الفضاء" -> ["الفضاء"]; "رواية عن الغربة" -> ["الغربة"]; a country as a topic -> its name; an era -> its name. A subject is searched in our books, so never skip it and never merge it with the genre word (not "تاريخ الأندلس"). Only subjects the visitor WANTS: something they reject ("ولا فيها موت", "بدون سياسة") is never listed here. Other wishes that no field expresses come after it. Never put the original language or translated/untranslated here.""".replace("{ORIGIN_CODES}", ", ".join(ORIGIN_LANGS))
 
 UNDERSTAND_SYSTEM = ("You interpret a library visitor's request (Arabic, often Saudi/Gulf dialect) for a "
@@ -971,7 +1001,7 @@ def clean_prefs(raw):
         "translated": raw.get("translated") if raw.get("translated") in ("yes", "no") else None,
         "awards": pick("awards", AWARD_KEYS)[:4],
         "award_year": raw.get("award_year") if isinstance(raw.get("award_year"), int) and 1900 <= raw.get("award_year") <= 2100 else None,
-        "adaptation": raw.get("adaptation") if raw.get("adaptation") in ("film", "series", "screen") else None,
+        "adaptation": raw.get("adaptation") if raw.get("adaptation") in ("film", "series", "screen", "animated") else None,
         "audience": raw.get("audience") if raw.get("audience") in AUDIENCES else None,
         "avoid_content": pick("avoid_content", SENSITIVE),
     }

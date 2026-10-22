@@ -227,6 +227,11 @@ for f in sorted(glob.glob(os.path.join(HERE, "*.json"))):
     # books.publication_year = year of THIS edition; the original year of a translated work is not it
     year = d.get("edition_year") if isinstance(d.get("edition_year"), int) else (
         d.get("publication_year") if isinstance(d.get("publication_year"), int) and not translated else None)
+    # a year after next year (or before 1000) is a slip in the source listing (book 4350: daroueya.com
+    # said 2028, عصير الكتب 2020 for the same ISBN); not stored, listed for staff to check on the copy (AUDFIX 2026-10-14)
+    if year and not 1000 <= year <= datetime.now(timezone.utc).year + 1:
+        issues.append(f"edition year {year} out of range: not imported, check the copy")
+        year = None
     if year and not b.get("publication_year"):
         upd["publication_year"] = year
     if pages and not b.get("page_count"):

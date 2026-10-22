@@ -1,0 +1,111 @@
+{
+  "format": "series-parts-1",
+  "about": "The full list of parts of a series, for the chat to say how many parts a series has and name the parts we do not stock (library open questions 15 and 17, Ibrahim 2026-10-17: «تمام اتفق» / «اتفق»). Only parts confirmed by the source named in the entry; title_ar only when it is the title of an Arabic edition we hold; other parts keep their original title. Every entry names its source (BOARD.md rule 12).",
+  "series": [
+    {
+      "names": [
+        "سجلات قاتل الملك",
+        "The Kingkiller Chronicle"
+      ],
+      "author": "باتريك روثفوس",
+      "source": "https://www.waterstones.com/book/9780575081437",
+      "note_ar": "الجزء الثالث لم يُنشر بعد.",
+      "note_en": "The third part has not been published yet.",
+      "parts": [
+        {
+          "n": 1,
+          "title_ar": "اسم الريح",
+          "title_en": "The Name of the Wind",
+          "year": 2007
+        },
+        {
+          "n": 2,
+          "title_en": "The Wise Man's Fear",
+          "year": 2011
+        }
+      ]
+    },
+    {
+      "names": [
+        "كينغسبريدج",
+        "Kingsbridge",
+        "أعمدة الأرض"
+      ],
+      "author": "كين فوليت",
+      "source": "https://www.panmacmillan.com/blogs/fiction/ken-follett-s-kingsbridge-books-in-order",
+      "note_ar": "خمس روايات؛ «The Evening and the Morning» تمهيد تجري أحداثه قبل «أعمدة الأرض».",
+      "note_en": "Five novels; «The Evening and the Morning» is a prequel set before «The Pillars of the Earth».",
+      "parts": [
+        {
+          "n": 0,
+          "label_ar": "تمهيد",
+          "label_en": "prequel",
+          "title_en": "The Evening and the Morning",
+          "year": 2020
+        },
+        {
+          "n": 1,
+          "title_ar": "أعمدة الأرض",
+          "title_en": "The Pillars of the Earth",
+          "year": 1989
+        },
+        {
+          "n": 2,
+          "title_ar": "عالم بلا نهاية",
+          "title_en": "World Without End",
+          "year": 2007
+        },
+        {
+          "n": 3,
+          "title_ar": "عمود نار",
+          "title_en": "A Column of Fire",
+          "year": 2017
+        },
+        {
+          "n": 4,
+          "title_en": "The Armour of Light",
+          "year": 2023
+        }
+      ]
+    },
+    {
+      "names": [
+        "رباعية نابولي",
+        "Neapolitan Novels",
+        "Neapolitan Quartet",
+        "صديقتي المذهلة"
+      ],
+      "author": "إيلينا فيرانتي",
+      "source": "https://en.wikipedia.org/wiki/Neapolitan_Novels",
+      "note_ar": "أربع روايات.",
+      "added_for": "QAD 2026-10-21 case 8 (documentation only; not read by the app — QADFIX13 #5, AGY-20261021-01 (c))",
+      "note_en": "Four novels.",
+      "parts": [
+        {
+          "n": 1,
+          "title_ar": "صديقتي المذهلة",
+          "title_en": "My Brilliant Friend",
+          "year": 2011
+        },
+        {
+          "n": 2,
+          "title_ar": "حكاية الاسم الجديد",
+          "title_en": "The Story of a New Name",
+          "year": 2012
+        },
+        {
+          "n": 3,
+          "title_ar": "الهاربون والباقون",
+          "title_en": "Those Who Leave and Those Who Stay",
+          "year": 2013
+        },
+        {
+          "n": 4,
+          "title_ar": "حكاية الطفلة الضائعة: صديقتي المذهلة 4",
+          "title_en": "The Story of the Lost Child",
+          "year": 2014
+        }
+      ]
+    }
+  ]
+}
