@@ -534,6 +534,26 @@ def _soft_ops(a, b):
     return prev[-1]
 
 
+_LATIN_KEY = re.compile(r"^[a-z][a-z .'\-]{4,}$")
+
+
+def _latin_typo_match(k, conn):
+    """QADFIX14 #7 (QAD 2026-10-23, case 26.1): «Colson Whitehed» is Colson Whitehead — a name in Latin letters one or two
+    typing slips away from exactly one author's Latin name or alias (similarity >= 0.9, clearly ahead of any other). Arabic
+    names keep their own spelling rules and the «تقصد …؟» question (Ibrahim 2026-10-03)."""
+    import difflib
+    if not _LATIN_KEY.match(k or ""):
+        return None
+    scores = []
+    for name_key, aid in _index(conn).items():
+        if _LATIN_KEY.match(name_key) and abs(len(name_key) - len(k)) <= 3:
+            scores.append((difflib.SequenceMatcher(None, k, name_key).ratio(), aid))
+    scores.sort(reverse=True)
+    if scores and scores[0][0] >= 0.9 and (len(scores) == 1 or scores[1][1] == scores[0][1] or scores[1][0] < scores[0][0] - 0.04):
+        return scores[0][1]
+    return None
+
+
 def _spelling_match(k, conn):
     """«سيمون سينك» for the record «سايمون سينك»: the same full name in another Arabic spelling of a foreign
     name (a vowel letter more or less, or a transliteration letter: ب/ف، ج/غ …). Every word must match,
@@ -586,6 +606,8 @@ def lookup(name, conn=None, spelling=True):
             aid = _index(conn).get(k)
             if aid is None and spelling:
                 aid = _spelling_match(k, conn)
+            if aid is None and spelling:
+                aid = _latin_typo_match(k, conn)
         except Exception:  # table missing on a database that was never migrated
             return None
         if aid is None:

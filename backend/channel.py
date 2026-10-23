@@ -229,6 +229,12 @@ def check(fetch=None):
         added = dev_notes.add_notes(msgs)
     except Exception as e:  # noqa: BLE001 - messages never block the update part
         _save_state(messages_error=str(e)[:200])
+    try:  # INBOXSEND (Ibrahim 2026-10-23): «وقت ما انا ابغى» — his signed request for the inbox file
+        if isinstance(payload.get("inbox_request"), dict):
+            import inbox_send
+            inbox_send.on_request(payload["inbox_request"])
+    except Exception as e:  # noqa: BLE001 - never blocks the update part
+        _save_state(inbox_error=str(e)[:200])
     up = payload.get("update") if isinstance(payload.get("update"), dict) else None
     cur = dict(s.get("update") or {})
     busy = cur.get("status") in ("downloading", "checking", "restarting", "ready")

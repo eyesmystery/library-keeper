@@ -15,7 +15,12 @@ Ibrahim's Mac only, from the project folder, with the project's Python:
   backend/venv/bin/python scripts/channel_publish.py update release/ThalathSmart-update-....zip --notes "…"
                                                                        offers that update; the library's manager
                                                                        approves it in «التنبيهات»
-  … --dry-run on message/unmessage/update: build and check the signed file, publish nothing.
+  backend/venv/bin/python scripts/channel_publish.py request-inbox [--scope all]
+                                                                       asks the library for its inbox file now
+                                                                       (INBOXSEND); it is sealed for Ibrahim and
+                                                                       uploaded at the library's next hourly check —
+                                                                       then `scripts/inbox_pull.py pull`
+  … --dry-run on message/unmessage/update/request-inbox: build and check the signed file, publish nothing.
 
 The channel is the GitHub release `manar-channel` of the repository (uploaded with the gh CLI, as a pre-release so it
 is never shown as the latest version). Each publication raises `seq`; the library refuses an older file.
@@ -159,6 +164,8 @@ def main():
     m.add_argument("--publisher", action="append", default=[]); m.add_argument("--label", default=None)
     m.add_argument("--dry-run", action="store_true")
     u = sub.add_parser("unmessage"); u.add_argument("--ref", required=True); u.add_argument("--dry-run", action="store_true")
+    ri = sub.add_parser("request-inbox"); ri.add_argument("--scope", choices=("open", "all"), default="open")
+    ri.add_argument("--dry-run", action="store_true")
     up = sub.add_parser("update"); up.add_argument("zip"); up.add_argument("--notes", default="")
     up.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
@@ -174,6 +181,10 @@ def main():
         if a.publisher:
             note["action"] = {"type": "books", "label": a.label or ("عرض كتب " + a.publisher[0]), "publisher_any": a.publisher}
         payload["messages"] = [x for x in payload.get("messages") or [] if x.get("ref") != note["ref"]] + [note]
+        return publish(payload, a.dry_run)
+    if a.cmd == "request-inbox":   # INBOXSEND (Ibrahim 2026-10-23 «وقت ما انا ابغى»): one new id per request
+        payload["inbox_request"] = {"id": "REQ-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S"),
+                                    "scope": a.scope, "at": now()}
         return publish(payload, a.dry_run)
     if a.cmd == "unmessage":
         payload["messages"] = [x for x in payload.get("messages") or [] if x.get("ref") != a.ref]
