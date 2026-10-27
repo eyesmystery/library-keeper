@@ -56,6 +56,9 @@ ok(r.status_code == 400 and "الدمج" in r.get_json()["error"], "an alias use
 ok(c.post(f"/api/admin/authors/{g1['id']}", json={"name": "  "}).status_code == 400, "empty Arabic name refused")
 
 # merge
+ok(c.post("/api/admin/authors/merge", json={"keep": g1["id"], "drop": g2["id"]}).status_code == 403, "manager cannot merge spellings (developer only, ADMSTF)")
+_mgr = c
+c = login(A.app.test_client(), "developer")
 r = c.post("/api/admin/authors/merge", json={"keep": g1["id"], "drop": g2["id"]})
 ok(r.status_code == 200 and r.get_json()["links_moved"] == 1, "merge moves the duplicate's links")
 ok(con.execute("select count(*) from authors where author_id=?", (g2["id"],)).fetchone()[0] == 0, "merged author row removed")
@@ -94,14 +97,14 @@ ok('aria-controls="booksView">المكتبة</button>' in html, "main tab is nam
 ok('role="tablist" aria-label="أقسام المكتبة"' in html and 'aria-controls="libBooks"' in html and 'aria-controls="libAuthors"' in html,
    "library has books and authors sub-tabs")
 ok(all(f'data-view="{v}"' in html for v in ("cards", "list", "shelf")), "books can be shown as cards, list or shelf")
-ok(all(f'<option value="{v}">' in html for v in ("genre", "publisher", "research", "stock", "lang")), "books can be grouped")
+ok(all(f'<option value="{v}">' in html for v in ("genre", "publisher", "stock", "loc")) and all(f'<option value="{v}" class="dev-only">' in html for v in ("research", "lang")),
+   "books can be grouped (research state and work language for the developer, ADMSTF)")
 ok('id="libTabTranslators"' in html and "['translators', 'libTabTranslators', 'libAuthors']" in html and 'id="libNTranslators"' in html,
    "library has a translators sub-tab next to books and authors")
-ok('id="libTabOrigin"' in html and "['origin', 'libTabOrigin', 'libOrigin']" in html and 'id="originList"' in html,
-   "library has the «أصل الكتاب» staff list")
+ok('id="libTabOrigin"' not in html and 'id="originList"' not in html,
+   "«أصل الكتاب» staff list removed (Ibrahim 2026-10-24, ADMSTF)")
 import re as _re
-_codes = _re.findall(r"\['([a-z]+)', '", html[html.index("const ORIGIN_LANGS"):html.index("const originPending")])
-ok(_codes and all(x in A.LANG_NAMES for x in _codes) and "other" in _codes and "ar" not in _codes, "origin list offers only language codes the server accepts")
+ok('id="fOrig"' in html and "saveLanguage(b.book_id)" in html, "the original language is still set from the book card (ADMSTF: the list was removed)")
 _st = login(A.app.test_client(), role="staff")
 _b = con.execute("select book_id from books order by book_id desc limit 1").fetchone()[0]
 ok(_st.patch(f"/api/books/{_b}", json={"original_language": "ar"}).status_code == 200

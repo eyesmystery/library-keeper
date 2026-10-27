@@ -302,7 +302,7 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
             display_name TEXT NOT NULL,
-            role TEXT NOT NULL CHECK (role IN ('manager', 'staff')),
+            role TEXT NOT NULL CHECK (role IN ('manager', 'staff', 'developer')),
             password_hash TEXT NOT NULL,
             active INTEGER NOT NULL DEFAULT 1,
             created_at TEXT NOT NULL,
@@ -312,6 +312,22 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         )
         """
     )
+    # «دور المطوّر» (Ibrahim 2026-10-24, ADMSTF): older databases have the two-role CHECK; rebuild the table
+    # with the same rows and give his own account (ibrahim) the developer role. Runs once.
+    # A fresh table (new install, --no-user package, restore of a recent backup) gets NO developer here, on purpose:
+    # a name chosen on the setup page never earns the role (Codex audit 2026-10-24 P2). There the role is given
+    # explicitly on the computer itself: scripts/set_developer.py --grant <username> (AUDFIX 2026-10-24).
+    _su = conn.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'staff_users'").fetchone()
+    if _su and "'developer'" not in (_su[0] or ""):
+        _cols = [r[1] for r in conn.execute("PRAGMA table_info(staff_users)")]
+        _new = (_su[0].replace("CHECK (role IN ('manager', 'staff'))", "CHECK (role IN ('manager', 'staff', 'developer'))")
+                .replace("staff_users", "staff_users_admstf", 1))
+        conn.execute(_new)
+        conn.execute(f"INSERT INTO staff_users_admstf ({', '.join(_cols)}) SELECT {', '.join(_cols)} FROM staff_users")
+        conn.execute("DROP TABLE staff_users")
+        conn.execute("ALTER TABLE staff_users_admstf RENAME TO staff_users")
+        conn.execute("UPDATE staff_users SET role = 'developer' WHERE username = 'ibrahim'")
+        conn.commit()
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS audit_log (
@@ -367,6 +383,12 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
     # Books we do not have, looked up outside when a visitor names them (2026-10-11; backend/outside_books.py)
     import outside_books
     outside_books.ensure_table(conn)
+    # «ماذا تقرأ الآن؟»: visitors' reviews, and books visitors want on the shelves (2026-10-27; backend/visitor_reviews.py,
+    # backend/shelf_suggestions.py)
+    import visitor_reviews
+    visitor_reviews.ensure_table(conn)
+    import shelf_suggestions
+    shelf_suggestions.ensure_table(conn)
     conn.execute("CREATE INDEX IF NOT EXISTS idx_books_barcode ON books(barcode)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_books_rewaa_sku ON books(rewaa_sku)")
     conn.execute(

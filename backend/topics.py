@@ -45,7 +45,11 @@ def stems(word):
             least = 4 if suf in ("ي", "يه") else 3
             if v.endswith(suf) and len(strip_al(v)) - len(suf) >= least:
                 out.add(v[:-len(suf)])
-    return {v for v in out if len(v) >= 3}
+    # QADFIX21 (QAD 2026-10-26, case 9.1): «قصة فيها قطط» and the title «حكايات القط الشقي» — a two-letter word written with
+    # «ال» («القط») and the plural of a doubled root («قطط») meet on the two letters; a bare two-letter word stays out
+    two = {strip_al(w)} if w.startswith("ال") and len(strip_al(w)) == 2 else set()
+    two |= {v[:2] for v in out if len(v) == 3 and v[1] == v[2] and not v.startswith("ال")}
+    return {v for v in out if len(v) >= 3} | two
 
 
 def _is_year(w):

@@ -72,7 +72,10 @@ ok([x["title"] for x in plan["new"]] == ["كتاب جديد للاختبار"], 
 
 # restore brings everything back
 did = dl[0]["deletion_id"]
-r = staff.post(f"/api/admin/books/deleted/{did}/restore")
+ok(staff.post(f"/api/admin/books/deleted/{did}/restore").status_code == 403, "staff cannot restore (developer only, ADMSTF)")
+ok(c.post(f"/api/admin/books/deleted/{did}/restore").status_code == 403, "manager cannot restore (developer only, ADMSTF)")
+c = login(A.app.test_client(), "developer")
+r = c.post(f"/api/admin/books/deleted/{did}/restore")
 ok(r.status_code == 200 and r.get_json()["book_id"] == bid, "restore ok")
 ok(counts(bid) == before, f"every row restored ({counts(bid)})")
 ok(dict(con.execute("select * from books where book_id=?", (bid,)).fetchone()) == before_book, "book row identical after restore")

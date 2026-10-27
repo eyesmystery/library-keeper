@@ -56,7 +56,9 @@ OUT = os.path.join(ROOT, "release")
 BACKEND_SKIP = {"venv", "venv-win", "__pycache__"}
 SCRIPTS = ["backup_db.py", "restore_db.py", "confirmations.py", "ensure_venv.sh", "ensure_venv.bat", "build_embeddings.py",
            # AUTOUPD (2026-10-16): the start files run run_server.py, which installs an approved update by auto_update.py
-           "run_server.py", "auto_update.py"]
+           "run_server.py", "auto_update.py",
+           # AUDFIX (2026-10-24): the explicit way to give the developer role on a fresh install or after a restore
+           "set_developer.py"]
 CHANNEL_DIR = os.path.expanduser("~/.library_keeper/channel")
 
 
@@ -75,7 +77,11 @@ def channel_settings():
 EMPTY_TABLES = ["audit_log", "feedback", "book_choices", "book_daily", "usage_daily", "visitor_notes",
                 "book_confirmations", "open_questions", "staff_notes", "staff_ideas",
                 # «اختياراتنا هذا الشهر» (PICKS 2026-10-14): the library approves its own picks; rows made on the Mac are tries
-                "monthly_picks", "monthly_pick_months"]
+                "monthly_picks", "monthly_pick_months",
+                # «ماذا تقرأ الآن؟» (2026-10-27): visitors' reviews and the books they want on the shelves are the library's own
+                "visitor_reviews", "candidate_books",
+                # books looked up outside while visitors asked (AGY-20261027-04): the library builds its own; an update keeps it
+                "outside_books"]
 
 # ---------------------------------------------------------------- start files (Windows)
 WIN_START = r"""@echo off

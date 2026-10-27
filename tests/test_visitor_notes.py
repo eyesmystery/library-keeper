@@ -112,7 +112,7 @@ ok("report ? 'report' : 'suggestion'" in js and "reportReasons" in js, "visitor 
 ok(all(f"'{k}'" in js for k in visitor_notes.REASONS), "every reason the server accepts is offered to the visitor")
 ok(js.count("title_author") == 2, "reasons offered in both Arabic and English")
 admin = visitor.get("/admin").get_data(as_text=True)
-ok('id="tabInbox"' in admin and 'id="inboxN"' in admin and "/api/admin/inbox" in admin, "admin page has the «البلاغات» tab with its counter")
+ok('id="tabAlerts"' in admin and 'id="subVisitors"' in admin and 'id="subNVisitors"' in admin and "/api/admin/inbox" in admin, "visitor reports live in «التنبيهات ← من الزوار» with its counter (ADMSTF)")
 
 print(f"\n{P} passed, {F} failed")
 sys.exit(1 if F else 0)

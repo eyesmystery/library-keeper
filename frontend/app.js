@@ -7,6 +7,7 @@ const COPY = {
   ar: {
     title: 'منار | مكتبة ثلاث', description: 'منار تساعدك تختار كتابًا متوفرًا الآن في مكتبة ثلاث.',
     switchLanguage: 'Switch to English', tagline: 'الذكي',
+    slogan: 'منار - ذكاء يرشدك إلى ما يناسبك',   // Ibrahim 2026-10-23
     hero: 'وش ودّك<br>تقرأ اليوم؟',
     welcomeBody: 'سولف معي عن مزاجك، وألقى لك كتاب من الموجود عندنا.',
     startNote: 'تقدر تبدأ بكلمة، شعور، أو آخر كتاب عجبك.', start: 'سولف معي عن مزاجك',
@@ -23,7 +24,7 @@ const COPY = {
     detailsAria: (title, author) => `عرض تفاصيل كتاب ${title} للكاتب ${author}`,
     pages: n => `${n} صفحة`, unknownLength: 'الطول غير معروف', shelf: value => `الرف ${value}`,
     askStaff: 'موقعه عند الموظف', available: 'متوفر', fallbackReply: 'هذي خيارات متوفرة الآن.',
-    fallbackChips: ['ورّني غيرها', 'شي أخف'], typing: 'منار تكتب',
+    fallbackChips: ['ورّني غيرها', 'شي أخف', 'شي أقصر', 'رشّحي لي رواية', 'فاجئيني بكتاب'], typing: 'منار تكتب',
     connectionError: 'تعذر الوصول لمنار الآن. تأكد من الاتصال وجرّب مرة ثانية.',
     book: 'كتاب', shelfUnknown: 'اسأل موظف المكتبة يدلّك عليه', whereLabel: 'مكانه', unknown: 'غير معروف', currency: value => `${value} ر.س`,
     selectedAt: (title, place) => `ستجد «${title}» في ${place}. ويمكن لموظف المكتبة مساعدتك.`,
@@ -41,7 +42,7 @@ const COPY = {
     addCalendar: 'أضف إلى التقويم', addGoogle: 'أو في تقويم Google', calendarPlace: 'مكتبة ثلاث',
     contextTitle: 'نبحث عن:', contextRemove: label => `إلغاء: ${label}`,
     contextRemoved: label => `شلنا «${label}». اكتب طلبك، أو اضغط «ورّني اقتراحات».`, showNow: 'ورّني اقتراحات',
-    afterFeedback: ['اقترح لي كتاب ثاني', 'محادثة جديدة'], oneCopy: 'نسخة واحدة', twoCopies: 'نسختان',
+    afterFeedback: ['اقترح لي كتاب ثاني', 'محادثة جديدة', 'شي أقصر', 'رشّحي لي رواية', 'أبغى كتاب هدية'], oneCopy: 'نسخة واحدة', twoCopies: 'نسختان',
     copies: n => `${n} نسخ`, availableSuffix: ' متوفرة', switchReset: 'غيّرنا اللغة وبدأنا محادثة جديدة.',
     reportBtn: 'فيه معلومة غلط؟ بلّغنا', reportTitle: 'وش الغلط في معلومات الكتاب؟', reportLead: title => `«${title}»`,
     reportReasons: [['title_author', 'العنوان أو المؤلف'], ['cover', 'الغلاف'], ['summary', 'النبذة'], ['details', 'التصنيف أو الصفحات أو اللغة'], ['location', 'المكان أو التوفر'], ['other', 'شي ثاني']],
@@ -50,10 +51,36 @@ const COPY = {
     suggestBtn: 'عندك اقتراح؟', suggestTitle: 'اقتراحك يهمّنا', suggestLead: 'كتاب تتمنى نوفّره، أو شي يخلّي منار أحسن. ما نطلب اسمك.',
     suggestNoteLabel: 'اقتراحك', suggestPlaceholder: 'اكتب اقتراحك هنا…', suggestSent: 'وصلنا اقتراحك، شكرًا لك.', needSuggestion: 'اكتب اقتراحك أول.',
     noteSend: 'إرسال', noteSending: 'جاري الإرسال…', noteCancel: 'إلغاء', noteFailed: 'ما قدرنا نرسلها الآن. جرّب مرة ثانية.', noteBusy: 'وصلتنا رسائل كثيرة من هنا. جرّب بعد شوي.',
+
+    // «ماذا تقرأ الآن؟» (Ibrahim 2026-10-27)
+    reading: 'ماذا تقرأ الآن؟', readingLead: 'اكتب اسم الكتاب اللي تقرأه أو قرأته من مكتبة ثلاث، وقل لنا رأيك فيه.',
+    searchLabel: 'اسم الكتاب أو المؤلف', searchPlaceholder: 'مثلًا: لاعب الشطرنج', searching: 'لحظة…',
+    noResults: 'ما لقينا هذا الكتاب في مكتبتنا. تقدر تقترحه علينا تحت.', notInStock: 'غير متوفر حاليًا',
+    shelfLead: 'كتابك مو عندنا؟', shelfBtn: 'ماذا تقترح أن يكون على رفوف مكتبة ثلاث؟',
+    starsLabel: 'كم تعطيه من ٥؟', starAria: n => `${n} من ٥`, tagsLabel: 'وش تقول عنه؟ (اختياري)',
+    reviewTags: [['gripping', 'يشد'], ['fun', 'ممتع'], ['moving', 'مؤثر'], ['easy', 'سهل القراءة'], ['slow', 'بطيء'], ['heavy', 'ثقيل']],
+    reviewTextLabel: 'رأيك بكلماتك (اختياري)', reviewTextPlaceholder: 'وش عجبك أو ما عجبك فيه؟ بدون حرق للأحداث.',
+    nameLabel: 'اسمك الأول (اختياري، يظهر مع رأيك)', reviewNote: 'رأيك يظهر للزوار بعد ما يراجعه موظفو المكتبة.',
+    sendReview: 'أرسل رأيي', otherBook: 'كتاب آخر', needStars: 'اختر عدد النجوم أول.',
+    reviewSent: title => `شكرًا لك! وصلنا رأيك في «${title}»، وينعرض للزوار بعد ما يراجعه موظفو المكتبة.`,
+    again: 'رأي في كتاب ثاني', homeBtn: 'الصفحة الأولى',
+    shelfFormLead: 'اكتب اسم الكتاب اللي تتمنى نوفّره، ونتأكد معك منه.', bookLabel: 'اسم الكتاب', authorLabel: 'المؤلف (اختياري)',
+    check: 'ابحث عنه', needTitle: 'اكتب اسم الكتاب أول.', lookingUp: 'لحظة، أدوّر عليه…',
+    isHere: 'عندنا هذا الكتاب ومتوفر الحين! هذي بطاقته:', notHereNow: 'هذا الكتاب في مكتبتنا، بس نسخه نافدة الحين.', wantBack: 'أبغاه يتوفر',
+    foundAsk: 'لقيت هذا الكتاب. هل هو اللي تقصده؟', yesThis: 'نعم، هذا هو', notThis: 'لا، مو هو',
+    sourceLabel: s => `المصدر: ${s}`, byLabel: a => `تأليف ${a}`,
+    notFound: 'ما لقيت معلومات عنه. نحفظ اقتراحك مثل ما كتبته؟', saveAsTyped: 'احفظ اقتراحي',
+    candidateSaved: title => `شكرًا! سجّلنا «${title}» ككتاب مرشّح لرفوف مكتبة ثلاث.`,
+    wantSaved: title => `شكرًا! وصل طلبك أن يتوفر «${title}» مرة ثانية.`, suggestionSaved: 'شكرًا! وصلنا اقتراحك.',
+    suggestionNote: (title, author) => `كتاب مقترح للرفوف: ${title}${author ? ' — ' + author : ''}`,
+    reviewsTitle: 'آراء قرّاء مكتبة ثلاث', reviewsSum: (avg, n) => `${formatNumber(avg)} من ٥ · ${n === 1 ? 'قارئ واحد' : n === 2 ? 'قارئان' : formatNumber(n) + (n <= 10 ? ' قرّاء' : ' قارئًا')}`,
+    anonymousReader: 'قارئ من مكتبة ثلاث', reviewBtn: 'قرأته؟ شاركنا رأيك',
+    favoritesChip: 'رشّحي لي تفضيلات قرّاء مكتبة ثلاث', readingFailed: 'ما قدرنا نرسلها الآن. جرّب مرة ثانية.',
   },
   en: {
     title: 'Manar | Thalath', description: 'Manar, the book guide at Thalath, helps you choose a book that is available now.',
     switchLanguage: 'التبديل للعربية', tagline: 'SMART LIBRARY GUIDE',
+    slogan: 'Manar - Intelligence that guides you to what fits you',   // Ibrahim 2026-10-23
     hero: 'What would you<br>like to read today?',
     welcomeBody: "Tell me what you're in the mood for, and I'll find a book that's here now.",
     startNote: 'Start with a word, a feeling, or the last book you loved.', start: "Tell me what you're in the mood for",
@@ -70,7 +97,7 @@ const COPY = {
     detailsAria: (title, author) => `View details for ${title} by ${author}`,
     pages: n => `${n} pages`, unknownLength: 'Length unknown', shelf: value => `Shelf ${value}`,
     askStaff: 'Ask a bookseller for its location', available: 'Available', fallbackReply: 'Here are a few books available now.',
-    fallbackChips: ['Show me others', 'Something lighter'], typing: 'Manar is typing',
+    fallbackChips: ['Show me others', 'Something lighter', 'Something shorter', 'Suggest a novel', 'Surprise me'], typing: 'Manar is typing',
     connectionError: 'Manar is unavailable right now. Check your connection and try again.',
     book: 'Book', shelfUnknown: 'Ask a bookseller to show you', whereLabel: 'Where to find it', unknown: 'Unknown', currency: value => `SAR ${value}`,
     selectedAt: (title, place) => `You will find “${title}” at ${place}. A bookseller can help you too.`,
@@ -88,7 +115,7 @@ const COPY = {
     addCalendar: 'Add to calendar', addGoogle: 'or to Google Calendar', calendarPlace: 'Thalath Bookshop',
     contextTitle: 'Searching for:', contextRemove: label => `Remove: ${label}`,
     contextRemoved: label => `Removed “${label}”. Type your request, or tap “Show me suggestions”.`, showNow: 'Show me suggestions',
-    afterFeedback: ['Suggest another book', 'New conversation'], oneCopy: '1 copy', twoCopies: '2 copies',
+    afterFeedback: ['Suggest another book', 'New conversation', 'Something shorter', 'Suggest a novel', 'I want a gift book'], oneCopy: '1 copy', twoCopies: '2 copies',
     copies: n => `${n} copies`, availableSuffix: ' available', switchReset: 'Language changed — we started a new conversation.',
     reportBtn: 'Something wrong? Tell us', reportTitle: 'What is wrong with this book’s details?', reportLead: title => `“${title}”`,
     reportReasons: [['title_author', 'Title or author'], ['cover', 'Cover'], ['summary', 'Summary'], ['details', 'Genre, pages or language'], ['location', 'Location or availability'], ['other', 'Something else']],
@@ -97,6 +124,31 @@ const COPY = {
     suggestBtn: 'Have a suggestion?', suggestTitle: 'We would love your suggestion', suggestLead: 'A book you wish we had, or something that would make Manar better. We do not ask for your name.',
     suggestNoteLabel: 'Your suggestion', suggestPlaceholder: 'Write your suggestion…', suggestSent: 'We got your suggestion. Thank you.', needSuggestion: 'Write your suggestion first.',
     noteSend: 'Send', noteSending: 'Sending…', noteCancel: 'Cancel', noteFailed: 'We could not send it right now. Please try again.', noteBusy: 'We received many messages from here. Try again in a little while.',
+
+    // «What are you reading now?» (Ibrahim 2026-10-27)
+    reading: 'What are you reading now?', readingLead: 'Write the title of a book from Thalath you are reading or have read, and tell us what you think.',
+    searchLabel: 'Book title or author', searchPlaceholder: 'For example: The Chess Player', searching: 'One moment…',
+    noResults: 'We could not find this book in our shop. You can suggest it to us below.', notInStock: 'Not in stock now',
+    shelfLead: 'Not in our shop?', shelfBtn: 'What would you like to see on Thalath’s shelves?',
+    starsLabel: 'How many stars out of 5?', starAria: n => `${n} out of 5`, tagsLabel: 'How would you describe it? (optional)',
+    reviewTags: [['gripping', 'Gripping'], ['fun', 'Enjoyable'], ['moving', 'Moving'], ['easy', 'Easy to read'], ['slow', 'Slow'], ['heavy', 'Heavy']],
+    reviewTextLabel: 'Your words (optional)', reviewTextPlaceholder: 'What did you like or not? No spoilers, please.',
+    nameLabel: 'Your first name (optional, shown with your review)', reviewNote: 'Your review is shown to visitors after the bookshop staff check it.',
+    sendReview: 'Send my review', otherBook: 'Another book', needStars: 'Choose the stars first.',
+    reviewSent: title => `Thank you! We got your review of “${title}”. It is shown to visitors after the staff check it.`,
+    again: 'Review another book', homeBtn: 'Start page',
+    shelfFormLead: 'Write the title of the book you wish we had, and we will check it with you.', bookLabel: 'Book title', authorLabel: 'Author (optional)',
+    check: 'Look it up', needTitle: 'Write the book title first.', lookingUp: 'One moment, looking it up…',
+    isHere: 'We have this book in stock now! Here it is:', notHereNow: 'This book is in our shop, but it is out of stock now.', wantBack: 'I want it back',
+    foundAsk: 'I found this book. Is it the one you mean?', yesThis: 'Yes, that is it', notThis: 'No, not this one',
+    sourceLabel: s => `Source: ${s}`, byLabel: a => `by ${a}`,
+    notFound: 'I could not find details about it. Shall we keep your suggestion as you wrote it?', saveAsTyped: 'Keep my suggestion',
+    candidateSaved: title => `Thank you! “${title}” is now a suggested book for Thalath’s shelves.`,
+    wantSaved: title => `Thank you! We noted that you want “${title}” back in stock.`, suggestionSaved: 'Thank you! We got your suggestion.',
+    suggestionNote: (title, author) => `Book suggested for the shelves: ${title}${author ? ' — ' + author : ''}`,
+    reviewsTitle: 'What Thalath readers say', reviewsSum: (avg, n) => `${formatNumber(avg)} out of 5 · ${formatNumber(n)} ${n === 1 ? 'reader' : 'readers'}`,
+    anonymousReader: 'A Thalath reader', reviewBtn: 'Read it? Share your review',
+    favoritesChip: "Thalath readers' favourites", readingFailed: 'We could not send it right now. Please try again.',
   }
 };
 
@@ -140,6 +192,7 @@ function applyLanguage() {
   document.documentElement.dir = english ? 'ltr' : 'rtl';
   document.title = t('title');
   $('metaDescription').content = t('description');
+  $('brandSlogan').textContent = t('slogan');
   $('welcomeTitle').innerHTML = t('hero');
   $('welcomeBody').textContent = t('welcomeBody');
   $('startNote').textContent = t('startNote');
@@ -168,7 +221,8 @@ function applyLanguage() {
   $('chatInput').placeholder = t('placeholder');
   $('sendBtn').setAttribute('aria-label', t('send'));
   $('trustNote').textContent = t('trust');
-  ['backBtn', 'chatBackBtn', 'feedbackBackBtn'].forEach(id => { $(id).textContent = t('back'); });
+  ['backBtn', 'chatBackBtn', 'feedbackBackBtn', 'readingBackBtn'].forEach(id => { $(id).textContent = t('back'); });
+  applyReadingLanguage();
   document.querySelectorAll('.brand-home').forEach(button => button.setAttribute('aria-label', t('home')));
   renderContext();
   $('readerLabel').textContent = t('accordingReaders');
@@ -185,7 +239,7 @@ function applyLanguage() {
   $('suggestBtn').textContent = t('suggestBtn');
   if (noteMode) closeNote();
   const nextCode = english ? 'AR' : 'EN';
-  ['welcomeLangBtn', 'chatLangBtn', 'detailLangBtn', 'feedbackLangBtn'].forEach(id => {
+  ['welcomeLangBtn', 'chatLangBtn', 'detailLangBtn', 'feedbackLangBtn', 'readingLangBtn'].forEach(id => {
     $(id).textContent = nextCode;
     $(id).setAttribute('aria-label', t('switchLanguage'));
   });
@@ -362,11 +416,15 @@ function newChat() {
   $('chatLog').replaceChildren();
   showSection('chat');
   botMessage(t('greeting'));
-  setChips(t('startChips'));
+  // «رشّحي لي تفضيلات قرّاء مكتبة ثلاث» once enough books have readers' reviews (2026-10-27)
+  setChips(favoritesReady ? t('startChips').concat([t('favoritesChip')]) : t('startChips'));
   $('chatInput').focus();
 }
 
 function showBook(book) {
+  // a book opened from «ماذا تقرأ الآن؟» is one step past it in the history (AGY-20261027-01); from anywhere else the usual levels
+  if (currentSection === 'reading') { LEVEL.bookDetail = LEVEL.reading + 1; LEVEL.feedback = LEVEL.bookDetail + 1; }
+  else if (currentSection !== 'bookDetail' && currentSection !== 'feedback') { LEVEL.bookDetail = 2; LEVEL.feedback = 3; }
   selectedBook = book;
   $('dTitle').textContent = book.title;
   closeMore();
@@ -417,6 +475,7 @@ function showBook(book) {
   $('dSummary').hidden = !book.summary;
   $('dReason').textContent = book.reason || '';
   $('dReason').hidden = !book.reason;
+  loadBookReviews(book);
   showSection('bookDetail');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -834,9 +893,308 @@ async function submitNote() {
   }
 }
 
+
+// ---------------- «ماذا تقرأ الآن؟» (Ibrahim 2026-10-27, from a visitor's proposal): the visitor finds a book of the
+// library (in stock or not) and rates it — stars, quick traits, optional words and first name — shown to visitors after
+// staff approve it. A book we do not have is suggested for the shelves: one we hold is shown to the visitor, one we do
+// not hold is looked up outside and the visitor is asked whether it is the right book before it is kept as a candidate.
+let favoritesReady = false;
+let reviewBook = null;
+let reviewStars = 0;
+let reviewTags = [];
+let reviewSending = false;
+let readingFromBook = false;
+let searchTimer = null;
+let searchSeq = 0;
+let shelfSeq = 0;
+async function loadReviewStatus() {
+  try {
+    const response = await fetch(`${API}/reviews/status`);
+    if (response.ok) favoritesReady = !!(await response.json()).favorites_ready;
+  } catch (error) { favoritesReady = false; }
+}
+function applyReadingLanguage() {
+  $('readingLabel').textContent = t('reading');
+  $('rTitle').textContent = t('reading');
+  $('rLead').textContent = t('readingLead');
+  $('rSearchLabel').textContent = t('searchLabel');
+  $('rSearch').placeholder = t('searchPlaceholder');
+  $('rShelfLead').textContent = t('shelfLead');
+  $('rShelfLabel').textContent = t('shelfBtn');
+  $('rStarsLabel').textContent = t('starsLabel');
+  $('rTagsLabel').textContent = t('tagsLabel');
+  $('rTextLabel').textContent = t('reviewTextLabel');
+  $('rText').placeholder = t('reviewTextPlaceholder');
+  $('rNameLabel').textContent = t('nameLabel');
+  $('rNote').textContent = t('reviewNote');
+  $('rSend').textContent = t('sendReview');
+  $('rChange').textContent = t('otherBook');
+  $('sLead').textContent = t('shelfFormLead');
+  $('sBookLabel').textContent = t('bookLabel');
+  $('sAuthorLabel').textContent = t('authorLabel');
+  $('sCheck').textContent = t('check');
+  $('sBack').textContent = t('back');
+  $('rAgain').textContent = t('again');
+  $('rHome').textContent = t('homeBtn');
+  $('reviewBtn').textContent = t('reviewBtn');
+  $('dReviewsTitle').textContent = t('reviewsTitle');
+  if (reviewBook && !$('rForm').hidden) { renderReviewBook(); renderStars(); renderTags(); }
+  if (!$('rFind').hidden && $('rSearch').value.trim()) searchReview($('rSearch').value);
+}
+function readingStep(step) {
+  $('rFind').hidden = step !== 'find';
+  $('rForm').hidden = step !== 'form';
+  $('sForm').hidden = step !== 'shelf';
+  $('rDone').hidden = step !== 'done';
+}
+function openReading(book = null) {
+  readingFromBook = !!book;
+  // one step forward in the browser history from wherever it is opened, so Back returns there — to the book page when
+  // opened from «قرأته؟ شاركنا رأيك» (AGY-20261027-01: the fixed level 1 went back one step from the book page)
+  if (currentSection !== 'reading') LEVEL.reading = LEVEL[currentSection] + 1;
+  $('rSearch').value = '';
+  $('rResults').replaceChildren();
+  $('rFindState').textContent = '';
+  showSection('reading');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (book) selectReviewBook(book);
+  else { readingStep('find'); $('rSearch').focus(); }
+}
+function readingBack() {
+  // inside the page (a review form or the shelf suggestion opened from the search) «رجوع» returns to the search;
+  // otherwise it is the browser's Back: to the book page it was opened from, or to the start page (AGY-20261027-01)
+  if (!readingFromBook && (!$('rForm').hidden || !$('sForm').hidden)) { readingStep('find'); return; }
+  goBack();
+}
+function miniBook(book, note) {
+  const box = document.createElement('div');
+  box.className = 'r-mini';
+  const initial = [...String(book.title || 'ك').trim()][0] || 'ك';
+  box.innerHTML = `<span class="r-mini-cover">${book.cover_url ? `<img src="${escapeHtml(book.cover_url)}" alt="" loading="lazy" />` : `<span aria-hidden="true">${escapeHtml(initial)}</span>`}</span>`
+    + `<span class="r-mini-text"><strong dir="auto">${escapeHtml(book.title)}</strong><span dir="auto">${escapeHtml(book.author || '')}</span>${note ? `<em>${escapeHtml(note)}</em>` : ''}</span>`;
+  return box;
+}
+async function searchReview(text) {
+  const q = String(text || '').trim();
+  const seq = ++searchSeq;
+  if (q.length < 2) { $('rResults').replaceChildren(); $('rFindState').textContent = ''; return; }
+  $('rFindState').textContent = t('searching');
+  try {
+    const response = await fetch(`${API}/reviews/search?q=${encodeURIComponent(q)}&lang=${currentLanguage}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (seq !== searchSeq) return;
+    const books = Array.isArray(data.books) ? data.books : [];
+    $('rResults').replaceChildren();
+    $('rFindState').textContent = books.length ? '' : t('noResults');
+    books.forEach(book => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'r-result';
+      button.appendChild(miniBook(book, book.available ? t('available') : t('notInStock')));
+      button.addEventListener('click', () => selectReviewBook(book));
+      $('rResults').appendChild(button);
+    });
+  } catch (error) { if (seq === searchSeq) $('rFindState').textContent = t('readingFailed'); }
+}
+function renderReviewBook() {
+  $('rBook').replaceChildren(miniBook(reviewBook, reviewBook.available ? t('available') : t('notInStock')));
+}
+function renderStars() {
+  const box = $('rStars');
+  box.replaceChildren();
+  for (let n = 1; n <= 5; n += 1) {
+    const star = document.createElement('button');
+    star.type = 'button';
+    star.className = 'star';
+    star.setAttribute('role', 'radio');
+    star.setAttribute('aria-checked', String(n === reviewStars));
+    star.setAttribute('aria-label', t('starAria')(formatNumber(n)));
+    star.tabIndex = n === (reviewStars || 1) ? 0 : -1;
+    star.classList.toggle('on', n <= reviewStars);
+    star.textContent = '★';
+    star.addEventListener('click', () => { reviewStars = n; $('rError').textContent = ''; renderStars(); box.children[n - 1].focus(); });
+    star.addEventListener('keydown', event => {
+      const step = { ArrowRight: currentLanguage === 'ar' ? -1 : 1, ArrowLeft: currentLanguage === 'ar' ? 1 : -1, ArrowUp: 1, ArrowDown: -1 }[event.key];
+      if (!step) return;
+      event.preventDefault();
+      reviewStars = Math.min(5, Math.max(1, (reviewStars || n) + step));
+      renderStars(); box.children[reviewStars - 1].focus();
+    });
+    box.appendChild(star);
+  }
+}
+function renderTags() {
+  const box = $('rTags');
+  box.replaceChildren();
+  t('reviewTags').forEach(([key, label]) => {
+    const tag = document.createElement('button');
+    tag.type = 'button';
+    tag.className = 'note-reason';
+    tag.textContent = label;
+    tag.setAttribute('aria-pressed', String(reviewTags.includes(key)));
+    tag.addEventListener('click', () => {
+      reviewTags = reviewTags.includes(key) ? reviewTags.filter(k => k !== key) : reviewTags.concat([key]);
+      tag.setAttribute('aria-pressed', String(reviewTags.includes(key)));
+    });
+    box.appendChild(tag);
+  });
+}
+function selectReviewBook(book) {
+  reviewBook = book;
+  reviewStars = 0;
+  reviewTags = [];
+  $('rText').value = '';
+  $('rName').value = '';
+  $('rError').textContent = '';
+  renderReviewBook(); renderStars(); renderTags();
+  readingStep('form');
+  $('rStars').firstElementChild.focus();
+}
+async function submitReview() {
+  if (!reviewBook || reviewSending) return;
+  if (!reviewStars) { $('rError').textContent = t('needStars'); $('rStars').firstElementChild.focus(); return; }
+  reviewSending = true;
+  $('rSend').disabled = true;
+  $('rSend').textContent = t('noteSending');
+  $('rError').textContent = '';
+  try {
+    const response = await fetch(`${API}/reviews`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ book_id: reviewBook.book_id, stars: reviewStars, tags: reviewTags, text: $('rText').value.trim(),
+        first_name: $('rName').value.trim(), language: currentLanguage })
+    });
+    if (!response.ok) throw new Error(response.status === 429 ? 'busy' : `HTTP ${response.status}`);
+    showReadingDone(t('reviewSent')(reviewBook.title));
+  } catch (error) {
+    $('rError').textContent = t(error.message === 'busy' ? 'noteBusy' : 'readingFailed');
+  } finally {
+    reviewSending = false;
+    $('rSend').disabled = false;
+    $('rSend').textContent = t('sendReview');
+  }
+}
+function showReadingDone(text) {
+  $('rDoneText').textContent = text;
+  readingStep('done');
+  $('rAgain').focus();
+}
+function openShelf(prefill) {
+  $('sBook').value = String(prefill || '').trim();
+  $('sAuthor').value = '';
+  $('sError').textContent = '';
+  $('sResult').replaceChildren();
+  readingStep('shelf');
+  $('sBook').focus();
+}
+function shelfButton(label, primary, onClick) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = primary ? 'want-button' : 'note-cancel';
+  button.textContent = label;
+  button.addEventListener('click', onClick);
+  return button;
+}
+async function shelfSend(body, doneText, buttons) {
+  buttons.forEach(b => { b.disabled = true; });
+  try {
+    const response = await fetch(`${API}/${body.note ? 'suggestion' : 'shelf/suggest'}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    if (!response.ok) throw new Error(response.status === 429 ? 'busy' : `HTTP ${response.status}`);
+    showReadingDone(doneText);
+  } catch (error) {
+    buttons.forEach(b => { b.disabled = false; });
+    $('sError').textContent = t(error.message === 'busy' ? 'noteBusy' : 'readingFailed');
+  }
+}
+async function checkShelf() {
+  const title = $('sBook').value.trim(), author = $('sAuthor').value.trim();
+  if (title.length < 2) { $('sError').textContent = t('needTitle'); $('sBook').focus(); return; }
+  const seq = ++shelfSeq;
+  const out = $('sResult');
+  $('sError').textContent = '';
+  $('sCheck').disabled = true;
+  out.replaceChildren();
+  const wait = document.createElement('p'); wait.className = 'note-lead'; wait.textContent = t('lookingUp'); out.appendChild(wait);
+  const asTyped = { note: t('suggestionNote')(title, author), language: currentLanguage };
+  try {
+    const response = await fetch(`${API}/shelf/check`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, author, language: currentLanguage })
+    });
+    if (!response.ok) throw new Error(response.status === 429 ? 'busy' : `HTTP ${response.status}`);
+    const data = await response.json();
+    if (seq !== shelfSeq) return;
+    out.replaceChildren();
+    const say = text => { const p = document.createElement('p'); p.className = 's-say'; p.textContent = text; out.appendChild(p); };
+    if (data.result === 'available') {
+      // a book we have in stock: the visitor is told so and sees its card (Ibrahim 2026-10-27)
+      say(t('isHere'));
+      const list = document.createElement('div'); list.className = 'more-list';
+      (data.books || []).forEach((book, i) => list.appendChild(bookCard(Object.assign({}, book, { reason: String(book.hook || book.summary || '').split(/(?<=[.!؟?])\s/)[0].slice(0, 140) }), i)));
+      out.appendChild(list);
+    } else if (data.result === 'out_of_stock') {
+      say(t('notHereNow'));
+      out.appendChild(miniBook(data.book, t('notInStock')));
+      const actions = document.createElement('div'); actions.className = 'note-actions';
+      const want = shelfButton(t('wantBack'), true, () => shelfSend({ book_id: data.book.book_id, asked_as: title }, t('wantSaved')(data.book.title), [want]));
+      actions.appendChild(want); out.appendChild(actions);
+    } else if (data.result === 'found_outside' && data.candidate) {
+      // looked up outside: the visitor confirms it is the book before it is kept (Ibrahim 2026-10-27)
+      const c = data.candidate;
+      say(t('foundAsk'));
+      const card = document.createElement('div'); card.className = 's-candidate';
+      card.innerHTML = `<strong dir="auto">${escapeHtml(c.title || title)}</strong>`
+        + (c.author ? `<span dir="auto">${escapeHtml(t('byLabel')(c.author))}${c.year ? ` · ${escapeHtml(String(c.year))}` : ''}</span>` : (c.year ? `<span>${escapeHtml(String(c.year))}</span>` : ''))
+        + (c.summary ? `<p dir="auto">${escapeHtml(c.summary)}</p>` : '')
+        + (c.sources && c.sources.length ? `<em>${escapeHtml(t('sourceLabel')(c.sources.join('، ')))}</em>` : '');
+      out.appendChild(card);
+      const actions = document.createElement('div'); actions.className = 'note-actions';
+      const yes = shelfButton(t('yesThis'), true, () => shelfSend({ key: c.key, asked_as: title }, t('candidateSaved')(c.title || title), [yes, no]));
+      const no = shelfButton(t('notThis'), false, () => shelfSend(asTyped, t('suggestionSaved'), [yes, no]));
+      actions.append(yes, no); out.appendChild(actions);
+    } else {
+      say(t('notFound'));
+      const actions = document.createElement('div'); actions.className = 'note-actions';
+      const save = shelfButton(t('saveAsTyped'), true, () => shelfSend(asTyped, t('suggestionSaved'), [save]));
+      actions.appendChild(save); out.appendChild(actions);
+    }
+  } catch (error) {
+    if (seq !== shelfSeq) return;
+    out.replaceChildren();
+    $('sError').textContent = t(error.message === 'busy' ? 'noteBusy' : 'readingFailed');
+  } finally {
+    if (seq === shelfSeq) $('sCheck').disabled = false;
+  }
+}
+// the book page: what Thalath readers said (approved reviews of every edition of the work)
+let bookReviewsSeq = 0;
+async function loadBookReviews(book) {
+  const seq = ++bookReviewsSeq;
+  $('dReviews').hidden = true;
+  try {
+    const response = await fetch(`${API}/reviews/book/${encodeURIComponent(book.book_id)}?lang=${currentLanguage}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (seq !== bookReviewsSeq || !data.count) return;
+    $('dReviewsSum').textContent = '★ ' + t('reviewsSum')(data.avg, data.count);
+    const tags = $('dReviewsTags'); tags.replaceChildren();
+    (data.tags || []).slice(0, 5).forEach(tag => {
+      const chip = document.createElement('span'); chip.className = 'meta-chip'; chip.textContent = `${tag.label} (${formatNumber(tag.n)})`; tags.appendChild(chip);
+    });
+    const list = $('dReviewsList'); list.replaceChildren();
+    (data.reviews || []).forEach(r => {
+      const item = document.createElement('blockquote'); item.className = 'review-item';
+      item.innerHTML = `<p dir="auto">${escapeHtml(r.text)}</p><footer>${'★'.repeat(r.stars)}<span dir="auto"> — ${escapeHtml(r.name || t('anonymousReader'))}</span></footer>`;
+      list.appendChild(item);
+    });
+    $('dReviews').hidden = false;
+  } catch (error) { /* no reviews shown */ }
+}
+
 // Each screen has a level; moving forward adds a browser history step and moving back removes steps,
 // so the phone's back button returns to the previous screen instead of leaving the app.
-const LEVEL = { welcome: 0, chat: 1, eventDetail: 1, bookDetail: 2, feedback: 3 };
+const LEVEL = { welcome: 0, chat: 1, eventDetail: 1, reading: 1, bookDetail: 2, feedback: 3 };
 let skipPop = false;
 function showSection(id, fromHistory = false) {
   if (!fromHistory && id !== currentSection) {
@@ -845,7 +1203,7 @@ function showSection(id, fromHistory = false) {
     else if (diff < 0) { skipPop = true; history.go(diff); }
   }
   currentSection = id;
-  ['welcome', 'chat', 'eventDetail', 'bookDetail', 'feedback'].forEach(section => { $(section).hidden = section !== id; });
+  ['welcome', 'chat', 'eventDetail', 'reading', 'bookDetail', 'feedback'].forEach(section => { $(section).hidden = section !== id; });
 }
 function showToast(message) {
   clearTimeout(toastTimer);
@@ -914,9 +1272,21 @@ window.addEventListener('popstate', event => {
   if (section === 'feedback') updateFeedbackLocation();
 });
 $('newChatBtn').addEventListener('click', newChat);
+$('readingBtn').addEventListener('click', () => openReading());
+$('readingBackBtn').addEventListener('click', readingBack);
+$('reviewBtn').addEventListener('click', () => { if (selectedBook) openReading(selectedBook); });
+$('rSearch').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => searchReview($('rSearch').value), 300); });
+$('rSearch').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); clearTimeout(searchTimer); searchReview($('rSearch').value); } });
+$('rShelfBtn').addEventListener('click', () => openShelf($('rSearch').value));
+$('rForm').addEventListener('submit', event => { event.preventDefault(); submitReview(); });
+$('rChange').addEventListener('click', () => { readingFromBook = false; readingStep('find'); $('rSearch').focus(); });
+$('sForm').addEventListener('submit', event => { event.preventDefault(); checkShelf(); });
+$('sBack').addEventListener('click', () => { readingStep('find'); $('rSearch').focus(); });
+$('rAgain').addEventListener('click', () => openReading());
+$('rHome').addEventListener('click', goHome);
 $('backBtn').addEventListener('click', goBack);
 $('wantBtn').addEventListener('click', chooseBook);
-['welcomeLangBtn', 'chatLangBtn', 'detailLangBtn', 'feedbackLangBtn'].forEach(id => $(id).addEventListener('click', switchLanguage));
+['welcomeLangBtn', 'chatLangBtn', 'detailLangBtn', 'feedbackLangBtn', 'readingLangBtn'].forEach(id => $(id).addEventListener('click', switchLanguage));
 $('reportBtn').addEventListener('click', () => openNote('report', $('reportBtn')));
 $('suggestBtn').addEventListener('click', () => openNote('suggestion', $('suggestBtn')));
 $('noteForm').addEventListener('submit', event => { event.preventDefault(); submitNote(); });
@@ -926,6 +1296,7 @@ $('noteSheet').addEventListener('modal-close', closeNote);  // Escape and the Ta
 document.querySelectorAll('.feedback-button').forEach(button => button.addEventListener('click', () => sendFeedback(button.dataset.value)));
 
 applyLanguage();
+loadReviewStatus();
 history.replaceState({ section: 'welcome' }, '');
 showSection('welcome', true);
 checkTestMode();

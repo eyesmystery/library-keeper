@@ -128,6 +128,43 @@ bad["payload"] = bad["payload"].replace("REQ-3", "REQ-4")
 channel.check(fetch=lambda: ({}, json.dumps(bad).encode()))
 ok(len(runs) == 1, "a request in a file with a wrong signature is ignored")
 
+# ---------------------------------------------------------------- AUDFIX (audit 2026-10-23 P2): the waiting request keeps its scope
+def wait_for(rid, scope, seq):
+    m.post("/api/admin/send-inbox/settings", json={"enabled": False})
+    channel.check(fetch=lambda: ({}, signed({"seq": seq, "messages": [], "update": None, "inbox_request": {"id": rid, "scope": scope}})))
+    m.post("/api/admin/send-inbox/settings", json={"enabled": True})
+    p = inbox_send.state().get("pending_request") or {}
+    return p.get("id") == rid and p.get("scope") == scope
+def last_doc():
+    return json.loads(sealed.open_sealed(SK, sent[-1][2]))
+nruns = len(runs)
+ok(wait_for("REQ-5", "all", 5) and len(runs) == nruns, "a request for all waits while sending is off")
+n0 = len(sent)
+okk, _ = inbox_send.send(reason="manual", scope="open", by="المدير", put=put)
+s = inbox_send.state()
+ok(okk and last_doc()["scope"] == "open" and last_doc()["request_id"] is None
+   and (s.get("pending_request") or {}).get("id") == "REQ-5" and s["pending_request"]["scope"] == "all"
+   and "REQ-5" not in s["requests_done"], "«أرسل الآن» for the open reports does not clear a waiting request for all")
+r = inbox_send.tick(put=put)
+ok(r and r[0] and len(sent) == n0 + 2 and last_doc()["scope"] == "all" and last_doc()["request_id"] == "REQ-5",
+   "the next tick sends the waiting request with its scope (all)")
+s = inbox_send.state()
+ok("REQ-5" in s["requests_done"] and not s.get("pending_request"), "then it is marked done")
+ok(inbox_send.tick(put=put) is None and len(sent) == n0 + 2, "and it is sent once only")
+ok(wait_for("REQ-6", "all", 6), "another request for all waits")
+okk, _ = inbox_send.send(reason="manual", scope="all", by="المدير", put=put)
+s = inbox_send.state()
+ok(okk and last_doc()["scope"] == "all" and last_doc()["request_id"] == "REQ-6" and "REQ-6" in s["requests_done"]
+   and not s.get("pending_request"), "«أرسل الآن» for all answers it: its id goes in the file and it is marked done")
+ok(inbox_send.tick(put=put) is None and len(sent) == n0 + 3, "and the tick does not send it again")
+ok(wait_for("REQ-7", "open", 7), "a request for the open reports waits")
+okk, _ = inbox_send.send(reason="manual", scope="open", put=fail)
+s = inbox_send.state()
+ok(not okk and (s.get("pending_request") or {}).get("id") == "REQ-7" and s["pending_request"]["scope"] == "open"
+   and "REQ-7" not in s["requests_done"], "a failed manual upload leaves the waiting request as it was")
+r = inbox_send.tick(put=put)
+ok(r and r[0] and last_doc()["request_id"] == "REQ-7" and not inbox_send.state().get("pending_request"), "and the tick sends it")
+
 # ---------------------------------------------------------------- «أرسل الآن»
 r = m.post("/api/admin/send-inbox/now", json={"scope": "all"})
 ok(r.status_code == 200 and runs[-1]["reason"] == "manual" and runs[-1]["scope"] == "all", "the manager sends now")

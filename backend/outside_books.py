@@ -335,15 +335,25 @@ def _count(key):
 
 
 # ---------------------------------------------------------------------------- lookup
-def lookup(title, budget=BUDGET, background=True):
-    """-> the stored / found record (dict with status 'found') or None. Never raises."""
+def lookup(title, budget=BUDGET, background=True, goodreads_too=False):
+    """-> the stored / found record (dict with status 'found') or None. Never raises.
+    goodreads_too (a visitor suggesting a book for the shelves, VREVFIX 2026-10-27): Goodreads' «book by title» page is
+    asked at the same time as Wikidata and Open Library, not only after both — Arabic books are mostly found only there
+    («الأرض بعد طوفان نوح»: Wikidata and Open Library know nothing, Open Library took 6 s, so Goodreads never had its
+    turn) — and a title remembered as not found is tried again (the visitor is asking now)."""
     try:
-        return _lookup(title, budget, background)
+        return _lookup(title, budget, background, goodreads_too)
     except Exception:  # noqa: BLE001 - the chat goes on without it
         return None
 
 
-def _lookup(title, budget, background):
+def _gr_by_title(title, timeout):
+    """Goodreads' page for this title, when it is the same title; None when it is another book or none."""
+    gr = goodreads_page(title=title, timeout=timeout)
+    return gr if gr and same_title(title, gr.get("title") or "") else None
+
+
+def _lookup(title, budget, background, goodreads_too=False):
     key = key_of(title)
     if len(key) < 3 or not enabled():
         return None
@@ -355,12 +365,14 @@ def _lookup(title, budget, background):
                 row = _enrich_waiting(key, title, row, 0)
             return dict(row, times_asked=(row.get("times_asked") or 0) + 1)
         looked = datetime.strptime(row["looked_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
-        if time.time() - looked < RETRY_NOT_FOUND:
+        if time.time() - looked < RETRY_NOT_FOUND and not goodreads_too:
             return None
     t0 = time.time()
     found = {}
-    pool = ThreadPoolExecutor(max_workers=2)
+    pool = ThreadPoolExecutor(max_workers=3)
     jobs = {}
+    if goodreads_too and _up("goodreads"):
+        jobs[pool.submit(_gr_by_title, title, budget)] = "goodreads"
     if _up("wikidata"):
         jobs[pool.submit(from_wikidata, title, min(4.0, budget))] = "wikidata"
     if _up("openlibrary"):
@@ -375,14 +387,22 @@ def _lookup(title, budget, background):
         try:
             found[src] = f.result()
         except Exception:  # noqa: BLE001
-            _fail(src)
+            _fail(src, 900 if src == "goodreads" else 600)
     wd, ol = found.get("wikidata"), found.get("openlibrary")
+    gr_answered = "goodreads" in found     # Goodreads was asked and answered (a page, or no such title)
+    if not wd and not ol and found.get("goodreads"):
+        gr = dict(found["goodreads"])
+        gr.update(_enriched=True, blurb=gr.get("description"))
+        _save(key, title, gr, "found")
+        _count(key)
+        return get(title)
     left = budget - (time.time() - t0)
-    if not wd and not ol and _up("goodreads") and left > 1.5:
+    if not wd and not ol and not goodreads_too and _up("goodreads") and left > 1.5:
         # neither knows it (or Wikidata is busy: it answers 429 when asked too much): Goodreads' own
         # «book by title» page, kept only when it is the same title
         try:
             gr = goodreads_page(title=title, timeout=left)
+            gr_answered = True
             if gr and same_title(title, gr.get("title") or ""):
                 gr.update(_enriched=True, blurb=gr.get("description"))
                 _save(key, title, gr, "found")
@@ -392,7 +412,9 @@ def _lookup(title, budget, background):
             _fail("goodreads", 900)
             return None
     if not wd and not ol:
-        if jobs and all(f in done for f in jobs):   # every source answered: really not found
+        # every source answered, Goodreads too: really not found. A Goodreads not asked (no time left, or resting after a
+        # failure) leaves nothing remembered, so the next visitor's lookup tries again (VREVFIX 2026-10-27)
+        if jobs and all(f in done for f in jobs) and gr_answered:
             _save(key, title, {"title": None}, "not_found")
             _count(key)
         return None
@@ -402,6 +424,17 @@ def _lookup(title, budget, background):
             info[k] = v if k != "sources" else list(dict.fromkeys((info.get("sources") or []) + v))
     if not info.get("isbn") and ol:
         info["isbn"] = ol.get("isbn")
+    # AGY-20261027-02: Goodreads asked together with the others (goodreads_too) is not dropped when Wikidata or Open Library
+    # also knows the title: its blurb (what the book is about) and whatever they left empty are kept with its source
+    gr = found.get("goodreads")
+    if gr:
+        for k in ("author", "publisher", "pages", "year", "genres", "rating", "ratings_count", "goodreads_id", "isbn"):
+            if not info.get(k) and gr.get(k):
+                info[k] = gr[k]
+        if gr.get("description"):
+            info["blurb"] = gr["description"]
+            info["_enriched"] = True
+        info["sources"] = list(dict.fromkeys((info.get("sources") or []) + list(gr.get("sources") or [])))
     wiki = info.pop("wiki", None)
     info.pop("kind", None)
     left = budget - (time.time() - t0)

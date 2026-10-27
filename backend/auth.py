@@ -1,6 +1,7 @@
 """Staff accounts, sessions, roles, CSRF, login throttling and the audit log (approved 2026-09-27).
 
-- Roles: manager (everything) and staff (catalog, cards, review, inventory edits).
+- Roles: manager (everything), staff (catalog, cards, review, inventory edits) and developer (ADMSTF 2026-10-24:
+  Ibrahim's own account — everything a manager has plus the developer-only views; never assignable from the page).
 - Passwords: hashlib.scrypt with a random salt (standard library; no new dependency).
 - Sessions: Flask signed cookie (HttpOnly, SameSite=Strict, Secure in production), 12 h.
   The signing key lives OUTSIDE the project: ~/.library_keeper/secret_key (600), or
@@ -23,8 +24,21 @@ from datetime import datetime, timezone
 
 from models import get_connection
 
-ROLES = ("manager", "staff")
-ROLE_LABELS = {"manager": "مدير", "staff": "موظف"}
+ROLES = ("manager", "staff", "developer")
+ROLE_LABELS = {"manager": "مدير", "staff": "موظف", "developer": "مطوّر"}
+# «دور المطوّر» (Ibrahim 2026-10-24, ADMSTF): given only by the one-time migration of an old database (his own
+# account) or explicitly on the computer by scripts/set_developer.py (fresh install / restore, AUDFIX 2026-10-24);
+# the users page and the first-run setup can only give manager or staff.
+ASSIGNABLE_ROLES = ("manager", "staff")
+MANAGER_ROLES = ("manager", "developer")
+
+
+def is_manager(role):
+    return role in MANAGER_ROLES
+
+
+def is_developer(role):
+    return role == "developer"
 SESSION_HOURS = 12
 MIN_PASSWORD = 8
 _USER_RE = re.compile(r"^[A-Za-z0-9._-]{3,32}$")
@@ -117,7 +131,7 @@ def create_user(username, display_name, role, password):
     display_name = (display_name or "").strip()[:60]
     if not _USER_RE.match(username):
         raise ValueError("اسم المستخدم: 3–32 حرف إنجليزي أو رقم أو . _ -")
-    if role not in ROLES:
+    if role not in ASSIGNABLE_ROLES:
         raise ValueError("دور غير معروف")
     if not display_name:
         raise ValueError("اكتب الاسم الظاهر")
@@ -142,7 +156,7 @@ def update_user(user_id, *, role=None, active=None, password=None, display_name=
         raise LookupError("user not found")
     sets, args = [], []
     if role is not None:
-        if role not in ROLES:
+        if role not in ASSIGNABLE_ROLES:
             raise ValueError("دور غير معروف")
         sets.append("role = ?"); args.append(role)
     if active is not None:

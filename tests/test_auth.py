@@ -56,9 +56,11 @@ row = models.get_connection().execute("select verified_by from attribute_evidenc
 ok(r.status_code == 200 and row == "سارة", "review recorded under the real signed-in name, not a typed one")
 for path in ["/api/admin/import/history", "/api/admin/stats"]:
     ok(st.get(path).status_code == 403, f"staff blocked from {path}")
-# «الإعدادات» is open to staff (Ibrahim 2026-10-13): model, accounts, usage, test mode, audit log
-for path in ["/api/admin/llm", "/api/admin/users", "/api/admin/testlog", "/api/admin/audit", "/api/admin/usage"]:
+# «الإعدادات» for staff: QR, sections, audit log (2026-10-13); accounts and AI settings manager/developer only (ADMSTF 2026-10-24)
+for path in ["/api/admin/audit", "/api/admin/sections"]:
     ok(st.get(path).status_code == 200, f"staff may open {path} (settings)")
+for path in ["/api/admin/llm", "/api/admin/users", "/api/admin/testlog", "/api/admin/usage"]:
+    ok(st.get(path).status_code == 403, f"staff blocked from {path} (manager/developer only since 2026-10-24)")
 
 # disable -> immediate sign-out; last manager protected
 ok(anon.post(f"/api/admin/users/{sara_id}", json={"active": False}, headers=h).status_code == 200, "manager disables staff")

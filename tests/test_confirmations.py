@@ -134,8 +134,6 @@ ok(c.post(f"/api/admin/books/{b1}/confirmation", json={"choice": ["x"]}).status_
 ok(con.execute("select count(*) from authors where name_ar='كاتب جديد'").fetchone()[0] == 1, "people records follow the corrected author")
 ok(m.get("/api/admin/confirmations").get_json()["count"] == 0 and post(pkg(expect={"title": bk["title"], "author": "كاتب جديد", "research_status": "matched"}), True).status_code == 400, "the answer is closed and cannot be applied twice")
 ok(c.post("/api/admin/confirmations/corrections", json={"package": pkg()}).status_code == 403, "staff cannot apply corrections")
-ok('id="cxCopy"' not in html and 'id="cxDownload"' not in html and 'id="cxApply"' in html and "/api/admin/confirmations/corrections" in html
-   and html.index('id="cxFold"') > html.index('id="inboxView"') and html.index('id="cxFold"') < html.index('id="eventsView"')
-   and "if (which === 'inbox') { loadInbox(); if (ME && ME.role === 'manager') loadConfirmCount(); }" in html
-   and "$('cxFold').hidden = !manager;" in html and 'id="cxFold" hidden>' in html, "the apply-corrections fold sits on the inbox page; the copy / download step is gone")
+ok('id="cxFold"' not in html and 'id="cxApply"' not in html and "confirmCorrections" not in html,
+   "the apply-corrections fold is gone from the admin page (Ibrahim 2026-10-24 «ما نحتاجه خلاص»); the API stays")
 print(f"TOTAL PASS={P} FAIL={F}")

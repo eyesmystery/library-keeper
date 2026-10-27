@@ -135,7 +135,7 @@ def status(role=None):
             "last_sent": s.get("last_sent"), "last_file": s.get("last_file"), "last_counts": s.get("last_counts"),
             "last_try": s.get("last_try"), "last_error": s.get("last_error"), "sending": bool(s.get("sending")),
             "next_due": next_due(cfg, s) if cfg.get("enabled") else None, "pending_request": s.get("pending_request"),
-            "not_ready": ready(cfg), "can_manage": role == "manager"}
+            "not_ready": ready(cfg), "can_manage": role in ("manager", "developer")}
 
 
 def set_settings(enabled=None, token=None, clear_token=False):
@@ -197,8 +197,16 @@ def _put(cfg, name, blob):
         raise SendError("تعذر الاتصال بالإنترنت أو بـ GitHub: " + str(getattr(e, "reason", e))[:120])
 
 
+def _covers(sent_scope, wanted_scope):
+    """A file sent with sent_scope holds everything a request for wanted_scope asks for ("all" ⊇ "open")."""
+    return sent_scope == "all" or sent_scope == (wanted_scope or "open")
+
+
 def send(reason="manual", scope="open", by=None, request_id=None, put=None, audit=None):
-    """Build, seal and upload one file now. -> (ok, message). put: for tests, put(cfg, name, blob)."""
+    """Build, seal and upload one file now. -> (ok, message). put: for tests, put(cfg, name, blob).
+    AUDFIX (audit 2026-10-23 P2): a waiting request is marked done only by a file that carries its id and covers its
+    scope. A manual or weekly send that covers it answers it (its id goes in the file); one that does not (open while
+    "all" was asked) leaves it waiting for tick()."""
     cfg = config()
     why = ready(cfg)
     if why:
@@ -207,16 +215,23 @@ def send(reason="manual", scope="open", by=None, request_id=None, put=None, audi
         return False, why
     if not _send_lock.acquire(blocking=False):
         return False, "الإرسال يعمل الآن"
+    adopted = False
     try:
         _save_state(sending=True, last_try=_now())
+        s0 = state()
+        pend0 = s0.get("pending_request")
+        if (not request_id and pend0 and pend0.get("id") and pend0["id"] not in (s0.get("requests_done") or [])
+                and _covers(scope, pend0.get("scope"))):
+            request_id, adopted = pend0["id"], True     # this file answers the waiting request too
         name, blob, counts = build_file(scope, reason, by, request_id)
         (put or _put)(cfg, name, blob)
         s = state()
         done = [x for x in (s.get("requests_done") or []) if x][-50:]
-        if request_id and request_id not in done:
-            done.append(request_id)
         pend = s.get("pending_request")
-        if pend and (not request_id or pend.get("id") == request_id):
+        short = bool(pend and request_id and pend.get("id") == request_id and not _covers(scope, pend.get("scope")))
+        if request_id and not short and request_id not in done:
+            done.append(request_id)
+        if pend and request_id and pend.get("id") == request_id and not short:
             pend = None
         _save_state(sending=False, last_sent=_now(), last_file=name, last_counts=counts, last_error=None,
                     requests_done=done, pending_request=pend, last_reason=reason)
@@ -229,7 +244,7 @@ def send(reason="manual", scope="open", by=None, request_id=None, put=None, audi
                 pass
         return True, f"أُرسل ملف البلاغات إلى المطوّر ({name})"
     except (SendError, sealed.SealedError) as e:
-        if request_id:
+        if request_id and not adopted:       # an adopted request is still waiting as it was
             _save_state(pending_request={"id": request_id, "scope": scope, "at": _now()})
         _save_state(sending=False, last_error=str(e)[:300])
         return False, str(e)

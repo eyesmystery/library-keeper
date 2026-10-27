@@ -80,7 +80,7 @@ ok(acts.count("event.add") == 3 and "event.update" in acts and "event.delete" in
 page = visitor.get("/").get_data(as_text=True)
 ok('id="eventsBox"' in page and 'id="eventDetail"' in page, "start page has «فعالياتنا» and the event page")
 admin = visitor.get("/admin").get_data(as_text=True)
-ok('id="tabEvents"' in admin and "/api/admin/events" in admin, "admin page has the «الفعاليات» tab")
+ok('id="subEvents"' in admin and 'id="tabOrganize"' in admin and "/api/admin/events" in admin, "events live in «تنظيم منار ← الفعاليات» (ADMSTF)")
 
 # ---- «أضف إلى التقويم»: an .ics file for an upcoming active event (Ibrahim, 2026-10-09)
 import events as EV

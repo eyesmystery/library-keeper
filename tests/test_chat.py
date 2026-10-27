@@ -72,7 +72,7 @@ def say(msgs): return c.post("/api/chat", json={"messages": msgs}).get_json()
 script["interpret"] = {"intent": "smalltalk", "preferences": prefs(), "mentioned_titles": [], "wants_new_options": False}
 script["respond"] = {"reply": "هلا والله! وش مزاجك اليوم؟", "show_book_ids": [], "suggestions": ["شي خفيف", "رواية تشد"]}
 r = say([{"role": "user", "content": "السلام عليكم"}])
-ok(r["understanding"] == "ai" and r["books"] == [] and r["suggestions"] == ["شي خفيف", "رواية تشد"], "smalltalk: reply, no books, chips")
+ok(r["understanding"] == "ai" and r["books"] == [] and r["suggestions"][:2] == ["شي خفيف", "رواية تشد"] and len(r["suggestions"]) >= 5, "smalltalk: reply, no books, chips (at least five since 2026-10-27)")
 
 script["interpret"] = {"intent": "recommend", "preferences": prefs(genres=["رواية"], moods_include=["funny"]), "mentioned_titles": [], "wants_new_options": False}
 def pick_with_bad_ids(system, messages):

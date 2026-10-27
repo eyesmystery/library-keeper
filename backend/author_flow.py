@@ -174,6 +174,30 @@ NEAR_RE = re.compile(r'^(?:ما عندنا (?:مؤلف باسم |كتب لـ ?)(
 TOO_MANY = ['*']  # marker: the family name is carried by too many catalog people to list
 
 
+def _lev(a, b):
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
+        prev = cur
+    return prev[-1]
+
+
+def _family_spelling(written, names):
+    """QADFIX17: the one word the visitor wrote is the family name of one of these names, as spelled there or in another
+    common spelling («تشيكوف» / «تشيخوف»; "Gibran" in "Kahlil Gibran")."""
+    w = _bare(key(written))
+    for n in names:
+        parts = key(n).split()
+        if not parts:
+            continue
+        last = _bare(parts[-1])
+        if w == last or (len(w) >= 4 and len(last) >= 4 and _lev(w, last) <= 1 + (len(last) >= 6)):
+            return True
+    return False
+
+
 def _bare(word):
     """«العقاد» and «عقاد» are the same family name."""
     return word[2:] if word.startswith('ال') and len(word) > 4 else word
@@ -257,6 +281,28 @@ def near_question(written, options, english=False):
     if len(options) == 1:
         return lead + (f'Do you mean «{options[0]}»?' if english else f'تقصد «{options[0]}»؟')
     return lead + choice_question(options, english)
+
+
+def _respelt_by_visitor(written, conversation):
+    """The visitor wrote this full name (first + family) again after an earlier message of his named the same first name
+    with a family name spelt close to it («يوسف زيدن» then «يوسف زيدان»)."""
+    words = key(written).split()
+    if len(words) < 2:
+        return False
+    try:
+        import authors as _ar
+        same = _ar._same_word
+    except Exception:
+        def same(a, b): return a == b
+    first, fam = words[0], _bare(words[-1])
+    for c in conversation[:-1]:
+        if c.get('role') != 'user':
+            continue
+        ws = key(c.get('content') or '').split()
+        for i, w in enumerate(ws[:-1]):
+            if w == first and (same(fam, _bare(ws[i + 1])) or _bare(ws[i + 1]) == fam):
+                return True
+    return False
 
 
 def _near_answer(conversation):
@@ -462,6 +508,9 @@ def resolve(request, conversation, books, english=False):
             for d, strings in by_display.items():
                 kd = key(d)
                 if (len(kd.split()) >= 2 and (' ' + kd + ' ' in msg or ' و' + kd + ' ' in msg or ' ل' + kd + ' ' in msg)
+                        # QADFIX21 (QAD 2026-10-26, case 16.3): «رواية لسينويه عن حياة ابن سينا» — a person the book is ABOUT is
+                        # its subject, not a second author asked for
+                        and not re.search(r'(?:^| )(?:عن|حول|بخصوص|about|on)\s+(?:\S+\s+)?' + re.escape(kd) + r'(?: |$)', msg)
                         and not (set(strings) & mine) and kd not in [key(x) for x in people]
                         and kd not in ' | '.join(key(x) for x in [written, full] + sorted(mine))):
                     people.append(d)
@@ -469,6 +518,14 @@ def resolve(request, conversation, books, english=False):
             people = [p for p in people if not any(p != q and key(p) in key(q) for q in people)]
         if len(people) >= 2:
             per = {p: _catalog_for(p, by_display, author_records) for p in people}
+            # QADFIX21 (case 16.3): «سينويه» alone is the person the model named in full («جيلبير سينويه»): his books are
+            # looked up under the full name and its stored spellings, never «we have none» for his family name
+            for p in list(per):
+                if not per[p] and key(p) == key(written or '') and len(key(p).split()) == 1:
+                    for alt in [full] + [a for a in (request.get('aliases') or []) if isinstance(a, str)]:
+                        if alt and _catalog_for(alt, by_display, author_records):
+                            per[p] = _catalog_for(alt, by_display, author_records)
+                            break
             if any(per.values()):
                 request['people'] = {p: sorted(v) for p, v in per.items()}
                 return None, set().union(*per.values()), True
@@ -508,7 +565,11 @@ def resolve(request, conversation, books, english=False):
             if mode in ('similar', 'both'):
                 return None, None, False
             return None, allowed(near_chosen), True
-        if not (same and near_declined):
+        # QADFIX20 (QAD 2026-10-25, case 28.2; AGY-20261025-01 e): «روايات يوسف زيدن» → «ما لقيت مؤلفًا بهذا الاسم» → «أقصد يوسف
+        # زيدان، صاحب عزازيل» — the visitor is correcting his own spelling of the same person (same first name, a family
+        # name written close to the earlier one): we have no books by him; never «تقصد جرجي زيدان ولا رشا زيدان؟», others who
+        # only share the family name
+        if not (same and near_declined) and not _respelt_by_visitor(written, conversation):
             near = near_authors(written, by_display, books)
             if near is TOO_MANY:
                 many = (f'We don’t have an author named {written}, and several of our authors share that family name. What is the full name of the author you mean?'
@@ -561,6 +622,13 @@ def resolve(request, conversation, books, english=False):
     ambiguous = len(key(written).split()) < 2 or (proposal and key(written) != key(proposal) and not exact
                                                    # "Nizar Qabbani" is a stored spelling of «نزار قباني»: no «Do you mean …?» (2026-10-12)
                                                    and key(written) not in record_keys)
+    # QADFIX20 (QAD 2026-10-25, case 26.1; AGY-20261025-01 e): "any books by Paulo Koelo in english?" — our author records know
+    # the name the model read («باولو كويلو») and we have none of his books: «Do you mean …?» changes nothing; the answer is that
+    # his books are not here, under the name as the records hold it
+    if ambiguous and not options and known_record and full and len(key(written).split()) >= 2:
+        ambiguous = False
+        written = full
+        request['name_as_written'] = full
     # «وش عندكم لموراكامي؟»: a family name alone that only one catalog author carries needs no
     # «تقصد هاروكي موراكامي؟» — his books are shown at once; with two or more authors of that name
     # the question stays (Ibrahim 2026-10-15, QAD case 19.1)
@@ -568,10 +636,24 @@ def resolve(request, conversation, books, english=False):
             and (_bare(key(written)) == _bare(key(options[0]).split()[-1])
                  or any(_bare(key(written)) == _bare(key(a).split()[-1]) for a in allowed(options[0]) if key(a).split()))):
         ambiguous = False
+    # QADFIX17 (QAD 2026-10-24, cases 27.1, 33.2): «تشيكوف» for «أنطون تشيخوف», "Gibran" for «جبران خليل جبران» — one catalog
+    # author, the very one the model named, and the visitor wrote his family name in another spelling or script: his books
+    # are shown at once, no «تقصد …؟»
+    if (ambiguous and written and len(options) == 1 and full and len(key(written).split()) == 1
+            and key(full) in ({key(options[0])} | {key(a) for a in allowed(options[0])})
+            and _family_spelling(written, [full, options[0]] + [a for a in (request.get('aliases') or []) if isinstance(a, str)])):
+        ambiguous = False
     # «أحب ماركيز، عطني شي بنفس الجو»: for likeness, a name our author records know needs no
     # «تقصد فلان؟» first; a request for his own books still confirms a one-word name (2026-10-07)
     if written and mode in ('similar', 'both') and known_record and len(options) <= 1:
         return None, None, False
+    if (not written and full and len(options) == 1 and key(full) in ({key(options[0])} | {key(a) for a in allowed(options[0])})
+            and any(c['role'] == 'assistant' and any((' ' + p + key(full) + ' ') in (' ' + key(c['content']) + ' ') for p in ('', 'ل'))
+                    for c in conversation[:-1])):
+        # QADFIX17 (QAD 2026-10-24, case 12.2): «فيه شي ثاني لنفس الكاتب؟» right after Manar named «يان مارتل»: the conversation
+        # says who is meant, no «تقصد يان مارتل؟»
+        written, confirmed = full, True
+        request['name_as_written'] = full
     if not written or (ambiguous and not confirmed):
         return question, None, mode == 'works'
     if mode in ('similar', 'both'):

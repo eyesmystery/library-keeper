@@ -123,6 +123,23 @@ def assets_step():
     return not any(gone.values())
 
 
+def developer_note():
+    """After a restore (AUDFIX 2026-10-24): the developer role is kept as the backup has it and is never given by
+    name. When the restored database has accounts but none is a developer, say how to give it explicitly."""
+    con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+    try:
+        row = con.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'staff_users'").fetchone()
+        if not row or "'developer'" not in (row[0] or ""):
+            return  # no accounts yet, or an older database: the server's first start handles it (models.init_db)
+        users = con.execute("SELECT COUNT(*) FROM staff_users").fetchone()[0]
+        devs = con.execute("SELECT COUNT(*) FROM staff_users WHERE role = 'developer' AND active = 1").fetchone()[0]
+    finally:
+        con.close()
+    if users and not devs:
+        print("note: no active account has the developer role in this backup. To give it to an account: "
+              "scripts/set_developer.py --grant <username>")
+
+
 def main():
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group(required=True)
@@ -163,6 +180,7 @@ def main():
     os.replace(tmp, DB)
     ok2, books2 = check(DB)
     print(f"restored {os.path.basename(src)} -> data/library.db ({books2} books, integrity={ok2})")
+    developer_note()
     if not args.no_assets:
         assets_step()
     return 0 if ok2 == "ok" else 1

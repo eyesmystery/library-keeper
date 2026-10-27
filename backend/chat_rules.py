@@ -452,6 +452,27 @@ _KID_WORD = re.compile(r"(?:^| )(?:ولدي|ابني|بنتي|ابنتي|طفل�
 _FOR_ME = re.compile(r"(?:^| )(?:كتاب|كتب|شي|شيء|روايه) (?:لي|لنفسي)(?: انا)?(?: |$)|(?:^| )(?:a book|something) for (?:me|myself)")
 
 
+# QADFIX17 (QAD 2026-10-24, case 45.2): «تقدرين تسألين موظف المكتبة» to a visitor who never said she is a woman — the
+# reply speaks to the visitor in the masculine general form unless the model read her as a woman (rule 4 of the reply)
+_FEM_TO_MASC = {"تقدرين": "تقدر", "تبغين": "تبغى", "تبين": "تبي", "تحبين": "تحب", "تفضلين": "تفضل", "تفضّلين": "تفضّل",
+                "تريدين": "تريد", "تعرفين": "تعرف", "تسألين": "تسأل", "تحتاجين": "تحتاج", "تشوفين": "تشوف", "تلقين": "تلقى",
+                "تختارين": "تختار", "تميلين": "تميل", "تودين": "تود", "تقرين": "تقرا", "تقرئين": "تقرأ", "تقرأين": "تقرأ",
+                "تستمتعين": "تستمتع", "تجربين": "تجرب", "ترتاحين": "ترتاح", "تدورين": "تدور", "تبحثين": "تبحث",
+                "تشترين": "تشتري", "تهدين": "تهدي", "تهديها": "تهديها", "تقدري": "تقدر", "تبغي": "تبغى", "تحبي": "تحب",
+                "تفضلي": "تفضل", "أبشري": "أبشر", "ابشري": "ابشر", "جربي": "جرب", "جرّبي": "جرّب", "اسألي": "اسأل",
+                "خذي": "خذ", "شوفي": "شوف", "لكِ": "لك", "عندكِ": "عندك", "إليكِ": "إليك",
+                # QADFIX20 (QAD 2026-10-25, case 22.3): «معك حق، كنتِ تقصدين وصفات أكل … اللي تبينها» to a father
+                "تقصدين": "تقصد", "تقصدي": "تقصد", "كنتِ": "كنت", "قصدكِ": "قصدك", "تطلبين": "تطلب", "تبحثي": "تبحث"}
+# QADFIX20: a pronoun joined to the verb («تبينها»، «تحبينه») keeps it: «تبيها»، «تحبه»
+_FEM_RX = re.compile(r"(?<![\wً-ْ])(و|ف)?(" + "|".join(sorted((re.escape(k) for k in _FEM_TO_MASC), key=len, reverse=True))
+                     + r")(ها|ه|هم|هن|ني)?(?![\wً-ْ])")
+
+
+def masculine_address(text):
+    """The visitor addressed in the masculine general form («تقدر»، «تفضّل»)."""
+    return _FEM_RX.sub(lambda m: (m.group(1) or "") + _FEM_TO_MASC[m.group(2)] + (m.group(3) or ""), text or "")
+
+
 def parent_said(text):
     t = " ".join(normalize(text).split())
     # QADFIX7 #4: «ولدي … ابي كتاب لي» — a book for the parent himself, the child is what it is about
@@ -464,11 +485,14 @@ _KIDDING = re.compile(r"(?:^| )(?:عمره|عمرها|عمر|سنه|سنين|س�
 _model_reader = threading.local()
 
 
-def set_model_parent(flag):
+def set_model_parent(flag, not_parent=False):
     """QADFIX12 #3 (QAD 2026-10-22, case 13.1): the interpreter read this turn as a grown-up asking for a book for
     himself about a child («كتاب لي أنا عن تربية طفل عمره سنتين»), in whatever words. Set per request thread at the
     start of each turn, so parent_reader() below honours the model and not only the phrasings in its lists."""
     _model_reader.parent = bool(flag)
+    # QADFIX16 (QAD 2026-10-24, cases 22.3, 41.2): the model read the visitor as the reader of a book about something
+    # other than raising a child («وأنا بعد أبي شي عن كرة القدم لي»): no word list makes him a parent reader then
+    _model_reader.not_parent = bool(not_parent) and not bool(flag)
 
 
 def parent_reader(user_messages):
@@ -478,6 +502,8 @@ def parent_reader(user_messages):
         return False
     if getattr(_model_reader, "parent", False):
         return True
+    if getattr(_model_reader, "not_parent", False):
+        return False
     if parent_said(user_messages[-1]):
         return True
     last = " ".join(normalize(user_messages[-1]).split())

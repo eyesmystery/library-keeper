@@ -13,7 +13,7 @@
 
 ## ١. التحميل
 
-افتح [صفحة الإصدارات](https://github.com/eyesmystery/library-keeper/releases/latest) ونزّل الملف المناسب: `…-windows.zip` أو `…-mac.zip` (نحو 490 ميغابايت). سجّل الدخول إلى GitHub أولًا، فالمستودع خاص.
+افتح [صفحة الإصدارات](https://github.com/eyesmystery/library-keeper/releases/latest) ونزّل الملف المناسب: `…-windows.zip` أو `…-mac.zip` (نحو 560 ميغابايت).
 
 من الطرفية، لمن عنده GitHub CLI:
 
@@ -86,7 +86,7 @@ gh release download --repo eyesmystery/library-keeper --pattern "*windows.zip"
 
 ## ٨. التحديث إلى إصدار جديد (بدون فقد تعديلاتكم)
 
-الحزمة الكاملة تستبدل كل شيء، فلا تُستعمل لتحديث تطبيق يعمل. للتحديث ملف خاص في صفحة الإصدارات اسمه `ThalathSmart-update-….zip` (نحو 175 ميغابايت، واحد للنظامين):
+الحزمة الكاملة تستبدل كل شيء، فلا تُستعمل لتحديث تطبيق يعمل. للتحديث ملف خاص في صفحة الإصدارات اسمه `ThalathSmart-update-….zip` (نحو 198 ميغابايت، واحد للنظامين):
 
 1. أغلق نافذة السيرفر.
 2. فك الملف، وانقل المجلد الناتج (`ThalathSmart-update-…`) إلى **داخل** مجلد التطبيق، بجانب `start_library`.
@@ -151,7 +151,7 @@ cd backend && LIBRARY_KEEPER_HOST=0.0.0.0 ./venv/bin/python app.py
 
 - الاختبارات: `backend/venv/bin/python tests/run_all.py`
 - بناء حزمتي التحميل وملف التحديث من مجلد عمل فيه القاعدة الحية (يكتب في `release/`):
-  `backend/venv/bin/python scripts/make_release.py --version "0.9.10 beta" --no-user --update-from release/<الحزمة الكاملة السابقة>.zip`
+  `backend/venv/bin/python scripts/make_release.py --version "0.9.11 beta" --no-user --update-from release/<الحزمة الكاملة السابقة>.zip`
   الخيار `--update-from` يُكرَّر لكل إصدار سابق قد يكون مثبّتًا في المكتبة.
 - لا ترفع `data/library.db` ولا `backups/` ولا `data/test_logs/` ولا `data/llm_settings.json` ولا أي ملف مفاتيح؛ كلها في `.gitignore`.
 
@@ -160,7 +160,7 @@ cd backend && LIBRARY_KEEPER_HOST=0.0.0.0 ./venv/bin/python app.py
 Thalath Smart is a small Flask + SQLite web app (port 8802). No build step, no Node, no Docker.
 
 0. **Updating an existing installation?** Do not use the full package (it replaces everything). Download `ThalathSmart-update-….zip`, stop the server, unzip it and move the folder INSIDE the app folder, then double-click `install_update.bat` / `install_update.command`. Accounts, settings, events, stock and activity stay; code is replaced; the catalog is merged field by field (a field the library changed is kept, conflicts go to `updates/update_report_*.md`). Dry run: `python ThalathSmart-update-…/apply_update.py --dry-run` with the app's Python.
-1. Download the package for your system from [Releases](https://github.com/eyesmystery/library-keeper/releases/latest) (`…-windows.zip` or `…-mac.zip`, about 490 MB; the repository is private, so sign in first, or use `gh release download --repo eyesmystery/library-keeper --pattern "*mac.zip"`). Unzip it to a permanent folder.
+1. Download the package for your system from [Releases](https://github.com/eyesmystery/library-keeper/releases/latest) (`…-windows.zip` or `…-mac.zip`, about 560 MB; or use `gh release download --repo eyesmystery/library-keeper --pattern "*mac.zip"`). Unzip it to a permanent folder.
 2. Install Python 3.9+ (Windows: tick "Add python.exe to PATH").
 3. Double-click `start_library.bat` (Windows) or `start_library.command` (macOS; right-click → Open the first time). The first start creates a virtual environment and needs internet. Allow Python on private networks when the system asks.
 4. Open `http://127.0.0.1:8802/admin` on the same computer and create the manager account (first run only; the package ships with no accounts).

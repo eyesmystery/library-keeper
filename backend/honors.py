@@ -131,6 +131,14 @@ def load(max_age=60):
             for r in conn.execute("SELECT book_id, author_id FROM book_authors WHERE role='author'"):
                 if r["author_id"] in data["author"]:
                     data["book_authors"].setdefault(r["book_id"], []).append(r["author_id"])
+            # QADFIX18 (inbox 2026-10-24, «أبي جائزة للرواية»): the titles of those books, so an author's prize given for
+            # one named work is not read as a prize of his other books
+            data["titles"] = {}
+            if data["book_authors"]:
+                ids = list(data["book_authors"])
+                q = ",".join("?" * len(ids))
+                for r in conn.execute(f"SELECT book_id, title FROM books WHERE book_id IN ({q})", ids):
+                    data["titles"][r["book_id"]] = r["title"] or ""
     finally:
         conn.close()
     _cache.update(at=time.time(), data=data)
@@ -222,6 +230,10 @@ def matches_award(book_id, keys, year=None, min_year=None, max_year=None, result
         return [label for _, label in sorted(rows, key=lambda x: x[0])]
     for aid in d["book_authors"].get(book_id, []):
         for r in d["author"].get(aid, []):
+            # QADFIX18 (inbox 2026-10-24, «أبي جائزة للرواية» → «لوياثان»): for «رواية فائزة / حائزة على جائزة» an author's
+            # prize given for another named work («عن «Timbuktu»») is not this book's; a person's prize (no work) still counts
+            if want_any and (r.get("work_title") or "").strip() and _nw(r["work_title"]) != _nw(d.get("titles", {}).get(book_id, "")):
+                continue
             # «كاتبة فازت بنوبل»: «فاز» is the person's own win too; only the author's wins count then
             # (QAD 2026-10-18, case 24: Nobel is an author_awards prize, «فاز» had left it out)
             if _wanted(r, keys, want_any) and _in_years(r, year, min_year, max_year) and (not results or r["result"] in results):
@@ -281,6 +293,18 @@ def name_exists(phrase):
     return any(_wanted(r, k, False) for rows in list(d["book"].values()) + list(d["author"].values()) for r in rows)
 
 
+def name_is_generic(phrase):
+    """QADFIX18 (inbox 2026-10-24, «أبي جائزة للرواية»): words that many different prizes share in their names («للرواية»
+    is in nine) say what a prize is for, not which prize it is — a prize for the novel, not a prize called «للرواية»."""
+    d = load()
+    words = [w for w in _nw(phrase) if w not in ("جائزه", "جايزه")]
+    if not words:
+        return True
+    names = {r.get("award_name") for rows in list(d["book"].values()) + list(d["author"].values()) for r in rows
+             if r.get("award_key") == "other" and all(w in set(_nw(r.get("award_name"))) for w in words)}
+    return len(names) > 4
+
+
 # Countries of the Arab League in Arabic and English (AUDFIX, audit 2026-10-16 P2: السودان and البحرين were missing
 # from the partial list, so their films counted as foreign)
 _ARAB_COUNTRY = re.compile(
@@ -335,17 +359,21 @@ def novel_origins(book_id):
     return out
 
 
-def matches_adaptation(book_id, kind, max_year=None, origin=None):
+def matches_adaptation(book_id, kind, max_year=None, origin=None, min_year=None):
     """kind: film / series / screen (any of the two) -> labels of the matching adaptations.
     max_year: only adaptations made that year or before («فيلم قديم»، «أبيض وأسود», QAD 2026-10-15, case 34).
     origin: "american" / "foreign" / "arab" (QADFIX4; country only, AUDFIX 2026-10-16). The novel's own origin comes
     first (Ibrahim 2026-10-16 23:3x: «بلد الرواية اهم من بلد الفلم»): when the novel is from there, every adaptation of
     the kind counts; otherwise an adaptation whose recorded country is from there. A novel with several films matches
     when any of them does."""
-    kinds = {"film": ("film", "animated", "tv_film"), "series": ("series",), "screen": SCREEN, "animated": ("animated",)}.get(kind, ())
+    # QADFIX16 (QAD 2026-10-24, case 37.1): «فيلم تلفزيوني مو سينما» — a television film or a series
+    kinds = {"film": ("film", "animated", "tv_film"), "series": ("series",), "screen": SCREEN, "animated": ("animated",),
+             "tv": ("tv_film", "series")}.get(kind, ())
     novel_ok = bool(origin) and origin in novel_origins(book_id)
     return [adaptation_label(r) for r in load()["adapt"].get(book_id, [])
             if r["kind"] in kinds and (not max_year or (_int_year(r.get("year")) or 9999) <= max_year)
+            # QADFIX22 (QAD 2026-10-27, case 37.2): «أفلام بعد الألفين» — made that year or after (an unknown year does not count)
+            and (not min_year or (_int_year(r.get("year")) or 0) >= min_year)
             and (novel_ok or _adapt_origin_ok(r, origin))]
 
 

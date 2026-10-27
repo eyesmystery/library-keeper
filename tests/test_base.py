@@ -14,7 +14,7 @@ for path in ["/", "/static/styles.css", "/static/app.js", "/admin", "/api/books"
 css = open("../frontend/styles.css", encoding="utf-8").read()
 html = open("../frontend/index.html", encoding="utf-8").read()
 js = open("../frontend/app.js", encoding="utf-8").read()
-ok(".host-mark{width:56px;aspect-ratio:2652/1442}" in css and html.count('class="host-mark" src="/static/assets/manar-logo.svg" alt="منار"') == 3 and "marsa" not in css.lower() and "marsa" not in html.lower()
+ok(".host-mark{width:56px;aspect-ratio:2652/1442}" in css and html.count('class="host-mark" src="/static/assets/manar-logo.svg" alt="منار"') == 4 and "marsa" not in css.lower() and "marsa" not in html.lower()
    and "مرسى" not in html and "مرسى" not in js and "Marsa" not in js,
    "Chat and book-detail headers carry the «منار» logo (old names and logos are gone)")
 ok('id="modelStatus" class="model-status" role="status" hidden' in html and
@@ -77,7 +77,7 @@ ok(genres_of("أبغى ديوان شعر") == {"شعر"}, "poetry query -> poetr
 ok("شعر" not in genres_of("أشعر بالملل وأبغى رواية"), "أشعر does not trigger poetry")
 ok(all(b["author"] == "غازي القصيبي" for b in rec("كتب غازي القصيبي")["results"][:3]), "author search القصيبي")
 ok(con2.execute("select count(*) from books where shelf_location glob '[A-H][0-9]*'").fetchone()[0] == 0, "no invented shelf codes (locations come from staff or library sections)")
-ok(html.count('class="header-brand brand-home" type="button"') == 1 and html.count('class="detail-brand brand-home" type="button"') == 2
+ok(html.count('class="header-brand brand-home" type="button"') == 2 and html.count('class="detail-brand brand-home" type="button"') == 2
    and "function goHome() { if (noteMode) closeNote(); closeMore(); showSection('welcome'); }" in js
    and "document.querySelectorAll('.brand-home').forEach(button => button.addEventListener('click', goHome));" in js
    and "home: 'الرجوع للصفحة الرئيسية'" in js and "home: 'Back to the start page'" in js, "the «منار» logo in the chat and detail headers goes back to the start page")

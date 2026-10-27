@@ -13,6 +13,7 @@ models.init_db()
 con = sqlite3.connect(models.DB_PATH)
 ok("outside_books" in {r[0] for r in con.execute("select name from sqlite_master where type='table'")}, "migration creates outside_books")
 import outside_books as O
+from datetime import datetime, timezone
 
 # ---------- names
 ok(O.key_of("اخلع حذائك") == O.key_of("اخلع حذاءك") == O.key_of("كتاب اخلع حذاءك"), "«حذائك» / «حذاءك» / «كتاب …» are one key")
@@ -46,6 +47,11 @@ def fake_gr(goodreads_id=None, isbn=None, title=None, timeout=12.0):
                 "genres": ["Nonfiction", "Short Stories", "Self Help"], "rating": 3.7, "ratings_count": 5101,
                 "reviews": [{"rating": 4, "text": "كتاب جميل يعلمك أن السعادة في الرحلة نفسها وليست في الوصول إليها أبدا"}],
                 "sources": ["https://www.goodreads.com/book/show/24500966"], "goodreads_id": "24500966"}
+    if title and not goodreads_id and not isbn:
+        if O.same_title("الأرض بعد طوفان نوح", title):
+            return {"title": "الأرض بعد طوفان نوح: سيرة أبناء نوح", "author": "شريف سامي", "description": "عن أبناء نوح بعد الطوفان.",
+                    "sources": ["https://www.goodreads.com/book/show/60290879"], "goodreads_id": "60290879"}
+        return None   # Goodreads has no page for this title
     raise RuntimeError("goodreads challenge")
 O.from_wikidata, O.from_openlibrary, O.goodreads_page = fake_wd, fake_ol, fake_gr
 O.wiki_summary = lambda lang, page, timeout=4.0: (None, None)
@@ -71,6 +77,10 @@ ok(r and r["author"] == "سعود السنعوسي" and r["wikidata"] == "Q1", "
 ok(O.enrich(O.key_of("ساق البامبو")) is False and not O.get("ساق البامبو").get("enriched_at"),
    "a Goodreads bot check is not «no such book»: tried again on a later visit")
 
+# VREVFIX (2026-10-27): a lookup in which Goodreads was not asked (resting after the bot check above) is not remembered as not found
+ok(O.lookup("كتاب لا وجود له ابدا", background=False) is None and O.get("كتاب لا وجود له ابدا") is None,
+   "Goodreads not asked: nothing remembered, the next visitor's lookup tries again")
+O._down.clear()
 ok(O.lookup("كتاب لا وجود له ابدا", background=False) is None, "not found anywhere -> None")
 row = O.get("كتاب لا وجود له ابدا")
 ok(row and row["status"] == "not_found", "… and remembered as not found")
@@ -222,6 +232,40 @@ took = time.time() - t0
 O.ENRICH_WAIT = keep_wait
 ok(r and r["author"] == "كاتب" and took < 0.5 + 0.3 + 0.5,
    f"one fast source, one slow source and a slow Goodreads: the answer comes in {took:.2f} s (budget + the short Goodreads wait)")
+
+# ---------- VREVFIX (2026-10-27): a book suggested for the shelves — Goodreads asked together with the others
+O._down.clear()
+slow = {"n": 0}
+def slow_ol(title, timeout=4.0):
+    import time as _t
+    slow["n"] += 1
+    _t.sleep(1.2)
+    return None
+O.from_openlibrary, O.from_wikidata, O.goodreads_page = slow_ol, fake_wd, fake_gr
+ok(O.lookup("الأرض بعد طوفان نوح", budget=1.0, background=False) is None and O.get("الأرض بعد طوفان نوح") is None,
+   "chat lookup: Open Library slower than the budget, Goodreads not reached -> None, nothing remembered as not found")
+r = O.lookup("الأرض بعد طوفان نوح", budget=3.0, background=False, goodreads_too=True)
+ok(r and r["status"] == "found" and r["author"] == "شريف سامي" and "goodreads" in " ".join(r["sources"]),
+   "shelf suggestion: Goodreads asked at the same time finds the Arabic book")
+c3 = models.get_connection()
+c3.execute("INSERT OR REPLACE INTO outside_books (key, asked_title, status, looked_at) VALUES (?,?,?,?)",
+           (O.key_of("كتاب منسي"), "كتاب منسي", "not_found", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")))
+c3.commit(); c3.close()
+before = calls["gr"]
+O.lookup("كتاب منسي", budget=2.0, background=False, goodreads_too=True)
+ok(calls["gr"] == before + 1, "shelf suggestion: a title remembered as not found is tried again")
+
+# AGY-20261027-02: Goodreads asked together with the others is kept when Open Library also knows the title
+def stub_ol(title, timeout=4.0):
+    if O.same_title("الأرض بعد طوفان نوح", title):
+        return {"title": "الأرض بعد طوفان نوح", "author": None, "year": 2021, "isbn": None, "subjects": [], "publisher": None,
+                "sources": ["https://openlibrary.org/works/OL9W"]}
+    return None
+O.from_openlibrary = stub_ol
+c5 = models.get_connection(); c5.execute("DELETE FROM outside_books WHERE key=?", (O.key_of("الأرض بعد طوفان نوح"),)); c5.commit(); c5.close()
+r = O.lookup("الأرض بعد طوفان نوح", budget=3.0, background=False, goodreads_too=True)
+ok(r and r["author"] == "شريف سامي" and r.get("blurb") and any("goodreads" in u for u in r["sources"]) and any("openlibrary" in u for u in r["sources"]),
+   "AGY-02: an Open Library stub does not drop Goodreads: its author, blurb and source are kept")
 
 print(f"\nTOTAL pass={P} fail={F}")
 sys.exit(1 if F else 0)

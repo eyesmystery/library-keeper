@@ -160,10 +160,9 @@ ok(s.post(f"/api/admin/inbox/staff-ideas/{iid}", json={"status": "done"}).status
 admin2 = visitor.get("/admin").get_data(as_text=True)
 ok('id="inboxTabIdeas"' in admin2 and "loadIdeas(" in admin2, "the inbox has the «اقتراحات الموظفين» tab")
 ok('id="basicEdit"' in admin2 and 'id="basicForm"' in admin2 and "saveBasic(b)" in admin2, "the card has the edit button and form")
-ok('id="libTabConfirm"' in admin2 and admin2.index('id="libTabConfirm"') < admin2.index('id="libTabOrigin"'),
-   "«تأكيد الهوية» tab comes before «أصل الكتاب»")
-ok("!confirmPending(b)" in admin2, "books waiting for identity are not in «أصل الكتاب»")
-ok('id="libTabPublishers"' in admin2 and admin2.index('id="libTabTranslators"') < admin2.index('id="libTabPublishers"') < admin2.index('id="libTabConfirm"')
+ok('id="libTabConfirm"' not in admin2 and 'id="libTabOrigin"' not in admin2 and "${confirmBlock(d)}" in admin2,
+   "«تأكيد الهوية» and «أصل الكتاب» tabs removed; the coloured section stays in the card (ADMSTF)")
+ok('id="libTabPublishers"' in admin2 and admin2.index('id="libTabTranslators"') < admin2.index('id="libTabPublishers"') < admin2.index('id="libTabDeleted"')
    and "['publishers', 'libTabPublishers', 'libPublishers']" in admin2 and 'id="pubList"' in admin2, "«دور النشر» tab after the authors / translators")
 ok('id="inboxExport"' in admin2, "admin inbox has the download button")
 

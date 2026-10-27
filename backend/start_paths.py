@@ -1,4 +1,4 @@
-"""The five start buttons of the visitor chat (Ibrahim 2026-10-11, from the library owners' proposal).
+"""The five start buttons of the visitor chat (five tap-ready answers each since 2026-10-27, Ibrahim: «اقل شيء ٥ اختيارات مساعدة») (Ibrahim 2026-10-11, from the library owners' proposal).
 
 Tapping a start button never brings books straight away: Manar first asks one question for that path,
 with tap-ready answers. The visitor's answer then goes through the normal conversation; a vague answer
@@ -18,31 +18,31 @@ PATHS = {
         "أدوّر كتاب معيّن": ("أبشر! وش اسم الكتاب، أو اسم مؤلفه؟", []),
         "رشّحي لي كتاب يناسب ذوقي أو مزاجي": (
             "حلو! قل لي وش آخر كتاب قرأته وعجبك، أو وش مزاجك اليوم؟",
-            ["رواية تشد", "شي خفيف ومريح", "كتاب يفيدني", SKIP_AR]),
+            ["رواية تشد", "شي خفيف ومريح", "كتاب يفيدني", "شي قصير أخلّصه بسرعة", SKIP_AR]),
         "أبغى كتاب هدية": (
             "فكرة حلوة! لمن الهدية، ووش يحب يقرأ؟",
-            ["لصديق يحب الروايات", "لطفل", "لشخص يحب تطوير الذات", "ما أدري وش يحب"]),
+            ["لصديق يحب الروايات", "لطفل", "لشخص يحب تطوير الذات", "لشخص يحب التاريخ", "ما أدري وش يحب"]),
         "أبغى أبدأ قراءة": (
             "خطوة جميلة! وش يشدّك أكثر: القصص، ولا المعلومات، ولا الكتب اللي تطوّر الذات؟",
-            ["القصص والروايات", "المعلومات والتاريخ", "تطوير الذات", SKIP_AR]),
+            ["القصص والروايات", "المعلومات والتاريخ", "تطوير الذات", "شي قصير وسهل", SKIP_AR]),
         "فاجئيني بكتب جديدة": (
             "يسعدني! تبغى المفاجأة رواية، ولا كتاب غير روائي؟",
-            ["رواية", "كتاب غير روائي", SURPRISE_AR]),
+            ["رواية", "كتاب غير روائي", "كتاب فاز بجائزة", "شي قصير", SURPRISE_AR]),
     },
     "en": {
         "Find a specific book": ("Sure! What is the book's title, or its author?", []),
         "Recommend something for my taste or mood": (
             "Lovely! Tell me the last book you read and enjoyed, or your mood today.",
-            ["A gripping novel", "Something light", "Something useful", SKIP_EN]),
+            ["A gripping novel", "Something light", "Something useful", "A short, quick read", SKIP_EN]),
         "I want a gift book": (
             "Nice idea! Who is the gift for, and what do they like to read?",
-            ["A friend who loves novels", "A child", "Someone into self-help", "Not sure what they like"]),
+            ["A friend who loves novels", "A child", "Someone into self-help", "Someone who loves history", "Not sure what they like"]),
         "I want to start reading": (
             "A great step! What draws you most: stories, facts, or books for personal growth?",
-            ["Stories and novels", "Facts and history", "Personal growth", SKIP_EN]),
+            ["Stories and novels", "Facts and history", "Personal growth", "Something short and easy", SKIP_EN]),
         "Surprise me with new books": (
             "Happy to! Would you like the surprise to be a novel, or non-fiction?",
-            ["A novel", "Non-fiction", SURPRISE_EN]),
+            ["A novel", "Non-fiction", "A prize-winning book", "Something short", SURPRISE_EN]),
     },
 }
 

@@ -351,6 +351,11 @@
     details.prov-more>summary{min-height:44px;padding:10px 14px;cursor:pointer;font-size:14px;color:var(--muted)}
     details.prov-more .prov-list{padding:0 10px 10px}
     .tbl{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden}
+    /* «الكتب المطلوبة» (2026-10-24) */
+    #rqList .tbl-wrap{overflow-x:auto}#rqList .tbl{font-size:14px}#rqList .tbl td:first-child{white-space:normal;min-width:180px}
+    #rqList .pill.ok{display:inline-block;margin-inline-start:6px;padding:1px 8px;border-radius:99px;background:var(--primary-soft);color:var(--primary);font-size:12px;font-weight:700}
+    #rqList .btn.small{padding:4px 12px;font-size:13px;min-height:0}
+    @media (max-width:600px){#rqList th:nth-child(2),#rqList td:nth-child(2),#rqList th:nth-child(4),#rqList td:nth-child(4),#rqList th:nth-child(5),#rqList td:nth-child(5){display:none}#rqList .tbl th,#rqList .tbl td{padding:7px 6px}}
     .tbl th,.tbl td{padding:7px 9px;border-bottom:1px solid #eee8dc;text-align:right;white-space:nowrap}
     .tbl th{background:#f3f0e8;color:var(--muted);font-weight:700}
     .tbl td.ignored,.tbl th.ignored{color:#b3b7b4}
@@ -503,7 +508,7 @@
     header.rail .tab[aria-selected="true"]{background:var(--sage-soft);color:var(--brown);font-weight:700}
     /* «التنبيهات»: a bell (Ibrahim 2026-10-17: «غير الايقونة. حطها جرس»); before this the tab had no --i and showed a filled square */
     #tabAlerts{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5a6 6 0 0 1 12 0c0 4.2 1.4 6.3 2.3 7.3.3.3.1.7-.3.7H4c-.4 0-.6-.4-.3-.7.9-1 2.3-3.1 2.3-7.3z'/%3E%3Cpath d='M10 20.5a2.2 2.2 0 0 0 4 0'/%3E%3C/svg%3E")}
-    #tabBooks{--i:var(--i-books)}#tabInbox{--i:var(--i-chat)}#tabEvents{--i:var(--i-calendar)}#tabPicks{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z'/%3E%3C/svg%3E")}#tabStats{--i:var(--i-chart)}#tabImport{--i:var(--i-upload)}#tabSettings{--i:var(--i-sliders)}
+    #tabBooks{--i:var(--i-books)}#tabReaders{--i:var(--i-users)}#tabOrganize{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z'/%3E%3C/svg%3E")}#tabImport{--i:var(--i-upload)}#tabSettings{--i:var(--i-sliders)}
     header.rail .tab .tab-n.alert{margin-inline-start:auto;font-size:13px}
     .who-av{display:none}header.rail .who{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;padding:16px 8px 0;border-top:1px solid var(--line)}
     header.rail #whoName{display:block;flex-basis:100%;margin-bottom:8px;font-size:14px;overflow-wrap:anywhere}
@@ -567,7 +572,7 @@
     .days-axis{grid-column:2;direction:ltr;display:flex;justify-content:space-between;font-size:13px;margin-top:0}.days-axis span{direction:rtl;max-width:33%;text-align:center}
     .chart-detail{margin-top:20px;border-top:1px solid var(--line);padding-top:8px}.chart-detail summary{display:flex;align-items:center;min-height:44px;cursor:pointer;color:var(--muted);font-size:16px}.chart-detail[open] summary{color:var(--ink)}
     .chart-empty{padding:24px 0;color:var(--muted);font-size:15px}.hbar .fill{background:var(--brown)}
-    #statsView .st-head h2,#inboxView .st-head h2{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+    #statsView .st-head h2{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
     @media(max-width:1199px){main{padding:28px 24px 48px}.shell{grid-template-columns:204px minmax(0,1fr)}.tool{flex-basis:130px}.booklist th:not(.bk-cell):not(.review-cell):not(.open-cell){width:80px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:979px){
       .shell{display:block}header.rail{position:static;height:auto;border-inline-end:0;border-bottom:1px solid var(--line)}
@@ -610,6 +615,26 @@
       #qrPrint .qp-code{width:78mm}#qrPrint .qp-code svg{display:block;width:100%;height:auto}
       #qrPrint .qp-note{margin-top:8mm;font-size:10pt;color:#756B65}
     }
+    /* ===== ADMSTF (Ibrahim 2026-10-24): the page is for library staff; the developer's own parts are drawn in their own
+       colour («ابغى اي شيء يكون للمطور يكون بلون مختلف عشان اعرف انه هذا خاص فيني») and hidden from everyone else ===== */
+    :root{--dev:#2F6690;--dev-soft:#E7F0F7}
+    body:not(.is-dev) .dev-only{display:none!important}
+    .dev-box{background:var(--dev-soft)!important;border:1px dashed var(--dev)!important;border-radius:12px}
+    .dev-box>h3:first-child,.dev-box summary h3{color:var(--dev)}
+    .dev-tab{color:var(--dev)!important;border:1px dashed var(--dev)!important}
+    .dev-tab[aria-selected="true"],.dev-tab[aria-pressed="true"]{background:var(--dev-soft)!important}
+    .dev-col{background:var(--dev-soft)!important;color:var(--dev)}
+    .dev-tag{display:inline-block;margin-inline-start:6px;padding:0 6px;border-radius:6px;background:var(--dev);color:#fff;font-size:12px;font-weight:700;vertical-align:middle}
+    .kind-off{display:none!important}
+    .sheet-key{display:flex;flex-wrap:wrap;gap:8px 24px;margin:8px 0 0}.sheet-key span{display:flex;flex-direction:column}.sheet-key small{font-size:13px;color:var(--muted)}.sheet-key b{font-size:18px;color:var(--ink)}.sheet-head .sheet-key small{color:inherit;opacity:.75}.sheet-head .sheet-key b{color:inherit}
+    .sub-h{margin:18px 0 8px;font-size:16px;color:var(--ink)}.nb-block{background:transparent!important;border-style:dashed!important}
+    .sub-tabs{margin-top:20px}
+    #inboxPane .st-head h2,#devPane .st-head h2{position:static;width:auto;height:auto;clip:auto;font-size:20px;margin:0 0 4px}
+    header.rail .tab.nav-qr{justify-content:center;margin:0 0 10px;background:var(--brown);color:#fff;font-weight:700}
+    header.rail .tab.nav-qr:hover,header.rail .tab.nav-qr:focus-visible{background:var(--coral);color:#fff}
+    .rail-tip{position:fixed;z-index:60;max-width:320px;padding:8px 12px;border-radius:8px;background:var(--brown);color:#fff;font-size:14px;line-height:1.5;box-shadow:0 6px 18px rgba(59,31,20,.2);pointer-events:none}
+    header.rail .tab .tab-tip{display:none}
+    @media(max-width:979px){header.rail .tab{flex-wrap:wrap}header.rail .tab .tab-tip{display:block;flex-basis:100%;font-size:12px;line-height:1.4;color:var(--muted);font-weight:400}header.rail .tab.nav-qr .tab-tip{color:#fff}}
   </style>
 </head>
 <body>
@@ -641,20 +666,19 @@
       <h1 class="brand"><img class="brand-icon" src="/static/assets/manar-icon.svg" alt="" /><img class="brand-logo" src="/static/assets/manar-logo.svg" alt="منار" /><span>لوحة الإدارة</span></h1>
       <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="adminNav">القائمة</button>
       <nav id="adminNav" class="tabs" role="tablist" aria-label="أقسام الإدارة" aria-orientation="vertical">
-        <button class="tab" role="tab" id="tabBooks" title="المكتبة" aria-selected="true" aria-controls="booksView">المكتبة</button>
-        <button class="tab" role="tab" id="tabAlerts" title="التنبيهات" aria-selected="false" aria-controls="alertsView">التنبيهات <span class="tab-n alert" id="alertsN" hidden></span></button>
-        <button class="tab" role="tab" id="tabInbox" title="البلاغات" aria-selected="false" aria-controls="inboxView">البلاغات <span class="tab-n alert" id="inboxN" hidden></span></button>
-        <button class="tab" role="tab" id="tabPicks" title="اختياراتنا" aria-selected="false" aria-controls="picksView">اختياراتنا</button>
-        <button class="tab" role="tab" id="tabEvents" title="الفعاليات" aria-selected="false" aria-controls="eventsView">الفعاليات</button>
-        <button class="tab" role="tab" id="tabStats" title="الإحصاءات" aria-selected="false" aria-controls="statsView">الإحصاءات</button>
-        <button class="tab" role="tab" id="tabImport" title="استيراد من رواء" aria-selected="false" aria-controls="importView">استيراد من رواء</button>
-        <button class="tab" role="tab" id="tabSettings" title="الإعدادات" aria-selected="false" aria-controls="settingsView">الإعدادات</button>
-        <button class="tab nav-qr" id="navQr" type="button" title="رمز QR لصفحة الزائر" aria-haspopup="dialog">رمز QR</button>
+        <button class="tab nav-qr" id="navQr" type="button" aria-haspopup="dialog" data-tip="يفتح رمز QR لصفحة الزائر: اطبعه أو نزّله صورة">رمز QR</button>
+        <button class="tab" role="tab" id="tabBooks" data-tip="الكتب، المؤلفون، المترجمون، دور النشر" aria-selected="true" aria-controls="booksView">المكتبة</button>
+        <button class="tab" role="tab" id="tabAlerts" data-tip="ما ينتظرك: من الزوار، من الموظفين، ومن المطوّر" aria-selected="false" aria-controls="alertsView">التنبيهات <span class="tab-n alert" id="alertsN" hidden></span></button>
+        <button class="tab" role="tab" id="tabReaders" data-tip="إحصائيات الزوار وطلبات القرّاء" aria-selected="false" aria-controls="readersView">القرّاء <span class="tab-n" id="requestedN" hidden></span></button>
+        <button class="tab" role="tab" id="tabOrganize" data-tip="اختياراتنا والفعاليات في الصفحة الأولى لمنار" aria-selected="false" aria-controls="organizeView">تنظيم منار</button>
+        <button class="tab" role="tab" id="tabImport" data-tip="ملف رواء، ملف المكتبة، وسجل الاستيراد" aria-selected="false" aria-controls="importView">الاستيراد</button>
+        <button class="tab" role="tab" id="tabSettings" data-tip="رمز QR، أقسام المكتبة، الموظفون، التحديثات، الذكاء الاصطناعي، عن التطبيق" aria-selected="false" aria-controls="settingsView">الإعدادات</button>
       </nav>
       <div class="who" id="who" hidden><span class="who-av" id="whoAv" aria-hidden="true"></span><span id="whoName"></span>
         <button id="pwBtn" type="button" title="تغيير كلمة المرور"><span class="who-t">كلمة المرور</span></button><button id="logoutBtn" type="button" title="خروج"><span class="who-t">خروج</span></button></div>
     </div>
   </header>
+  <div id="railTip" class="rail-tip" role="tooltip" hidden></div>
 
   <div id="auth" class="auth" hidden>
     <form id="authForm" class="auth-card" autocomplete="on">
@@ -680,7 +704,6 @@
     <div class="pagehead">
       <h2 class="ph-title" id="phTitle" tabindex="-1">المكتبة</h2>
       <div class="ph-actions">
-        <button class="ph-gear" id="phGear" type="button" aria-label="الإعدادات" title="الإعدادات"><i class="ic" aria-hidden="true"></i></button>
         <a class="visitor-link ph-cta" href="/" target="_blank" rel="noopener">واجهة الزائر <i class="ic" aria-hidden="true"></i></a>
       </div>
     </div>
@@ -691,9 +714,7 @@
           <button class="settings-tab" role="tab" id="libTabAuthors" aria-selected="false" aria-controls="libAuthors" tabindex="-1">المؤلفون <span class="tab-n" id="libNAuthors"></span></button>
           <button class="settings-tab" role="tab" id="libTabTranslators" aria-selected="false" aria-controls="libAuthors" tabindex="-1">المترجمون <span class="tab-n" id="libNTranslators"></span></button>
           <button class="settings-tab" role="tab" id="libTabPublishers" aria-selected="false" aria-controls="libPublishers" tabindex="-1">دور النشر <span class="tab-n" id="libNPublishers"></span></button>
-          <button class="settings-tab" role="tab" id="libTabConfirm" aria-selected="false" aria-controls="libConfirm" tabindex="-1">تأكيد الهوية <span class="tab-n" id="libNConfirm"></span></button>
-          <button class="settings-tab" role="tab" id="libTabOrigin" aria-selected="false" aria-controls="libOrigin" tabindex="-1">أصل الكتاب <span class="tab-n" id="libNOrigin"></span></button>
-          <button class="settings-tab" role="tab" id="libTabDeleted" aria-selected="false" aria-controls="libDeleted" tabindex="-1">المحذوفة <span class="tab-n" id="libNDeleted"></span></button>
+          <button class="settings-tab dev-only dev-tab" role="tab" id="libTabDeleted" aria-selected="false" aria-controls="libDeleted" tabindex="-1">المحذوفة <span class="tab-n" id="libNDeleted"></span></button>
         </div>
       </div>
 
@@ -709,33 +730,33 @@
           <div class="lib-tools">
             <label class="tool"><span>دار النشر</span><select id="publisherFilter"><option value="">الكل</option></select></label>
             <label class="tool"><span>الترتيب</span><select id="sortBy">
-            <option value="complete">الأكثر اكتمالًا</option>
-            <option value="added">الأحدث إضافة</option>
-            <option value="researched">الأحدث بحثًا</option>
             <option value="title">العنوان (أ–ي)</option>
+            <option value="complete" class="dev-only">الأكثر اكتمالًا (مطوّر)</option>
+            <option value="added">الأحدث إضافة</option>
+            <option value="researched" class="dev-only">الأحدث بحثًا (مطوّر)</option>
             <option value="author">المؤلف (أ–ي)</option>
             <option value="qty">الكمية (الأكثر)</option>
             <option value="price">السعر (الأعلى)</option>
-            <option value="pages">عدد الصفحات</option>
+            <option value="pages" class="dev-only">عدد الصفحات (مطوّر)</option>
             <option value="loc">الموقع (الرف)</option>
           </select></label>
             <label class="tool"><span>التجميع</span><select id="groupBy">
             <option value="">بدون تجميع</option>
             <option value="genre">التصنيف</option>
             <option value="publisher">دار النشر</option>
-            <option value="research">حالة البحث</option>
+            <option value="research" class="dev-only">حالة البحث (مطوّر)</option>
             <option value="stock">المخزون</option>
-            <option value="lang">لغة العمل</option>
+            <option value="lang" class="dev-only">لغة العمل (مطوّر)</option>
             <option value="loc">الموقع</option>
           </select></label>
             <div class="seg viewseg" role="group" aria-label="شكل عرض الكتب">
               <button type="button" data-view="list" aria-pressed="true">قائمة</button>
-              <button type="button" data-view="cards" aria-pressed="false">بطاقات</button>
+              <button type="button" data-view="cards" aria-pressed="false" class="dev-only dev-tab">بطاقات</button>
               <button type="button" data-view="shelf" aria-pressed="false">رفوف</button>
             </div>
           </div>
           <div id="bookChips" class="fchips" aria-label="تصفية سريعة"></div>
-<details class="legend-box"><summary>دليل ألوان الصفات</summary>
+<details class="legend-box dev-only dev-box"><summary>دليل ألوان الصفات <span class="dev-tag">مطوّر</span></summary>
           <div class="legend" aria-label="دليل الألوان">
             <span class="chip confirmed">مؤكد</span> ثقة ٨٥٪ فأكثر (٥ مراجعات أو أكثر)، يُذكر للزائر
             <span class="chip impression">انطباع</span> ٦٥–٨٤٪، للترتيب فقط
@@ -759,13 +780,12 @@
           <label class="tool"><span>الترتيب</span><select id="authorSort">
             <option value="books">الأكثر كتبًا</option>
             <option value="stock">الأكثر توفرًا</option>
-            <option value="researched">الأكثر كتبًا مبحوثة</option>
+            <option value="researched" class="dev-only">الأكثر كتبًا مبحوثة (مطوّر)</option>
             <option value="name">الاسم (أ–ي)</option>
-            <option value="recent">آخر تعديل</option>
+            <option value="recent" class="dev-only">آخر تعديل (مطوّر)</option>
           </select></label>
-          <div class="seg authorseg" role="group" aria-label="شكل عرض المؤلفين">
-            <button type="button" data-view="cards" aria-pressed="true">بطاقات</button>
-            <button type="button" data-view="list" aria-pressed="false">قائمة</button>
+          <div class="seg authorseg" role="group" aria-label="شكل عرض المؤلفين" hidden>
+            <button type="button" data-view="list" aria-pressed="true">قائمة</button>
           </div>
         </div>
         <div id="authorChips" class="fchips" aria-label="تصفية المؤلفين"></div>
@@ -787,60 +807,29 @@
         <div id="pubList" class="del-list"></div>
       </div>
 
-      <div id="libConfirm" class="lib-pane" role="tabpanel" aria-labelledby="libTabConfirm" hidden>
-        <p class="diff" style="margin:0 0 12px">ابدأ من هنا: كتب ما تأكدنا أن سجلها هو نفس الكتاب اللي على الرف (المؤلف أو العنوان أو الطبعة)، وبعضها قد لا يكون كتابًا أصلًا. افتح الكتاب، قارن الغلاف والعنوان والمؤلف والدار، واختر الصحيح في صندوق «تأكيد هوية الكتاب». بعد الرد يخرج الكتاب من هذه القائمة، وإذا كان أصله غير معروف يظهر في «أصل الكتاب».</p>
-        <div class="lib-tools"><input id="confirmSearch" type="search" placeholder="ابحث بالعنوان أو المؤلف أو الدار…" aria-label="بحث في قائمة تأكيد الهوية" /></div>
-        <div class="count-row"><p id="confirmCount" class="count" role="status"></p></div>
-        <div id="confirmList" class="del-list"></div>
-      </div>
-
-      <div id="libOrigin" class="lib-pane" role="tabpanel" aria-labelledby="libTabOrigin" hidden>
-        <p class="diff" style="margin:0 0 12px">كتب ما نعرف بعد هل هي عربية الأصل أو مترجمة. اختر من الكتاب نفسه: «عربي الأصل»، أو لغة الأصل إذا كان مترجمًا. الاختيار يُحفظ مباشرة ويخرج الكتاب من القائمة، وتقدر تتراجع عن آخر اختيار. ما يتغير المخزون ولا أي شيء ثاني في الكتاب. الكتب اللي تنتظر «تأكيد الهوية» ما تظهر هنا إلا بعد الرد عليها.</p>
-        <div class="lib-tools"><input id="originSearch" type="search" placeholder="ابحث بالعنوان أو المؤلف أو الدار…" aria-label="بحث في قائمة أصل الكتاب" /></div>
-        <div class="count-row"><p id="originCount" class="count" role="status"></p></div>
-        <div id="originList" class="del-list"></div>
-      </div>
-
-      <div id="libDeleted" class="lib-pane" role="tabpanel" aria-labelledby="libTabDeleted" hidden>
+      <div id="libDeleted" class="lib-pane dev-box" role="tabpanel" aria-labelledby="libTabDeleted" hidden>
         <p class="diff" style="margin:0 0 12px">منتجات حُذفت يدويًا من الكتالوج لأنها ليست كتبًا (ألعاب، مجموعات تعليمية…). ما تظهر للزوار ولا تدخل البحث، واستيراد رواء الأسبوعي يتجاهلها. لو انحذف شيء بالغلط استرجعه من هنا ويرجع بكل بياناته.</p>
         <p id="delCount" class="count" role="status"></p>
         <div id="delList" class="del-list"></div>
       </div>
     </div>
 
-    <!-- «التنبيهات» + «ملاحظات من المطور» (QADFIX4, Ibrahim 2026-10-16): what needs a look now, and the developer's notes -->
+    <!-- «التنبيهات» (ADMSTF, Ibrahim 2026-10-24): one section for what waits — «ينتظرك الآن» on top, then by source.
+         Before: «التنبيهات» (QADFIX4, 2026-10-16) and «البلاغات» were two sections. Updates and sending moved to «الإعدادات». -->
     <div id="alertsView" role="tabpanel" aria-labelledby="tabAlerts" hidden>
       <div class="st-head">
-        <div><h2>التنبيهات</h2>
-          <p class="diff">كل ما ينتظر مراجعة الآن في مكان واحد: بلاغات الزوار واقتراحاتهم، التعديلات المطلوبة على الكتب، الكتب اللي تحتاج تأكيد هويتها، وملاحظات المطور. «جديد» يعني وصل بعد آخر مرة فتحت هذه الصفحة من هذا الجهاز.</p></div>
+        <div><h2>ينتظرك الآن</h2>
+          <p class="diff">كل ما ينتظر مراجعة في مكان واحد. اضغط «افتح» لتروح له. «جديد» يعني وصل بعد آخر مرة فتحت هذه الصفحة من هذا الجهاز.</p></div>
       </div>
       <p id="alertsState" class="count" role="status"></p>
       <div id="alertsList" class="del-list"></div>
-      <article class="dn-card" id="updBox" style="margin-top:16px" aria-labelledby="updTitle" hidden>
-        <h3 id="updTitle" tabindex="-1">تحديثات «منار»</h3>
-        <p id="updText" role="status"></p>
-        <div class="upd-bar" id="updBar" hidden><span id="updBarFill"></span></div>
-        <div class="dn-acts" id="updActs"></div>
-      </article>
-      <!-- «إرسال البلاغات للمطوّر» (INBOXSEND, Ibrahim 2026-10-23): the inbox file sealed for Ibrahim, weekly and on his request -->
-      <article class="dn-card" id="sendBox" style="margin-top:16px" aria-labelledby="sendTitle" hidden>
-        <h3 id="sendTitle" tabindex="-1">إرسال البلاغات للمطوّر</h3>
-        <p class="diff">نفس ملف «تنزيل البلاغات» (بلاغات الزوار واقتراحاتهم، الأسئلة اللي ما لقت جواب، تعديلات الموظفين واقتراحاتهم، ومحادثات وضع الاختبار) يُرسل للمطوّر كل أسبوع، وكلما طلبه. الملف مشفّر بمفتاح المطوّر فلا يفتحه غيره، ولا يتغيّر شيء في البلاغات عند إرساله.</p>
-        <p id="sendText" role="status"></p>
-        <div class="dn-acts" id="sendActs"></div>
-      </article>
-      <div class="st-head" id="devHead" style="margin-top:22px">
-        <div><h2>ملاحظات من المطور</h2>
-          <p class="diff">طلبات من مطوّر التطبيق لفريق المكتبة. اقرأ الملاحظة، نفّذ المطلوب، ثم اضغط «تم» (ولك أن تكتب ما سويت). كل ضغطة تُسجَّل في سجل العمليات وتصل للمطور مع «تنزيل الكل في ملف».</p></div>
-        <div class="seg" id="devStatus" role="group" aria-label="حالة الملاحظات">
-          <button type="button" data-status="open" aria-pressed="true">مفتوحة</button><button type="button" data-status="done">تمّت</button><button type="button" data-status="all">الكل</button>
-        </div>
+      <div class="settings-tabs lib-tabs sub-tabs" id="alertsSub" role="tablist" aria-label="مصدر التنبيه">
+        <button class="settings-tab" role="tab" id="subVisitors" aria-selected="true" aria-controls="inboxPane">من الزوار <span class="tab-n" id="subNVisitors"></span></button>
+        <button class="settings-tab" role="tab" id="subStaff" aria-selected="false" aria-controls="inboxPane" tabindex="-1">من الموظفين <span class="tab-n" id="subNStaff"></span></button>
+        <button class="settings-tab" role="tab" id="subDevNotes" aria-selected="false" aria-controls="devPane" tabindex="-1">من المطوّر <span class="tab-n" id="subNDev"></span></button>
+        <button class="settings-tab dev-only dev-tab" role="tab" id="subQuestions" aria-selected="false" aria-controls="inboxPane" tabindex="-1">أسئلة بلا جواب <span class="tab-n" id="inboxNQuestions"></span></button>
       </div>
-      <p id="devState" class="count" role="status"></p>
-      <div id="devList" class="del-list"></div>
-    </div>
-
-    <div id="inboxView" role="tabpanel" aria-labelledby="tabInbox" hidden>
+      <div id="inboxPane" role="tabpanel" aria-labelledby="subVisitors">
       <div class="st-head">
         <div><h2>بلاغات الزوار واقتراحاتهم</h2>
           <p class="diff">الزائر يبلّغ من صفحة الكتاب إذا شاف معلومة غلط، ويرسل اقتراحه من المحادثة. مجهولة: ما نحفظ اسم الزائر ولا محادثته. البلاغ ما يغيّر الكتاب؛ صحّح البطاقة ثم اضغط «تمت المعالجة».</p></div>
@@ -848,38 +837,73 @@
           <button type="button" data-status="open" aria-pressed="true">مفتوحة</button><button type="button" data-status="done">تمت معالجتها</button><button type="button" data-status="all">الكل</button>
         </div>
       </div>
-      <div class="settings-tabs lib-tabs" role="tablist" aria-label="نوع الرسائل">
+      <div class="settings-tabs lib-tabs kind-tabs" id="inboxKinds" role="tablist" aria-label="نوع الرسائل">
         <button class="settings-tab" role="tab" id="inboxTabReport" aria-selected="true" aria-controls="inboxList">بلاغات الكتب <span class="tab-n" id="inboxNReport"></span></button>
         <button class="settings-tab" role="tab" id="inboxTabSuggestion" aria-selected="false" aria-controls="inboxList" tabindex="-1">الاقتراحات <span class="tab-n" id="inboxNSuggestion"></span></button>
-        <button class="settings-tab" role="tab" id="inboxTabQuestions" aria-selected="false" aria-controls="inboxList" tabindex="-1">أسئلة بلا جواب <span class="tab-n" id="inboxNQuestions"></span></button>
+        <button class="settings-tab" role="tab" id="inboxTabReviews" aria-selected="false" aria-controls="inboxList" tabindex="-1">مراجعات القرّاء <span class="tab-n" id="inboxNReviews"></span></button>
+        <button class="settings-tab" role="tab" id="inboxTabCandidates" aria-selected="false" aria-controls="inboxList" tabindex="-1">كتب مرشّحة <span class="tab-n" id="inboxNCandidates"></span></button>
+        <button class="settings-tab" role="tab" id="inboxTabQuestions" aria-selected="false" aria-controls="inboxList" tabindex="-1" hidden>أسئلة بلا جواب</button>
         <button class="settings-tab" role="tab" id="inboxTabStaff" aria-selected="false" aria-controls="inboxList" tabindex="-1" hidden>تعديلات الموظفين <span class="tab-n" id="inboxNStaff"></span></button>
         <button class="settings-tab" role="tab" id="inboxTabIdeas" aria-selected="false" aria-controls="inboxList" tabindex="-1">اقتراحات الموظفين <span class="tab-n" id="inboxNIdeas"></span></button>
       </div>
-      <div class="export-bar">
-        <a id="inboxExport" class="btn secondary" href="/api/admin/inbox/export?status=open" download>تنزيل الكل في ملف (md)</a>
-        <span class="diff">البلاغات والاقتراحات والأسئلة بلا جواب وتعديلات الموظفين واقتراحاتهم، ومعها سجل كل ما غيّره الموظفون في البيانات (قبل ← بعد) وملفات رواء المستوردة وما أضافته، ومحادثات الزوار المحفوظة في وضع الاختبار، وردود تأكيد هوية الكتب، خلال آخر 30 يومًا، في ملف واحد ترسله لإبراهيم أو تعالجه مع Claude.</span>
-      </div>
       <p id="inboxState" class="count" role="status"></p>
       <div id="inboxList" class="del-list" role="tabpanel"></div>
-      <!-- «تطبيق ملف التصحيحات من Claude» (Ibrahim 2026-10-11): moved here from «استيراد من رواء»; the staff answers on
-           «تأكيد هوية الكتاب» now travel in «تنزيل الكل في ملف (md)» (section 9), so the copy/download step was removed -->
-      <details class="fold panel cx-apply" id="cxFold" hidden>
-        <summary><h3 id="cxTitle">تطبيق ملف التصحيحات من Claude</h3><span id="cxCount" class="diff">جاري التحميل…</span></summary>
-        <p class="diff" style="margin:10px 0 8px">ردود الموظفين على «تأكيد هوية الكتاب» تطلع مع «تنزيل الكل في ملف». بعد ما يرسلها إبراهيم لـ Claude يرجع ملف تصحيحات يُطبَّق هنا.</p>
-        <p class="diff" style="margin:0 0 8px">الصق نص التصحيحات هنا أو اختر الملف، ثم «معاينة». ما يتغير شيء قبل ما تضغط «تطبيق»، وتُؤخذ نسخة احتياطية أولًا.</p>
-        <textarea id="cxText" dir="ltr" style="width:100%;min-height:90px" aria-label="نص التصحيحات من Claude" placeholder='{"format": "confirmation-corrections-1", ...}'></textarea>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px">
-          <label class="btn secondary" for="cxFile">اختر ملف التصحيحات</label><input id="cxFile" type="file" accept=".json,application/json" hidden />
-          <button id="cxPreview" class="btn" type="button">معاينة</button>
-          <button id="cxApply" class="btn" type="button" hidden>تطبيق التصحيحات</button>
-          <span id="cxPlanState" class="state" role="status"></span>
+      </div>
+      <div id="devPane" role="tabpanel" aria-labelledby="subDevNotes" hidden>
+      <div class="st-head" id="devHead">
+        <div><h2>ملاحظات من المطور</h2>
+          <p class="diff">طلبات من مطوّر التطبيق لفريق المكتبة. اقرأ الملاحظة، نفّذ المطلوب، ثم اضغط «تم» (ولك أن تكتب ما سويت). كل ضغطة تُسجَّل في سجل العمليات وتصل للمطوّر مع ملف البلاغات.</p></div>
+        <div class="seg" id="devStatus" role="group" aria-label="حالة الملاحظات">
+          <button type="button" data-status="open" aria-pressed="true">مفتوحة</button><button type="button" data-status="done">تمّت</button><button type="button" data-status="all">الكل</button>
         </div>
-        <div style="overflow-x:auto;margin-top:10px"><table id="cxPlan" class="tbl"></table></div>
-      </details>
+      </div>
+      <p id="devState" class="count" role="status"></p>
+      <div id="devList" class="del-list"></div>
+      </div>
     </div>
 
+    <!-- «القرّاء» (ADMSTF, Ibrahim 2026-10-24): «إحصائيات الزوار» (manager) + «طلبات القرّاء» -->
+    <div id="readersView" role="tabpanel" aria-labelledby="tabReaders" hidden>
+      <div class="settings-tabs lib-tabs sub-tabs" id="readersSub" role="tablist" aria-label="أقسام القرّاء">
+        <button class="settings-tab" role="tab" id="subStats" aria-selected="true" aria-controls="statsView">إحصائيات الزوار</button>
+        <button class="settings-tab" role="tab" id="subRequests" aria-selected="false" aria-controls="requestedView" tabindex="-1">طلبات القرّاء <span class="tab-n" id="subNRequests"></span></button>
+      </div>
+    <div id="statsView" role="tabpanel" aria-labelledby="subStats">
+      <div class="st-head">
+        <div><h2>توجهات القرّاء ورضاهم</h2>
+          <p class="diff">من استخدام الزوار للتطبيق. البيانات مجهولة: ما نحفظ كلام الزائر ولا هويته، واختيار الكتاب ما يغيّر المخزون.</p></div>
+        <div class="seg" role="group" aria-label="الفترة">
+          <button type="button" data-days="7">٧ أيام</button><button type="button" data-days="30" aria-pressed="true">٣٠ يوم</button>
+          <button type="button" data-days="90">٩٠ يوم</button><button type="button" data-days="365">سنة</button><button type="button" data-days="0">الكل</button>
+        </div>
+      </div>
+      <p id="stState" class="state" role="status"></p>
+      <div id="stBody"></div>
+    </div>
+
+    <!-- «الكتب المطلوبة» (Ibrahim, 2026-10-24): what visitors asked for and we did not have, with how many times -->
+    <div id="requestedView" role="tabpanel" aria-labelledby="subRequests" hidden>
+      <section class="panel" aria-labelledby="rqTitle">
+        <div class="pk-head">
+          <div><h2 id="rqTitle">طلبات القرّاء: كتب ومؤلفون ما كانت عندنا</h2>
+            <p class="hint">كتب ومؤلفون سأل عنهم الزوار في المحادثة وما كانت عندنا، مرتّبة حسب عدد مرات الطلب. يساعدكم تقررون وش توفّرون. إذا وفّرتم الكتاب أو قررتم ما توفّرونه اضغط «تم».</p></div>
+          <div class="seg" role="group" aria-label="الحالة"><button type="button" id="rqOpen" aria-pressed="true">مفتوحة</button><button type="button" id="rqDone" aria-pressed="false">تم</button></div>
+        </div>
+        <p id="rqState" class="state" role="status"></p>
+        <div id="rqList"></div>
+      </section>
+    </div>
+
+    </div>
+
+    <!-- «تنظيم منار» (ADMSTF, Ibrahim 2026-10-24): «اختياراتنا» + «الفعاليات» -->
+    <div id="organizeView" role="tabpanel" aria-labelledby="tabOrganize" hidden>
+      <div class="settings-tabs lib-tabs sub-tabs" id="organizeSub" role="tablist" aria-label="أقسام تنظيم منار">
+        <button class="settings-tab" role="tab" id="subPicks" aria-selected="true" aria-controls="picksView">اختياراتنا</button>
+        <button class="settings-tab" role="tab" id="subEvents" aria-selected="false" aria-controls="eventsView" tabindex="-1">الفعاليات</button>
+      </div>
     <!-- «اختياراتنا هذا الشهر» (Ibrahim, 2026-10-14): the automatic ranking proposes five, staff approve -->
-    <div id="picksView" role="tabpanel" aria-labelledby="tabPicks" hidden>
+    <div id="picksView" role="tabpanel" aria-labelledby="subPicks">
       <section class="panel" aria-labelledby="pkTitle">
         <div class="pk-head">
           <div><h2 id="pkTitle">اختياراتنا هذا الشهر</h2>
@@ -895,12 +919,13 @@
         <ol id="pkSlots" class="pk-slots"></ol>
       </section>
       <section class="panel" aria-labelledby="pkCandTitle">
-        <h2 id="pkCandTitle">مرشحون آخرون</h2>
+        <h2 id="pkCandTitle">ضع كتابًا في خانة</h2>
         <p class="hint">مرتّبون حسب النقاط. اضغط رقم الخانة لوضع الكتاب فيها؛ الكتاب اللي تختاره ما يغيّره التحديث التلقائي.</p>
-        <div id="pkCands"></div>
-        <label for="pkQ" style="display:block;margin-top:14px;font-weight:600">أو ابحث عن أي كتاب متوفر</label>
+        <label for="pkQ" style="display:block;margin-top:4px;font-weight:600">ابحث عن أي كتاب متوفر</label>
         <input id="pkQ" class="wide" placeholder="جزء من العنوان أو اسم المؤلف" autocomplete="off" />
         <div id="pkFound"></div>
+        <p class="hint" style="margin-top:16px">أو اختر من المرشحين:</p>
+        <div id="pkCands"></div>
       </section>
       <section class="panel" aria-labelledby="pkSigTitle">
         <h2 id="pkSigTitle">من وين جات الإشارات</h2>
@@ -909,8 +934,12 @@
     </div>
 
     <!-- «الفعاليات» (Ibrahim, 2026-10-08): staff add events; upcoming ones show on the visitor start page -->
-    <div id="eventsView" role="tabpanel" aria-labelledby="tabEvents" hidden>
-      <section class="panel" aria-labelledby="evFormTitle">
+    <div id="eventsView" role="tabpanel" aria-labelledby="subEvents" hidden>
+      <section class="panel" aria-labelledby="evListTitle">
+        <div class="pk-head"><h2 id="evListTitle">الفعاليات</h2><button id="evNew" class="btn" type="button" aria-expanded="false" aria-controls="evFormPanel">+ فعالية جديدة</button></div>
+        <div id="evList"></div>
+      </section>
+      <section class="panel" id="evFormPanel" aria-labelledby="evFormTitle" hidden>
         <h2 id="evFormTitle">فعالية جديدة</h2>
         <p class="hint">تظهر في الصفحة الأولى للتطبيق تحت «فعالياتنا» من لحظة الحفظ حتى نهاية يومها، ومن يضغط عليها تطلع له تفاصيلها.</p>
         <div class="ev-form">
@@ -935,31 +964,22 @@
           <p class="hint">إذا ما رفعت صورة والفعالية عن كتاب، تظهر صورة غلافه.</p>
           <div class="row">
             <button id="evSave" class="btn" type="button">حفظ الفعالية</button>
-            <button id="evCancel" class="btn secondary" type="button" hidden>إلغاء التعديل</button>
+            <button id="evCancel" class="btn secondary" type="button">إلغاء</button>
             <span id="evState" class="state" role="status"></span>
           </div>
         </div>
       </section>
-      <section class="panel" aria-labelledby="evListTitle">
-        <h2 id="evListTitle">الفعاليات</h2>
-        <div id="evList"></div>
-      </section>
     </div>
 
-    <div id="statsView" role="tabpanel" aria-labelledby="tabStats" hidden>
-      <div class="st-head">
-        <div><h2>توجهات القرّاء ورضاهم</h2>
-          <p class="diff">من استخدام الزوار للتطبيق. البيانات مجهولة: ما نحفظ كلام الزائر ولا هويته، واختيار الكتاب ما يغيّر المخزون.</p></div>
-        <div class="seg" role="group" aria-label="الفترة">
-          <button type="button" data-days="7">٧ أيام</button><button type="button" data-days="30" aria-pressed="true">٣٠ يوم</button>
-          <button type="button" data-days="90">٩٠ يوم</button><button type="button" data-days="365">سنة</button><button type="button" data-days="0">الكل</button>
-        </div>
-      </div>
-      <p id="stState" class="state" role="status"></p>
-      <div id="stBody"></div>
     </div>
 
     <div id="importView" role="tabpanel" aria-labelledby="tabImport" hidden>
+      <div class="settings-tabs lib-tabs sub-tabs" id="importSub" role="tablist" aria-label="أقسام الاستيراد">
+        <button class="settings-tab" role="tab" id="subRewaa" aria-selected="true" aria-controls="impRewaa">ملف رواء</button>
+        <button class="settings-tab" role="tab" id="subSheet" aria-selected="false" aria-controls="impSheet" tabindex="-1">ملف المكتبة</button>
+        <button class="settings-tab" role="tab" id="subHist" aria-selected="false" aria-controls="impHist" tabindex="-1">السجل</button>
+      </div>
+      <div id="impRewaa" role="tabpanel" aria-labelledby="subRewaa">
       <section class="panel" aria-labelledby="impTitle">
         <h2 id="impTitle">١. ارفع ملف التصدير من رواء</h2>
         <p class="hint">صدّر قائمة المنتجات من رواء بصيغة Excel (xlsx) أو CSV وارفعها هنا. ما يتغير شي قبل ما تشوف المعاينة وتضغط «تطبيق».</p>
@@ -972,10 +992,15 @@
       </section>
 
       <section id="mapPanel" class="panel" aria-labelledby="mapTitle" hidden>
-        <h2 id="mapTitle">٢. اختر الأعمدة اللي نحتاجها</h2>
-        <p class="hint">اخترنا تلقائيًا الأعمدة الأقرب؛ غيّرها إذا لزم. أي عمود ما تختاره (مثل نوع الضريبة وفئة المنتج) يتم تجاهله.</p>
-        <div id="mapFields" class="inv"></div>
-        <div style="overflow-x:auto;margin-top:14px"><table id="sampleTable" class="tbl"></table></div>
+        <h2 id="mapTitle">٢. عاين التغييرات</h2>
+        <p id="mapMissing" class="warn" hidden></p>
+        <!-- ADMSTF (Ibrahim 2026-10-24): the columns are chosen automatically; this opens by itself only when a key column is missing -->
+        <details id="mapFold" class="fold">
+          <summary><h3>تغيير الأعمدة</h3></summary>
+          <p class="hint">اخترنا تلقائيًا الأعمدة الأقرب؛ غيّرها إذا لزم. أي عمود ما تختاره (مثل نوع الضريبة وفئة المنتج) يتم تجاهله.</p>
+          <div id="mapFields" class="inv"></div>
+          <div style="overflow-x:auto;margin-top:14px"><table id="sampleTable" class="tbl"></table></div>
+        </details>
         <div class="row" style="margin-top:14px">
           <label class="switch" style="color:var(--ink)"><input id="missingZero" type="checkbox" checked /> الكتب اللي مو موجودة في الملف تصير نافدة (الكمية ٠)</label>
         </div>
@@ -983,7 +1008,7 @@
       </section>
 
       <section id="planPanel" class="panel" aria-labelledby="planTitle" hidden>
-        <h2 id="planTitle">٣. راجع التغييرات قبل التطبيق</h2>
+        <h2 id="planTitle">٣. راجع التغييرات وطبّقها</h2>
         <div id="planStats" class="stats"></div>
         <p id="planWarn" class="warn" hidden></p>
         <div id="planLists"></div>
@@ -994,6 +1019,8 @@
       </section>
 
 
+      </div>
+      <div id="impSheet" role="tabpanel" aria-labelledby="subSheet" hidden>
       <section class="panel" aria-labelledby="lsTitle">
         <h2 id="lsTitle">ملف المكتبة: الرفوف والتصنيف</h2>
         <p class="hint">ملف Excel اللي تجهّزه المكتبة (رمز الرف، الدار، التصنيف، الكلمات المفتاحية). يكتب مكان كل كتاب مع تصنيف المكان (مثل «روايات · الرف R04»)، ويعبّي الدار والتصنيف إذا كانت فاضية، ويحدّث الكلمات المفتاحية. الدار المختلفة ما تتغيّر، تنعرض لك فقط. ما يتغيّر شي قبل ما تضغط «تطبيق»، وتنحفظ نسخة احتياطية قبلها.</p>
@@ -1013,10 +1040,13 @@
         </div>
       </section>
 
+      </div>
+      <div id="impHist" role="tabpanel" aria-labelledby="subHist" hidden>
       <section class="panel" aria-labelledby="histTitle">
         <h2 id="histTitle">سجل الاستيراد</h2>
         <div style="overflow-x:auto"><table id="histTable" class="tbl"></table></div>
       </section>
+      </div>
     </div>
 
     <div id="settingsView" role="tabpanel" aria-labelledby="tabSettings" hidden>
@@ -1025,6 +1055,7 @@
         <button class="settings-tab" id="setTabSections" type="button" role="tab" aria-selected="false" aria-controls="settingsSections" tabindex="-1">أقسام المكتبة</button>
         <button class="settings-tab" id="setTabUsers" type="button" role="tab" aria-selected="false" aria-controls="settingsUsers" tabindex="-1">الموظفون</button>
         <button class="settings-tab" id="setTabAi" type="button" role="tab" aria-selected="false" aria-controls="settingsAi" tabindex="-1">الذكاء الاصطناعي</button>
+        <button class="settings-tab" id="setTabUpdates" type="button" role="tab" aria-selected="false" aria-controls="settingsUpdates" tabindex="-1">التحديثات والإرسال</button>
         <button class="settings-tab" id="setTabAudit" type="button" role="tab" aria-selected="false" aria-controls="settingsAudit" tabindex="-1">سجل التعديلات</button>
         <button class="settings-tab" id="setTabAbout" type="button" role="tab" aria-selected="false" aria-controls="settingsAbout" tabindex="-1">عن التطبيق</button>
       </div>
@@ -1121,6 +1152,28 @@
         </div>
       </section>
       </div>
+      <!-- moved here from «التنبيهات» (ADMSTF, Ibrahim 2026-10-24); each keeps its row in «ينتظرك الآن» when it needs action -->
+      <div id="settingsUpdates" class="settings-pane" role="tabpanel" aria-labelledby="setTabUpdates" hidden>
+      <article class="dn-card" id="updBox" aria-labelledby="updTitle" hidden>
+        <h3 id="updTitle" tabindex="-1">تحديثات «منار»</h3>
+        <p id="updText" role="status"></p>
+        <div class="upd-bar" id="updBar" hidden><span id="updBarFill"></span></div>
+        <div class="dn-acts" id="updActs"></div>
+      </article>
+      <!-- «إرسال البلاغات للمطوّر» (INBOXSEND, Ibrahim 2026-10-23): the inbox file sealed for Ibrahim, weekly and on his request -->
+      <article class="dn-card" id="sendBox" aria-labelledby="sendTitle" hidden>
+        <h3 id="sendTitle" tabindex="-1">إرسال البلاغات للمطوّر</h3>
+        <p class="diff">نفس ملف «تنزيل الكل في ملف» تحت (بلاغات الزوار واقتراحاتهم، الأسئلة اللي ما لقت جواب، تعديلات الموظفين واقتراحاتهم، ومحادثات وضع الاختبار) يُرسل للمطوّر كل أسبوع، وكلما طلبه. الملف مشفّر بمفتاح المطوّر فلا يفتحه غيره، ولا يتغيّر شيء في البلاغات عند إرساله.</p>
+        <p id="sendText" role="status"></p>
+        <div class="dn-acts" id="sendActs"></div>
+      </article>
+      <section class="panel" aria-labelledby="exportTitle">
+        <h2 id="exportTitle">تنزيل الكل في ملف</h2>
+        <p class="hint">احتياطي للإرسال التلقائي: البلاغات والاقتراحات والأسئلة بلا جواب وتعديلات الموظفين واقتراحاتهم، ومعها سجل كل ما غيّره الموظفون في البيانات (قبل ← بعد) وملفات رواء المستوردة وما أضافته، ومحادثات الزوار المحفوظة في وضع الاختبار، خلال آخر 30 يومًا، في ملف واحد ترسله لإبراهيم.</p>
+        <div class="seg" id="exportStatus" role="group" aria-label="ما يدخل في الملف"><button type="button" data-status="open" aria-pressed="true">المفتوحة</button><button type="button" data-status="all">الكل</button></div>
+        <p style="margin:12px 0 0"><a id="inboxExport" class="btn secondary" href="/api/admin/inbox/export?status=open" download>تنزيل الكل في ملف (md)</a></p>
+      </section>
+      </div>
       <div id="settingsAudit" class="settings-pane" role="tabpanel" aria-labelledby="setTabAudit" hidden>
       <section class="panel" aria-labelledby="auditTitle">
         <h2 id="auditTitle">سجل التعديلات</h2>
@@ -1178,12 +1231,12 @@
     // ---------------- tabs
     const SETTINGS_TABS = {
       trial: ['setTabTrial', 'settingsTrial'], sections: ['setTabSections', 'settingsSections'],
-      users: ['setTabUsers', 'settingsUsers'], ai: ['setTabAi', 'settingsAi'],
+      users: ['setTabUsers', 'settingsUsers'], ai: ['setTabAi', 'settingsAi'], updates: ['setTabUpdates', 'settingsUpdates'],
       audit: ['setTabAudit', 'settingsAudit'], about: ['setTabAbout', 'settingsAbout']
     };
     let currentSettingsTab = 'trial';
     function selectSettingsTab(which, focus = false) {
-      if (!SETTINGS_TABS[which]) which = 'trial';
+      if (!SETTINGS_TABS[which] || $(SETTINGS_TABS[which][0]).hidden) which = 'trial';
       currentSettingsTab = which;
       Object.entries(SETTINGS_TABS).forEach(([key, [tabId, panelId]]) => {
         const selected = key === which;
@@ -1195,6 +1248,7 @@
       if (which === 'sections') loadSections();
       if (which === 'users') loadUsers();
       if (which === 'ai') { loadLlm(); loadTestlog(); loadUsage(); }
+      if (which === 'updates') { loadUpdate(); loadSend(); setExportLink(); }
       if (which === 'audit') loadAudit();
       if (which === 'about') loadVersion();
       if (focus) $(SETTINGS_TABS[which][0]).focus();
@@ -1204,7 +1258,7 @@
       $(tabId).addEventListener('keydown', e => {
         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
         e.preventDefault();
-        const keys = Object.keys(SETTINGS_TABS), at = keys.indexOf(key);
+        const keys = Object.keys(SETTINGS_TABS).filter(k => !$(SETTINGS_TABS[k][0]).hidden), at = keys.indexOf(key);
         const next = e.key === 'Home' ? 0 : e.key === 'End' ? keys.length - 1 :
           (at + (e.key === 'ArrowLeft' ? 1 : -1) + keys.length) % keys.length;
         selectSettingsTab(keys[next], true);
@@ -1212,7 +1266,11 @@
     });
 
     // The active section supplies the page heading.
-    const HEADS = { books: 'المكتبة', alerts: 'التنبيهات', inbox: 'البلاغات', picks: 'اختياراتنا', events: 'الفعاليات', stats: 'الإحصاءات', import: 'استيراد من رواء', settings: 'الإعدادات' };
+    // ADMSTF (Ibrahim 2026-10-24): six sections. Old names still work for links inside the page (inbox → alerts …).
+    const HEADS = { books: 'المكتبة', alerts: 'التنبيهات', readers: 'القرّاء', organize: 'تنظيم منار', import: 'الاستيراد', settings: 'الإعدادات' };
+    const OLD_SECTION = { inbox: ['alerts', 'visitors'], stats: ['readers', 'stats'], requested: ['readers', 'requests'], picks: ['organize', 'picks'], events: ['organize', 'events'] };
+    const isMgr = () => !!ME && (ME.role === 'manager' || ME.role === 'developer');
+    const isDev = () => !!ME && ME.role === 'developer';
     function setHead(which) { if (HEADS[which]) $('phTitle').textContent = HEADS[which]; }
     setHead('books');
     function setNavOpen(open, restoreFocus = false) {
@@ -1226,32 +1284,112 @@
       if (e.key === 'Escape' && $('navToggle').getAttribute('aria-expanded') === 'true') { setNavOpen(false, true); e.preventDefault(); }
     });
     function selectTab(which, keepMenu = false) {
+      if (OLD_SECTION[which]) { const [m, sub] = OLD_SECTION[which]; SUBS[m].cur = sub; which = m; }
       setHead(which);
       if (!keepMenu && !matchMedia('(min-width:980px)').matches && $('navToggle').getAttribute('aria-expanded') === 'true') {
         setNavOpen(false); $('phTitle').focus({ preventScroll: true });
       }
-      const tabs = { books: ['tabBooks', 'booksView'], alerts: ['tabAlerts', 'alertsView'], inbox: ['tabInbox', 'inboxView'], picks: ['tabPicks', 'picksView'], events: ['tabEvents', 'eventsView'], stats: ['tabStats', 'statsView'], import: ['tabImport', 'importView'], settings: ['tabSettings', 'settingsView'] };
+      const tabs = { books: ['tabBooks', 'booksView'], alerts: ['tabAlerts', 'alertsView'], readers: ['tabReaders', 'readersView'], organize: ['tabOrganize', 'organizeView'], import: ['tabImport', 'importView'], settings: ['tabSettings', 'settingsView'] };
       Object.entries(tabs).forEach(([key, [tab, view]]) => {
         $(tab).setAttribute('aria-selected', String(key === which)); $(tab).tabIndex = key === which ? 0 : -1; $(view).hidden = key !== which;
       });
       if (which === 'settings') selectSettingsTab(currentSettingsTab);
       if (which === 'import') loadHistory();
-      if (which === 'stats') loadStats();
-      if (which === 'events') loadEvents();
-      if (which === 'picks') loadPicks();
-      if (which === 'inbox') { loadInbox(); if (ME && ME.role === 'manager') loadConfirmCount(); } else loadInboxCount();
-      if (which === 'alerts') loadAlerts(); else loadAlertsCount();
+      if (SUBS[which]) selectSub(which, SUBS[which].cur);
+      if (which === 'alerts') loadAlerts(); else { loadAlertsCount(); loadInboxCount(); }
       if (which === 'books') loadCatalog();
     }
+    // sub-sections inside a main section (ADMSTF 2026-10-24)
+    const SUBS = {
+      alerts: { cur: 'visitors', tabs: { visitors: ['subVisitors', 'inboxPane'], staff: ['subStaff', 'inboxPane'], dev: ['subDevNotes', 'devPane'], questions: ['subQuestions', 'inboxPane'] } },
+      readers: { cur: 'stats', tabs: { stats: ['subStats', 'statsView'], requests: ['subRequests', 'requestedView'] } },
+      organize: { cur: 'picks', tabs: { picks: ['subPicks', 'picksView'], events: ['subEvents', 'eventsView'] } },
+      import: { cur: 'rewaa', tabs: { rewaa: ['subRewaa', 'impRewaa'], sheet: ['subSheet', 'impSheet'], hist: ['subHist', 'impHist'] } }
+    };
+    const INBOX_GROUPS = { visitors: ['report', 'suggestion', 'reviews', 'candidates'], staff: ['staff', 'ideas'], questions: ['questions'] };
+    const KIND_TAB = { report: 'inboxTabReport', suggestion: 'inboxTabSuggestion', reviews: 'inboxTabReviews', candidates: 'inboxTabCandidates', questions: 'inboxTabQuestions', staff: 'inboxTabStaff', ideas: 'inboxTabIdeas' };
+    const shown = id => !$(id).hidden && getComputedStyle($(id)).display !== 'none';
+    function selectSub(main, key, focus = false) {
+      const g = SUBS[main];
+      if (!g.tabs[key] || !shown(g.tabs[key][0])) key = Object.keys(g.tabs).find(k => shown(g.tabs[k][0])) || Object.keys(g.tabs)[0];
+      g.cur = key;
+      const [tabId, pane] = g.tabs[key];
+      Object.entries(g.tabs).forEach(([k, [t]]) => { $(t).setAttribute('aria-selected', String(k === key)); $(t).tabIndex = k === key ? 0 : -1; });
+      new Set(Object.values(g.tabs).map(([, p]) => p)).forEach(p => { $(p).hidden = p !== pane; });
+      $(pane).setAttribute('aria-labelledby', tabId);
+      if (focus) $(tabId).focus();
+      if (main === 'alerts' && key !== 'dev') {
+        const kinds = INBOX_GROUPS[key];
+        Object.entries(KIND_TAB).forEach(([k, id]) => $(id).classList.toggle('kind-off', !kinds.includes(k)));
+        $('inboxKinds').hidden = kinds.length < 2;
+        setInboxKind(kinds.includes(inbox.kind) ? inbox.kind : kinds[0]);
+      }
+      if (main === 'alerts' && key === 'dev') loadDevNotes();
+      if (main === 'readers') key === 'stats' ? loadStats() : loadRequested();
+      if (main === 'organize') key === 'picks' ? loadPicks() : loadEvents();
+      if (main === 'import' && key === 'hist') loadHistory();
+    }
+    Object.entries(SUBS).forEach(([main, g]) => Object.entries(g.tabs).forEach(([key, [t]]) => {
+      $(t).addEventListener('click', () => selectSub(main, key));
+      $(t).addEventListener('keydown', e => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+        e.preventDefault();
+        const keys = Object.keys(g.tabs).filter(k => shown(g.tabs[k][0])), at = keys.indexOf(key), n = keys.length;
+        const next = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : (at + (e.key === 'ArrowLeft' ? 1 : n - 1)) % n;  // RTL: left = next
+        selectSub(main, keys[next], true);
+      });
+    }));
     $('tabBooks').addEventListener('click', () => selectTab('books'));
     $('tabImport').addEventListener('click', () => selectTab('import'));
-    $('tabStats').addEventListener('click', () => selectTab('stats'));
-    $('tabInbox').addEventListener('click', () => selectTab('inbox'));
     $('tabAlerts').addEventListener('click', () => selectTab('alerts'));
+    $('tabReaders').addEventListener('click', () => selectTab('readers'));
+    $('tabOrganize').addEventListener('click', () => selectTab('organize'));
     $('tabSettings').addEventListener('click', () => selectTab('settings'));
-    $('tabEvents').addEventListener('click', () => selectTab('events'));
-    $('tabPicks').addEventListener('click', () => selectTab('picks'));
-    $('phGear').addEventListener('click', () => selectTab('settings'));
+    // rail explanations (Ibrahim 2026-10-24: «اذا الواحد جاء عن التبويب يبين ايش داخله»)
+    (() => {
+      const tip = $('railTip');
+      const show = el => {
+        if (!el.dataset.tip || !matchMedia('(min-width:980px)').matches) return;
+        tip.textContent = el.dataset.tip; tip.hidden = false;
+        const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect();
+        tip.style.top = Math.max(8, r.top + r.height / 2 - t.height / 2) + 'px';
+        tip.style.left = Math.max(8, r.left - t.width - 10) + 'px';
+        el.setAttribute('aria-describedby', 'railTip');
+      };
+      const hide = el => { tip.hidden = true; if (el) el.removeAttribute('aria-describedby'); };
+      $('adminNav').querySelectorAll('[data-tip]').forEach(el => {
+        el.insertAdjacentHTML('beforeend', `<small class="tab-tip">${esc(el.dataset.tip)}</small>`);
+        el.addEventListener('mouseenter', () => show(el)); el.addEventListener('focus', () => show(el));
+        el.addEventListener('mouseleave', () => hide(el)); el.addEventListener('blur', () => hide(el)); el.addEventListener('click', () => hide(el));
+      });
+      window.addEventListener('scroll', () => hide(), { passive: true });
+    })();
+    // «الكتب المطلوبة» (Ibrahim 2026-10-24)
+    let rqStatus = 'open';
+    const rqDate = s => { try { return new Date(s).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { year: 'numeric', month: 'short', day: 'numeric' }); } catch (e) { return String(s || '').slice(0, 10); } };
+    async function loadRequested() {
+      $('rqState').textContent = 'جاري التحميل…';
+      let d;
+      try { const r = await fetch('/api/admin/inbox/requested?status=' + rqStatus); if (!r.ok) throw new Error(r.status); d = await r.json(); }
+      catch (e) { $('rqState').textContent = 'تعذر تحميل القائمة'; return; }
+      const n = d.counts || {};
+      $('requestedN').textContent = n.open || ''; $('requestedN').hidden = !n.open; $('subNRequests').textContent = n.open ? num(n.open) : '';
+      $('rqState').textContent = d.items.length ? '' : (rqStatus === 'open' ? 'ما فيه طلبات مفتوحة.' : 'ما فيه شي معلّم «تم».');
+      if (!d.items.length) { $('rqList').innerHTML = ''; return; }
+      $('rqList').innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>المطلوب</th><th>النوع</th><th>مرات الطلب</th><th>أول مرة</th><th>آخر مرة</th><th></th></tr></thead><tbody>'
+        + d.items.map(x => `<tr><td>${esc(x.phrase)}${(x.in_stock_now || []).length ? ' <span class="pill ok" title="عنوان بنفس الاسم متوفر الآن">متوفر الآن</span>' : ''}</td>`
+          + `<td>${x.kind === 'missing_author' ? 'مؤلف' : 'كتاب'}</td><td><b>${x.times}</b></td><td>${esc(rqDate(x.first_at))}</td><td>${esc(rqDate(x.last_at))}</td>`
+          + `<td>${rqStatus === 'open' ? `<button class="btn secondary small" type="button" data-rq="${x.q_id}">تم</button>` : esc(x.handled_by || '')}</td></tr>`).join('')
+        + '</tbody></table></div>';
+      $('rqList').querySelectorAll('[data-rq]').forEach(b => b.addEventListener('click', async () => {
+        b.disabled = true;
+        const r = await fetch('/api/admin/inbox/questions/' + b.dataset.rq, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'done' }) });
+        if (r.ok) loadRequested(); else { b.disabled = false; $('rqState').textContent = 'تعذر الحفظ'; }
+      }));
+    }
+    const rqSwitch = s => { rqStatus = s; $('rqOpen').setAttribute('aria-pressed', String(s === 'open')); $('rqDone').setAttribute('aria-pressed', String(s === 'done')); loadRequested(); };
+    $('rqOpen').addEventListener('click', () => rqSwitch('open'));
+    $('rqDone').addEventListener('click', () => rqSwitch('done'));
     $('adminNav').querySelectorAll('[role=tab]').forEach(tab => {
       tab.tabIndex = tab.getAttribute('aria-selected') === 'true' ? 0 : -1;
       tab.addEventListener('keydown', e => {
@@ -1283,18 +1421,16 @@
     function goAlert(go) {
       const [view, sub] = go.split(':');
       if (view === 'inbox') {
-        selectTab('inbox');
-        const id = { report: 'inboxTabReport', suggestion: 'inboxTabSuggestion', staff: 'inboxTabStaff', ideas: 'inboxTabIdeas' }[sub];
-        if (id && !$(id).hidden) $(id).click();
-      } else if (view === 'books') {
-        selectTab('books');
-        if (sub === 'confirm' && !$('libTabConfirm').hidden) $('libTabConfirm').click();
-      } else if (view === 'alerts' && sub === 'send') {
-        $('sendBox').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('sendTitle').focus({ preventScroll: true });
-      } else if (view === 'alerts' && sub === 'update') {
-        $('updBox').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('updTitle').focus({ preventScroll: true });
+        selectTab('alerts'); selectSub('alerts', sub === 'staff' || sub === 'ideas' ? 'staff' : 'visitors');
+        if (KIND_TAB[sub] && !$(KIND_TAB[sub]).hidden) setInboxKind(sub);
+        $('alertsSub').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (view === 'alerts' && (sub === 'send' || sub === 'update')) {
+        // updates and sending live in «الإعدادات» since 2026-10-24
+        selectTab('settings'); selectSettingsTab('updates');
+        const t = sub === 'send' ? 'sendTitle' : 'updTitle';
+        setTimeout(() => { $(t).scrollIntoView({ behavior: 'smooth', block: 'start' }); $(t).focus({ preventScroll: true }); }, 300);
       } else if (view === 'alerts') {
-        $('devHead').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('devHead').querySelector('h2').focus?.();
+        selectSub('alerts', 'dev'); $('alertsSub').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
     async function loadAlerts(devMsg) {
@@ -1313,10 +1449,9 @@
         }).join('');
         $('alertsList').querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => goAlert(b.dataset.go)));
         markAlertsSeen(d.items);
+        const dv = d.items.find(i => i.key === 'dev'); $('subNDev').textContent = dv && dv.open ? num(dv.open) : '';
       } catch (e) { $('alertsState').textContent = 'تعذر تحميل التنبيهات.'; }
-      loadDevNotes(devMsg);
-      loadUpdate();
-      loadSend();
+      if (SUBS.alerts.cur === 'dev') loadDevNotes(devMsg);
     }
     // «إرسال البلاغات للمطوّر» (INBOXSEND): on/off, the upload token and «أرسل الآن» are the manager's.
     let sendPoll = null;
@@ -1363,7 +1498,7 @@
           const d = await r2.json().catch(() => ({}));
           if (!r2.ok) throw new Error(d.error || r2.status);
           loadSend(what === 'now' ? 'بدأ الإرسال…' : what === 'save' ? 'حُفظ الرمز.' : what === 'on' ? 'شُغّل الإرسال.' : 'أُوقف الإرسال.');
-          if (what === 'now') { clearTimeout(sendPoll); sendPoll = setTimeout(() => { if (!$('alertsView').hidden) loadSend(); }, 4000); }
+          if (what === 'now') { clearTimeout(sendPoll); sendPoll = setTimeout(() => { if (!$('settingsUpdates').hidden) loadSend(); }, 4000); }
         } catch (e) { b.disabled = false; $('sendText').textContent = 'تعذر: ' + e.message; }
       }));
     }
@@ -1435,7 +1570,7 @@
         } catch (e) { b.disabled = false; $('updText').textContent = 'تعذر: ' + e.message; }
       }));
     }
-    function schedUpd(ms) { clearTimeout(updPoll); updPoll = setTimeout(() => { if (!$('alertsView').hidden) loadUpdate(); }, ms); }
+    function schedUpd(ms) { clearTimeout(updPoll); updPoll = setTimeout(() => { if (!$('settingsUpdates').hidden) loadUpdate(); }, ms); }
     let devStatus = 'open';
     $('devStatus').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
       devStatus = b.dataset.status;
@@ -1627,9 +1762,14 @@
       ev.editing = null; ev.book = null;
       ['evTitle', 'evDesc', 'evDate', 'evTime', 'evEnd', 'evBookQ', 'evImage'].forEach(id => { $(id).value = ''; });
       $('evBookList').hidden = true; $('evImageNow').hidden = true;
-      $('evFormTitle').textContent = 'فعالية جديدة'; $('evSave').textContent = 'حفظ الفعالية'; $('evCancel').hidden = true;
-      evShowBook();
+      $('evFormTitle').textContent = 'فعالية جديدة'; $('evSave').textContent = 'حفظ الفعالية';
+      evShowBook(); evForm(false);
     }
+    function evForm(open) {
+      $('evFormPanel').hidden = !open; $('evNew').setAttribute('aria-expanded', String(open));
+      if (open) { $('evFormPanel').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('evTitle').focus({ preventScroll: true }); }
+    }
+    $('evNew').addEventListener('click', () => { if (!$('evFormPanel').hidden && !ev.editing) return evForm(false); evReset(); $('evState').textContent = ''; evForm(true); });
     $('evCancel').addEventListener('click', () => { evReset(); $('evState').textContent = ''; });
     async function evSave() {
       const st = $('evState');
@@ -1663,8 +1803,8 @@
         if (!res.ok) throw new Error(res.status);
         evRows = (await res.json()).events || [];
       } catch (e) { box.innerHTML = '<p class="state">تعذر تحميل الفعاليات</p>'; return; }
-      if (!evRows.length) { box.innerHTML = '<p class="state">ما فيه فعاليات للحين. أضف أول فعالية من النموذج أعلاه.</p>'; return; }
-      box.innerHTML = evRows.map(e => {
+      if (!evRows.length) { box.innerHTML = '<p class="state">ما فيه فعاليات للحين. أضف أول فعالية من زر «+ فعالية جديدة».</p>'; return; }
+      const row = e => {
         const status = e.past ? 'انتهت' : e.active ? 'تظهر للزوار' : 'مخفية';
         const when = evDay(e.event_date) + (e.event_time ? ' · ' + evClock(e.event_time) + (e.end_time ? ' – ' + evClock(e.end_time) : '') : '');
         return `<article class="ev-row${e.past || !e.active ? ' dim' : ''}">
@@ -1678,7 +1818,11 @@
             ${e.own_image ? `<button type="button" class="btn secondary" data-act="noimg" data-ev="${e.event_id}">حذف الصورة</button>` : ''}
             <button type="button" class="btn secondary" data-act="del" data-ev="${e.event_id}">حذف</button>
           </div></article>`;
-      }).join('');
+      };
+      // upcoming first; finished ones folded underneath (ADMSTF 2026-10-24)
+      const up = evRows.filter(e => !e.past), past = evRows.filter(e => e.past);
+      box.innerHTML = (up.length ? up.map(row).join('') : '<p class="state">ما فيه فعاليات قادمة.</p>')
+        + (past.length ? `<details class="fold ev-past"><summary><h3>انتهت (${num(past.length)})</h3></summary>${past.map(row).join('')}</details>` : '');
       box.querySelectorAll('button[data-act]').forEach(btn => btn.addEventListener('click', () => evAction(btn.dataset.act, Number(btn.dataset.ev))));
     }
     async function evAction(act, id) {
@@ -1690,8 +1834,8 @@
         $('evTime').value = e.event_time || ''; $('evEnd').value = e.end_time || ''; $('evImage').value = '';
         ev.book = e.book ? { book_id: e.book.book_id, title: e.book.title, author: e.book.author } : null; evShowBook();
         $('evImageNow').hidden = !e.own_image; $('evImageNow').textContent = 'للفعالية صورة الآن؛ اختر صورة جديدة إذا تبغى تغيّرها.';
-        $('evFormTitle').textContent = 'تعديل الفعالية'; $('evSave').textContent = 'حفظ التعديل'; $('evCancel').hidden = false;
-        $('evTitle').focus(); window.scrollTo({ top: 0, behavior: 'smooth' });
+        $('evFormTitle').textContent = 'تعديل الفعالية'; $('evSave').textContent = 'حفظ التعديل';
+        evForm(true);
         return;
       }
       if (act === 'del' && !confirm(`حذف «${e.title}»؟`)) return;
@@ -1722,8 +1866,8 @@
     const AUTHOR_STATUS_AR = { researched: 'مكتمل البحث', thin: 'بحث جزئي', needs_sources: 'يحتاج مصادر', pending: 'بانتظار البحث' };
     const styleAr = v => STYLE_AR[v] || v;
     const sourceLabel = u => { try { const h = new URL(u).hostname.replace(/^www\./, ''); return h.includes('wikidata') ? 'ويكي بيانات' : h.includes('abjjad') ? 'أبجد' : h; } catch (e) { return u; } };
-    const lib = { view: store.get('view.v2', 'list'), aview: store.get('aview', 'cards'), chips: new Set(), achips: new Set(),
-                  shown: {}, collapsed: new Set(), pane: ['authors', 'translators', 'origin'].includes(store.get('pane', 'books')) ? store.get('pane', 'books') : 'books' };
+    const lib = { view: store.get('view.v2', 'list'), aview: 'list', chips: new Set(), achips: new Set(),
+                  shown: {}, collapsed: new Set(), pane: ['authors', 'translators'].includes(store.get('pane', 'books')) ? store.get('pane', 'books') : 'books' };
     let authorsList = null, peopleShown = null;
     // «المؤلفون» and «المترجمون» (2026-10-03) share one pane; a person who only translates is listed under المترجمون only
     function onPeople() { return lib.pane === 'authors' || lib.pane === 'translators'; }
@@ -1808,13 +1952,11 @@
         renderAuthors();
         if (load) loadAuthors();
       }
-      if (which === 'origin') renderOrigin();
-      if (which === 'confirm') renderConfirm();
       if (which === 'publishers') renderPublishers();
       if (which === 'deleted' && load) { delNote = ''; loadDeleted(); }
       if (focus) $(LIB_PANES.find(([k]) => k === which)[1]).focus();
     }
-    const LIB_PANES = [['books', 'libTabBooks', 'libBooks'], ['authors', 'libTabAuthors', 'libAuthors'], ['translators', 'libTabTranslators', 'libAuthors'], ['publishers', 'libTabPublishers', 'libPublishers'], ['confirm', 'libTabConfirm', 'libConfirm'], ['origin', 'libTabOrigin', 'libOrigin'], ['deleted', 'libTabDeleted', 'libDeleted']];
+    const LIB_PANES = [['books', 'libTabBooks', 'libBooks'], ['authors', 'libTabAuthors', 'libAuthors'], ['translators', 'libTabTranslators', 'libAuthors'], ['publishers', 'libTabPublishers', 'libPublishers'], ['deleted', 'libTabDeleted', 'libDeleted']];
     LIB_PANES.forEach(([k, t]) => {
       $(t).addEventListener('click', () => selectLibPane(k));
       $(t).addEventListener('keydown', e => {
@@ -1826,12 +1968,6 @@
       });
     });
 
-    // ---------------- «أصل الكتاب» (2026-10-04): staff pick Arabic original / translated for books with no original language
-    const ORIGIN_LANGS = [['en', 'الإنجليزية'], ['fr', 'الفرنسية'], ['es', 'الإسبانية'], ['de', 'الألمانية'], ['ru', 'الروسية'], ['it', 'الإيطالية'],
-      ['pt', 'البرتغالية'], ['ja', 'اليابانية'], ['zh', 'الصينية'], ['ko', 'الكورية'], ['tr', 'التركية'], ['fa', 'الفارسية'], ['ur', 'الأردية'],
-      ['hi', 'الهندية'], ['sv', 'السويدية'], ['no', 'النرويجية'], ['da', 'الدنماركية'], ['nl', 'الهولندية'], ['pl', 'البولندية'], ['cs', 'التشيكية'],
-      ['hu', 'المجرية'], ['el', 'اليونانية'], ['grc', 'اليونانية القديمة'], ['he', 'العبرية'], ['la', 'اللاتينية'], ['bs', 'البوسنية'],
-      ['other', 'مترجم، اللغة غير معروفة']];
     // ---------------- «دور النشر» (Ibrahim 2026-10-09): publishers with their book counts; a click filters «الكتب»
     function renderPublishers() {
       const by = new Map();
@@ -1863,65 +1999,6 @@
     }
     $('pubSearch').addEventListener('input', () => { lib.shown.__pubs = 0; renderPublishers(); });
     $('pubSort').addEventListener('change', () => { lib.shown.__pubs = 0; renderPublishers(); });
-
-    // identity first (Ibrahim 2026-10-09): a book whose identity is still unconfirmed waits in «تأكيد الهوية»
-    const confirmPending = b => b.active && b.research_status === 'needs_confirmation' && !b.confirmation_answered;
-    const originPending = b => b.active && (b.language || 'ar') === 'ar' && !b.original_language && b.research_status !== 'not_a_book' && !confirmPending(b);
-    function renderConfirm() {
-      const all = (catalog || []).filter(confirmPending);
-      $('libNConfirm').textContent = all.length ? num(all.length) : '';
-      if (lib.pane !== 'confirm') return;
-      const q = $('confirmSearch').value.trim().toLowerCase();
-      const list = all.filter(b => !q || [b.title, b.author, b.publisher].some(x => String(x || '').toLowerCase().includes(q)))
-        .sort((a, b) => (inStock(b) - inStock(a)) || String(a.title).localeCompare(String(b.title), 'ar'));
-      const lim = lib.shown.__confirm || PAGE * 2;
-      $('confirmCount').textContent = all.length ? `${num(list.length)} من ${num(all.length)} كتاب ينتظر تأكيد هويته` : 'ما فيه كتب تنتظر تأكيد الهوية.';
-      $('confirmList').innerHTML = list.slice(0, lim).map(b => `<div class="del-row org-row">
-          <div><button type="button" class="ttl" data-bid="${b.book_id}">${esc(b.title)}</button>
-            <span>${esc(b.author || '')}${b.publisher ? ' · ' + esc(b.publisher) : ''}${b.shelf_location ? ' · الرف ' + esc(b.shelf_location) : ''}${inStock(b) ? '' : ' · غير متوفر الآن'}</span></div>
-          <div class="org-act"><button type="button" class="mini" data-bid="${b.book_id}">افتح وأكّد</button></div></div>`).join('')
-        + (list.length > lim ? `<button type="button" class="more" id="moreConfirm">عرض المزيد (باقي ${num(list.length - lim)})</button>` : '');
-      $('confirmList').querySelectorAll('[data-bid]').forEach(el => el.addEventListener('click', () => openCard(Number(el.dataset.bid))));
-      if ($('moreConfirm')) $('moreConfirm').addEventListener('click', () => { lib.shown.__confirm = lim + PAGE * 2; renderConfirm(); });
-    }
-    $('confirmSearch').addEventListener('input', () => { lib.shown.__confirm = 0; renderConfirm(); });
-    let originNote = null;   // {text, id} of the last choice, for «تراجع»
-    function renderOrigin() {
-      const all = (catalog || []).filter(originPending);
-      $('libNOrigin').textContent = all.length ? num(all.length) : '';
-      if (lib.pane !== 'origin') return;
-      const q = $('originSearch').value.trim().toLowerCase();
-      const list = all.filter(b => !q || [b.title, b.author, b.publisher].some(x => String(x || '').toLowerCase().includes(q)))
-        .sort((a, b) => (inStock(b) - inStock(a)) || String(a.title).localeCompare(String(b.title), 'ar'));
-      const lim = lib.shown.__origin || PAGE * 2;
-      $('originCount').innerHTML = (originNote ? `${esc(originNote.text)} <button type="button" class="linkbtn" id="originUndo">تراجع</button> · ` : '')
-        + (all.length ? `${num(list.length)} من ${num(all.length)} كتاب بانتظار الاختيار` : 'ما فيه كتب بانتظار تحديد الأصل.');
-      $('originList').innerHTML = list.slice(0, lim).map(b => `<div class="del-row org-row" data-oid="${b.book_id}">
-          <div><button type="button" class="ttl" data-bid="${b.book_id}">${esc(b.title)}</button>
-            <span>${esc(b.author || '')}${b.publisher ? ' · ' + esc(b.publisher) : ''}${b.translated ? ' · له مترجم مسجّل' : ''}${inStock(b) ? '' : ' · غير متوفر الآن'}</span></div>
-          <div class="org-act"><button type="button" class="mini ok" data-org="ar">عربي الأصل</button>
-            <select data-orgsel aria-label="مترجم عن أي لغة: ${esc(b.title)}"><option value="">مترجم عن…</option>${ORIGIN_LANGS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></div></div>`).join('')
-        + (list.length > lim ? `<button type="button" class="more" id="moreOrigin">عرض المزيد (باقي ${num(list.length - lim)})</button>` : '');
-      $('originList').querySelectorAll('[data-bid]').forEach(el => el.addEventListener('click', () => openCard(Number(el.dataset.bid))));
-      $('originList').querySelectorAll('[data-org]').forEach(el => el.addEventListener('click', () => setOrigin(Number(el.closest('[data-oid]').dataset.oid), 'ar', el)));
-      $('originList').querySelectorAll('[data-orgsel]').forEach(el => el.addEventListener('change', () => { if (el.value) setOrigin(Number(el.closest('[data-oid]').dataset.oid), el.value, el); }));
-      if ($('moreOrigin')) $('moreOrigin').addEventListener('click', () => { lib.shown.__origin = lim + PAGE * 2; renderOrigin(); });
-      if ($('originUndo')) $('originUndo').addEventListener('click', () => setOrigin(originNote.id, '', $('originUndo')));
-    }
-    async function setOrigin(id, value, el) {
-      const b = (catalog || []).find(x => x.book_id === id);
-      if (!b) return;
-      el.disabled = true;
-      try {
-        const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ original_language: value }) });
-        if (!res.ok) throw new Error();
-        b.original_language = value || null;
-        const lang = (ORIGIN_LANGS.find(([v]) => v === value) || [])[1];
-        originNote = value ? { id, text: `«${b.title}»: ${value === 'ar' ? 'عربي الأصل' : value === 'other' ? 'مترجم (اللغة غير معروفة)' : 'مترجم عن ' + lang}.` } : null;
-        renderStats(); renderGrid(); renderPublishers(); renderConfirm(); renderOrigin();
-      } catch (e) { el.disabled = false; if (el.tagName === 'SELECT') el.value = ''; $('originCount').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
-    }
-    $('originSearch').addEventListener('input', () => { lib.shown.__origin = 0; renderOrigin(); });
 
     // ---------------- deleted products («ليس كتابًا»), restorable
     let deletedList = null, delNote = '';
@@ -1966,7 +2043,7 @@
         $('genreFilter').value = keepG; $('publisherFilter').value = keepP;
         fillLocFilter();
         $('libNBooks').textContent = num(catalog.length);
-        renderStats(); renderGrid(); renderPublishers(); renderConfirm(); renderOrigin();
+        renderStats(); renderGrid(); renderPublishers();
         loadAuthors(!onPeople());
         loadDeleted(lib.pane !== 'deleted');
       } catch (err) { $('count').textContent = 'تعذر تحميل الكتب.'; }
@@ -1976,7 +2053,9 @@
       const attention = catalog.filter(b => b.research_status === 'needs_confirmation' || b.status === 'needs_review' || b.counts.conflict > 0).length;
       $('stats').innerHTML = `<span class="catalog-stat">إجمالي الكتب <b>${num(catalog.length)}</b></span>
         <span class="catalog-stat">متوفر للزوار <b>${num(catalog.filter(inStock).length)}</b></span>
-        <span class="catalog-stat${attention ? ' warn' : ''}" title="هوية تحتاج تأكيدًا أو بطاقة تحتاج مراجعة أو صفات متعارضة">تحتاج مراجعة <b>${num(attention)}</b></span>`;
+        <span class="catalog-stat">نافد <b>${num(catalog.filter(b => b.active && !(b.quantity > 0)).length)}</b></span>
+        <span class="catalog-stat" title="كتب متوفرة ما لها موقع على الرف">بدون موقع <b>${num(catalog.filter(b => inStock(b) && !locOf(b)).length)}</b></span>
+        <span class="catalog-stat dev-only dev-col${attention ? ' warn' : ''}" title="هوية تحتاج تأكيدًا أو بطاقة تحتاج مراجعة أو صفات متعارضة">تحتاج مراجعة <b>${num(attention)}</b></span>`;
     }
 
     function setFiltersOpen(open, restoreFocus = false) {
@@ -2032,8 +2111,9 @@
 
     function renderChips() {
       const focusedKey = $('bookChips').contains(document.activeElement) ? document.activeElement.dataset.k : null;
-      $('bookChips').innerHTML = BOOK_CHIPS.map(([group, list]) =>
-        `<div class="fgroup" role="group" aria-label="${group}"><b>${group}</b>${list.map(([k, label, fn]) =>
+      // ADMSTF: «المخزون» is the stock filter's job; «البحث» and «البيانات» are the developer's
+      $('bookChips').innerHTML = BOOK_CHIPS.filter(([group]) => group !== 'المخزون').map(([group, list]) =>
+        `<div class="fgroup${['البحث', 'البيانات'].includes(group) ? ' dev-only dev-box' : ''}" role="group" aria-label="${group}"><b>${group}</b>${list.map(([k, label, fn]) =>
           `<button type="button" class="fchip" data-k="${k}" aria-pressed="${lib.chips.has(k)}">${label} <small>${num(catalog.filter(fn).length)}</small></button>`).join('')}</div>`).join('');
       $('bookChips').querySelectorAll('.fchip').forEach(btn => btn.addEventListener('click', () => {
         const k = btn.dataset.k; lib.chips.has(k) ? lib.chips.delete(k) : lib.chips.add(k);
@@ -2078,7 +2158,7 @@
         <td class="hide-sm">${esc(b.genre || '—')}</td>
         <td class="stock-cell">${!b.active ? '<span class="status off">موقوف</span>' : b.quantity > 0 ? `${num(b.quantity)} <span class="qty-label">نسخ متوفرة</span>` : '<span class="status off">نافد</span>'}<span class="mobile-price"><bdi>${num(b.price || 0)}</bdi> ر.س</span></td>
         <td class="num hide-sm">${num(b.price || 0)} <span class="sub">ر.س</span></td>
-        <td class="review-cell">${reviewBadge(b)}</td>
+        <td class="review-cell dev-only dev-col">${reviewBadge(b)}</td>
         <td class="open-cell"><button type="button" class="row-open" data-bid="${b.book_id}" aria-label="فتح بطاقة ${esc(b.title)}">←</button></td>
       </tr>`;
     }
@@ -2091,12 +2171,13 @@
       </button>`;
     }
     function renderItems(list) {
-      if (lib.view === 'list') return `<div class="table-scroll"><table class="booklist" role="table" aria-label="قائمة الكتب"><thead><tr><th class="bk-cell" scope="col">الكتاب</th><th class="loc-cell" scope="col">الموقع</th><th class="hide-sm" scope="col">التصنيف</th><th scope="col">الكمية</th><th class="hide-sm" scope="col">السعر</th><th class="review-cell" scope="col">المراجعة</th><th class="open-cell" scope="col"><span class="sr">عرض</span></th></tr></thead><tbody>${list.map(bookRow).join('')}</tbody></table></div>`;
+      if (lib.view === 'list') return `<div class="table-scroll"><table class="booklist" role="table" aria-label="قائمة الكتب"><thead><tr><th class="bk-cell" scope="col">الكتاب</th><th class="loc-cell" scope="col">الموقع</th><th class="hide-sm" scope="col">التصنيف</th><th scope="col">الكمية</th><th class="hide-sm" scope="col">السعر</th><th class="review-cell dev-only dev-col" scope="col">المراجعة</th><th class="open-cell" scope="col"><span class="sr">عرض</span></th></tr></thead><tbody>${list.map(bookRow).join('')}</tbody></table></div>`;
       if (lib.view === 'shelf') return `<div class="shelf">${list.map(bookSpine).join('')}</div>`;
       return `<div class="grid">${list.map(bookCard).join('')}</div>`;
     }
 
     function renderGrid() {
+      if (lib.view === 'cards' && !isDev()) lib.view = 'list';
       renderChips(); renderActiveFilters();
       const list = filteredBooks().sort(SORTS[$('sortBy').value] || SORTS.added);
       const filtered = lib.chips.size || $('search').value.trim() || $('genreFilter').value || $('locFilter').value || $('publisherFilter').value;
@@ -2130,7 +2211,7 @@
       if (id === 'sortBy' || id === 'groupBy') store.set(id, $(id).value);
       resetBooks();
     }));
-    $('sortBy').value = store.get('sortBy', 'complete'); if (!$('sortBy').value) $('sortBy').value = 'complete';
+    $('sortBy').value = store.get('sortBy', 'title'); if (!$('sortBy').value) $('sortBy').value = 'title';  // title first for staff (ADMSTF)
     $('groupBy').value = store.get('groupBy', ''); if ($('groupBy').selectedIndex < 0) $('groupBy').value = '';
     document.querySelectorAll('.viewseg button').forEach(b => b.addEventListener('click', () => { lib.view = b.dataset.view; store.set('view.v2', lib.view); renderGrid(); }));
     $('clearBookFilters').addEventListener('click', () => {
@@ -2184,14 +2265,14 @@
       const st = tr
         ? [['', all.length, 'كل المترجمين'], ['instock', all.filter(a => P.stock(a) > 0).length, 'لهم كتب متوفرة'],
            ['many', all.filter(a => P.books(a) > 1).length, 'ترجموا أكثر من كتاب'], ['author', all.filter(a => a.roles.author).length, 'مترجمون ومؤلفون'],
-           ['dups', all.filter(a => a.duplicates.length).length, 'تهجئات تحتاج مراجعة', true]]
+           ['dups', all.filter(a => a.duplicates.length).length, 'تهجئات تحتاج مراجعة', true, true]]
         : [['', all.length, 'كل الأسماء'], ['author', all.filter(a => a.roles.author).length, 'مؤلفون'],
-           ['instock', all.filter(a => P.stock(a) > 0).length, 'لهم كتب متوفرة'], ['styled', all.filter(a => a.style).length, 'لهم أسلوب محسوب'],
-           ['dups', all.filter(a => a.duplicates.length).length, 'تهجئات تحتاج مراجعة', true]];
-      $('authorStats').innerHTML = st.map(([k, n, label, warn]) => `<button type="button" class="stat ${warn && n ? 'warn' : ''}" data-chip="${k}" aria-pressed="${k ? lib.achips.has(k) && lib.achips.size === 1 : !lib.achips.size}"><b>${num(n)}</b><span>${label}</span></button>`).join('');
+           ['instock', all.filter(a => P.stock(a) > 0).length, 'لهم كتب متوفرة'], ['styled', all.filter(a => a.style).length, 'لهم أسلوب محسوب', false, true],
+           ['dups', all.filter(a => a.duplicates.length).length, 'تهجئات تحتاج مراجعة', true, true]];
+      $('authorStats').innerHTML = st.map(([k, n, label, warn, dev]) => `<button type="button" class="stat ${warn && n ? 'warn' : ''}${dev ? ' dev-only dev-box' : ''}" data-chip="${k}" aria-pressed="${k ? lib.achips.has(k) && lib.achips.size === 1 : !lib.achips.size}"><b>${num(n)}</b><span>${label}</span></button>`).join('');
       $('authorStats').querySelectorAll('.stat').forEach(b => b.addEventListener('click', () => { lib.achips.clear(); if (b.dataset.chip) lib.achips.add(b.dataset.chip); lib.shown.__authors = 0; renderAuthors(); }));
       $('authorChips').innerHTML = chipGroups.map(([group, list]) => `<div class="fgroup" role="group" aria-label="${group}"><b>${group}</b>${list.map(([k, label, fn]) =>
-        `<button type="button" class="fchip" data-k="${k}" aria-pressed="${lib.achips.has(k)}">${label} <small>${num(all.filter(fn).length)}</small></button>`).join('')}</div>`).join('');
+        `<button type="button" class="fchip${['styled', 'dups', 'verified'].includes(k) ? ' dev-only dev-tab' : ''}" data-k="${k}" aria-pressed="${lib.achips.has(k)}">${label} <small>${num(all.filter(fn).length)}</small></button>`).join('')}</div>`).join('');
       $('authorChips').querySelectorAll('.fchip').forEach(b => b.addEventListener('click', () => {
         const k = b.dataset.k; lib.achips.has(k) ? lib.achips.delete(k) : lib.achips.add(k); lib.shown.__authors = 0; renderAuthors(); }));
       const q = $('authorSearch').value.trim().toLowerCase();
@@ -2206,10 +2287,10 @@
       const flags = a => (a.duplicates.length ? '<span class="dupflag">تهجئة ثانية؟</span>' : '') + (a.verified ? '<span class="okflag">مؤكد</span>' : '');
       const latin = a => a.latin && a.latin !== a.name ? `<span class="latin">${esc(a.latin)}</span>` : '';
       const html = lib.aview === 'list'
-        ? `<div class="table-scroll"><table class="booklist"><thead><tr><th>الاسم</th><th>${tr ? 'أدوار أخرى' : 'الأدوار'}</th><th>${tr ? 'الترجمات' : 'الكتب'}</th><th>المتوفر</th><th class="hide-sm">المبحوث</th><th class="hide-sm">الأسلوب في كتالوجنا</th><th class="hide-sm">ملاحظات</th></tr></thead><tbody>${part.map(a => `
+        ? `<div class="table-scroll"><table class="booklist"><thead><tr><th>الاسم</th><th>${tr ? 'أدوار أخرى' : 'الأدوار'}</th><th>${tr ? 'الترجمات' : 'الكتب'}</th><th>المتوفر</th><th class="hide-sm dev-only dev-col">المبحوث</th><th class="hide-sm dev-only dev-col">الأسلوب في كتالوجنا</th><th class="hide-sm dev-only dev-col">ملاحظات</th></tr></thead><tbody>${part.map(a => `
           <tr data-aid="${a.id}"><td><button type="button" class="ttl" data-aid="${a.id}">${esc(a.name)}</button>${latin(a)}</td>
-          <td>${roles(a)}</td><td class="num">${num(P.books(a))}</td><td class="num">${num(P.stock(a))}</td><td class="num hide-sm">${num(P.researched(a))}</td>
-          <td class="hide-sm">${esc(styleLine(a.style)) || '<span class="state">—</span>'}</td><td class="hide-sm">${flags(a)}</td></tr>`).join('')}</tbody></table></div>`
+          <td>${roles(a)}</td><td class="num">${num(P.books(a))}</td><td class="num">${num(P.stock(a))}</td><td class="num hide-sm dev-only dev-col">${num(P.researched(a))}</td>
+          <td class="hide-sm dev-only dev-col">${esc(styleLine(a.style)) || '<span class="state">—</span>'}</td><td class="hide-sm dev-only dev-col">${flags(a)}</td></tr>`).join('')}</tbody></table></div>`
         : `<div class="agrid">${part.map(a => `<button type="button" class="acard" data-aid="${a.id}" aria-label="فتح صفحة ${esc(a.name)}">
           <span class="avatar" style="--c:${COLORS[a.id % COLORS.length]}" aria-hidden="true">${esc(initial(a.name))}</span>
           <span><span class="nm">${esc(a.name)}</span>${latin(a)}
@@ -2247,11 +2328,16 @@
         .filter(([, v]) => v && v.length).map(([l, v]) => `<div class="fact"><span>${l}</span><b>${esc([].concat(v).map(styleAr).join('، '))}</b></div>`).join('');
       const srcs = (a.source_urls || []).filter(Boolean);
       const srcLine = srcs.length ? srcs.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(sourceLabel(u))}</a>`).join('، ') : 'معرفة عامة (بدون مصدر منشور)';
-      const researchBlock = `<section class="block"><h3>الأسلوب من البحث</h3>
+      const researchBlock = `<section class="block dev-only dev-box"><h3>الأسلوب من البحث <span class="dev-tag">مطوّر</span></h3>
         ${a.style_note_ar ? `<p style="margin:0 0 10px;font-size:15px;line-height:1.7">${esc(a.style_note_ar)}</p>` : ''}
         ${rRows ? `<div class="facts">${rRows}</div>` : (a.style_note_ar ? '' : '<p class="no-ev">ما فيه أسلوب مبحوث لهذا الشخص بعد.</p>')}
         <p class="state" style="margin:8px 0 0">${esc(AUTHOR_STATUS_AR[a.research_status] || a.research_status || '')}${a.confidence != null ? ` · الثقة ${Math.round(a.confidence * 100)}٪` : ''}${a.origin ? ` · ${esc(a.origin)}` : ''} · المصادر: ${srcLine}</p>
         <p class="state" style="margin:4px 0 0">هذا اللي تعتمد عليه المحادثة لما يطلب الزائر كتبًا تشبه هذا المؤلف، ويُعطى الزائر منه جملة عامة فقط.</p></section>`;
+      // for staff (ADMSTF 2026-10-24): the style sentence and known works only, folded
+      const knownFor = [].concat(a.known_for || []).filter(Boolean);
+      const staffStyle = a.style_note_ar || knownFor.length ? fold(`<section class="block"><h3>عن أسلوبه</h3>
+        ${a.style_note_ar ? `<p style="margin:0 0 10px;font-size:15px;line-height:1.7">${esc(a.style_note_ar)}</p>` : ''}
+        ${knownFor.length ? `<p style="margin:0">من أشهر أعماله: <b>${esc(knownFor.map(styleAr).join('، '))}</b></p>` : ''}</section>`) : '';
       $('sheet').setAttribute('aria-labelledby', 'aTitle');
       const roleCount = Object.entries(a.roles).map(([r, n]) => `${ROLE_AR[r]}: ${num(n)} ${bookWord(n)}`).join('، ');
       $('sheet').innerHTML = `
@@ -2261,7 +2347,24 @@
           <button class="close" type="button" onclick="closeCard()" aria-label="إغلاق">×</button>
         </div>
         <div class="sheet-body">
-          <section class="block"><h3>البيانات</h3>
+          <!-- ADMSTF order (Ibrahim 2026-10-24): books first, style folded, editing last -->
+          <section class="block"><h3>الكتب (${num(a.books_list.length)})</h3>
+            <ul class="abooks">${a.books_list.map(b => `<li><button type="button" data-book="${b.book_id}">
+              ${cover(b)}<span><b>${esc(b.title)}</b><small>${ROLE_AR[b.role] || esc(b.role)}${b.publisher ? '، ' + esc(b.publisher) : ''}${b.genre ? '، ' + esc(b.genre) : ''}</small></span>
+              <span>${b.active && b.quantity > 0 ? `<span class="m">${num(b.quantity)} نسخ</span>` : '<span class="status off">غير متوفر</span>'}</span></button></li>`).join('') || '<li class="no-ev">ما فيه كتب مرتبطة.</li>'}</ul>
+          </section>
+          ${staffStyle}
+          ${fold(authorAwardsBlock(a))}
+          ${researchBlock}
+          <section class="block dev-only dev-box"><h3>الأسلوب في كتالوجنا <span class="dev-tag">مطوّر</span></h3>${styleRows ? `<div class="facts">${styleRows}</div><p class="state" style="margin:8px 0 0">محسوب من ${num(s.books)} ${s.books === 1 ? 'كتاب مبحوث' : 'كتب مبحوثة'} له عندنا، مو من سيرته.</p>` : (a.books_list.length ? '<p class="no-ev">ما عندنا كتب مبحوثة له بعد، فما فيه أسلوب محسوب.</p>' : '<p class="no-ev">ما عندنا كتب له في المخزون، فما فيه أسلوب محسوب من كتالوجنا.</p>')}</section>
+          <section class="block dev-only dev-box"><h3>دمج تهجئة ثانية لنفس الشخص <span class="dev-tag">مطوّر</span></h3>
+            <p class="state" style="margin:0 0 10px">الدمج فقط لنفس الاسم مكتوب بطريقة ثانية (مثل بارغاس/فارغاس). إذا اختلف اسم أو زاد اسم (محمد نور الدين/محمد ناصر الدين، إبراهيم عيسى/إبراهيم أحمد عيسى) فهم أشخاص مختلفون، لا تدمجهم. بعد الدمج تنتقل الكتب لهذا المؤلف والتهجئة الثانية تصير اسمًا بديلًا، وبيانات الكتب ما تتغير.</p>
+            ${a.duplicates.length ? `<div class="dups">${a.duplicates.map(d => `<div class="dup"><b>${esc(d.name)}</b><button type="button" class="mini" data-view-author="${d.id}">عرض</button><button type="button" class="mini ok" data-merge="${d.id}" data-name="${esc(d.name)}">دمج في «${esc(a.name)}»</button></div>`).join('')}</div>` : ''}
+            <div class="merge-pick"><input id="mergeSearch" type="search" placeholder="ما ظهرت التهجئة فوق؟ ابحث عنها…" aria-label="بحث عن اسم للدمج" /></div>
+            <div id="mergeResults" class="merge-res"></div><p id="mergeState" class="state" role="status"></p>
+          </section>
+          <section class="block"><h3>تعديل البيانات</h3>
+            <p class="state" style="margin:0 0 10px">كل تعديل يُسجَّل باسمك مع القيمة القديمة والجديدة، ويوصل للمطوّر في ملف البلاغات.</p>
             <div class="aform">
               <div><label for="aNameAr">الاسم بالعربي</label><input id="aNameAr" type="text" maxlength="120" value="${esc(a.name)}" /></div>
               <div><label for="aLatin">الاسم باللاتيني</label><input id="aLatin" type="text" dir="ltr" maxlength="120" value="${esc(a.latin || '')}" /></div>
@@ -2271,20 +2374,6 @@
             </div>
             <div class="row" style="margin:12px 0 0"><button class="btn" id="saveAuthor" type="button">حفظ</button><span id="authorState" class="state" role="status"></span></div>
             <p class="state" style="margin:8px 0 0">تعديل الاسم ما يغيّر نص المؤلف في بطاقات الكتب؛ الاسم القديم يُحفظ كاسم بديل حتى تبقى الكتب مرتبطة.</p>
-          </section>
-          ${researchBlock}
-          ${authorAwardsBlock(a)}
-          <section class="block"><h3>الأسلوب في كتالوجنا</h3>${styleRows ? `<div class="facts">${styleRows}</div><p class="state" style="margin:8px 0 0">محسوب من ${num(s.books)} ${s.books === 1 ? 'كتاب مبحوث' : 'كتب مبحوثة'} له عندنا، مو من سيرته.</p>` : (a.books_list.length ? '<p class="no-ev">ما عندنا كتب مبحوثة له بعد، فما فيه أسلوب محسوب.</p>' : '<p class="no-ev">ما عندنا كتب له في المخزون، فما فيه أسلوب محسوب من كتالوجنا.</p>')}</section>
-          <section class="block"><h3>الكتب (${num(a.books_list.length)})</h3>
-            <ul class="abooks">${a.books_list.map(b => `<li><button type="button" data-book="${b.book_id}">
-              ${cover(b)}<span><b>${esc(b.title)}</b><small>${ROLE_AR[b.role] || esc(b.role)}${b.publisher ? '، ' + esc(b.publisher) : ''}${b.genre ? '، ' + esc(b.genre) : ''}</small></span>
-              <span>${b.active && b.quantity > 0 ? `<span class="m">${num(b.quantity)} نسخ</span>` : '<span class="status off">غير متوفر</span>'}</span></button></li>`).join('') || '<li class="no-ev">ما فيه كتب مرتبطة.</li>'}</ul>
-          </section>
-          <section class="block"><h3>دمج تهجئة ثانية لنفس الشخص</h3>
-            <p class="state" style="margin:0 0 10px">الدمج فقط لنفس الاسم مكتوب بطريقة ثانية (مثل بارغاس/فارغاس). إذا اختلف اسم أو زاد اسم (محمد نور الدين/محمد ناصر الدين، إبراهيم عيسى/إبراهيم أحمد عيسى) فهم أشخاص مختلفون، لا تدمجهم. بعد الدمج تنتقل الكتب لهذا المؤلف والتهجئة الثانية تصير اسمًا بديلًا، وبيانات الكتب ما تتغير.</p>
-            ${a.duplicates.length ? `<div class="dups">${a.duplicates.map(d => `<div class="dup"><b>${esc(d.name)}</b><button type="button" class="mini" data-view-author="${d.id}">عرض</button><button type="button" class="mini ok" data-merge="${d.id}" data-name="${esc(d.name)}">دمج في «${esc(a.name)}»</button></div>`).join('')}</div>` : ''}
-            <div class="merge-pick"><input id="mergeSearch" type="search" placeholder="ما ظهرت التهجئة فوق؟ ابحث عنها…" aria-label="بحث عن اسم للدمج" /></div>
-            <div id="mergeResults" class="merge-res"></div><p id="mergeState" class="state" role="status"></p>
           </section>
         </div>`;
       $('sheet').querySelectorAll('[data-book]').forEach(el => el.addEventListener('click', () => openCard(Number(el.dataset.book))));
@@ -2354,6 +2443,10 @@
       const when = b.original_year_checked_at ? String(b.original_year_checked_at).slice(0, 10) : '';
       return `${b.original_year}${src ? ' — ' + src : ''}${when ? ' (' + when + ')' : ''}`;
     }
+    const devFact = html => html.replace('class="fact"', 'class="fact dev-only dev-col"');
+    // a card section folded under its heading (ADMSTF): <section class="block"><h3>…</h3>…</section> → <details>
+    const fold = html => html ? html.replace(/^<section class="block"([^>]*)><h3([^>]*)>([\s\S]*?)<\/h3>/, '<section class="block fold-block"$1><details class="fold"><summary><h3$2>$3</h3></summary>')
+      .replace(/<\/section>\s*$/, '</details></section>') : '';
     function factBox(label, value, unknownText = 'غير معروف') {
       const has = value !== null && value !== undefined && value !== '';
       return `<div class="fact"><span>${label}</span><b class="${has ? '' : 'unknown'}">${has ? esc(value) : unknownText}</b></div>`;
@@ -2397,7 +2490,7 @@
       ].join('');
       const related = (a.related || []).length ? `<p ${P}>كتب مرتبطة:</p><ul style="margin:4px 0 0;padding-inline-start:20px;font-size:14px">${a.related.map(r =>
         `<li><b>${esc(r.relation)}:</b> <a href="#" data-open="${r.id}" dir="auto">${esc(r.title)}</a> <span class="diff" dir="auto">(${esc(r.reason)})</span></li>`).join('')}</ul>` : '';
-      const research = a.research_label && !(d.confirmation && d.confirmation.needed) ? `<p class="${a.research_status === 'matched' ? 'diff' : 'warn'}" style="margin:8px 0 0">${esc(a.research_label)}${a.research_status !== 'matched' && a.research_note ? ` — <span dir="auto">${esc(a.research_note)}</span>` : ''}</p>` : '';
+      const research = a.research_label && !(d.confirmation && d.confirmation.needed) ? `<p class="${a.research_status === 'matched' ? 'diff' : 'warn'} dev-only dev-col" style="margin:8px 0 0">${esc(a.research_label)}${a.research_status !== 'matched' && a.research_note ? ` — <span dir="auto">${esc(a.research_note)}</span>` : ''}</p>` : '';
       if (!rows && !research && !related) return '';
       return `<section class="block"><h3>عن الكتاب</h3>${rows || '<p class="no-ev">لم يُبحث عن الكتاب بعد.</p>'}${related}${research}</section>`;
     }
@@ -2615,10 +2708,24 @@
       $('sheet').innerHTML = `
         <div class="sheet-head">
           ${cover(b)}
-          <div><h2 id="sTitle">${esc(b.title)}</h2><p>${esc(b.author)} · <span class="status ${esc(d.profile.status)}">${esc(d.profile.status_label)}</span> · آخر إثراء: ${date(d.profile.last_enriched_at)}</p></div>
+          <div><h2 id="sTitle">${esc(b.title)}</h2><p>${esc(b.author)}<span class="dev-only dev-col"> · <span class="status ${esc(d.profile.status)}">${esc(d.profile.status_label)}</span> · آخر إثراء: ${date(d.profile.last_enriched_at)}</span></p>
+            <p class="sheet-key"><span><small>المكان</small><b>${esc(locOf(b) || 'بدون موقع')}</b></span><span><small>الكمية</small><b>${!b.active ? 'موقوف' : b.quantity > 0 ? num(b.quantity) : 'نافد'}</b></span><span><small>السعر</small><b>${num(b.price || 0)} ر.س</b></span></p></div>
           <button class="close" type="button" aria-label="إغلاق" id="closeBtn">✕</button>
         </div>
         <div class="sheet-body">
+
+          <!-- ADMSTF order (Ibrahim 2026-10-24) -->
+          <section class="block"><h3>المخزون والظهور</h3>
+            <div class="inv">
+              <div><label for="fPrice">السعر (ر.س)</label><input id="fPrice" type="number" min="0" step="0.5" value="${Number(b.price) || 0}" /></div>
+              <div><label for="fQty">الكمية</label><input id="fQty" type="number" min="0" step="1" value="${Number(b.quantity) || 0}" /></div>
+              <div><label for="fShelf">الموقع (اختياري)</label><input id="fShelf" type="text" maxlength="40" placeholder="مثلًا: رف ٣ – الطابق الأرضي" value="${esc(b.shelf_location || '')}" /></div>
+              <label class="switch"><input id="fActive" type="checkbox" ${b.active ? 'checked' : ''} /> يظهر للزوار</label>
+              <button id="saveInv" class="btn" type="button">حفظ</button>
+            </div>
+            <p class="diff" style="margin:8px 0 0">يظهر للزائر: <b>${b.location_kind === 'shelf' ? esc(b.location) + ' (مكتوب للكتاب)' : b.location_kind === 'section' ? esc(b.location) + ' (حسب قسم التصنيف)' : 'لا يظهر موقع، يُطلب من الزائر سؤال الموظف'}</b></p>
+            <p id="invState" class="state" role="status"></p>
+          </section>
           <section class="block" id="basicBlock"><div class="block-head"><h3>البيانات الأساسية</h3>
             <button id="basicEdit" class="btn secondary" type="button" aria-expanded="false" aria-controls="basicForm">تعديل البيانات</button></div>
             <div id="basicForm" class="basic-form" hidden>
@@ -2646,26 +2753,18 @@
             ${factBox('سنة الصدور الأصلية', origYearText(b), 'غير معروفة بعد')}
             ${factBox('ISBN', b.isbn)}${factBox('الأصل واللغة', b.origin, 'غير معروف بعد')}
             ${factBox('الباركود', b.barcode)}${factBox('رمز المنتج في رواء', b.rewaa_sku)}
-            ${factBox('المصدر', b.source === 'rewaa' ? 'رواء' : 'بيانات تجريبية')}${factBox('آخر مزامنة', b.last_synced_at ? date(b.last_synced_at) : null, 'لم تتم')}
-          </div></section>
-          ${staffNotesBlock(d)}
-          ${confirmBlock(d)}
-          <section class="block" aria-labelledby="nbTitle"><h3 id="nbTitle" class="sr">ليس كتابًا</h3>
-            <div id="notBook" class="notbook">${NOT_BOOK_HTML}</div>
-          </section>
-          ${aboutBlock(d)}
-          ${honorsBlock(d)}
-          <section class="block"><h3>المخزون والظهور</h3>
+            ${devFact(factBox('المصدر', b.source === 'rewaa' ? 'رواء' : 'بيانات تجريبية'))}${devFact(factBox('آخر مزامنة', b.last_synced_at ? date(b.last_synced_at) : null, 'لم تتم'))}
+          </div>
+            <h4 class="sub-h">اللغة والترجمة</h4>
             <div class="inv">
-              <div><label for="fPrice">السعر (ر.س)</label><input id="fPrice" type="number" min="0" step="0.5" value="${Number(b.price) || 0}" /></div>
-              <div><label for="fQty">الكمية</label><input id="fQty" type="number" min="0" step="1" value="${Number(b.quantity) || 0}" /></div>
-              <div><label for="fShelf">الموقع (اختياري)</label><input id="fShelf" type="text" maxlength="40" placeholder="مثلًا: رف ٣ – الطابق الأرضي" value="${esc(b.shelf_location || '')}" /></div>
-              <label class="switch"><input id="fActive" type="checkbox" ${b.active ? 'checked' : ''} /> يظهر للزوار</label>
-              <button id="saveInv" class="btn" type="button">حفظ</button>
+              <div><label for="fLang">لغة هذه الطبعة</label><select id="fLang">${langOptions(b.language || 'ar', false)}</select></div>
+              <div><label for="fOrig">لغة الأصل</label><select id="fOrig">${langOptions(b.original_language || '', true)}</select></div>
+              <div><label for="fTrans">المترجم</label><input id="fTrans" type="text" maxlength="120" value="${esc(b.translator || '')}" /></div>
+              <button id="saveLang" class="btn" type="button">حفظ</button>
             </div>
-            <p class="diff" style="margin:8px 0 0">يظهر للزائر: <b>${b.location_kind === 'shelf' ? esc(b.location) + ' (مكتوب للكتاب)' : b.location_kind === 'section' ? esc(b.location) + ' (حسب قسم التصنيف)' : 'لا يظهر موقع، يُطلب من الزائر سؤال الموظف'}</b></p>
-            <p id="invState" class="state" role="status"></p>
+            <p id="langState" class="state" role="status"></p>
           </section>
+          ${confirmBlock(d)}
           <section class="block"><h3>الغلاف</h3>
             <div class="cover-row">
               ${b.cover_url ? `<img class="cover-big" src="${esc(b.cover_url)}" alt="غلاف ${esc(b.title)}" />` : '<div class="cover-none">لا يوجد غلاف بعد</div>'}
@@ -2686,16 +2785,10 @@
               <span class="diff">${b.summary_source ? 'المصدر: ' + (String(b.summary_source).startsWith('http') ? `<a href="${esc(b.summary_source)}" target="_blank" rel="noopener noreferrer">${esc(host(b.summary_source))}</a>` : ({ library_sheet: 'ملف المكتبة (بعد التحقق)', general_knowledge: 'معرفة عامة بالعمل' }[b.summary_source] || 'موظف')) : ''}</span></div>
             <p id="summaryState" class="state" role="status"></p>
           </section>
-          <section class="block"><h3>لغة الكتاب</h3>
-            <div class="inv">
-              <div><label for="fLang">لغة هذه الطبعة</label><select id="fLang">${langOptions(b.language || 'ar', false)}</select></div>
-              <div><label for="fOrig">لغة الأصل</label><select id="fOrig">${langOptions(b.original_language || '', true)}</select></div>
-              <div><label for="fTrans">المترجم</label><input id="fTrans" type="text" maxlength="120" value="${esc(b.translator || '')}" /></div>
-              <button id="saveLang" class="btn" type="button">حفظ</button>
-            </div>
-            <p id="langState" class="state" role="status"></p>
-          </section>
-          ${['أطفال', 'يافعين', 'قصص مصورة'].includes(b.genre) || b.age_min != null || b.age_max != null ? `<section class="block"><h3>العمر المناسب</h3>
+          ${staffNotesBlock(d)}
+          ${fold(aboutBlock(d))}
+          ${fold(honorsBlock(d))}
+          ${['أطفال', 'يافعين', 'قصص مصورة'].includes(b.genre) || b.age_min != null || b.age_max != null ? fold(`<section class="block"><h3>العمر المناسب</h3>
             <p class="diff" style="margin:0 0 8px">لكتب الأطفال واليافعين: من أي عمر إلى أي عمر يناسب الكتاب. تستخدمه منار لما يذكر الزائر عمر طفله.${b.age_source ? ' المصدر: ' + (String(b.age_source).startsWith('http') ? `<a href="${esc(b.age_source)}" target="_blank" rel="noopener noreferrer">${esc(host(b.age_source))}</a>` : b.age_source === 'staff' ? 'موظف' : esc(b.age_source)) : ''}</p>
             <div class="inv">
               <div><label for="fAgeMin">من عمر</label><input id="fAgeMin" type="number" min="0" max="18" inputmode="numeric" value="${b.age_min ?? ''}" /></div>
@@ -2704,16 +2797,19 @@
             </div>
             ${b.age_note ? `<p class="diff">${esc(b.age_note)}</p>` : ''}
             <p id="ageState" class="state" role="status"></p>
-          </section>` : ''}
-          <section class="block fold-block"><details id="attrsFold" class="fold" ${ATTRS_OPEN ? 'open' : ''}>
-            <summary><h3>الصفات القرائية (من مراجعات القرّاء)</h3><span class="fold-count">${num(d.review.total)} صفة · اضغط للعرض</span></summary>
+          </section>`) : ''}
+          <section class="block fold-block dev-only dev-box"><details id="attrsFold" class="fold" ${ATTRS_OPEN ? 'open' : ''}>
+            <summary><h3>الصفات القرائية (من مراجعات القرّاء) <span class="dev-tag">مطوّر</span></h3><span class="fold-count">${num(d.review.total)} صفة · اضغط للعرض</span></summary>
             <div class="review-bar">
               <span>المراجعة اختيارية: أكّدت ${num(d.review.verified)} من ${num(d.review.total)} صفة. البطاقة تشتغل في التوصية حتى بدون مراجعة.</span>
               <span>تُسجَّل المراجعة باسمك: <b>${esc(ME ? ME.name : '')}</b></span>
             </div>
             <p id="reviewState" class="state" role="status"></p>
             ${attrs}</details></section>
-          <section class="block"><h3>كل المصادر المقروءة</h3>${d.sources.length ? `<ul class="sources">${d.sources.map(u => `<li><a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(decodeURI(u))}</a></li>`).join('')}</ul>` : '<p class="no-ev">لا توجد مصادر مسجلة.</p>'}</section>
+          <section class="block dev-only dev-box"><h3>كل المصادر المقروءة <span class="dev-tag">مطوّر</span></h3>${d.sources.length ? `<ul class="sources">${d.sources.map(u => `<li><a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(decodeURI(u))}</a></li>`).join('')}</ul>` : '<p class="no-ev">لا توجد مصادر مسجلة.</p>'}</section>
+          <section class="block nb-block" aria-labelledby="nbTitle"><h3 id="nbTitle" class="sr">ليس كتابًا</h3>
+            <div id="notBook" class="notbook">${NOT_BOOK_HTML}</div>
+          </section>
         </div>`;
       $('closeBtn').addEventListener('click', closeCard);
       $('attrsFold').addEventListener('toggle', e => { ATTRS_OPEN = e.target.open; });
@@ -2737,7 +2833,7 @@
       if ($('coverRemove')) $('coverRemove').addEventListener('click', () => coverAction(b.book_id, 'remove'));
     }
 
-    const NOT_BOOK_HTML = '<p>هذا المنتج مو كتاب (لعبة، مجموعة تعليمية، أداة…)؟ احذفه من الكتالوج. يروح لقسم «المحذوفة» وتقدر تسترجعه.</p><button id="notBookBtn" class="btn secondary" type="button">ليس كتابًا</button>';
+    const NOT_BOOK_HTML = '<p>هذا المنتج مو كتاب (لعبة، مجموعة تعليمية، أداة…)؟ احذفه من الكتالوج. يُحفظ في «المحذوفة» ويقدر المطوّر يسترجعه.</p><button id="notBookBtn" class="btn secondary" type="button">ليس كتابًا</button>';
     function askNotBook(b) {
       const box = $('notBook'); box.classList.add('ask'); box.setAttribute('role', 'alertdialog'); box.setAttribute('aria-labelledby', 'nbAsk');
       box.innerHTML = `<p id="nbAsk">متأكد تبغى تحذف «${esc(b.title)}» لأنه ليس كتابًا؟ بيختفي من الكتب والبحث والزوار، ويقدر يُسترجع من «المحذوفة».</p>
@@ -3170,6 +3266,10 @@
           <select id="map_${f}" class="wide" style="width:100%"><option value="">— لا يوجد —</option>${d.headers.map((h, i) => `<option value="${i}" ${d.suggested[f] === i ? 'selected' : ''}>${esc(h)}</option>`).join('')}</select></div>`).join('');
         FIELD_ORDER.forEach(f => $('map_' + f).addEventListener('change', renderSample));
         renderSample(); $('mapPanel').hidden = false;
+        const missing = FIELD_ORDER.filter(f => d.fields[f].required && (d.suggested[f] === undefined || d.suggested[f] === null));
+        $('mapFold').open = missing.length > 0;
+        $('mapMissing').hidden = !missing.length;
+        $('mapMissing').textContent = missing.length ? `ما لقينا عمود: ${missing.map(f => d.fields[f].label).join('، ')}. اختره من «تغيير الأعمدة» تحت.` : '';
       } catch (err) { $('impState').textContent = 'تعذر: ' + err.message; }
     });
     function listBlock(title, items, fmt, open = false) {
@@ -3264,44 +3364,6 @@
       } catch (err) { $('lsApplyState').textContent = 'تعذر التطبيق: ' + err.message; }
       finally { $('lsApply').disabled = false; $('lsApply').dataset.armed = ''; $('lsApply').textContent = 'تطبيق على الكتالوج'; }
     });
-    // ---------------- staff confirmations: out to Claude, corrections back in (2026-10-04)
-    async function confirmPackage() {
-      const res = await fetch('/api/admin/confirmations');
-      if (!res.ok) throw new Error(res.status);
-      return res.json();
-    }
-    async function loadConfirmCount() {
-      try {
-        const p = await confirmPackage();
-        $('cxCount').textContent = p.count ? `${num(p.count)} رد من الموظفين بانتظار التصحيح · ${num(p.books_needing_confirmation)} كتاب يحتاج تأكيد`
-          : `${num(p.books_needing_confirmation)} كتاب يحتاج تأكيد هوية`;
-      } catch (err) { $('cxCount').textContent = ''; }
-    }
-    async function confirmCorrections(apply) {
-      const st = $('cxPlanState'); st.className = 'state';
-      let pkg;
-      try { pkg = JSON.parse($('cxText').value); } catch (e) { st.className = 'state error'; st.textContent = 'النص ليس ملف تصحيحات صالحًا. الصقه كاملًا كما أعطاك إياه Claude.'; return; }
-      st.textContent = apply ? 'جاري التطبيق…' : 'جاري الفحص…'; $('cxPreview').disabled = $('cxApply').disabled = true;
-      try {
-        const res = await fetch('/api/admin/confirmations/corrections', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ package: pkg, apply }) });
-        const d = await res.json();
-        const items = d.items || [];
-        $('cxPlan').innerHTML = items.length ? `<thead><tr><th>الكتاب</th><th>التغيير</th><th>الحالة</th></tr></thead><tbody>${items.map(r => `<tr>
-          <td dir="auto">${esc(r.title || '')} <span class="diff">#${r.book_id ?? ''}</span></td>
-          <td>${r.changes.length ? r.changes.map(c => `<div><b>${esc(c.label)}:</b> <span class="diff" dir="auto">${esc(c.old ?? '—')}</span> ← <b dir="auto">${esc(c.new ?? '—')}</b></div>`).join('') : '<span class="diff">بدون تغيير في السجل (يُقفل الرد فقط)</span>'}${r.note ? `<div class="diff" dir="auto">${esc(r.note)}</div>` : ''}</td>
-          <td>${r.ok ? (d.applied ? '<span class="okflag">طُبّق</span>' : '<span class="okflag">جاهز</span>') : `<span class="warn">${esc(r.problem || '')}</span>`}</td></tr>`).join('')}</tbody>` : '';
-        if (d.applied) {
-          st.textContent = `تم: صُحّح ${num(d.books)} كتاب وأُقفل ${num(d.handled)} رد. النسخة الاحتياطية: ${d.backup}`;
-          $('cxApply').hidden = true; $('cxText').value = ''; loadConfirmCount(); loadCatalog();
-        } else if (d.ok) { st.textContent = `${num(items.length)} بند جاهز. راجع الجدول ثم اضغط «تطبيق التصحيحات».`; $('cxApply').hidden = false; }
-        else { st.className = 'state error'; st.textContent = d.error || 'تعذر الفحص'; $('cxApply').hidden = true; }
-      } catch (err) { st.className = 'state error'; st.textContent = 'تعذر الاتصال بالخادم'; }
-      finally { $('cxPreview').disabled = $('cxApply').disabled = false; }
-    }
-    $('cxPreview').addEventListener('click', () => confirmCorrections(false));
-    $('cxApply').addEventListener('click', () => confirmCorrections(true));
-    $('cxText').addEventListener('input', () => { $('cxApply').hidden = true; });
-    $('cxFile').addEventListener('change', async e => { const f = e.target.files[0]; if (f) { $('cxText').value = await f.text(); $('cxApply').hidden = true; confirmCorrections(false); } e.target.value = ''; });
 
     async function loadHistory() {
       try {
@@ -3340,10 +3402,14 @@
       $('auth').hidden = true; $('who').hidden = false;
       $('whoName').textContent = `${ME.name} · ${ME.role_label}`;
       $('whoAv').textContent = String(ME.name || '؟').trim().charAt(0); $('who').title = $('whoName').textContent;
-      const manager = ME.role === 'manager';
-      // «الإعدادات» is open to staff too (Ibrahim 2026-10-13); import and statistics stay manager-only
-      $('tabImport').hidden = !manager; $('tabSettings').hidden = false; $('tabStats').hidden = !manager; $('phGear').hidden = false;
-      $('cxFold').hidden = !manager;  // applying identity corrections stays manager-only, as in «استيراد من رواء»
+      const manager = isMgr();
+      // «الإعدادات» is open to staff (2026-10-13), but «الموظفون» and «الذكاء الاصطناعي» are for the manager and the
+      // developer (Ibrahim 2026-10-24); import and visitor statistics stay manager-only. The developer sees everything,
+      // plus the developer-only parts drawn in their own colour (body.is-dev).
+      $('tabImport').hidden = !manager; $('tabSettings').hidden = false; $('subStats').hidden = !manager;
+      $('setTabUsers').hidden = !manager; $('setTabAi').hidden = !manager;
+      document.body.classList.toggle('is-dev', isDev());
+      devOptions(isDev());
       ['aPass', 'aPass2', 'pCur', 'pNew'].forEach(id => { $(id).value = ''; });
       loadInboxCount(); loadAlertsCount();
     }
@@ -3373,6 +3439,13 @@
     $('logoutBtn').addEventListener('click', async () => {
       await fetch('/api/admin/logout', { method: 'POST' }); ME = null; CSRF = null; $('who').hidden = true; showAuth('login');
     });
+    const DEV_OPTS = [...document.querySelectorAll('option.dev-only')].map(o => [o, o.parentNode]);
+    function devOptions(on) {
+      DEV_OPTS.forEach(([o, sel]) => {
+        if (on && !o.parentNode) sel.appendChild(o);
+        if (!on && o.parentNode) { if (o.selected) { sel.selectedIndex = 0; sel.dispatchEvent(new Event('change')); } o.remove(); }
+      });
+    }
     async function boot() {
       const res = await rawFetch('/api/admin/session');
       const d = await res.json();
@@ -3388,11 +3461,11 @@
         const d = await (await fetch('/api/admin/users')).json();
         $('usersTable').innerHTML = `<thead><tr><th>الاسم</th><th>المستخدم</th><th>الدور</th><th>آخر دخول</th><th>الحالة</th><th></th></tr></thead><tbody>${d.users.map(u => `
           <tr class="${u.active ? '' : 'off'}"><td>${esc(u.display_name)}</td><td dir="ltr">${esc(u.username)}</td>
-          <td>${u.role === 'manager' ? 'مدير' : 'موظف'}</td><td>${when(u.last_login_at)}</td>
+          <td>${u.role === 'developer' ? 'مطوّر' : u.role === 'manager' ? 'مدير' : 'موظف'}</td><td>${when(u.last_login_at)}</td>
           <td>${u.active ? 'فعّال' : 'موقوف'}</td>
-          <td><button class="btn secondary" data-uid="${u.user_id}" data-do="${u.active ? 'off' : 'on'}" type="button">${u.active ? 'إيقاف' : 'تفعيل'}</button>
+          <td>${u.role === 'developer' && !isDev() ? '<span class="diff">حساب المطوّر</span>' : u.role === 'developer' ? '' : `<button class="btn secondary" data-uid="${u.user_id}" data-do="${u.active ? 'off' : 'on'}" type="button">${u.active ? 'إيقاف' : 'تفعيل'}</button>
               <button class="btn secondary" data-uid="${u.user_id}" data-do="reset" type="button">كلمة مرور جديدة</button>
-              <button class="btn secondary" data-uid="${u.user_id}" data-do="role" data-role="${u.role === 'manager' ? 'staff' : 'manager'}" type="button">${u.role === 'manager' ? 'اجعله موظف' : 'اجعله مدير'}</button></td></tr>`).join('')}</tbody>`;
+              <button class="btn secondary" data-uid="${u.user_id}" data-do="role" data-role="${u.role === 'manager' ? 'staff' : 'manager'}" type="button">${u.role === 'manager' ? 'اجعله موظف' : 'اجعله مدير'}</button>`}</td></tr>`).join('')}</tbody>`;
         $('usersTable').querySelectorAll('button[data-uid]').forEach(b => b.addEventListener('click', () => userAction(b)));
       } catch (e) { $('usersState').textContent = 'تعذر تحميل الموظفين'; }
     }
@@ -3433,7 +3506,7 @@
       const res = await fetch('/api/admin/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ daily_model_calls: Number($('capInput').value) }) });
       $('capState').textContent = res.ok ? 'تم الحفظ' : 'قيمة غير صحيحة'; loadUsage(); loadAudit();
     });
-    const AUDIT_LABELS = { 'update.approved': 'موافقة على تحديث «منار»', 'update.installed': 'تثبيت تحديث «منار»', 'update.failed': 'فشل تحديث «منار» ورجوع للنسخة السابقة', 'dev_note.done': 'تمّت ملاحظة من المطور', 'dev_note.open': 'إعادة فتح ملاحظة من المطور', 'staff_idea.add': 'اقتراح موظف على التطبيق', 'staff_idea.done': 'معالجة اقتراح موظف', 'staff_idea.open': 'إعادة فتح اقتراح موظف', 'inbox.export': 'تنزيل ملف البلاغات', 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف',
+    const AUDIT_LABELS = { 'update.approved': 'موافقة على تحديث «منار»', 'update.installed': 'تثبيت تحديث «منار»', 'update.failed': 'فشل تحديث «منار» ورجوع للنسخة السابقة', 'dev_note.done': 'تمّت ملاحظة من المطور', 'dev_note.open': 'إعادة فتح ملاحظة من المطور', 'staff_idea.add': 'اقتراح موظف على التطبيق', 'staff_idea.done': 'معالجة اقتراح موظف', 'staff_idea.open': 'إعادة فتح اقتراح موظف', 'inbox.export': 'تنزيل ملف البلاغات', 'review.approved': 'اعتماد مراجعة قارئ', 'review.rejected': 'رفض مراجعة قارئ', 'review.pending': 'إرجاع مراجعة قارئ للمراجعة', 'candidate.added': 'كتاب مرشّح: تم توفيره', 'candidate.declined': 'كتاب مرشّح: لن نوفره', 'candidate.open': 'إعادة فتح كتاب مرشّح', 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف', 'user.developer_granted': 'منح دور المطوّر (من الجهاز)', 'user.developer_revoked': 'سحب دور المطوّر (من الجهاز)',
       'user.password_changed': 'تغيير كلمة المرور', 'book.update': 'تعديل كتاب', 'card.confirm': 'تأكيد صفة', 'card.reject': 'حذف صفة',
       'card.restore': 'استرجاع صفة', 'card.set': 'تعيين صفة', 'card.add': 'إضافة صفة', 'model.set': 'تغيير النموذج',
       'key.saved': 'حفظ مفتاح', 'key.deleted': 'حذف مفتاح', 'endpoint.set': 'تغيير عنوان مزوّد', 'import.apply': 'استيراد من رواء',
@@ -3453,9 +3526,12 @@
       if (!c) return;
       if (typeof c.staff_open === 'number') { $('inboxTabStaff').hidden = false; staffOpen = c.staff_open; $('inboxNStaff').textContent = staffOpen ? num(staffOpen) : ''; }
       if (typeof c.ideas_open === 'number') { ideasOpen = c.ideas_open; $('inboxNIdeas').textContent = ideasOpen ? num(ideasOpen) : ''; }
-      const open = (c.open || 0) + staffOpen + ideasOpen;
-      $('inboxN').hidden = !open; $('inboxN').textContent = open ? num(open) : '';
-      $('tabInbox').setAttribute('aria-label', open ? `البلاغات، ${num(open)} بانتظار المعالجة` : 'البلاغات');
+      // «ماذا تقرأ الآن؟» (2026-10-27): reviews waiting for approval and open candidate books count with the visitors' notes
+      const rv = c.reviews_open || 0, cd = c.candidates_open || 0;
+      $('inboxNReviews').textContent = rv ? num(rv) : '';
+      $('inboxNCandidates').textContent = cd ? num(cd) : '';
+      $('subNVisitors').textContent = (c.open || 0) + rv + cd ? num((c.open || 0) + rv + cd) : '';
+      $('subNStaff').textContent = staffOpen + ideasOpen ? num(staffOpen + ideasOpen) : '';
       $('inboxNReport').textContent = c.report.open ? num(c.report.open) : '';
       $('inboxNSuggestion').textContent = c.suggestion.open ? num(c.suggestion.open) : '';
     }
@@ -3463,19 +3539,22 @@
       if (!ME) return;
       try { const res = await rawFetch('/api/admin/inbox/count'); if (res.ok) showInboxCounts(await res.json()); } catch (e) { /* the badge just stays as it is */ }
     }
-    function setExportLink() {
-      // the file follows the status chosen above (open / handled / all)
-      const a = $('inboxExport');
-      if (a) a.href = `/api/admin/inbox/export?status=${inbox.status}`;
-    }
+    // «تنزيل الكل في ملف» lives in «الإعدادات ← التحديثات والإرسال» since 2026-10-24, with its own open/all choice
+    let exportStatus = 'open';
+    function setExportLink() { $('inboxExport').href = `/api/admin/inbox/export?status=${exportStatus}`; }
+    document.querySelectorAll('#exportStatus button').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('#exportStatus button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      exportStatus = btn.dataset.status; setExportLink();
+    }));
     async function loadInbox(msg, more) {
-      setExportLink();
       // more: fetch the next page (older notes) and keep what is already listed
       $('inboxState').textContent = msg || 'جاري التحميل…';
       const offset = more ? inbox.items.length : 0;
       if (inbox.kind === 'questions') return loadQuestions(msg, more, offset);
       if (inbox.kind === 'staff') return loadStaffNotes(msg, more, offset);
       if (inbox.kind === 'ideas') return loadIdeas(msg, more, offset);
+      if (inbox.kind === 'reviews') return loadReviews(msg, more, offset);
+      if (inbox.kind === 'candidates') return loadCandidates(msg, more, offset);
       try {
         const res = await fetch(`/api/admin/inbox?kind=${inbox.kind}&status=${inbox.status}&offset=${offset}`);
         if (!res.ok) throw new Error(res.status);
@@ -3581,6 +3660,84 @@
         }));
       } catch (e) { $('inboxState').textContent = 'تعذر تحميل الاقتراحات.'; if (!more) $('inboxList').innerHTML = ''; }
     }
+
+    // «مراجعات القرّاء» (Ibrahim 2026-10-27): reviews visitors wrote in «ماذا تقرأ الآن؟»; shown to visitors only after approval
+    const REVIEW_FLAGS = { offensive: 'فيه كلام مسيء', spoiler: 'فيه حرق للأحداث', off_topic: 'مو عن الكتاب', emptied: 'التنظيف شال الكلام كله، فما يظهر للزوار منه شي' };
+    const REVIEW_STATUS = { pending: 'بانتظار الموافقة', approved: 'معتمدة', rejected: 'مرفوضة' };
+    async function loadReviews(msg, more, offset) {
+      try {
+        const res = await fetch(`/api/admin/inbox/reviews?status=${inbox.status}&offset=${offset}`);
+        if (!res.ok) throw new Error(res.status);
+        const d = await res.json();
+        inbox.items = more ? inbox.items.concat(d.items) : d.items;
+        inbox.total = d.total;
+        $('inboxNReviews').textContent = d.counts.pending ? num(d.counts.pending) : '';
+        loadInboxCount();
+        const rest = Math.max(0, inbox.total - inbox.items.length);
+        $('inboxState').textContent = msg || (inbox.items.length ? `عدد المراجعات: ${num(inbox.total)}${rest ? ` · المعروض ${num(inbox.items.length)}` : ''}` : '');
+        $('inboxList').innerHTML = inbox.items.length ? `<p class="state" style="margin:0 0 8px">آراء الزوار في كتب المكتبة. ما تظهر للزوار ولا تدخل في ردود منار إلا بعد «اعتماد». «اعتماد بدون النص» يحسب النجوم والسمات ويخفي الكلام. أرقام الجوال والروابط والحسابات تنشال من الكلام تلقائيًا.</p>`
+          + inbox.items.map(r => {
+            const shown = r.clean_text && r.clean_text !== r.text;
+            const flags = (r.ai_flags || []).map(f => REVIEW_FLAGS[f] || f);
+            return `<div class="note-row${r.status !== 'pending' ? ' done' : ''}"><div class="nr-book">${cover({ book_id: r.book_id || 0, title: r.book_title, cover_url: r.cover_url })}<div>
+              <b>${esc(r.book_title || 'كتاب محذوف')}</b><span class="nr-meta">${esc(r.book_author || '')}</span>
+              <span class="nr-reason" style="color:#B07A12">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)} (${num(r.stars)} من ٥)</span>
+              ${(r.tag_labels || []).length ? `<span class="nr-meta">السمات: ${esc(r.tag_labels.join('، '))}</span>` : ''}
+              ${r.text ? `<p class="nr-text" dir="auto" style="white-space:pre-line">${esc(shown ? r.clean_text : r.text)}</p>` : '<span class="nr-meta">بدون كلام</span>'}
+              ${shown ? `<details><summary class="nr-meta">النص كما كتبه الزائر</summary><p class="nr-text" dir="auto">${esc(r.text)}</p></details>` : ''}
+              ${flags.length ? `<span class="nr-reason" style="color:var(--danger,#B3261E)">تنبيه: ${esc(flags.join('، '))}</span>` : ''}
+              <span class="nr-meta">${r.first_name ? `باسم «${esc(r.first_name)}» · ` : ''}${when(r.created_at)}${r.language === 'en' ? ' · من الواجهة الإنجليزية' : ''} · ${REVIEW_STATUS[r.status] || r.status}${r.hide_text ? ' (بدون النص)' : ''}${r.status !== 'pending' ? ` · ${esc(r.handled_by || '—')} ${when(r.handled_at)}` : ''}</span></div></div>
+              <div class="nr-actions">${r.status === 'pending' ? `<button type="button" class="btn" data-rv="${r.review_id}" data-to="approved">اعتماد</button>${r.text ? `<button type="button" class="btn secondary" data-rv="${r.review_id}" data-to="approved" data-hide="1">اعتماد بدون النص</button>` : ''}<button type="button" class="btn secondary" data-rv="${r.review_id}" data-to="rejected">رفض</button>`
+                : `<button type="button" class="btn secondary" data-rv="${r.review_id}" data-to="pending">إرجاع للمراجعة</button>`}</div></div>`;
+          }).join('') + (rest ? `<div class="nr-actions" style="justify-content:center"><button type="button" class="btn secondary" id="reviewsMore">عرض الأقدم (باقي ${num(rest)})</button></div>` : '')
+          : `<div class="empty-note">${inbox.status === 'open' ? 'ما فيه مراجعات تنتظر الموافقة.' : 'ما فيه مراجعات.'}</div>`;
+        if ($('reviewsMore')) $('reviewsMore').addEventListener('click', () => { $('reviewsMore').disabled = true; loadInbox(null, true); });
+        $('inboxList').querySelectorAll('[data-rv]').forEach(b => b.addEventListener('click', async () => {
+          b.disabled = true;
+          const r = await fetch(`/api/admin/inbox/reviews/${b.dataset.rv}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: b.dataset.to, hide_text: b.dataset.hide === '1' }) });
+          if (r.ok) loadInbox(); else { b.disabled = false; $('inboxState').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
+        }));
+      } catch (e) { $('inboxState').textContent = 'تعذر تحميل المراجعات.'; if (!more) $('inboxList').innerHTML = ''; }
+    }
+    // «كتب مرشّحة» (Ibrahim 2026-10-27): books visitors want on the shelves; one we do not have was looked up and confirmed by the visitor
+    const CAND_STATUS = { open: 'مرشّح', added: 'تم توفيره', declined: 'لن نوفره' };
+    async function loadCandidates(msg, more, offset) {
+      try {
+        const res = await fetch(`/api/admin/inbox/candidates?status=${inbox.status}&offset=${offset}`);
+        if (!res.ok) throw new Error(res.status);
+        const d = await res.json();
+        inbox.items = more ? inbox.items.concat(d.items) : d.items;
+        inbox.total = d.total;
+        $('inboxNCandidates').textContent = d.counts.open ? num(d.counts.open) : '';
+        loadInboxCount();
+        const rest = Math.max(0, inbox.total - inbox.items.length);
+        $('inboxState').textContent = msg || (inbox.items.length ? `عدد الكتب: ${num(inbox.total)}${rest ? ` · المعروض ${num(inbox.items.length)}` : ''}` : '');
+        $('inboxList').innerHTML = inbox.items.length ? `<p class="state" style="margin:0 0 8px">كتب طلب الزوار أن تكون في المكتبة. «من خارج المكتبة»: منار بحثت عنه وأكّد الزائر أنه هو الكتاب. «من الكتالوج»: كتاب عندنا نفدت نسخه. الأكثر طلبًا أولًا.</p>`
+          + inbox.items.map(c => {
+            const open = c.status === 'open';
+            return `<div class="note-row${open ? '' : ' done'}"><div>
+              <p class="nr-text" dir="auto" style="margin-top:0"><b>${esc(c.title)}</b>${c.author ? ` — ${esc(c.author)}` : ''}${c.year ? ` (${esc(String(c.year))})` : ''}</p>
+              <span class="nr-reason">${c.source === 'catalog' ? 'من الكتالوج (نافد)' : 'من خارج المكتبة'} · طلبه ${num(c.times_suggested)} ${c.times_suggested === 1 ? 'زائر' : 'زوار'}</span>
+              ${c.asked_as && c.asked_as !== c.title ? `<span class="nr-meta">كتبه الزائر: ${esc(c.asked_as)}</span>` : ''}
+              ${c.isbn || c.publisher ? `<span class="nr-meta">${c.isbn ? 'ISBN ' + esc(c.isbn) : ''}${c.isbn && c.publisher ? ' · ' : ''}${esc(c.publisher || '')}</span>` : ''}
+              ${c.summary ? `<p class="nr-text" dir="auto" style="font-size:13px">${esc(c.summary.slice(0, 300))}${c.summary.length > 300 ? '…' : ''}</p>` : ''}
+              ${(c.sources || []).length ? `<span class="nr-meta">المصادر: ${(c.sources || []).slice(0, 4).map(u => /^https?:/.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, '').split('/')[0])}</a>` : esc(u)).join(' · ')}</span>` : ''}
+              ${(c.notes || []).map(n => `<p class="nr-text" dir="auto">ملاحظة زائر: ${esc(n)}</p>`).join('')}
+              <span class="nr-meta">أول مرة ${when(c.first_at)} · آخر مرة ${when(c.last_at)} · ${CAND_STATUS[c.status] || c.status}${open ? '' : ` · ${esc(c.handled_by || '—')} ${when(c.handled_at)}`}</span></div>
+              <div class="nr-actions">${c.source === 'catalog' && c.book_id ? `<button type="button" class="btn secondary" data-open-book="${c.book_id}">افتح بطاقة الكتاب</button>` : ''}
+              ${open ? `<button type="button" class="btn" data-cd="${c.candidate_id}" data-to="added">تم توفيره</button><button type="button" class="btn secondary" data-cd="${c.candidate_id}" data-to="declined">لن نوفره</button>`
+                : `<button type="button" class="btn secondary" data-cd="${c.candidate_id}" data-to="open">إعادة فتح</button>`}</div></div>`;
+          }).join('') + (rest ? `<div class="nr-actions" style="justify-content:center"><button type="button" class="btn secondary" id="candMore">عرض الباقي (${num(rest)})</button></div>` : '')
+          : `<div class="empty-note">${inbox.status === 'open' ? 'ما فيه كتب مرشّحة مفتوحة.' : 'ما فيه كتب مرشّحة.'}</div>`;
+        if ($('candMore')) $('candMore').addEventListener('click', () => { $('candMore').disabled = true; loadInbox(null, true); });
+        $('inboxList').querySelectorAll('[data-open-book]').forEach(b => b.addEventListener('click', () => openCard(Number(b.dataset.openBook))));
+        $('inboxList').querySelectorAll('[data-cd]').forEach(b => b.addEventListener('click', async () => {
+          b.disabled = true;
+          const r = await fetch(`/api/admin/inbox/candidates/${b.dataset.cd}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: b.dataset.to }) });
+          if (r.ok) loadInbox(); else { b.disabled = false; $('inboxState').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
+        }));
+      } catch (e) { $('inboxState').textContent = 'تعذر تحميل الكتب المرشّحة.'; if (!more) $('inboxList').innerHTML = ''; }
+    }
     function renderInbox(items, msg) {
       const report = inbox.kind === 'report';
       const what = report ? 'عدد البلاغات' : 'عدد الاقتراحات';
@@ -3616,12 +3773,16 @@
       document.querySelectorAll('#inboxStatus button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
       inbox.status = btn.dataset.status; loadInbox();
     }));
-    [['report', 'inboxTabReport'], ['suggestion', 'inboxTabSuggestion'], ['questions', 'inboxTabQuestions'], ['staff', 'inboxTabStaff'], ['ideas', 'inboxTabIdeas']].forEach(([kind, id]) => $(id).addEventListener('click', () => {
-      inbox.kind = kind;
-      ['inboxTabReport', 'inboxTabSuggestion', 'inboxTabQuestions', 'inboxTabStaff', 'inboxTabIdeas'].forEach(other => { $(other).setAttribute('aria-selected', String(other === id)); $(other).tabIndex = other === id ? 0 : -1; });
-      $('inboxList').setAttribute('aria-labelledby', id);
+    function setInboxKind(kind) {
+      inbox.kind = kind; const id = KIND_TAB[kind];
+      Object.values(KIND_TAB).forEach(other => { $(other).setAttribute('aria-selected', String(other === id)); $(other).tabIndex = other === id ? 0 : -1; });
+      $('inboxList').setAttribute('aria-labelledby', $('inboxKinds').hidden ? SUBS.alerts.tabs[SUBS.alerts.cur][0] : id);
+      const heads = { visitors: 'بلاغات الزوار واقتراحاتهم', staff: 'من الموظفين: تعديلات مطلوبة على الكتب واقتراحاتهم', questions: 'أسئلة بلا جواب' };
+      $('inboxPane').querySelector('.st-head h2').textContent = heads[SUBS.alerts.cur] || heads.visitors;
+      $('inboxPane').querySelector('.st-head .diff').hidden = SUBS.alerts.cur !== 'visitors';
       loadInbox();
-    }));
+    }
+    Object.entries(KIND_TAB).forEach(([kind, id]) => $(id).addEventListener('click', () => setInboxKind(kind)));
     setInterval(() => { if (ME && !document.hidden) loadInboxCount(); }, 60000);
 
     // ---------------- statistics (manager): reading trends and satisfaction

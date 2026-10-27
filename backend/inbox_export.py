@@ -473,6 +473,60 @@ def build(status="open", generated_by=None):
                 f"- الحالة: {STATUS_AR.get(n.get('status'), n.get('status'))}"
                 + (f" — {_md(n.get('handled_by')) or '—'} · {_when(n.get('handled_at'))}" if n.get("status") == "done" else "")
                 + (f" · تعليق الموظف: {_md(n.get('handled_note'))}" if n.get("handled_note") else ""), ""]
-    counts = {"dev_notes": len(dnotes), "confirmations": len(answers), "test_conversations": len(convs) + convs_left, "reports": len(reports), "suggestions": len(suggestions), "questions": len(questions), "edits": len(edits),
+    # «ماذا تقرأ الآن؟» (Ibrahim 2026-10-27): visitors' reviews and the books they want on the shelves
+    try:
+        import visitor_reviews
+        rv_status = {"open": "open", "done": "done", "all": "all"}[status]
+        reviews = _all(lambda o: (visitor_reviews.list_reviews(rv_status, 300, o), visitor_reviews.total(rv_status)))
+    except Exception:  # never break the export over this section
+        reviews = []
+    rv_ar = {"pending": "بانتظار الموافقة", "approved": "معتمدة", "rejected": "مرفوضة"}
+    out += [f"## 11. مراجعات القرّاء ({len(reviews)})", ""]
+    if not reviews:
+        out += ["لا يوجد.", ""]
+    for i, r in enumerate(reviews, 1):
+        out += [f"### 11.{i} «{_md(r.get('book_title')) or '—'}» ({r.get('book_id')}) — {'★' * int(r.get('stars') or 0)} ({r.get('stars')}/5)",
+                f"- السمات: {'، '.join(r.get('tag_labels') or []) or '—'}"
+                + (f" · سمات من كلامه (النموذج): {'، '.join(r.get('ai_traits') or [])}" if r.get("ai_traits") else "")
+                + (f" · تنبيه النموذج: {'، '.join(r.get('ai_flags') or [])}" if r.get("ai_flags") else "")]
+        # only words visitors can read leave the library (AGY-20261027-03): not a rejected review's, not a hidden one's,
+        # not one still waiting for staff
+        if r.get("clean_text") and r.get("status") == "approved" and not r.get("hide_text"):
+            out.append(f"- كلامه (بعد التنظيف): {_md(r['clean_text'])}")
+        elif r.get("text"):
+            out.append("- فيه كلام لا يُصدَّر (" + ("مخفي" if r.get("hide_text") else rv_ar.get(r.get("status"), "")) + ")")
+        out.append(f"- {_when(r.get('created_at'))} · رقم البند: {r.get('review_id')} · {rv_ar.get(r.get('status'), r.get('status'))}"
+                   + (" (بدون النص)" if r.get("hide_text") else "")
+                   + (f" · {_md(r.get('handled_by'))} {_when(r.get('handled_at'))}" if r.get("status") != "pending" else ""))
+        out.append("")
+    try:
+        import shelf_suggestions
+        cand = _all(lambda o: (shelf_suggestions.list_candidates(rv_status, 300, o), shelf_suggestions.total(rv_status)))
+    except Exception:  # never break the export over this section
+        cand = []
+    cd_ar = {"open": "مرشّح", "added": "تم توفيره", "declined": "لن نوفره"}
+    out += [f"## 12. كتب رشّحها الزوار للرفوف ({len(cand)})", "",
+            "> **لـ Claude:** كتب طلب الزوار أن تكون في المكتبة. «من الخارج» = بحث منار عنه (ويكي بيانات، Open Library، "
+            "ويكيبيديا، Goodreads) وأكّد الزائر أنه هو الكتاب؛ «من الكتالوج» = كتاب عندنا نفد.", ""]
+    if not cand:
+        out += ["لا يوجد.", ""]
+    for i, c in enumerate(cand, 1):
+        out += [f"### 12.{i} «{_md(c.get('title'))}» — {_md(c.get('author')) or '—'}" + (f" ({c.get('year')})" if c.get("year") else ""),
+                f"- {'من الكتالوج (نافد، book_id ' + str(c.get('book_id')) + ')' if c.get('source') == 'catalog' else 'من الخارج'}"
+                f" · طلبه {c.get('times_suggested')} زائر · أول مرة {_when(c.get('first_at'))} · آخر مرة {_when(c.get('last_at'))}"
+                f" · رقم البند: {c.get('candidate_id')} · {cd_ar.get(c.get('status'), c.get('status'))}"
+                + (f" ({_md(c.get('handled_by'))})" if c.get("status") != "open" else "")]
+        if c.get("asked_as") and c.get("asked_as") != c.get("title"):
+            out.append(f"- كتبه الزائر: {_md(c['asked_as'])}")
+        if c.get("isbn") or c.get("publisher"):
+            out.append(f"- {('ISBN ' + _md(c.get('isbn'))) if c.get('isbn') else ''}{' · ' if c.get('isbn') and c.get('publisher') else ''}{_md(c.get('publisher')) if c.get('publisher') else ''}")
+        if c.get("summary"):
+            out.append(f"- نبذة: {_md(c['summary'])[:400]}")
+        if c.get("sources"):
+            out.append("- المصادر: " + " ، ".join(_md(s) for s in c["sources"][:4]))
+        for n in c.get("notes") or []:
+            out.append(f"- ملاحظة زائر: {_md(n)}")
+        out.append("")
+    counts = {"reviews": len(reviews), "candidates": len(cand), "dev_notes": len(dnotes), "confirmations": len(answers), "test_conversations": len(convs) + convs_left, "reports": len(reports), "suggestions": len(suggestions), "questions": len(questions), "edits": len(edits),
               "staff_changes": len(changes), "imports": len(imports), "ideas": len(ideas)}
     return "\n".join(out).rstrip() + "\n", counts

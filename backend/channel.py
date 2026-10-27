@@ -384,7 +384,7 @@ def status(role=None):
     return {"enabled": bool(cfg.get("enabled")), "has_key": bool(public_key()), "private": bool(cfg.get("token")),
             "installed_version": installed_version(), "last_check": s.get("last_check"), "last_ok": s.get("last_ok"),
             "last_error": s.get("last_error"), "update": up, "launcher": os.environ.get("LIBRARY_KEEPER_LAUNCHER") == "1",
-            "can_install": role == "manager", "pending": os.path.exists(PENDING)}
+            "can_install": role in ("manager", "developer"), "pending": os.path.exists(PENDING)}
 
 
 def start_background():

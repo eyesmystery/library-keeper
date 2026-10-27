@@ -81,6 +81,27 @@ def list_rows(status="open", offset=0):
     return rows, total
 
 
+def requested(status="open", limit=500):
+    """«الكتب المطلوبة» (Ibrahim 2026-10-24: «سو قسم جديد في الادارة وهي فيها الكتب اللي تطلب ومو متوفرة وتسجل كم مرة
+    طلب»): the titles and authors visitors asked for that we did not have, the most asked first, with how many times."""
+    conn = get_connection()
+    try:
+        ensure_table(conn)
+        where, args = "WHERE kind IN ('missing_book', 'missing_author')", []
+        if status in STATUSES:
+            where += " AND status=?"
+            args.append(status)
+        rows = [dict(r) for r in conn.execute(
+            f"SELECT * FROM open_questions {where} ORDER BY times DESC, last_at DESC LIMIT ?", args + [int(limit)])]
+        n = {k: conn.execute(f"SELECT COUNT(*) FROM open_questions WHERE kind IN ('missing_book', 'missing_author') AND status=?",
+                             (k,)).fetchone()[0] for k in STATUSES}
+    finally:
+        conn.close()
+    for r in rows:
+        r["kind_label"] = KINDS.get(r["kind"], r["kind"])
+    return rows, n
+
+
 def counts():
     conn = get_connection()
     try:

@@ -915,6 +915,8 @@ WEIGHTS = ["light", "medium", "heavy", "intense"]
 USE_CASES = ["habit_start", "light_reading", "coffee", "travel", "gift", "book_club",
              "discussion", "practical_learning", "quick_read", "slump_recovery"]
 LEVELS = ["beginner", "regular", "advanced"]
+# how the book is written, wished by the visitor (QADFIX18, inbox 2026-10-24 «رواية غير مبتذلة وسردها بسيط»)
+QUALITIES = ["simple_style", "original"]
 # language the work was originally written in (same codes as books.original_language)
 # prizes the visitor may ask for (backend/honors.py keys); "any" = any prize (2026-10-08)
 AWARD_KEYS = ["ipaf", "booker", "intl_booker", "nobel", "zayed", "katara", "mahfouz", "sharjah", "pulitzer", "goncourt", "hugo", "nebula", "locus", "any"]
@@ -943,14 +945,16 @@ PREFS_SCHEMA = {
         "translated": {"type": "string", "enum": ["yes", "no", "any"]},
         "awards": _arr(AWARD_KEYS),
         "award_year": {"type": "integer"},
-        "adaptation": {"type": "string", "enum": ["film", "series", "screen", "animated", "none"]},
+        "adaptation": {"type": "string", "enum": ["film", "series", "screen", "animated", "tv", "none"]},
         "audience": {"type": "string", "enum": AUDIENCES + ["any"]},
         "avoid_content": _arr(SENSITIVE),
+        "qualities": _arr(QUALITIES),
+        "subgenres_exclude": {"type": "array", "items": {"type": "string"}},
     },
     "required": ["genres", "subgenres", "length", "moods_include", "moods_exclude", "pace", "weight_include",
                  "weight_exclude", "use_cases", "reader_level", "authors", "title_keywords",
                  "unsupported_requests", "original_languages", "translated", "awards", "award_year", "adaptation",
-                 "audience", "avoid_content"],
+                 "audience", "avoid_content", "qualities", "subgenres_exclude"],
 }
 
 PREFS_RULES = """Preference rules:
@@ -966,8 +970,11 @@ PREFS_RULES = """Preference rules:
 - avoid_content: content the visitor wants to avoid ("بدون عنف" -> violence; "ما فيه مشاهد جريئة/محترم للعائلة" -> sexual_content; "بدون رعب" -> horror).
 - original_languages: codes of the language the work was ORIGINALLY written in, when the visitor asks for the literature of a language or nation: "مترجم من الإيطالية"/"رواية إيطالية"/"كاتب إيطالي" -> ["it"]; "أدب روسي" -> ["ru"]; "رواية يابانية" -> ["ja"]; "أدب أمريكا اللاتينية" names a region of AUTHORS, not a language: leave original_languages empty for it (the countries are read elsewhere); "رواية عربية"/"كاتب عربي" -> ["ar"]. Codes: {ORIGIN_CODES}. In "أدب ياباني"/"الأدب الروسي" the word أدب means literature in general: do NOT set genres to "أدب" for it. A country as a TOPIC or setting ("كتاب عن اليابان", "تدور أحداثها في إيطاليا") is NOT a language: put it in unsupported_requests.
 - translated: "yes" when they ask for a translated work (مترجم/أدب مترجم/أدب عالمي); "no" when they ask for an Arabic original (عربي غير مترجم/مو مترجم); else "any".
-- awards: prizes the book (or its author) must have: "حائزة على جائزة"/"كتاب أخذ جائزة"/"روايات فائزة" -> ["any"]; "البوكر" -> ["ipaf", "booker"] (in Arabic it usually means the Arabic Booker, so both); "البوكر العربية"/"الجائزة العالمية للرواية العربية" -> ["ipaf"]; "البوكر الدولية" -> ["intl_booker"]; "نوبل" -> ["nobel"]; "جائزة الشيخ زايد" -> ["zayed"]; "كتارا" -> ["katara"]; "جائزة نجيب محفوظ" -> ["mahfouz"]; "جائزة الشارقة" -> ["sharjah"]; "بوليتزر" -> ["pulitzer"]; "غونكور" -> ["goncourt"]; "هوغو"/"هيوغو"/"Hugo" -> ["hugo"]; "نيبولا"/"Nebula" -> ["nebula"]; "لوكس"/"لوكَس"/"Locus" -> ["locus"]; "جوائز الخيال العلمي" -> ["hugo", "nebula", "locus"]; another named prize -> ["any"] and its name in unsupported_requests. award_year: the year named with the prize ("البوكر ٢٠٢٢" -> 2022), else 0. A prize is never a subject: do not put it in unsupported_requests unless it is not in this list.
-- adaptation: "تحولت لفيلم"/"صار فيلم"/"عليها فيلم" -> "film"; "مسلسل" -> "series"; "فيلم أو مسلسل"/"انعرضت"/"تحولت لعمل" -> "screen"; "انمي"/"رسوم متحركة"/"كرتون" -> "animated"; else "none".
+- awards: prizes the book (or its author) must have: "حائزة على جائزة"/"كتاب أخذ جائزة"/"روايات فائزة" -> ["any"]; "البوكر" -> ["ipaf", "booker"] (in Arabic it usually means the Arabic Booker, so both); "البوكر العربية"/"الجائزة العالمية للرواية العربية" -> ["ipaf"]; "البوكر الدولية" -> ["intl_booker"]; "Booker Prize"/"the Booker" written in English, or "البوكر البريطانية" -> ["booker"] only; "نوبل" -> ["nobel"]; "جائزة الشيخ زايد" -> ["zayed"]; "كتارا" -> ["katara"]; "جائزة نجيب محفوظ" -> ["mahfouz"]; "جائزة الشارقة" -> ["sharjah"]; "بوليتزر" -> ["pulitzer"]; "غونكور" -> ["goncourt"]; "هوغو"/"هيوغو"/"Hugo" -> ["hugo"]; "نيبولا"/"Nebula" -> ["nebula"]; "لوكس"/"لوكَس"/"Locus" -> ["locus"]; "جوائز الخيال العلمي" -> ["hugo", "nebula", "locus"]; another named prize -> ["any"] and its name in unsupported_requests. award_year: the year named with the prize ("البوكر ٢٠٢٢" -> 2022), else 0. A prize is never a subject: do not put it in unsupported_requests unless it is not in this list.
+- adaptation: "تحولت لفيلم"/"صار فيلم"/"عليها فيلم" -> "film"; "مسلسل" -> "series"; "فيلم أو مسلسل"/"انعرضت"/"تحولت لعمل" -> "screen"; "انمي"/"رسوم متحركة"/"كرتون" -> "animated"; "فيلم تلفزيوني"/"مو سينما"/"انعرض بالتلفزيون"/"a TV movie" -> "tv"; else "none".
+- subgenres_exclude: kinds of story the visitor REFUSES, in Arabic, kept while the request continues: «بدون سحر أو خيال، واقعية بحتة» -> ["واقعية سحرية", "فانتازيا", "خيال"]; «مو رعب» -> ["رعب"]; "no fantasy" -> ["فانتازيا"]. Read the meaning in any wording; a refused kind is never put in subgenres. [] when none.
+- A field named that is narrower than the shelf it belongs to is also the subject: «كتاب فلسفة» -> genres ["فكر"] AND «فلسفة» first in unsupported_requests (the فكر shelf is wider than philosophy); «كتاب فيزياء» -> ["علوم"] and «فيزياء».
+- qualities: wishes about HOW the book is written or its quality, never a subject: simple, clear or easy narration or language (سرد بسيط، أسلوب سلس، لغة سهلة، مو معقد) -> "simple_style"; not clichéd, not formulaic, original, different from the usual (غير مبتذل، مو تقليدي، فكرة جديدة، مختلف) -> "original". Read the meaning in any wording; such a wish is never put in unsupported_requests and is never searched as a subject («الابتذال» is not what the book is about).
 - unsupported_requests: short Arabic phrases for wishes these fields cannot express. ALWAYS list first the SUBJECT the visitor wants to read about, one subject per item in 1-2 plain words as a book title would name it: "كتاب في تاريخ الأندلس" -> ["الأندلس"]; "أنظم وقتي وأترك التسويف" -> ["التسويف", "تنظيم الوقت"]; "خيال علمي عن الفضاء" -> ["الفضاء"]; "رواية عن الغربة" -> ["الغربة"]; a country as a topic -> its name; an era -> its name. A subject is searched in our books, so never skip it and never merge it with the genre word (not "تاريخ الأندلس"). Only subjects the visitor WANTS: something they reject ("ولا فيها موت", "بدون سياسة") is never listed here. Other wishes that no field expresses come after it. Never put the original language or translated/untranslated here.""".replace("{ORIGIN_CODES}", ", ".join(ORIGIN_LANGS))
 
 UNDERSTAND_SYSTEM = ("You interpret a library visitor's request (Arabic, often Saudi/Gulf dialect) for a "
@@ -1001,9 +1008,11 @@ def clean_prefs(raw):
         "translated": raw.get("translated") if raw.get("translated") in ("yes", "no") else None,
         "awards": pick("awards", AWARD_KEYS)[:4],
         "award_year": raw.get("award_year") if isinstance(raw.get("award_year"), int) and 1900 <= raw.get("award_year") <= 2100 else None,
-        "adaptation": raw.get("adaptation") if raw.get("adaptation") in ("film", "series", "screen", "animated") else None,
+        "adaptation": raw.get("adaptation") if raw.get("adaptation") in ("film", "series", "screen", "animated", "tv") else None,
         "audience": raw.get("audience") if raw.get("audience") in AUDIENCES else None,
         "avoid_content": pick("avoid_content", SENSITIVE),
+        "qualities": pick("qualities", QUALITIES),
+        "subgenres_exclude": strings("subgenres_exclude"),
     }
     out["moods_include"] = [m for m in out["moods_include"] if m not in out["moods_exclude"]]
     out["weight_include"] = [w for w in out["weight_include"] if w not in out["weight_exclude"]]

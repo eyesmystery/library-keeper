@@ -17,6 +17,7 @@
       <div class="welcome-top"><button id="welcomeLangBtn" class="language-button" type="button" aria-label="Switch to English">EN</button></div>
       <div class="welcome-main">
         <div class="brand-signature guide-lockup"><img class="brand-mark" src="/static/assets/manar-logo.svg" alt="منار" /><span class="host-under" role="img" aria-label="مكتبة ثلاث"></span></div>
+        <p id="brandSlogan" class="brand-slogan">منار - ذكاء يرشدك إلى ما يناسبك</p>
         <div class="welcome-copy">
           <h1 id="welcomeTitle">وش ودّك<br />تقرأ اليوم؟</h1>
           <p id="welcomeBody">سولف معي عن مزاجك، وألقى لك كتاب من الموجود عندنا.</p>
@@ -24,6 +25,8 @@
         <div class="start-card">
           <p id="startNote">تقدر تبدأ بكلمة، شعور، أو آخر كتاب عجبك.</p>
           <button id="startBtn" class="start-button" type="button"><span id="startLabel">سولف معي عن مزاجك</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+          <!-- «ماذا تقرأ الآن؟» (Ibrahim 2026-10-27): a visitor reviews a book they read, or suggests one for the shelves -->
+          <button id="readingBtn" class="start-button reading-button" type="button"><span id="readingLabel">ماذا تقرأ الآن؟</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Zm0 15A2.5 2.5 0 0 0 6.5 23H20" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
         </div>
         <p class="welcome-steps"><span id="stepDiscover">اكتشف</span><span id="stepAsk">اسأل</span><span id="stepRead">اقرأ</span></p>
         <section id="picksBox" class="picks-box" aria-labelledby="picksTitle" hidden>
@@ -96,7 +99,76 @@
         <div class="shelf-card"><div><span id="findLabel">بتلقاه في</span><strong id="dShelf"></strong></div><span class="location-mark" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.4 7-12a7 7 0 1 0-14 0c0 6.6 7 12 7 12Z" stroke="currentColor" stroke-width="1.8" /><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.8" /></svg></span></div>
         <button id="wantBtn" class="want-button" type="button">أبغى هذا الكتاب</button>
         <p class="stock-note"><span aria-hidden="true"></span><strong id="dStock"></strong><span id="dPrice"></span></p>
+        <!-- «آراء قرّاء مكتبة ثلاث» (2026-10-27): the reviews staff approved -->
+        <section id="dReviews" class="reader-reviews" aria-labelledby="dReviewsTitle" hidden>
+          <h3 id="dReviewsTitle">آراء قرّاء مكتبة ثلاث</h3>
+          <p id="dReviewsSum" class="reviews-sum"></p>
+          <div id="dReviewsTags" class="reviews-tags"></div>
+          <div id="dReviewsList" class="reviews-list"></div>
+        </section>
+        <button id="reviewBtn" class="text-button review-button" type="button">قرأته؟ شاركنا رأيك</button>
         <button id="reportBtn" class="text-button report-button" type="button" aria-haspopup="dialog">فيه معلومة غلط؟ بلّغنا</button>
+      </div>
+    </section>
+
+    <!-- «ماذا تقرأ الآن؟» (Ibrahim 2026-10-27) -->
+    <section id="reading" class="detail-screen reading-screen" aria-labelledby="rTitle" hidden>
+      <header class="app-header">
+        <button id="readingBackBtn" class="header-action header-back" type="button">رجوع</button>
+        <div class="header-center"><button class="header-brand brand-home" type="button" aria-label="الرجوع للصفحة الرئيسية"><img class="host-mark" src="/static/assets/manar-logo.svg" alt="منار" /></button></div>
+        <div class="header-end"><button id="readingLangBtn" class="language-button" type="button" aria-label="Switch to English">EN</button></div>
+      </header>
+      <div class="reading-body">
+        <h2 id="rTitle">ماذا تقرأ الآن؟</h2>
+        <div id="rFind">
+          <p id="rLead" class="note-lead">اكتب اسم الكتاب اللي تقرأه أو قرأته من مكتبة ثلاث، وقل لنا رأيك فيه.</p>
+          <label id="rSearchLabel" class="note-label" for="rSearch">اسم الكتاب أو المؤلف</label>
+          <input id="rSearch" class="field" type="search" maxlength="80" autocomplete="off" enterkeyhint="search" />
+          <p id="rFindState" class="note-lead find-state" role="status"></p>
+          <div id="rResults" class="more-list"></div>
+          <div class="shelf-cta">
+            <p id="rShelfLead" class="note-lead">كتابك مو عندنا؟</p>
+            <button id="rShelfBtn" class="start-button shelf-button" type="button"><span id="rShelfLabel">ماذا تقترح أن يكون على رفوف مكتبة ثلاث؟</span></button>
+          </div>
+        </div>
+        <form id="rForm" novalidate hidden>
+          <div id="rBook" class="r-book"></div>
+          <p id="rStarsLabel" class="note-label">كم تعطيه من ٥؟</p>
+          <div id="rStars" class="stars" role="radiogroup" aria-labelledby="rStarsLabel"></div>
+          <p id="rTagsLabel" class="note-label">وش تقول عنه؟ (اختياري)</p>
+          <div id="rTags" class="note-reasons" role="group" aria-labelledby="rTagsLabel"></div>
+          <label id="rTextLabel" class="note-label" for="rText">رأيك بكلماتك (اختياري)</label>
+          <textarea id="rText" class="field" rows="3" maxlength="500"></textarea>
+          <label id="rNameLabel" class="note-label" for="rName">اسمك الأول (اختياري، يظهر مع رأيك)</label>
+          <input id="rName" class="field" type="text" maxlength="20" autocomplete="given-name" />
+          <p id="rNote" class="note-lead">رأيك يظهر للزوار بعد ما يراجعه موظفو المكتبة.</p>
+          <p id="rError" class="note-error" role="alert"></p>
+          <div class="note-actions">
+            <button id="rSend" class="want-button" type="submit">أرسل رأيي</button>
+            <button id="rChange" class="note-cancel" type="button">كتاب آخر</button>
+          </div>
+        </form>
+        <form id="sForm" novalidate hidden>
+          <p id="sLead" class="note-lead">اكتب اسم الكتاب اللي تتمنى نوفّره، ونتأكد معك منه.</p>
+          <label id="sBookLabel" class="note-label" for="sBook">اسم الكتاب</label>
+          <input id="sBook" class="field" type="text" maxlength="120" autocomplete="off" />
+          <label id="sAuthorLabel" class="note-label" for="sAuthor">المؤلف (اختياري)</label>
+          <input id="sAuthor" class="field" type="text" maxlength="80" autocomplete="off" />
+          <p id="sError" class="note-error" role="alert"></p>
+          <div class="note-actions">
+            <button id="sCheck" class="want-button" type="submit">ابحث عنه</button>
+            <button id="sBack" class="note-cancel" type="button">رجوع</button>
+          </div>
+          <div id="sResult" class="s-result" role="status" aria-live="polite"></div>
+        </form>
+        <div id="rDone" class="r-done" hidden>
+          <div class="success-mark" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.5 3.2 3.2L18 7.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg></div>
+          <p id="rDoneText"></p>
+          <div class="note-actions">
+            <button id="rAgain" class="want-button" type="button">رأي في كتاب ثاني</button>
+            <button id="rHome" class="note-cancel" type="button">الصفحة الأولى</button>
+          </div>
+        </div>
       </div>
     </section>
 

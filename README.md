@@ -4,7 +4,7 @@
 
 *Thalath Smart: an Arabic reading assistant for the Thalath bookshop. Visitors open it from a QR code and get suggestions from the books in stock; staff manage the catalog from an admin page. Install steps in English: [INSTALL.md](INSTALL.md).*
 
-**الإصدار الحالي: 0.9.10 beta** · ما الذي تغيّر: [CHANGELOG.md](CHANGELOG.md)
+**الإصدار الحالي: 0.9.11 beta** · ما الذي تغيّر: [CHANGELOG.md](CHANGELOG.md)
 
 ## التحميل
 

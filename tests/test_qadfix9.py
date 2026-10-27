@@ -43,6 +43,6 @@ ok('any(women_wish(t) for t in user_messages[-3:])' in _src and "_named" in _src
 ok(A._routine_topics(["السهر"]) == ["النوم"], "1.1 «أبطل السهر» → «النوم»")
 ok(R.part_asked("ثلاثية التوأمين عندكم كاملة؟") == "all", "5.2 «ثلاثية … كاملة؟» asks for every part")
 ok("QADFIX9 (QAD 2026-10-20, case 29.1)" in _src, "29.1 «كتب دار رشم وش فيها حلو؟» shows the publisher's books")
-ok('_g.get(b["book_id"]) != "m" and bool(_PEOPLE_WOMEN.search' in _src, "11.1 a title «… النساء» by a man is not a woman's book")
+ok('_g.get(b["book_id"]) != "m" and bool(_TITLE_WOMEN.search' in _src, "11.1 a title «… النساء» by a man is not a woman's book")
 print(f"\nPASS={P} FAIL={F}")
 sys.exit(1 if F else 0)
