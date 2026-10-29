@@ -131,6 +131,33 @@ def scenarios(browser):
     ok(not errors, f"path 4: no JavaScript error {errors[:2]}")
     ctx.close()
 
+    # 5. (Ibrahim 2026-10-29) start page → «اقترح كتابًا لرفوف مكتبة ثلاث» → the suggestion form at once → «رجوع» / phone Back
+    ctx, pg, errors = fresh(browser)
+    btn = pg.locator("#shelfStartBtn")
+    ok(btn.is_visible() and "اقترح كتابًا" in btn.inner_text(), "the start page shows the shelf-suggestion button")
+    if os.environ.get("LK_SHOT"):
+        pg.screenshot(path=os.environ["LK_SHOT"], full_page=False)
+    btn.click()
+    ok(where(pg) == (True, "reading") and pg.locator("#sForm").is_visible() and not pg.locator("#rFind").is_visible(),
+       "→ the suggestion form straight away, not the review search")
+    ok("اقترح كتابًا" in pg.locator("#rTitle").inner_text(), "its title says it is a suggestion")
+    pg.click("#sBack")
+    ok(where(pg) == (True, "welcome"), "its «رجوع» → the start page")
+    btn.click()
+    pg.evaluate("() => readingBack()")
+    ok(where(pg) == (True, "welcome"), "the header «رجوع» → the start page")
+    btn.click()
+    pg.go_back()
+    ok(where(pg) == (True, "welcome"), "phone Back → the start page")
+    pg.evaluate("() => openReading()")
+    ok(pg.locator("#rFind").is_visible() and "ماذا تقرأ" in pg.locator("#rTitle").inner_text(),
+       "«ماذا تقرأ الآن؟» still opens on the review search")
+    pg.click("#rShelfBtn")
+    pg.click("#sBack")
+    ok(where(pg) == (True, "reading") and pg.locator("#rFind").is_visible(), "its own shelf button: «رجوع» back to the search")
+    ok(not errors, f"path 5: no JavaScript error {errors[:2]}")
+    ctx.close()
+
 
 def main():
     tmp = tempfile.mkdtemp(prefix="lk-history-")

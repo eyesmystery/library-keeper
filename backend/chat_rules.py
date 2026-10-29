@@ -852,3 +852,27 @@ def fix_false_unavailable(reply, all_books, prev_ids=(), language="ar"):
     out.append(reply[pos:])
     fixed = re.sub(r"[ \t]{2,}", " ", "".join(out)).strip()
     return (fixed, True) if changed else (reply, False)
+
+
+# INBOXFIX2 (library inbox 2026-10-29, conversation 8.7): a bare «recommend me a book», nothing else asked
+_BARE_VERBS = {normalize(w) for w in "رشحي رشح رشحيلي رشحلي اقترح اقترحي اقترحيلي اقترحلي عطني عطيني اعطني ابي ابغى ابغا ابغي ودي "
+               "recommend suggest give".split()}
+_BARE_FILL = {normalize(w) for w in "لي ليا كتاب كتابا كتب رواية روايه شي شيء طيب اوكي تمام ممكن حلو ثاني ثانيه غيره زيه مثله "
+              "me a book novel something another one please ok".split()}
+
+
+def bare_recommend(message):
+    """«رشّحي لي كتابًا»، «اقترح لي شي»، «recommend me a book»: a recommend verb and only filler words (no wish of its own)."""
+    words = [w for w in re.findall(r"\w+", normalize(message or ""))]
+    if not words or len(words) > 6:
+        return False
+    if not all(w in _BARE_VERBS or w in _BARE_FILL for w in words):
+        return False
+    if any(w in _BARE_REC for w in words):
+        return True
+    # «ابي» alone after a book may mean that book: a wanting verb counts only with «كتاب / شي / رواية»
+    return any(w in _BARE_VERBS for w in words) and any(w in _BARE_OBJ for w in words)
+
+
+_BARE_REC = {normalize(w) for w in "رشحي رشح رشحيلي رشحلي اقترح اقترحي اقترحيلي اقترحلي recommend suggest".split()}
+_BARE_OBJ = {normalize(w) for w in "كتاب كتابا كتب رواية روايه شي شيء book novel something".split()}

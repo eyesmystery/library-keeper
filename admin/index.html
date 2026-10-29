@@ -542,6 +542,9 @@
     #stats{display:flex;flex-wrap:wrap;gap:12px 28px;margin:0 0 16px;padding:0;background:none}
     .catalog-stat{display:flex;align-items:baseline;gap:8px;font-size:14px;color:var(--muted)}.catalog-stat b{font-size:22px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
     .catalog-stat.warn b{color:var(--danger)}
+    .dev-fetch th,.dev-fetch td{text-align:start;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}.dev-fetch thead th{font-size:12px;color:var(--muted)}.dev-fetch td:first-child{width:28px}
+    .stat-link{font:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline dotted;text-underline-offset:6px}
+    .stat-link[aria-pressed="true"]{color:var(--ink);text-decoration-style:solid}
     .active-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.active-filters:empty{display:none}
     .active-filter{display:inline-flex;align-items:center;gap:8px;min-height:44px;max-width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--brown);font-size:14px;cursor:pointer;overflow-wrap:anywhere}
     .count-row{justify-content:space-between;gap:12px;min-height:44px;margin:0 0 8px}.count-row .count{font-size:14px}.linkbtn{min-height:44px;font-size:14px}
@@ -1877,6 +1880,7 @@
       : String(b.origin || 'مترجم').split('،')[0];
     const completeness = b => (b.cover_url ? 1 : 0) + (b.has_summary ? 1 : 0) + (b.research_status === 'matched' ? 2 : 0)
       + (b.genre ? 1 : 0) + Math.min(3, b.counts.confirmed + b.counts.impression * .5);
+    const needsReview = b => b.research_status === 'needs_confirmation' || b.status === 'needs_review' || b.counts.conflict > 0;
     const BOOK_CHIPS = [
       ['البحث', [['matched', 'مبحوث', b => b.research_status === 'matched'], ['needs_confirmation', 'يحتاج تأكيد', b => b.research_status === 'needs_confirmation'],
                  ['unresearched', 'غير مبحوث', b => !b.research_status], ['review', 'تحتاج مراجعة', b => b.status === 'needs_review']]],
@@ -1884,6 +1888,9 @@
       ['البيانات', [['nocover', 'بدون غلاف', b => !b.cover_url], ['nosummary', 'بدون نبذة', b => !b.has_summary],
                    ['confirmed', 'صفات مؤكدة', b => b.counts.confirmed > 0], ['conflict', 'صفات اختلف فيها القرّاء', b => b.counts.conflict > 0],
                    ['noreviews', 'بدون مراجعات', b => !b.has_reviews]]],
+      // BKREV (Ibrahim 2026-10-29): «نأكد انها تم مراجعتها عشان نصفي اللي تحتاج مراجعة» + «قائمة مستقلة يعيد البحث عنها»
+      ['المراجعة', [['toreview', 'تحتاج مراجعة', b => !b.reviewed_at && needsReview(b)], ['reviewed', 'تمت مراجعته', b => !!b.reviewed_at],
+                    ['requeue', 'بانتظار إعادة البحث', b => !!b.requeue]]],
       ['اللغة', [['arabic', 'عربي أصلي', b => b.original_language === 'ar' && b.language === 'ar'],
                 ['translated', 'مترجم', b => b.language === 'ar' && b.original_language && b.original_language !== 'ar'],
                 ['foreign', 'بلغة أجنبية', b => b.language && b.language !== 'ar']]]
@@ -2050,12 +2057,20 @@
     }
 
     function renderStats() {
-      const attention = catalog.filter(b => b.research_status === 'needs_confirmation' || b.status === 'needs_review' || b.counts.conflict > 0).length;
+      const attention = catalog.filter(b => !b.reviewed_at && needsReview(b)).length;   // a book staff marked reviewed leaves it (BKREV)
       $('stats').innerHTML = `<span class="catalog-stat">إجمالي الكتب <b>${num(catalog.length)}</b></span>
         <span class="catalog-stat">متوفر للزوار <b>${num(catalog.filter(inStock).length)}</b></span>
         <span class="catalog-stat">نافد <b>${num(catalog.filter(b => b.active && !(b.quantity > 0)).length)}</b></span>
         <span class="catalog-stat" title="كتب متوفرة ما لها موقع على الرف">بدون موقع <b>${num(catalog.filter(b => inStock(b) && !locOf(b)).length)}</b></span>
-        <span class="catalog-stat dev-only dev-col${attention ? ' warn' : ''}" title="هوية تحتاج تأكيدًا أو بطاقة تحتاج مراجعة أو صفات متعارضة">تحتاج مراجعة <b>${num(attention)}</b></span>`;
+        <button type="button" class="catalog-stat stat-link${attention ? ' warn' : ''}" data-chip="toreview" aria-pressed="${lib.chips.size === 1 && lib.chips.has('toreview')}" title="اضغط تعرض الكتب اللي تحتاج مراجعة (هوية تحتاج تأكيدًا أو بطاقة تحتاج مراجعة أو صفات متعارضة)">تحتاج مراجعة <b>${num(attention)}</b></button>
+        <button type="button" class="catalog-stat stat-link" data-chip="requeue" aria-pressed="${lib.chips.size === 1 && lib.chips.has('requeue')}" title="اضغط تعرض الكتب اللي عُدّلت بياناتها أو غلافها وتنتظر أن يعيد المطوّر البحث عنها">بانتظار إعادة البحث <b>${num(catalog.filter(b => b.requeue).length)}</b></button>`;
+      // BKREV (Ibrahim 2026-10-29 «كيف يدخل الموظف عالكتب اللي تحتاج مراجعة؟»): one tap on the count shows that list; a second tap shows all
+      $('stats').querySelectorAll('[data-chip]').forEach(btn => btn.addEventListener('click', () => {
+        const k = btn.dataset.chip, only = lib.chips.size === 1 && lib.chips.has(k);
+        lib.chips.clear(); if (!only) lib.chips.add(k);
+        lib.shown = {}; renderStats(); renderGrid();
+        if (!only) $('count').scrollIntoView({ block: 'nearest' });
+      }));
     }
 
     function setFiltersOpen(open, restoreFocus = false) {
@@ -2715,11 +2730,13 @@
         <div class="sheet-body">
 
           <!-- ADMSTF order (Ibrahim 2026-10-24) -->
+          ${webSearchBlock(b)}
+          ${reviewBlock(d)}
           <section class="block"><h3>المخزون والظهور</h3>
             <div class="inv">
               <div><label for="fPrice">السعر (ر.س)</label><input id="fPrice" type="number" min="0" step="0.5" value="${Number(b.price) || 0}" /></div>
               <div><label for="fQty">الكمية</label><input id="fQty" type="number" min="0" step="1" value="${Number(b.quantity) || 0}" /></div>
-              <div><label for="fShelf">الموقع (اختياري)</label><input id="fShelf" type="text" maxlength="40" placeholder="مثلًا: رف ٣ – الطابق الأرضي" value="${esc(b.shelf_location || '')}" /></div>
+              <div><label for="fShelf">الموقع (اختياري)</label><input id="fShelf" type="text" maxlength="60" placeholder="مثلًا: R02" value="${esc(b.shelf_location || '')}" aria-describedby="fShelfHint" /><span id="fShelfHint" class="diff">اكتب رمز الرف فقط (R02)، واسم القسم ينكتب تلقائيًا</span></div>
               <label class="switch"><input id="fActive" type="checkbox" ${b.active ? 'checked' : ''} /> يظهر للزوار</label>
               <button id="saveInv" class="btn" type="button">حفظ</button>
             </div>
@@ -2817,6 +2834,9 @@
       if (!keepScroll) $('closeBtn').focus();
       $('sheet').querySelectorAll('button.mini').forEach(btn => btn.addEventListener('click', () => reviewAction(b.book_id, btn)));
       $('saveInv').addEventListener('click', () => saveInventory(b.book_id));
+      if ($('rvDone')) $('rvDone').addEventListener('click', () => markReviewed(b, true));
+      if ($('rvUndo')) $('rvUndo').addEventListener('click', () => markReviewed(b, false));
+      if ($('rsqDone')) $('rsqDone').addEventListener('click', () => researchDone(b));
       bindHonors(b.book_id);
       bindStaffNotes(b.book_id);
       if ($('cfSend')) $('cfSend').addEventListener('click', () => sendConfirmation(b.book_id, false));
@@ -2826,6 +2846,11 @@
       $('basicEdit').addEventListener('click', () => toggleBasic(true));
       $('basicCancel').addEventListener('click', () => toggleBasic(false));
       $('basicSave').addEventListener('click', () => saveBasic(b));
+      if ($('devFetch')) $('devFetch').addEventListener('click', () => devFetch(b));
+      if ($('devEdit')) $('devEdit').addEventListener('click', () => {
+        if ($('basicForm').hidden) $('basicEdit').click();
+        $('basicBlock').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('bTitle').focus({ preventScroll: true });
+      });
       if ($('saveAge')) $('saveAge').addEventListener('click', () => saveAge(b.book_id));
       $('saveSummary').addEventListener('click', () => saveSummary(b.book_id));
       $('coverFetch').addEventListener('click', () => coverSearch(b.book_id, b.title));
@@ -2862,10 +2887,134 @@
       $('sheet').scrollTop = top; $(stateId).textContent = text; loadCatalog();
     }
 
+    // DEVSEARCH (Ibrahim 2026-10-29: «ابغاك تضيف لي كمطور في بطاقة كل كتاب اقدر ابحث في الانترنت يدويا عن بيانات الكتاب
+    // واعدلها»): search links for the book's own data, and the page used as the source of what is saved (every value its source)
+    function webSearchBlock(b) {
+      const t = String(b.title || '').trim(), a = String(b.author || '').trim(), isbn = String(b.isbn || '').trim();
+      const q = encodeURIComponent, g = s => 'https://www.google.com/search?q=' + q(s);
+      const both = `"${t}"` + (a && a !== 'غير معروف' ? ' ' + a : '');
+      const links = [
+        ['Google', g(both + ' كتاب')],
+        ...(isbn ? [['Google بالـISBN', g(isbn)]] : []),
+        ['نيل وفرات', g('site:neelwafurat.com ' + both)],
+        ['أبجد', g('site:abjjad.com ' + both)],
+        ['جملون', g('site:jamalon.com ' + both)],
+        ['Goodreads', 'https://www.goodreads.com/search?q=' + q(isbn || (t + ' ' + a).trim())],
+        ['Open Library', 'https://openlibrary.org/search?q=' + q(isbn || (t + ' ' + a).trim())],
+        ['ويكيبيديا', 'https://ar.wikipedia.org/w/index.php?search=' + q(t)],
+        ['صور الغلاف', 'https://www.google.com/search?tbm=isch&q=' + q('غلاف كتاب ' + both)],
+      ];
+      return `<section class="block dev-only dev-box"><h3>بحث يدوي عن بيانات الكتاب <span class="dev-tag">مطوّر</span></h3>
+        <p class="diff" style="margin:0 0 8px">يفتح كل رابط بحثًا في صفحة جديدة. لقيت صفحة طبعتنا؟ الصق رابطها واضغط «اجلب من الرابط» تطلع لك بياناتها وتختار منها، أو عدّل بيدك وحفظ: ينحفظ الرابط مصدرًا للنبذة والعمر، ويُسجَّل مع التعديل.</p>
+        <div class="ev-links" style="display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 0 10px">${links.map(([l, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(l)} ↗</a>`).join('')}</div>
+        <div class="inv"><div class="bfull" style="flex:1 1 320px"><label for="devSrc">رابط المصدر (اختياري)</label><input id="devSrc" type="url" maxlength="500" dir="ltr" placeholder="https://…" /></div>
+          <button id="devFetch" class="btn" type="button">اجلب من الرابط</button>
+          <button id="devEdit" class="btn secondary" type="button">افتح تعديل البيانات</button></div>
+        <div id="devFetchOut" aria-live="polite"></div>
+      </section>`;
+    }
+    // DEVFETCH (Ibrahim 2026-10-29: «انا ابغى ابحث يدويا يعني يشوف المصدر وياخذ البيانات»): the pasted page is read on the
+    // server; what it says is shown beside what we hold; the ticked values are saved with the page as their source
+    const DEV_FIELDS = { title: 'العنوان', author: 'المؤلف', publisher: 'الدار', translator: 'المترجم', isbn: 'ISBN',
+                         page_count: 'عدد الصفحات', publication_year: 'سنة الطبعة' };
+    async function devFetch(b) {
+      const url = ($('devSrc').value || '').trim(), out = $('devFetchOut');
+      if (!/^https?:\/\//i.test(url)) { out.innerHTML = '<p class="state error">الصق رابط الصفحة أولًا (يبدأ بـ https://)</p>'; return; }
+      out.innerHTML = '<p class="state">جاري قراءة الصفحة…</p>'; $('devFetch').disabled = true;
+      try {
+        const res = await fetch(`/api/admin/books/${b.book_id}/from-page`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok || !j.ok) { out.innerHTML = `<p class="state error">${esc(j.error || 'تعذرت قراءة الصفحة')}</p>`; return; }
+        const empty = v => v == null || v === '' || v === 'غير معروف';
+        const rows = Object.entries(DEV_FIELDS).filter(([k]) => j.fields[k] != null).map(([k, label]) => {
+          const cur = j.current[k], val = j.fields[k], same = String(cur ?? '') === String(val);
+          return `<tr><td><input type="checkbox" data-f="${k}" ${!same && empty(cur) ? 'checked' : ''} ${same ? 'disabled' : ''} aria-label="اعتمد ${label}" /></td>
+            <th scope="row">${label}</th><td dir="auto">${empty(cur) ? '<span class="diff">—</span>' : esc(cur)}</td>
+            <td dir="auto"><b>${esc(val)}</b>${same ? ' <span class="diff">(نفسه)</span>' : ''}</td></tr>`;
+        });
+        if (j.cover) rows.push(`<tr><td><input type="checkbox" data-f="cover" ${b.cover_url ? '' : 'checked'} aria-label="اعتمد الغلاف" /></td>
+            <th scope="row">الغلاف</th><td>${b.cover_url ? 'موجود' : '<span class="diff">—</span>'}</td>
+            <td><img src="${esc(j.cover)}" alt="الغلاف في الصفحة" style="max-height:120px;border-radius:4px" referrerpolicy="no-referrer" /></td></tr>`);
+        if (!rows.length && !j.description) { out.innerHTML = '<p class="state">ما لقيت بيانات كتاب في هذي الصفحة.</p>'; return; }
+        // the page's description: shown, and turned into an Arabic نبذة on request (Ibrahim: «النبذة تأخذ من النسخة الاصلية وتترجم للعربي»)
+        const desc = j.description ? `<div class="dev-desc" style="margin-top:14px;padding-top:10px;border-top:1px solid var(--line)">
+            <p style="margin:0 0 6px"><b>وصف الكتاب في الصفحة</b> ${j.description_arabic ? '' : '<span class="diff">(بغير العربية — مثل صفحة الطبعة الأصلية)</span>'}</p>
+            <details><summary class="diff">اعرض الوصف</summary><p dir="auto" class="diff" style="white-space:pre-line">${esc(j.description)}</p></details>
+            <button id="devSum" class="btn secondary" type="button" style="margin-top:8px">اكتب نبذة بالعربي من هذا الوصف</button>
+            <div id="devSumOut" aria-live="polite"></div></div>` : '';
+        if (!rows.length) { out.innerHTML = desc; $('devSum').addEventListener('click', () => devSummary(b, j)); return; }
+        out.innerHTML = `<p class="diff" style="margin:10px 0 6px">هذا اللي لقيته في الصفحة. علّم اللي تبغى تعتمده (الناقص عندنا معلَّم من نفسه):</p>
+          <div class="tscroll"><table class="dev-fetch" style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th></th><th>البيان</th><th>عندنا</th><th>في الصفحة</th></tr></thead>
+          <tbody>${rows.join('')}</tbody></table></div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px"><button id="devApply" class="btn" type="button">اعتمد المختار</button>
+          <span class="diff">ينحفظ الرابط مصدرًا لكل قيمة تعتمدها، والتعديل يُسجَّل باسمك.</span></div><p id="devApplyState" class="state" role="status"></p>${desc}`;
+        $('devApply').addEventListener('click', () => devApply(b, j));
+        if ($('devSum')) $('devSum').addEventListener('click', () => devSummary(b, j));
+      } catch (e) { out.innerHTML = '<p class="state error">تعذرت قراءة الصفحة</p>'; }
+      finally { if ($('devFetch')) $('devFetch').disabled = false; }
+    }
+    async function devSummary(b, j) {
+      const out = $('devSumOut');
+      out.innerHTML = '<p class="state">النموذج يكتب النبذة…</p>'; $('devSum').disabled = true;
+      try {
+        const res = await fetch(`/api/admin/books/${b.book_id}/summary-from-text`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                                                                    body: JSON.stringify({ text: j.description }) });
+        const r = await res.json().catch(() => ({}));
+        if (!res.ok || !r.ok) { out.innerHTML = `<p class="state error">${esc(r.error || 'تعذرت كتابة النبذة')}</p>`; return; }
+        out.innerHTML = `${b.summary ? `<p class="diff" style="margin:8px 0 4px">النبذة الحالية (تنستبدل إذا حفظت): <span dir="auto">${esc(b.summary)}</span></p>` : ''}
+          <label for="devSumText" class="diff" style="display:block;margin:8px 0 4px">النبذة المقترحة — عدّلها كما تبغى (حتى ٧٠٠ حرف):</label>
+          <textarea id="devSumText" rows="5" maxlength="700" dir="auto" style="width:100%">${esc(r.summary)}</textarea>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px"><button id="devSumSave" class="btn" type="button">احفظ النبذة</button>
+          <span class="diff">مصدرها: رابط الصفحة${r.model ? ' · كتبها ' + esc(r.model) : ''}</span></div><p id="devSumState" class="state" role="status"></p>`;
+        $('devSumSave').addEventListener('click', async () => {
+          const st = $('devSumState'), text = $('devSumText').value.trim(); st.className = 'state';
+          if (!text) { st.textContent = 'النبذة فاضية'; return; }
+          st.textContent = 'جاري الحفظ…'; $('devSumSave').disabled = true;
+          try {
+            const s = await fetch(`/api/books/${b.book_id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                                                               body: JSON.stringify({ summary: text, source_url: j.url }) });
+            if (!s.ok) throw new Error(s.status);
+            await reopenCard(b.book_id, 'rvState', 'انحفظت النبذة، ومصدرها الرابط.');
+          } catch (e) { st.textContent = 'تعذر الحفظ (النبذة حتى ٧٠٠ حرف)'; st.classList.add('error'); $('devSumSave').disabled = false; }
+        });
+      } catch (e) { out.innerHTML = '<p class="state error">تعذرت كتابة النبذة</p>'; }
+      finally { if ($('devSum')) $('devSum').disabled = false; }
+    }
+    async function devApply(b, j) {
+      const picked = [...$('devFetchOut').querySelectorAll('input[data-f]:checked')].map(x => x.dataset.f);
+      const st = $('devApplyState'); st.className = 'state';
+      if (!picked.length) { st.textContent = 'علّم شي أول.'; return; }
+      st.textContent = 'جاري الحفظ…'; $('devApply').disabled = true;
+      let step = 'data';
+      try {
+        const body = {};
+        picked.filter(k => k !== 'cover').forEach(k => { body[k] = j.fields[k]; });
+        if (Object.keys(body).length) {
+          const res = await fetch(`/api/books/${b.book_id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                                                              body: JSON.stringify(Object.assign(body, { source_url: j.url })) });
+          if (!res.ok) throw new Error(res.status);
+        }
+        step = 'cover';
+        if (picked.includes('cover')) {
+          const r = await fetch(`/api/admin/books/${b.book_id}/cover/choose`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: j.cover }) });
+          if (!r.ok) throw new Error(r.status);
+        }
+        await reopenCard(b.book_id, 'rvState', `اعتمدت ${num(picked.length)} من الصفحة، ومصدرها الرابط.`);
+      } catch (e) {
+        st.textContent = step === 'data' ? 'تعذر الحفظ: تأكد من القيم (ISBN والسنة والصفحات).' : 'انحفظت البيانات، لكن تعذر تنزيل الغلاف من الصفحة.';
+        st.classList.add('error'); if ($('devApply')) $('devApply').disabled = false;
+      }
+    }
+    function devSource() {
+      const el = $('devSrc');
+      const v = el && document.body.classList.contains('is-dev') ? el.value.trim() : '';
+      return /^https?:\/\//i.test(v) ? { source_url: v } : {};
+    }
+
     async function saveSummary(id) {
       const st = $('summaryState'); st.textContent = 'جاري الحفظ…'; $('saveSummary').disabled = true;
       try {
-        const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ summary: $('fSummary').value }) });
+        const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ summary: $('fSummary').value }, devSource())) });
         if (!res.ok) throw new Error();
         await reopenCard(id, 'summaryState', 'تم الحفظ');
       } catch (e) { st.textContent = 'تعذر الحفظ (الحد ٧٠٠ حرف)'; $('saveSummary').disabled = false; }
@@ -2954,7 +3103,7 @@
       if (!Object.keys(body).length) { st.textContent = 'ما فيه تغيير.'; return; }
       st.textContent = 'جاري الحفظ…'; $('basicSave').disabled = true;
       try {
-        const res = await fetch(`/api/books/${b.book_id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const res = await fetch(`/api/books/${b.book_id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({}, body, devSource())) });
         if (!res.ok) { st.textContent = 'تأكد من القيم: السنة بين ١٠٠٠ والسنة الحالية، الصفحات رقم، وISBN صحيح (١٠ أو ١٣ رقمًا) أو فاضي.'; return; }
         const top = $('sheet').scrollTop;
         renderCard(await (await fetch(`/api/admin/books/${b.book_id}`)).json(), true);
@@ -2972,7 +3121,7 @@
       st.textContent = 'جاري الحفظ…'; $('saveAge').disabled = true;
       try {
         const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ age_min: lo === '' ? null : Number(lo), age_max: hi === '' ? null : Number(hi) }) });
+          body: JSON.stringify(Object.assign({ age_min: lo === '' ? null : Number(lo), age_max: hi === '' ? null : Number(hi) }, devSource())) });
         if (!res.ok) { st.textContent = 'العمر لازم يكون بين ٠ و١٨، و«من» أصغر من «إلى»'; return; }
         const top = $('sheet').scrollTop;
         renderCard(await (await fetch(`/api/admin/books/${id}`)).json(), true);
@@ -3006,12 +3155,73 @@
       try {
         const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error(res.status);
-        st.textContent = 'تم الحفظ';
-        const item = catalog.find(b => b.book_id === id);
-        if (item) Object.assign(item, body);
-        renderStats(); renderGrid();
+        await reopenCard(id, 'invState', 'تم الحفظ');   // shows the place as saved («R02» → «روايات · الرف R02», BKREV)
+        return;
       } catch (err) { st.textContent = 'تعذر الحفظ'; st.classList.add('error'); }
-      finally { $('saveInv').disabled = false; }
+      finally { if ($('saveInv')) $('saveInv').disabled = false; }
+    }
+
+    // BKREV (Ibrahim 2026-10-29): «تمت مراجعة الكتاب» and «بانتظار إعادة البحث» in the book card
+    // What to check with the book in hand (Ibrahim 2026-10-29: «مو محدد وش الشيء المطلوب اراجعه»): every item with the value we
+    // hold now; a missing one is marked; the identity question first when there is one; the developer also sees the card's issues
+    function reviewChecks(d) {
+      const b = d.book, out = [];
+      const translated = !!b.translator || (b.original_language && b.original_language !== 'ar' && b.language === 'ar');
+      const item = (label, value, hint) => out.push({ label, value: value == null || value === '' ? null : String(value), hint });
+      if (d.about && d.about.research_status === 'needs_confirmation')
+        out.push({ label: 'هوية الكتاب', value: null, hint: 'قارن العنوان والمؤلف والدار بالكتاب، وجاوب على «هذا الكتاب يحتاج تأكيد هويته» تحت', ident: true });
+      item('العنوان', b.title, 'كما على الغلاف');
+      item('المؤلف', b.author && b.author !== 'غير معروف' ? b.author : null, 'كما على الغلاف');
+      item('الدار', b.publisher, 'من الغلاف أو الصفحة الأولى');
+      if (translated) item('المترجم', b.translator, 'من الصفحة الأولى');
+      item('سنة الطبعة', b.publication_year, 'صفحة الحقوق');
+      item('عدد الصفحات', b.page_count, 'آخر صفحة مرقّمة');
+      item('ISBN', b.isbn, 'ظهر الكتاب أو صفحة الحقوق');
+      item('الغلاف', b.cover_url ? 'موجود' : null, 'نفس غلاف طبعتنا؟');
+      item('النبذة', b.summary ? 'موجودة' : null, 'تطابق موضوع الكتاب؟');
+      item('الرف', b.shelf_location, 'رمز الرف فقط، مثل R02');
+      return out;
+    }
+    function reviewBlock(d) {
+      const r = d.reviewed, q = d.research_queue;
+      const checks = reviewChecks(d), missing = checks.filter(c => !c.value).length;
+      const devIssues = (d.attributes || []).filter(a => a.evidence.some(e => e.conflict && !e.verified && !e.rejected)).map(a => a.name);
+      const list = `<p class="diff" style="margin:0 0 6px">${r ? 'بيانات الكتاب الحالية:' : 'راجع هذي البيانات والكتاب بيدك، وصحّح الغلط أو الناقص من «تعديل البيانات» و«المخزون والظهور» تحت:'}</p>
+        <ul class="rv-checks" style="margin:0 0 10px;padding:0 18px 0 0;display:grid;gap:4px">${checks.map(c => `<li>
+          <b>${esc(c.label)}:</b> ${c.value ? `<span dir="auto">${esc(c.value)}</span>` : (c.ident ? '<span class="warn">غير مؤكدة</span>' : '<span class="warn">ناقص</span>')}
+          <span class="diff">— ${esc(c.hint)}</span></li>`).join('')}</ul>
+        ${missing ? `<p class="diff" style="margin:0 0 8px">${num(missing)} ${missing === 1 ? 'بند ناقص' : 'بنود ناقصة'}${r ? '' : ' — تقدر تعتمد المراجعة وفيه ناقص إذا ما هو مكتوب في الكتاب نفسه'}.</p>` : ''}
+        ${devIssues.length ? `<p class="diff dev-only dev-col" style="margin:0 0 8px">للمطوّر: صفات اختلفت فيها المصادر — ${esc(devIssues.join('، '))}. مراجعتك أنت تعتمد صفات البطاقة كلها؛ مراجعة الموظف لا تلمسها.</p>` : ''}`;
+      const head = r
+        ? `<p style="margin:0 0 8px"><span class="chip confirmed">✓ تمت مراجعته</span> <span class="diff">${esc(r.by || 'موظف')} · ${date(r.at)}</span></p>
+           <button id="rvUndo" class="btn secondary" type="button">إلغاء المراجعة</button>`
+        : `<p class="diff" style="margin:0 0 8px">خلصت؟ اضغط «تمت مراجعة الكتاب»: تنسجل المراجعة باسمك، ويتأكد أنه هو الكتاب، ويطلع من قائمة «تحتاج مراجعة».</p>
+           <button id="rvDone" class="btn" type="button">✓ تمت مراجعة الكتاب</button>`;
+      const queue = q
+        ? `<p style="margin:12px 0 0"><span class="chip">🔎 بانتظار إعادة البحث</span> <span class="diff">بعد تعديل: ${esc((q.changed_ar || []).join('، '))} · ${esc(q.created_by || '')} ${date(q.updated_at || q.created_at)} — يعيد المطوّر البحث عن نبذته وبياناته بناءً على الجديد</span></p>
+           <button id="rsqDone" class="btn secondary dev-only" type="button" style="margin-top:6px">تمت إعادة البحث <span class="dev-tag">مطوّر</span></button>`
+        : '';
+      return `<section class="block" id="reviewBlock"><h3>مراجعة الكتاب</h3>${list}${head}${queue}<p id="rvState" class="state" role="status"></p></section>`;
+    }
+    async function markReviewed(b, done) {
+      const st = $('rvState'); st.className = 'state';
+      if (done && !confirm(`تأكيد: راجعت «${b.title}» وبياناته صحيحة؟`)) return;
+      st.textContent = 'جاري الحفظ…';
+      try {
+        const res = await fetch(`/api/admin/books/${b.book_id}/reviewed`, done
+          ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirm: true }) }
+          : { method: 'DELETE' });
+        if (!res.ok) throw new Error(res.status);
+        await reopenCard(b.book_id, 'rvState', done ? 'تم: الكتاب مُراجَع' : 'أُلغيت المراجعة');
+      } catch (e) { st.textContent = 'تعذر الحفظ'; st.classList.add('error'); }
+    }
+    async function researchDone(b) {
+      const st = $('rvState'); st.className = 'state'; st.textContent = 'جاري الحفظ…';
+      try {
+        const res = await fetch(`/api/admin/books/${b.book_id}/research-done`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+        if (!res.ok) throw new Error(res.status);
+        await reopenCard(b.book_id, 'rvState', 'خرج من قائمة إعادة البحث');
+      } catch (e) { st.textContent = 'تعذر الحفظ'; st.classList.add('error'); }
     }
 
     // ---------------- settings: model + test mode

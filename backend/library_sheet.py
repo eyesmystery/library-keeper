@@ -111,6 +111,50 @@ def location_text(codes):
     return f"{place} · {shelf}" if place else shelf
 
 
+_SHELF_WORD = re.compile(r"(?:^|(?<=\s))(?:ال)?رف(?:وف)?(?=\s|$)")
+
+
+def normalize_location(text):
+    """BKREV (Ibrahim 2026-10-29: «لما اعدل موقع الكتاب واحطه في الرف … احط الحروف بس لكن ابغاك ترجع تحط اسم القسم»):
+    a place typed as shelf codes only — «R02», «q4», «R02 / R05», «الرف R02» — gets its place name back from PLACES:
+    «روايات · الرف R02». Text already written as «<مكان> · …», or anything that is not only shelf codes
+    («رف ٣ – الطابق الأرضي»), is kept as typed (spaces trimmed)."""
+    s = re.sub(r"\s+", " ", str(text or "")).strip()
+    if not s or "·" in s:
+        return s
+    parts = [p for p in re.split(r"[\s/،,+]+", _SHELF_WORD.sub(" ", s)) if p]
+    codes = [shelf_code(p) for p in parts]
+    if not parts or not all(codes):
+        return s
+    return location_text(codes) or s
+
+
+def normalize_saved_locations(conn):
+    """Startup pass (models.init_db): every saved place that is shelf codes only gets its place name, as
+    normalize_location does for a new edit — so the places staff typed before this update are fixed too. Writes one
+    audit_log row «shelf.normalized» (before → after) when it changed anything. -> number of books changed."""
+    try:
+        rows = conn.execute("SELECT book_id, shelf_location FROM books WHERE COALESCE(shelf_location, '') <> ''").fetchall()
+    except sqlite3.OperationalError:
+        return 0
+    changed = []
+    for book_id, loc in rows:
+        new = normalize_location(loc)
+        if new and new != loc:
+            changed.append([book_id, loc, new])
+    if not changed:
+        return 0
+    conn.executemany("UPDATE books SET shelf_location = ? WHERE book_id = ?", [(n, b) for b, _, n in changed])
+    try:
+        conn.execute("INSERT INTO audit_log (at, username, action, target, details) VALUES (?, ?, ?, ?, ?)",
+                     (datetime.now(timezone.utc).isoformat(timespec="seconds"), "منار (تلقائي)", "shelf.normalized",
+                      str(len(changed)), json.dumps({"count": len(changed), "books": changed[:300]}, ensure_ascii=False)))
+    except sqlite3.OperationalError:
+        pass
+    conn.commit()
+    return len(changed)
+
+
 def keywords_of(value):
     out, seen = [], set()
     for part in re.split(r"[،,؛;/|\n]+|\s+[-–]\s+", str(value or "")):   # «دمشق - حب - حرب» too

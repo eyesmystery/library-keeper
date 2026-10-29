@@ -81,7 +81,9 @@ EMPTY_TABLES = ["audit_log", "feedback", "book_choices", "book_daily", "usage_da
                 # «ماذا تقرأ الآن؟» (2026-10-27): visitors' reviews and the books they want on the shelves are the library's own
                 "visitor_reviews", "candidate_books",
                 # books looked up outside while visitors asked (AGY-20261027-04): the library builds its own; an update keeps it
-                "outside_books"]
+                "outside_books",
+                # «بانتظار إعادة البحث» (BKREV 2026-10-29): what the library's staff changed is the library's own list
+                "research_queue"]
 
 # ---------------------------------------------------------------- start files (Windows)
 WIN_START = r"""@echo off

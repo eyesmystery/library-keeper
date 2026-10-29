@@ -527,6 +527,25 @@ def build(status="open", generated_by=None):
         for n in c.get("notes") or []:
             out.append(f"- ملاحظة زائر: {_md(n)}")
         out.append("")
-    counts = {"reviews": len(reviews), "candidates": len(cand), "dev_notes": len(dnotes), "confirmations": len(answers), "test_conversations": len(convs) + convs_left, "reports": len(reports), "suggestions": len(suggestions), "questions": len(questions), "edits": len(edits),
+    # «بانتظار إعادة البحث» (BKREV, Ibrahim 2026-10-29): books whose data or cover staff changed, to be researched again
+    try:
+        import research_queue
+        rq = _all(lambda o: research_queue.list_rows(st or "all", o))
+    except Exception:  # never break the export over this section
+        rq = []
+    out += [f"## 13. كتب تنتظر إعادة البحث بعد تعديل بياناتها ({len(rq)})", "",
+            "> **لـ Claude:** عدّل الموظفون بيانات هذه الكتب أو غلافها في المكتبة. أعد البحث عن كل كتاب بالبيانات الجديدة "
+            "(النبذة، البطاقة، المصادر، الغلاف)، ثم اكتب في release/inbox_resolutions.json بندًا نوعه `research` برقم البند "
+            "و`book_id` حتى يخرج من القائمة في المكتبة مع التحديث.", ""]
+    if not rq:
+        out += ["لا يوجد.", ""]
+    for i, r in enumerate(rq, 1):
+        out += [f"### 13.{i} «{_md(r.get('title')) or '—'}» ({r.get('book_id')}) — {_md(r.get('author')) or '—'}",
+                f"- بعد تعديل: {'، '.join(r.get('changed_ar') or []) or '—'} · {_md(r.get('created_by')) or '—'} · "
+                f"{_when(r.get('updated_at') or r.get('created_at'))} · رقم البند: {r.get('queue_id')} · "
+                + (STATUS_AR.get(r.get("status"), r.get("status")) if r.get("status") != "done"
+                   else f"{STATUS_AR.get('done', 'done')} ({_md(r.get('handled_by')) or '—'} {_when(r.get('handled_at'))})"),
+                f"- الآن: الدار {_md(r.get('publisher')) or '—'} · ISBN {_md(r.get('isbn')) or '—'}", ""]
+    counts = {"reviews": len(reviews), "research": len(rq), "candidates": len(cand), "dev_notes": len(dnotes), "confirmations": len(answers), "test_conversations": len(convs) + convs_left, "reports": len(reports), "suggestions": len(suggestions), "questions": len(questions), "edits": len(edits),
               "staff_changes": len(changes), "imports": len(imports), "ideas": len(ideas)}
     return "\n".join(out).rstrip() + "\n", counts

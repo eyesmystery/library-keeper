@@ -1,7 +1,7 @@
 """«ماذا تقرأ الآن؟» (Ibrahim 2026-10-27): visitors' reviews (stars, traits, words, optional first name; shown after staff
 approve), books suggested for the shelves (ours in stock shown, ours out of stock kept, others looked up and confirmed),
 «تفضيلات قرّاء مكتبة ثلاث» in the chat once enough books have reviews, and at least five helpers under an answer."""
-import os, sys, sqlite3, json
+import os, re, sys, sqlite3, json
 sys.path.insert(0, os.getcwd())
 os.environ["LIBRARY_KEEPER_LLM"] = "off"
 os.environ["LIBRARY_KEEPER_RATE_NOTES"] = "500"
@@ -270,7 +270,7 @@ m.post(f"/api/admin/inbox/reviews/{rid_r}", json={"status": "rejected"}, headers
 body2, _ = inbox_export.build("all", "test")
 ok("نص مخفي للتجربة" not in body2 and "نص مرفوض للتجربة" not in body2 and "فيه كلام لا يُصدَّر" in body2,
    "AGY-03: the inbox file carries no words of a hidden or rejected review")
-ok('"outside_books"]' in src, "AGY-04: the outside lookups of the Mac never go in a release package")
+ok(bool(re.search(r'EMPTY_TABLES = \[[^\]]*"outside_books"', src)), "AGY-04: the outside lookups of the Mac never go in a release package")
 _vr = open(os.path.join(ROOT, "backend", "visitor_reviews.py"), encoding="utf-8").read()
 ok(_vr.count("conn = _conn()") >= 7 and "get_connection()" in _vr.split("def _conn")[1].split("def ")[0], "AGY-03: every read and write makes sure the table exists")
 

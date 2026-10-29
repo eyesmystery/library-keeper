@@ -284,6 +284,9 @@ html[lang="en"] .start-card>p{font-size:18px}html[lang="en"] .start-button{font-
 /* «ماذا تقرأ الآن؟» (Ibrahim 2026-10-27): a second start button in another colour, the review page, the readers' reviews on the book page */
 .start-card .reading-button{margin-top:10px;background:var(--brown);box-shadow:0 10px 24px oklch(27.5% .058 40 / .18)}
 .start-card .reading-button:hover{background:var(--brown-soft)}
+/* Ibrahim 2026-10-29: «اقترح كتابًا لرفوف مكتبة ثلاث» — a third start button, outlined so the two main ones stay first */
+.start-card .shelf-start-button{margin-top:10px;background:transparent;color:var(--brown);border:1.5px solid oklch(27.5% .058 40 / .35);box-shadow:none}
+.start-card .shelf-start-button:hover{background:oklch(27.5% .058 40 / .06)}
 .reading-body{padding:22px 20px max(26px,env(safe-area-inset-bottom))}
 .reading-body h2{margin:0 0 6px;font-size:30px;font-weight:650;line-height:1.25}
 .field{display:block;width:100%;min-height:50px;margin:0 0 12px;padding:11px 13px;border:1px solid oklch(27.5% .058 40 / .2);border-radius:15px;outline:0;background:var(--surface);color:var(--brown);font:inherit;font-size:17px;line-height:1.5}

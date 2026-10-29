@@ -56,7 +56,7 @@ const COPY = {
     reading: 'ماذا تقرأ الآن؟', readingLead: 'اكتب اسم الكتاب اللي تقرأه أو قرأته من مكتبة ثلاث، وقل لنا رأيك فيه.',
     searchLabel: 'اسم الكتاب أو المؤلف', searchPlaceholder: 'مثلًا: لاعب الشطرنج', searching: 'لحظة…',
     noResults: 'ما لقينا هذا الكتاب في مكتبتنا. تقدر تقترحه علينا تحت.', notInStock: 'غير متوفر حاليًا',
-    shelfLead: 'كتابك مو عندنا؟', shelfBtn: 'ماذا تقترح أن يكون على رفوف مكتبة ثلاث؟',
+    shelfLead: 'كتابك مو عندنا؟', shelfBtn: 'ماذا تقترح أن يكون على رفوف مكتبة ثلاث؟', shelfStart: 'اقترح كتابًا لرفوفنا',
     starsLabel: 'كم تعطيه من ٥؟', starAria: n => `${n} من ٥`, tagsLabel: 'وش تقول عنه؟ (اختياري)',
     reviewTags: [['gripping', 'يشد'], ['fun', 'ممتع'], ['moving', 'مؤثر'], ['easy', 'سهل القراءة'], ['slow', 'بطيء'], ['heavy', 'ثقيل']],
     reviewTextLabel: 'رأيك بكلماتك (اختياري)', reviewTextPlaceholder: 'وش عجبك أو ما عجبك فيه؟ بدون حرق للأحداث.',
@@ -129,7 +129,7 @@ const COPY = {
     reading: 'What are you reading now?', readingLead: 'Write the title of a book from Thalath you are reading or have read, and tell us what you think.',
     searchLabel: 'Book title or author', searchPlaceholder: 'For example: The Chess Player', searching: 'One moment…',
     noResults: 'We could not find this book in our shop. You can suggest it to us below.', notInStock: 'Not in stock now',
-    shelfLead: 'Not in our shop?', shelfBtn: 'What would you like to see on Thalath’s shelves?',
+    shelfLead: 'Not in our shop?', shelfBtn: 'What would you like to see on Thalath’s shelves?', shelfStart: 'Suggest a book for our shelves',
     starsLabel: 'How many stars out of 5?', starAria: n => `${n} out of 5`, tagsLabel: 'How would you describe it? (optional)',
     reviewTags: [['gripping', 'Gripping'], ['fun', 'Enjoyable'], ['moving', 'Moving'], ['easy', 'Easy to read'], ['slow', 'Slow'], ['heavy', 'Heavy']],
     reviewTextLabel: 'Your words (optional)', reviewTextPlaceholder: 'What did you like or not? No spoilers, please.',
@@ -904,6 +904,8 @@ let reviewStars = 0;
 let reviewTags = [];
 let reviewSending = false;
 let readingFromBook = false;
+// Ibrahim 2026-10-29: the shelf suggestion opened straight from the start page — its «رجوع» goes back to the start page
+let shelfFromStart = false;
 let searchTimer = null;
 let searchSeq = 0;
 let shelfSeq = 0;
@@ -915,7 +917,9 @@ async function loadReviewStatus() {
 }
 function applyReadingLanguage() {
   $('readingLabel').textContent = t('reading');
+  $('shelfStartLabel').textContent = t('shelfStart');
   $('rTitle').textContent = t('reading');
+  if (!$('sForm').hidden) $('rTitle').textContent = t('shelfStart');
   $('rLead').textContent = t('readingLead');
   $('rSearchLabel').textContent = t('searchLabel');
   $('rSearch').placeholder = t('searchPlaceholder');
@@ -942,6 +946,7 @@ function applyReadingLanguage() {
   if (!$('rFind').hidden && $('rSearch').value.trim()) searchReview($('rSearch').value);
 }
 function readingStep(step) {
+  $('rTitle').textContent = t(step === 'shelf' ? 'shelfStart' : 'reading');
   $('rFind').hidden = step !== 'find';
   $('rForm').hidden = step !== 'form';
   $('sForm').hidden = step !== 'shelf';
@@ -949,6 +954,7 @@ function readingStep(step) {
 }
 function openReading(book = null) {
   readingFromBook = !!book;
+  shelfFromStart = false;
   // one step forward in the browser history from wherever it is opened, so Back returns there — to the book page when
   // opened from «قرأته؟ شاركنا رأيك» (AGY-20261027-01: the fixed level 1 went back one step from the book page)
   if (currentSection !== 'reading') LEVEL.reading = LEVEL[currentSection] + 1;
@@ -963,7 +969,7 @@ function openReading(book = null) {
 function readingBack() {
   // inside the page (a review form or the shelf suggestion opened from the search) «رجوع» returns to the search;
   // otherwise it is the browser's Back: to the book page it was opened from, or to the start page (AGY-20261027-01)
-  if (!readingFromBook && (!$('rForm').hidden || !$('sForm').hidden)) { readingStep('find'); return; }
+  if (!readingFromBook && !shelfFromStart && (!$('rForm').hidden || !$('sForm').hidden)) { readingStep('find'); return; }
   goBack();
 }
 function miniBook(book, note) {
@@ -1295,6 +1301,7 @@ window.addEventListener('popstate', event => {
 });
 $('newChatBtn').addEventListener('click', newChat);
 $('readingBtn').addEventListener('click', () => openReading());
+$('shelfStartBtn').addEventListener('click', () => { openReading(); shelfFromStart = true; openShelf(''); });
 $('readingBackBtn').addEventListener('click', readingBack);
 $('reviewBtn').addEventListener('click', () => { if (selectedBook) openReading(selectedBook); });
 $('rSearch').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => searchReview($('rSearch').value), 300); });
@@ -1303,7 +1310,7 @@ $('rShelfBtn').addEventListener('click', () => openShelf($('rSearch').value));
 $('rForm').addEventListener('submit', event => { event.preventDefault(); submitReview(); });
 $('rChange').addEventListener('click', () => { readingFromBook = false; readingStep('find'); $('rSearch').focus(); });
 $('sForm').addEventListener('submit', event => { event.preventDefault(); checkShelf(); });
-$('sBack').addEventListener('click', () => { readingStep('find'); $('rSearch').focus(); });
+$('sBack').addEventListener('click', () => { if (shelfFromStart) { goBack(); return; } readingStep('find'); $('rSearch').focus(); });
 $('rAgain').addEventListener('click', () => openReading());
 $('rHome').addEventListener('click', goHome);
 $('backBtn').addEventListener('click', goBack);

@@ -374,6 +374,9 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
     # General suggestions about the app from staff (2026-10-09; see backend/staff_ideas.py)
     import staff_ideas
     staff_ideas.ensure_table(conn)
+    # Books waiting for research after staff changed their data (BKREV 2026-10-29; see backend/research_queue.py)
+    import research_queue
+    research_queue.ensure_table(conn)
     # Library events shown on the visitor start page (2026-10-08; see backend/events.py)
     import events
     events.ensure_table(conn)
@@ -475,6 +478,13 @@ def init_db() -> None:
         """
     )
     conn.commit()
+    # BKREV (Ibrahim 2026-10-29): a place typed as shelf letters only («R02») gets its place name («روايات · الرف R02»);
+    # the one data pass at start-up, so places staff typed before this version are fixed as well
+    try:
+        import library_sheet
+        library_sheet.normalize_saved_locations(conn)
+    except Exception:
+        pass
     conn.close()
 
 

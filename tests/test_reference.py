@@ -238,7 +238,13 @@ chat.interpret = lambda conv, active: {"intent": "recommend", "prefs": llm.clean
 out = A.run_chat([{"role": "user", "content": "كتب تشبه كاتب رعب تجربة"}], active=("fake", "m"))
 ok(out["_debug"].get("style_source") == "research" and any(f["id"] == horror for f in seen["facts"]),
    "similar-author uses the stored researched style (no model style needed)")
-ok(not any(f["id"] == own for f in seen["facts"]), "the author's own books are not offered as «like him»")
+# INBOXFIX 2026-10-29: his own available books come too (the model had said «we have none of his books»), but only as
+# his own («من كتب … نفسه»), never as «like him», and after the likeness ones
+_own = [f for f in seen["facts"] if f["id"] == own]
+ok(all("نفسه" in f["why_it_matches"] for f in _own), "the author's own books are not offered as «like him» (only as his own)")
+_ids = [f["id"] for f in seen["facts"]]
+ok(not _own or _ids.index(own) > _ids.index(horror), "his own books come after the likeness ones")
+ok(not _own or "ولا تقل أبدًا إن كتبه غير متوفرة" in seen["guidance"], "the guidance says his own books are here")
 ok("المعروف عن كتابات كاتب رعب تجربة" in seen["guidance"] and "ولا تذكر عنه أي معلومة أخرى" in seen["guidance"],
    "guidance allows one general phrase about the stored style, nothing else")
 rec = authors.lookup("رعبي")

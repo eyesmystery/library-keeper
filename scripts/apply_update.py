@@ -886,6 +886,8 @@ INBOX_KINDS = {
     "question": ("open_questions", "q_id", None, "phrase"),
     "staff_edit": ("staff_notes", "note_id", None, "note"),
     "staff_idea": ("staff_ideas", "idea_id", None, "text"),
+    # «بانتظار إعادة البحث» (BKREV 2026-10-29): a book re-researched after staff changed its data; match by id + book_id
+    "research": ("research_queue", "queue_id", None, "changed"),
 }
 RIYADH_OFFSET = datetime.timedelta(hours=3)
 
