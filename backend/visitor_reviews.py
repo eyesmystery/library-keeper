@@ -25,6 +25,7 @@ Stored on the library's computer only: this table is visitor data, never in a re
 (scripts/make_release.py EMPTY_TABLES) nor in the catalog snapshot, and an update keeps it (apply_update replaces
 catalog tables only). No conversation id, network address or other visitor detail is stored.
 """
+import hashlib
 import json
 import re
 import unicodedata
@@ -250,6 +251,41 @@ def set_status(review_id, status, username=None, hide_text=False):
         conn.close()
 
 
+def _flagged(raw):
+    try:
+        return bool(json.loads(raw)) if raw else False
+    except (TypeError, ValueError):
+        return True
+
+
+def approvable():
+    """Reviews waiting for approval that the model check flagged nothing in -> count («اعتماد الكل»)."""
+    conn = _conn()
+    try:
+        return sum(1 for r in conn.execute("SELECT ai_flags FROM visitor_reviews WHERE status = 'pending'")
+                   if not _flagged(r["ai_flags"]))
+    finally:
+        conn.close()
+
+
+def approve_all(username=None):
+    """«اعتماد الكل» (Ibrahim 2026-10-27: «في اعتماد اراء القراء اضف امكانية اعتماد الكل. احيانا يكون في اراء كثيرة»):
+    every review waiting for approval is approved with its text, except those the model check flagged (offensive, spoiler,
+    off the book, emptied by the cleaning): those stay waiting for a one-by-one decision.
+    -> {"approved": [review ids], "left_flagged": n}."""
+    conn = _conn()
+    try:
+        rows = conn.execute("SELECT review_id, ai_flags FROM visitor_reviews WHERE status = 'pending'").fetchall()
+        ok = [r["review_id"] for r in rows if not _flagged(r["ai_flags"])]
+        now = _now()
+        conn.executemany("UPDATE visitor_reviews SET status = 'approved', hide_text = 0, handled_by = ?, handled_at = ?"
+                         " WHERE review_id = ? AND status = 'pending'", [(username, now, i) for i in ok])
+        conn.commit()
+        return {"approved": ok, "left_flagged": len(rows) - len(ok)}
+    finally:
+        conn.close()
+
+
 # ---------------------------------------------------------------- staff
 def counts():
     conn = _conn()
@@ -335,15 +371,29 @@ def _approved():
 _cache = {"stamp": None, "works": {}}
 
 
+_STAMP_SQL = """SELECT r.review_id, r.book_id, r.stars, r.tags, r.clean_text, r.hide_text, r.first_name, r.language,
+                       r.created_at, r.handled_at, b.active, b.title, b.author
+                FROM visitor_reviews r LEFT JOIN books b ON b.book_id = r.book_id
+                WHERE r.status = 'approved' ORDER BY r.review_id"""
+
+
 def by_work():
-    """{work_key: [approved review dicts, newest first]}. Read again only when the approved reviews changed
-    (their count and the last approval), so the chat's facts do not query them for every book."""
+    """{work_key: [approved review dicts, newest first]}. Grouped again only when anything it is built from changed,
+    so the chat's facts do not regroup them for every book.
+
+    AUDFIX 2026-10-27 evening (Codex evening audit, P2): the stamp was the approved reviews alone, so hiding a book
+    (books.active = 0), or changing its title or author, left the old grouping in memory and the public
+    /api/reviews/book/<id> kept showing its reviews until the next approval or a restart. The stamp is now a digest of
+    every field _approved() reads, review side and book side (active, title, author), so a change made by the staff
+    pages, a script or another process shows at the next read."""
     conn = _conn()
     try:
         import models
-        stamp = (models.DB_PATH,) + tuple(conn.execute(
-            "SELECT COUNT(*), MAX(handled_at), MAX(review_id), SUM(review_id), SUM(hide_text) FROM visitor_reviews "
-            "WHERE status = 'approved'").fetchone())
+        digest = hashlib.sha1()
+        for row in conn.execute(_STAMP_SQL):
+            digest.update(repr(tuple(row)).encode("utf-8"))
+            digest.update(b"\x1e")
+        stamp = (models.DB_PATH, digest.hexdigest())
     except Exception:  # noqa: BLE001 - a database without the table yet
         return {}
     finally:

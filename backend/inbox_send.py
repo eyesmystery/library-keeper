@@ -25,6 +25,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
+import safe_io
 import net
 import sealed
 
@@ -60,17 +61,9 @@ def _read_json(path, default=None):
 
 
 def _write_json(path, data, private=False):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    tmp = path + ".tmp"
-    if private:   # the upload token: readable by this user only (Windows ignores the mode)
-        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-        f = os.fdopen(fd, "w", encoding="utf-8")
-    else:
-        f = open(tmp, "w", encoding="utf-8")
-    with f:
-        json.dump(data, f, ensure_ascii=False, indent=1)
-        f.write("\n")
-    os.replace(tmp, path)
+    # CHANFIX (Windows, 2026-10-27): a temp file of its own and a replace that waits while the target is busy;
+    # private: the upload token, readable by this user only (Windows ignores the mode)
+    safe_io.write_json(path, data, private=private)
 
 
 def config():

@@ -25,6 +25,7 @@ import time
 import urllib.error
 import urllib.request
 
+import safe_io
 import net
 from collections import OrderedDict
 
@@ -155,10 +156,7 @@ def update_settings(**changes):
     """Merge non-secret settings into data/llm_settings.json atomically."""
     data = _read_settings()
     data.update(changes)
-    tmp = SETTINGS_PATH + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False)
-    os.replace(tmp, SETTINGS_PATH)
+    safe_io.write_json(SETTINGS_PATH, data, indent=None, newline=False)   # CHANFIX: safe on Windows
 
 
 # ---------------------------------------------------------------- saved keys
@@ -179,11 +177,7 @@ def _write_secrets(data):
         os.chmod(folder, 0o700)
     except OSError:
         pass
-    tmp = SECRETS_PATH + ".tmp"
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-        json.dump(data, f)
-    os.replace(tmp, SECRETS_PATH)
+    safe_io.write_json(SECRETS_PATH, data, private=True, indent=None, newline=False)   # CHANFIX: safe on Windows
     try:
         os.chmod(SECRETS_PATH, 0o600)
     except OSError:

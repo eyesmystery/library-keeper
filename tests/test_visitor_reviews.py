@@ -273,5 +273,53 @@ ok("نص مخفي للتجربة" not in body2 and "نص مرفوض للتجرب
 ok('"outside_books"]' in src, "AGY-04: the outside lookups of the Mac never go in a release package")
 _vr = open(os.path.join(ROOT, "backend", "visitor_reviews.py"), encoding="utf-8").read()
 ok(_vr.count("conn = _conn()") >= 7 and "get_connection()" in _vr.split("def _conn")[1].split("def ")[0], "AGY-03: every read and write makes sure the table exists")
+
+# ---- «اعتماد الكل» (Ibrahim 2026-10-27: «في اعتماد اراء القراء اضف امكانية اعتماد الكل. احيانا يكون في اراء كثيرة»)
+con.execute("update visitor_reviews set status='rejected' where status='pending'"); con.commit()
+_new = [VR.add({"book_id": ids[5], "title": "t5"}, 5, ["fun"], "", None, "ar") for _ in range(3)]
+_bad = VR.add({"book_id": ids[6], "title": "t6"}, 2, [], "نص", None, "ar", {"flags": ["spoiler"], "traits": [], "clean": "نص"})
+ok(VR.approvable() == 3 and VR.counts()["pending"] == 4, "approve-all: three without a warning, one flagged")
+ok(visitor.post("/api/admin/inbox/reviews/approve-all", json={}).status_code == 401, "approve-all: staff only")
+ok(m.post("/api/admin/inbox/reviews/approve-all", json={}, headers={"X-CSRF-Token": "wrong"}).status_code in (400, 403)
+   and VR.counts()["pending"] == 4, "approve-all: needs the CSRF token")
+_d = m.get("/api/admin/inbox/reviews").get_json()
+ok(_d.get("approvable") == 3, "approve-all: the list says how many can be approved at once")
+_r = m.post("/api/admin/inbox/reviews/approve-all", json={}, headers={"X-CSRF-Token": m.csrf}).get_json()
+ok(_r["approved"] == 3 and _r["left_flagged"] == 1 and _r["counts"]["pending"] == 1, "approve-all: the flagged review stays waiting")
+_st = {r[0]: (r[1], r[2], r[3]) for r in con.execute("select review_id, status, hide_text, handled_by from visitor_reviews where review_id in (%s)" % ",".join(str(i) for i in _new + [_bad]))}
+ok(all(_st[i][0] == "approved" and _st[i][1] == 0 and _st[i][2] for i in _new) and _st[_bad][0] == "pending",
+   "approve-all: approved with their text, by the staff member")
+ok(con.execute("select count(*) from audit_log where action='review.approved_all'").fetchone()[0] == 1, "approve-all: one audit row")
+ok(m.post("/api/admin/inbox/reviews/approve-all", json={}, headers={"X-CSRF-Token": m.csrf}).get_json()["approved"] == 0,
+   "approve-all: nothing left to approve the second time")
+_adm = open(os.path.join(ROOT, "admin", "index.html"), encoding="utf-8").read()
+ok("reviewsAll" in _adm and "تأكيد: اعتماد" in _adm and "'review.approved_all'" in _adm, "approve-all: the button asks a second tap first")
+
+# ---- AUDFIX 2026-10-27 evening (Codex evening audit, P2): hiding a book took no effect on its reviews held in memory.
+# Same process and same warm memory throughout: the test never clears VR._cache before checking.
+_hb = ids[9]
+_hbook = dict(A.get_book(_hb))
+_c0 = visitor.get(f"/api/reviews/book/{_hb}").get_json().get("count", 0)
+for _stars, _txt in ((5, "رأي أول عن كتاب سيُخفى"), (4, "رأي ثانٍ عن كتاب سيُخفى")):
+    _rid = visitor.post("/api/reviews", json={"book_id": _hb, "stars": _stars, "text": _txt}).get_json()["review_id"]
+    m.post(f"/api/admin/inbox/reviews/{_rid}", json={"status": "approved"})
+_s = visitor.get(f"/api/reviews/book/{_hb}").get_json()
+ok(_s.get("count") == _c0 + 2 and VR.work_key(_hbook) in VR.by_work(), "AUDFIX-E: the two approved reviews shown, memory warm")
+_warm = VR._cache["stamp"]
+ok(m.patch(f"/api/books/{_hb}", json={"active": 0}).status_code == 200
+   and con.execute("select active from books where book_id=?", (_hb,)).fetchone()[0] == 0, "AUDFIX-E: hidden through the staff edit route")
+_r = visitor.get(f"/api/reviews/book/{_hb}")
+ok(_r.status_code == 404 and "سيُخفى" not in _r.get_data(as_text=True), "AUDFIX-E: the public review link of a hidden book says not found")
+ok(VR.summary(_hbook) is None and all(r["book_id"] != _hb for rows in VR.by_work().values() for r in rows)
+   and VR._cache["stamp"] != _warm, "AUDFIX-E: the memory follows the hiding at once (no restart, no new approval)")
+ok("thalath_readers" not in A.book_fact(_hbook, None, "", "ar"), "AUDFIX-E: nor does the chat quote them")
+ok(m.patch(f"/api/books/{_hb}", json={"active": 1}).status_code == 200
+   and visitor.get(f"/api/reviews/book/{_hb}").get_json().get("count") == _c0 + 2, "AUDFIX-E: shown again once the book is shown again")
+_new_title = (_hbook["title"] or "") + " — طبعة معدلة للتجربة"
+ok(m.patch(f"/api/books/{_hb}", json={"title": _new_title}).status_code == 200
+   and VR.summary(_hbook) is None and (VR.summary(dict(A.get_book(_hb))) or {}).get("count") == _c0 + 2,
+   "AUDFIX-E: a new title regroups the reviews under the new work at once")
+m.patch(f"/api/books/{_hb}", json={"title": _hbook["title"]})
+ok((VR.summary(_hbook) or {}).get("count") == _c0 + 2, "AUDFIX-E: the old title back, the reviews back with it")
 print(f"\n{P} passed, {F} failed")
 sys.exit(1 if F else 0)

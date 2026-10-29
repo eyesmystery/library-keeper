@@ -340,11 +340,27 @@ def read_package(zip_path, work):
     return version, db, covers
 
 
-def build_update(stage, version, info, counts, from_zips, zip_path, test_log="keep"):
+def remove_tree(path, tries=5):
+    """shutil.rmtree that survives Finder writing a .DS_Store into the folder while it is being removed
+    (the 0.9.12 build on 2026-10-29 stopped at its very end on «Directory not empty: release/_stage/data»)."""
+    import time
+    for n in range(tries):
+        try:
+            shutil.rmtree(path)
+            return
+        except FileNotFoundError:
+            return
+        except OSError:
+            if n == tries - 1:
+                raise
+            time.sleep(0.5)
+
+
+def build_update(stage, version, info, counts, from_zips, zip_path, test_log="keep", from_bases=()):
     """The small update package, made from the staged full package (before the platform files are added)."""
     up = os.path.join(OUT, "_update")
     if os.path.exists(up):
-        shutil.rmtree(up)
+        remove_tree(up)
     payload = os.path.join(up, "payload")
     for part in ("backend", "frontend", "admin", "scripts"):
         copy_tree(os.path.join(stage, part), os.path.join(payload, part))
@@ -383,6 +399,24 @@ def build_update(stage, version, info, counts, from_zips, zip_path, test_log="ke
             apply_update.build_catalog(prev_db, os.path.join(up, "bases", version_tag(prev_version) + ".db"),
                                        {"version": prev_version, "from_package": os.path.basename(zp)}, prev_covers)
             need |= {name for name, sha in now.items() if prev_covers.get(name) != sha}
+    # --update-base (2026-10-29): a base catalog taken from an earlier update package (bases/<version>.db), for a
+    # version whose full package is no longer kept. The base carries its version and its cover list itself.
+    for bp in from_bases:
+        con = sqlite3.connect(bp)
+        try:
+            meta = dict(con.execute("SELECT key, value FROM update_meta"))
+            prev_covers = dict(con.execute("SELECT name, sha1 FROM cover_files"))
+        finally:
+            con.close()
+        prev_version = meta.get("version")
+        if not prev_version:
+            raise SystemExit(f"{bp}: not a base catalog (no version in update_meta)")
+        dest = os.path.join(up, "bases", version_tag(prev_version) + ".db")
+        if os.path.exists(dest):
+            continue                     # a full package given with --update-from wins
+        shutil.copy2(bp, dest)
+        from_versions.append(prev_version)
+        need |= {name for name, sha in now.items() if prev_covers.get(name) != sha}
     os.makedirs(os.path.join(up, "covers"))
     for name in sorted(need):
         shutil.copy2(os.path.join(covers_dir, name), os.path.join(up, "covers", name))
@@ -392,7 +426,7 @@ def build_update(stage, version, info, counts, from_zips, zip_path, test_log="ke
     write(os.path.join(up, "README-UPDATE-AR.html"), update_guide(version, counts, len(need), from_versions))
     check_clean(up)
     size = zip_stage(up, zip_path, f"ThalathSmart-update-{version_tag(version)}")
-    shutil.rmtree(up)
+    remove_tree(up)
     return {"path": os.path.relpath(zip_path, ROOT), "mb": round(size / 1e6, 1), "covers": len(need), "from": from_versions}
 
 
@@ -588,7 +622,7 @@ def clean_database(dest, keep_user):
 
 def build_common(stage, version, keep_user, model, info=None):
     if os.path.exists(stage):
-        shutil.rmtree(stage)
+        remove_tree(stage)
     os.makedirs(stage)
     copy_tree(os.path.join(ROOT, "backend"), os.path.join(stage, "backend"), skip=BACKEND_SKIP)
     copy_tree(os.path.join(ROOT, "frontend"), os.path.join(stage, "frontend"))
@@ -715,6 +749,9 @@ def main():
                     help="keep no account at all (copies published on GitHub); the first start asks for a manager account")
     ap.add_argument("--update-from", action="append", default=[], metavar="ZIP",
                     help="an earlier full package; also build the small update package for installations of it (repeatable)")
+    ap.add_argument("--update-base", action="append", default=[], metavar="DB",
+                    help="a base catalog (bases/<version>.db) from an earlier update package, for a version whose full "
+                         "package is no longer kept (repeatable)")
     ap.add_argument("--test-log", choices=("keep", "on", "off"), default="keep",
                     help="update package: turn «وضع الاختبار» on/off at the library (default: keep their setting)")
     ap.add_argument("--model", default=None, help="Ollama model written to data/llm_settings.json (default: the current one)")
@@ -740,9 +777,10 @@ def main():
     counts = build_common(stage, args.version, None if args.no_user else args.keep_user, model, info)
     write(os.path.join(stage, "BUILD.json"), json.dumps(info, ensure_ascii=False, indent=1) + "\n")
     made, update = {}, None
-    if args.update_from:
+    if args.update_from or args.update_base:
         name = "ThalathSmart-update-%s-%s-%s%s.zip" % (tag, when.strftime("%Y%m%d-%H%M"), ref, "-dirty" if dirty else "")
-        update = build_update(stage, args.version, info, counts, args.update_from, os.path.join(OUT, name), args.test_log)
+        update = build_update(stage, args.version, info, counts, args.update_from, os.path.join(OUT, name), args.test_log,
+                              args.update_base)
     for platform in ("windows", "mac"):
         for f in os.listdir(stage):  # start files of the other platform are removed before each zip
             if f.endswith((".bat", ".command", ".html")):
@@ -775,7 +813,7 @@ def main():
         check_clean(stage)
         zip_path = os.path.join(OUT, release_name(args.version, platform, when, ref, dirty))
         made[platform] = (zip_path, zip_stage(stage, zip_path, f"ThalathSmart-{tag}"))
-    shutil.rmtree(stage)
+    remove_tree(stage)
     print(json.dumps({"version": args.version, "model": model, "build": info, **counts,
                       "files": {k: {"path": os.path.relpath(v[0], ROOT), "mb": round(v[1] / 1e6, 1)} for k, v in made.items()},
                       "update": update},

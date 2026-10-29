@@ -34,6 +34,7 @@ import urllib.request
 import zipfile
 from datetime import datetime, timezone
 
+import safe_io
 import ed25519
 import net
 
@@ -52,6 +53,7 @@ MAX_UPDATE = 1024 * 1024 * 1024
 _lock = threading.Lock()
 _worker = {"thread": None}
 _timer = {"thread": None}
+_unsaved = {}   # CHANFIX2 (Codex audit 2026-10-29 P2): update notes the state file refused, shown and kept until saved
 
 
 class ChannelError(Exception):
@@ -63,20 +65,13 @@ def _now():
 
 
 def _read_json(path, default=None):
-    try:
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
-    except (OSError, ValueError):
-        return default
+    return safe_io.read_json(path, default)   # CHANFIX: a busy file (Windows) is read again, not taken as missing
 
 
 def _write_json(path, data):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=1)
-        f.write("\n")
-    os.replace(tmp, path)
+    # CHANFIX (library, Windows, 2026-10-27): «[WinError 5] Access is denied: channel_state.json.tmp -> channel_state.json»
+    # while the admin page read the state during the download — a temp file of its own and a replace that waits
+    safe_io.write_json(path, data)
 
 
 def config():
@@ -122,10 +117,32 @@ def _set_update(**changes):
     with _lock:
         s = state()
         up = dict(s.get("update") or {})
+        up.update(_unsaved)          # notes a busy file refused earlier are written with this one
         up.update(changes)
         s["update"] = up
         _write_json(STATE, s)
+        _unsaved.clear()
         return up
+
+
+def _update_now():
+    """The update as it really stands: the state file plus the notes it refused (a busy file on Windows)."""
+    up = dict(state().get("update") or {})
+    with _lock:
+        up.update(_unsaved)
+    return up
+
+
+def _note_update(**changes):
+    """A progress/status note that must never stop the install (CHANFIX2, 2026-10-29): when Windows keeps the state
+    file busy past safe_io's wait (an open admin page, an antivirus scan), the note is skipped and the install goes on;
+    the next note or the final status writes the file again."""
+    try:
+        return _set_update(**changes)
+    except OSError:
+        with _lock:
+            _unsaved.update(changes)   # kept in memory: status() and install() still see the true state
+        return None
 
 
 # ------------------------------------------------------------------ HTTP (GitHub releases)
@@ -290,7 +307,7 @@ def _download(cfg, up, progress):
     if got != size or h.hexdigest() != str(up.get("sha256") or "").lower():
         os.remove(path + ".part")
         raise ChannelError("بصمة ملف التحديث لا تطابق الملف الموقّع — لم يُثبَّت")
-    os.replace(path + ".part", path)
+    safe_io.replace(path + ".part", path)
     return path
 
 
@@ -298,13 +315,16 @@ def _install(by, download=None, dry_run=None, exit_after=True):
     cfg = config()
     up = dict(state().get("update") or {})
     try:
-        _set_update(status="downloading", progress=0, message="جاري تنزيل التحديث…", by=by, started=_now())
+        _note_update(status="downloading", progress=0, message="جاري تنزيل التحديث…", by=by, started=_now())
+        _last = {"pct": 0}
         def progress(got, total):
+            # CHANFIX: the state file is written every 5 % (was every 1 %, reading it back each time)
             pct = int(got * 100 / total) if total else 0
-            if pct != (state().get("update") or {}).get("progress"):
-                _set_update(progress=pct)
+            if pct >= 100 or pct - _last["pct"] >= 5:
+                _last["pct"] = pct
+                _note_update(progress=pct)
         zpath = (download or _download)(cfg, up, progress)
-        _set_update(status="checking", message="جاري فحص التحديث قبل تثبيته…")
+        _note_update(status="checking", message="جاري فحص التحديث قبل تثبيته…")
         tag = re.sub(r"[^0-9A-Za-z._-]", "_", str(up.get("version") or "update"))
         dest = os.path.join(UPDATES, tag)
         if os.path.isdir(dest):
@@ -321,13 +341,17 @@ def _install(by, download=None, dry_run=None, exit_after=True):
                               "from_version": installed_version()})
         launcher = os.environ.get("LIBRARY_KEEPER_LAUNCHER") == "1"
         if launcher:
-            _set_update(status="restarting", message="التحديث جاهز. السيرفر يُعاد تشغيله الآن لتثبيته (دقيقة أو دقيقتين)…")
+            _note_update(status="restarting", message="التحديث جاهز. السيرفر يُعاد تشغيله الآن لتثبيته (دقيقة أو دقيقتين)…")
             if exit_after:
                 threading.Timer(3.0, lambda: os._exit(0)).start()
         else:
-            _set_update(status="ready", message="التحديث جاهز. أغلق نافذة السيرفر ثم شغّل التطبيق من start_library ليُثبَّت.")
+            _note_update(status="ready", message="التحديث جاهز. أغلق نافذة السيرفر ثم شغّل التطبيق من start_library ليُثبَّت.")
     except Exception as e:  # noqa: BLE001
-        _set_update(status="failed", message=str(e)[:500], finished=_now())
+        # CHANFIX2: a busy state file here must not leave the page on «downloading» forever — try a few times
+        for _ in range(3):
+            if _note_update(status="failed", message=str(e)[:500], finished=_now()) is not None:
+                break
+            time.sleep(1)
 
 
 def _dry_run(upd):
@@ -339,13 +363,15 @@ def _dry_run(upd):
 
 def install(by, **kw):
     """Start the approved install in the background. -> (ok, message)."""
-    up = state().get("update") or {}
+    up = _update_now()
+    if _worker["thread"] and _worker["thread"].is_alive():
+        return False, "التحديث يعمل الآن"
+    if os.path.exists(PENDING):     # CHANFIX2: an update already downloaded and checked is never fetched twice
+        return False, "التحديث جاهز للتثبيت؛ أعد تشغيل التطبيق من start_library ليُثبَّت"
     if up.get("status") not in ("available", "failed"):
         return False, "لا يوجد تحديث ينتظر الموافقة"
     if not up.get("version") or version_key(up["version"]) <= version_key(installed_version()):
         return False, "لا يوجد تحديث أحدث من الإصدار المثبت"
-    if _worker["thread"] and _worker["thread"].is_alive():
-        return False, "التحديث يعمل الآن"
     t = threading.Thread(target=_install, args=(by,), kwargs=kw, daemon=True)
     _worker["thread"] = t
     t.start()
@@ -371,16 +397,27 @@ def after_start(audit=None):
         except Exception:  # noqa: BLE001
             pass
     os.makedirs(UPDATES, exist_ok=True)
-    try:
-        os.replace(RESULT, os.path.join(UPDATES, "update_result_" + time.strftime("%Y%m%d-%H%M%S") + ".json"))
+    try:   # AGY-20261029-01: waits on a busy file; a result left behind would be read and logged again at every start
+        safe_io.replace(RESULT, os.path.join(UPDATES, "update_result_" + time.strftime("%Y%m%d-%H%M%S") + ".json"))
     except OSError:
-        pass
+        try:
+            os.remove(RESULT)
+        except OSError:
+            pass
     return res
 
 
 def status(role=None):
     cfg, s = config(), state()
     up = dict(s.get("update") or {})
+    with _lock:
+        up.update(_unsaved)            # CHANFIX2: what the busy file refused (progress, ready, failed) is still shown
+    alive = bool(_worker["thread"] and _worker["thread"].is_alive())
+    if alive and up.get("status") in ("available", "failed"):
+        up["status"] = "downloading"   # the install runs even when its first note could not be written
+    elif not alive and os.path.exists(PENDING) and up.get("status") in ("available", "failed", "downloading", "checking"):
+        up["status"] = "ready"         # downloaded and checked, waiting for the restart that installs it
+        up["message"] = "التحديث جاهز. أغلق نافذة السيرفر ثم شغّل التطبيق من start_library ليُثبَّت."
     return {"enabled": bool(cfg.get("enabled")), "has_key": bool(public_key()), "private": bool(cfg.get("token")),
             "installed_version": installed_version(), "last_check": s.get("last_check"), "last_ok": s.get("last_ok"),
             "last_error": s.get("last_error"), "update": up, "launcher": os.environ.get("LIBRARY_KEEPER_LAUNCHER") == "1",

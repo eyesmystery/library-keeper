@@ -30,10 +30,18 @@ def port_busy(port):
 
 
 def write_json(path, data):
-    tmp = path + ".tmp"
+    # CHANFIX (Windows, 2026-10-27): a temp file of its own; the replace waits while the admin page reads the file
+    tmp = f"{path}.{os.getpid()}.tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
-    os.replace(tmp, path)
+    for n in range(50):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if n == 49:
+                raise
+            time.sleep(0.1)
 
 
 def main():
@@ -74,10 +82,20 @@ def main():
         res["error"] = str(e)[:500]
     res["at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     write_json(RESULT, res)
-    try:
-        os.replace(PENDING, os.path.join(UPDATES, f"update_pending_{ts}.json"))
-    except OSError:
-        pass
+    # AGY-20261029-01: a busy pending file (Windows) must never stay behind — run_server would install it again
+    for _ in range(100):
+        try:
+            os.replace(PENDING, os.path.join(UPDATES, f"update_pending_{ts}.json"))
+            break
+        except FileNotFoundError:
+            break
+        except OSError:
+            time.sleep(0.1)
+    else:
+        try:
+            os.remove(PENDING)
+        except OSError:
+            pass
     print(("✓ تم التحديث إلى " + str(res["version"])) if res["ok"] else ("✗ لم يتم التحديث: " + str(res.get("error"))), flush=True)
     return 0 if res["ok"] else 1
 

@@ -1194,13 +1194,27 @@ async function loadBookReviews(book) {
 
 // Each screen has a level; moving forward adds a browser history step and moving back removes steps,
 // so the phone's back button returns to the previous screen instead of leaving the app.
+// AGY-20261029-02: going back counts the steps really pushed (navStack mirrors the app's own history entries), not the
+// level difference — a jump of two levels pushes one step, so history.go(-2) used to leave «منار» altogether.
 const LEVEL = { welcome: 0, chat: 1, eventDetail: 1, reading: 1, bookDetail: 2, feedback: 3 };
-let skipPop = false;
+let skipPop = false, pushAfterPop = null;
+const navStack = ['welcome'];
 function showSection(id, fromHistory = false) {
   if (!fromHistory && id !== currentSection) {
     const diff = LEVEL[id] - LEVEL[currentSection];
-    if (diff > 0) history.pushState({ section: id }, '');
-    else if (diff < 0) { skipPop = true; history.go(diff); }
+    if (diff > 0) {
+      navStack.push(id);
+      history.pushState({ section: id, depth: navStack.length - 1 }, '');
+    } else if (diff < 0) {
+      let steps = 0;
+      while (navStack.length > 1 && LEVEL[navStack[navStack.length - 1]] >= LEVEL[id]) { navStack.pop(); steps += 1; }
+      if (navStack[navStack.length - 1] !== id) pushAfterPop = id;   // a screen not in the history: one step after it
+      if (steps > 0) { skipPop = true; history.go(-steps); }
+      else if (pushAfterPop) { navStack.push(id); history.pushState({ section: id, depth: navStack.length - 1 }, ''); pushAfterPop = null; }
+    } else {
+      navStack[navStack.length - 1] = id;
+      history.replaceState({ section: id, depth: navStack.length - 1 }, '');
+    }
   }
   currentSection = id;
   ['welcome', 'chat', 'eventDetail', 'reading', 'bookDetail', 'feedback'].forEach(section => { $(section).hidden = section !== id; });
@@ -1260,7 +1274,15 @@ document.querySelectorAll('.brand-home').forEach(button => button.addEventListen
 $('eventBackBtn').addEventListener('click', goBack);
 $('feedbackBackBtn').addEventListener('click', goBack);
 window.addEventListener('popstate', event => {
-  if (skipPop) { skipPop = false; return; }
+  if (skipPop) {
+    skipPop = false;
+    if (pushAfterPop) { navStack.push(pushAfterPop); history.pushState({ section: pushAfterPop, depth: navStack.length - 1 }, ''); pushAfterPop = null; }
+    return;
+  }
+  const depth = Math.max(0, (event.state && event.state.depth) || 0);
+  navStack.length = Math.min(navStack.length, depth + 1);
+  while (navStack.length < depth + 1) navStack.push((event.state && event.state.section) || 'welcome');
+  navStack[depth] = (event.state && event.state.section) || 'welcome';
   if (noteMode) closeNote();
   closeMore();
   let section = (event.state && event.state.section) || 'welcome';
@@ -1297,6 +1319,6 @@ document.querySelectorAll('.feedback-button').forEach(button => button.addEventL
 
 applyLanguage();
 loadReviewStatus();
-history.replaceState({ section: 'welcome' }, '');
+history.replaceState({ section: 'welcome', depth: 0 }, '');
 showSection('welcome', true);
 checkTestMode();

@@ -168,6 +168,23 @@ def cover_manifest(covers_dir):
     return out
 
 
+
+def retry_io(fn, *args, tries=100, wait=0.1):
+    """os.replace / os.remove that wait while Windows keeps the file busy for a moment (AGY-20261029-01: an antivirus
+    scan or the closing server can hold library.db or a small JSON file; one refusal used to stop the whole update)."""
+    import time
+    for n in range(tries):
+        try:
+            return fn(*args)
+        except PermissionError:
+            if n == tries - 1:
+                raise
+        except OSError as e:
+            if getattr(e, "winerror", None) not in (5, 32, 33) or n == tries - 1:
+                raise
+        time.sleep(wait)
+
+
 def build_catalog(src_db, dest, meta, covers_dir=None):
     """Copy the catalog tables of `src_db` into a new SQLite file `dest`, with the list of cover files
     (`covers_dir`: the covers folder, or a ready {file name: sha1} dict).
@@ -622,7 +639,7 @@ def merge_covers(app, upd, base_catalog, renames, keep_dir, dry, undo=None):
                         saved = os.path.join(keep_dir, "before_rename_" + str(new) + ext)
                         shutil.copy2(now, saved)
                         undo.append(("restore", saved, now))
-                    os.replace(was, now)
+                    retry_io(os.replace, was, now)
                     undo.append(("rename", now, was))
     src = os.path.join(upd, "covers")
     if not os.path.isdir(src):
@@ -672,7 +689,7 @@ def undo_covers(undo):
                 shutil.copy2(a, b)
             elif kind == "rename":
                 if os.path.exists(a):
-                    os.replace(a, b)
+                    retry_io(os.replace, a, b)
         except OSError as e:
             problems.append(f"cover {os.path.basename(b or a)}: {e}")
     return problems
@@ -807,8 +824,8 @@ def roll_back(app, keep, done, error, installed, target, ts, say=print):
             copy_db(os.path.join(keep, "library.db"), tmp)
             for tail in ("-wal", "-shm", "-journal"):
                 if os.path.exists(db + tail):
-                    os.remove(db + tail)
-            os.replace(tmp, db)
+                    retry_io(os.remove, db + tail)
+            retry_io(os.replace, tmp, db)
             restored_db = True
         except Exception as e:  # noqa: BLE001 - reported below with the place of the backup
             problems.append(f"database: {type(e).__name__}: {e}")
@@ -992,7 +1009,7 @@ def apply_settings(app, upd, notes, say=print):
             with open(tmp, "w", encoding="utf-8") as f:
                 json.dump(current, f, ensure_ascii=False, indent=1)
                 f.write("\n")
-            os.replace(tmp, target)
+            retry_io(os.replace, tmp, target)
         if changes.get("test_log", [None, None])[1] is True:
             say("تم تفعيل «وضع الاختبار»: محادثات الزوار تنحفظ وتدخل في ملف البلاغات.")
         return changes
@@ -1024,7 +1041,7 @@ def apply_channel(app, upd, notes):
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(merged, f, ensure_ascii=False, indent=1)
             f.write("\n")
-        os.replace(tmp, target)
+        retry_io(os.replace, tmp, target)
         return True
     except (OSError, ValueError) as e:
         notes.append(f"channel settings were not changed: {e}")
@@ -1078,11 +1095,11 @@ def apply(app, upd, dry_run=False, port=PORT, say=print):
             for tail in ("-wal", "-shm", "-journal"):
                 if os.path.exists(db + tail):
                     done["db_touched"] = True
-                    os.remove(db + tail)
-            os.replace(work, db)
+                    retry_io(os.remove, db + tail)
+            retry_io(os.replace, work, db)
             done["db_touched"] = True
             done["step"] = "saving the catalog base"
-            os.replace(base_new, os.path.join(app, "data", "catalog_base.db"))
+            retry_io(os.replace, base_new, os.path.join(app, "data", "catalog_base.db"))
             done["step"] = "installed"
             if read_text(os.path.join(app, "backend", "requirements.txt")) != old_req:
                 say("تحديث مكتبات بايثون (يحتاج إنترنت)…")

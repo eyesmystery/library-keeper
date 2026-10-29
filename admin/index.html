@@ -3506,7 +3506,7 @@
       const res = await fetch('/api/admin/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ daily_model_calls: Number($('capInput').value) }) });
       $('capState').textContent = res.ok ? 'تم الحفظ' : 'قيمة غير صحيحة'; loadUsage(); loadAudit();
     });
-    const AUDIT_LABELS = { 'update.approved': 'موافقة على تحديث «منار»', 'update.installed': 'تثبيت تحديث «منار»', 'update.failed': 'فشل تحديث «منار» ورجوع للنسخة السابقة', 'dev_note.done': 'تمّت ملاحظة من المطور', 'dev_note.open': 'إعادة فتح ملاحظة من المطور', 'staff_idea.add': 'اقتراح موظف على التطبيق', 'staff_idea.done': 'معالجة اقتراح موظف', 'staff_idea.open': 'إعادة فتح اقتراح موظف', 'inbox.export': 'تنزيل ملف البلاغات', 'review.approved': 'اعتماد مراجعة قارئ', 'review.rejected': 'رفض مراجعة قارئ', 'review.pending': 'إرجاع مراجعة قارئ للمراجعة', 'candidate.added': 'كتاب مرشّح: تم توفيره', 'candidate.declined': 'كتاب مرشّح: لن نوفره', 'candidate.open': 'إعادة فتح كتاب مرشّح', 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف', 'user.developer_granted': 'منح دور المطوّر (من الجهاز)', 'user.developer_revoked': 'سحب دور المطوّر (من الجهاز)',
+    const AUDIT_LABELS = { 'update.approved': 'موافقة على تحديث «منار»', 'update.installed': 'تثبيت تحديث «منار»', 'update.failed': 'فشل تحديث «منار» ورجوع للنسخة السابقة', 'dev_note.done': 'تمّت ملاحظة من المطور', 'dev_note.open': 'إعادة فتح ملاحظة من المطور', 'staff_idea.add': 'اقتراح موظف على التطبيق', 'staff_idea.done': 'معالجة اقتراح موظف', 'staff_idea.open': 'إعادة فتح اقتراح موظف', 'inbox.export': 'تنزيل ملف البلاغات', 'review.approved': 'اعتماد مراجعة قارئ', 'review.rejected': 'رفض مراجعة قارئ', 'review.pending': 'إرجاع مراجعة قارئ للمراجعة', 'review.approved_all': 'اعتماد كل المراجعات المنتظرة', 'candidate.added': 'كتاب مرشّح: تم توفيره', 'candidate.declined': 'كتاب مرشّح: لن نوفره', 'candidate.open': 'إعادة فتح كتاب مرشّح', 'sections.set': 'تعديل أقسام المكتبة', 'cover.upload': 'رفع غلاف', 'cover.fetch': 'جلب غلاف', 'cover.delete': 'حذف غلاف', 'login': 'دخول', 'user.setup': 'إنشاء حساب المدير', 'user.created': 'إضافة موظف', 'user.updated': 'تعديل موظف', 'user.developer_granted': 'منح دور المطوّر (من الجهاز)', 'user.developer_revoked': 'سحب دور المطوّر (من الجهاز)',
       'user.password_changed': 'تغيير كلمة المرور', 'book.update': 'تعديل كتاب', 'card.confirm': 'تأكيد صفة', 'card.reject': 'حذف صفة',
       'card.restore': 'استرجاع صفة', 'card.set': 'تعيين صفة', 'card.add': 'إضافة صفة', 'model.set': 'تغيير النموذج',
       'key.saved': 'حفظ مفتاح', 'key.deleted': 'حذف مفتاح', 'endpoint.set': 'تغيير عنوان مزوّد', 'import.apply': 'استيراد من رواء',
@@ -3675,7 +3675,12 @@
         loadInboxCount();
         const rest = Math.max(0, inbox.total - inbox.items.length);
         $('inboxState').textContent = msg || (inbox.items.length ? `عدد المراجعات: ${num(inbox.total)}${rest ? ` · المعروض ${num(inbox.items.length)}` : ''}` : '');
-        $('inboxList').innerHTML = inbox.items.length ? `<p class="state" style="margin:0 0 8px">آراء الزوار في كتب المكتبة. ما تظهر للزوار ولا تدخل في ردود منار إلا بعد «اعتماد». «اعتماد بدون النص» يحسب النجوم والسمات ويخفي الكلام. أرقام الجوال والروابط والحسابات تنشال من الكلام تلقائيًا.</p>`
+        // «اعتماد الكل» (Ibrahim 2026-10-27: «احيانا يكون في اراء كثيرة»): every waiting review with no warning, after a second tap
+        const flaggedLeft = Math.max(0, (d.counts.pending || 0) - (d.approvable || 0));
+        const allBar = inbox.status === 'open' && d.approvable ? `<div class="nr-actions" style="margin:0 0 10px;align-items:center;flex-wrap:wrap">
+            <button type="button" class="btn" id="reviewsAll">اعتماد الكل (${num(d.approvable)})</button>
+            <span class="nr-meta">${flaggedLeft ? `${num(flaggedLeft)} ${flaggedLeft === 1 ? 'مراجعة فيها تنبيه تبقى' : 'مراجعات فيها تنبيه تبقى'} للمراجعة وحدها.` : 'كل المراجعات المنتظرة بدون تنبيه.'}</span></div>` : '';
+        $('inboxList').innerHTML = inbox.items.length ? `<p class="state" style="margin:0 0 8px">آراء الزوار في كتب المكتبة. ما تظهر للزوار ولا تدخل في ردود منار إلا بعد «اعتماد». «اعتماد بدون النص» يحسب النجوم والسمات ويخفي الكلام. أرقام الجوال والروابط والحسابات تنشال من الكلام تلقائيًا.</p>` + allBar
           + inbox.items.map(r => {
             const shown = r.clean_text && r.clean_text !== r.text;
             const flags = (r.ai_flags || []).map(f => REVIEW_FLAGS[f] || f);
@@ -3692,6 +3697,15 @@
           }).join('') + (rest ? `<div class="nr-actions" style="justify-content:center"><button type="button" class="btn secondary" id="reviewsMore">عرض الأقدم (باقي ${num(rest)})</button></div>` : '')
           : `<div class="empty-note">${inbox.status === 'open' ? 'ما فيه مراجعات تنتظر الموافقة.' : 'ما فيه مراجعات.'}</div>`;
         if ($('reviewsMore')) $('reviewsMore').addEventListener('click', () => { $('reviewsMore').disabled = true; loadInbox(null, true); });
+        if ($('reviewsAll')) $('reviewsAll').addEventListener('click', async () => {
+          const b = $('reviewsAll');
+          if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = `تأكيد: اعتماد ${num(d.approvable)} ${d.approvable === 1 ? 'مراجعة' : 'مراجعات'} بنصّها`; return; }
+          b.disabled = true;
+          const r = await fetch('/api/admin/inbox/reviews/approve-all', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+          if (!r.ok) { b.disabled = false; $('inboxState').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; return; }
+          const o = await r.json();
+          loadInbox(`اعتُمدت ${num(o.approved)} ${o.approved === 1 ? 'مراجعة' : 'مراجعات'}${o.left_flagged ? `، وبقيت ${num(o.left_flagged)} فيها تنبيه للمراجعة وحدها` : ''}.`);
+        });
         $('inboxList').querySelectorAll('[data-rv]').forEach(b => b.addEventListener('click', async () => {
           b.disabled = true;
           const r = await fetch(`/api/admin/inbox/reviews/${b.dataset.rv}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: b.dataset.to, hide_text: b.dataset.hide === '1' }) });
