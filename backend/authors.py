@@ -11,6 +11,7 @@ merges exact normalized spellings, links books, and recomputes catalog styles. I
 `books` and never removes a researched or staff link; probable duplicate spellings are only
 reported (`probable_duplicates()`), to be resolved in an author research batch.
 """
+import functools
 import json
 import re
 import unicodedata
@@ -218,17 +219,25 @@ def _variant_ops(a, b):
     return prev[-1]
 
 
+@functools.lru_cache(maxsize=200000)
 def _same_word(x, y):
-    """Is y the same name word as x, only spelled differently?"""
+    """Is y the same name word as x, only spelled differently? (Cached, and a length gap too big for the allowed
+    edits is refused before the edit distance: the «المؤلفون» list took ~6 s on a Mac and longer at the library.)"""
     if x == y:
         return True
     if frozenset((x, y)) in _DISTINCT_NAMES:
         return False
     if min(len(x), len(y)) == 1:  # an initial: «ر.» for «رودريغيز»
         return x[0] == y[0]
+    gap = abs(len(x) - len(y))   # every edit costs at least 1: a bigger gap than allowed can never match
+    if gap > 3 or (min(len(x), len(y)) < 5 and gap > 1):
+        return False
     if min(len(x), len(y)) < 5:  # short words: only a single vowel or transliteration letter
         return _variant_ops(x, y) <= 1
     return _variant_ops(x, y) <= 3
+
+
+_DUP_CACHE = {}   # names signature -> pairs (the names change rarely; the list is opened often)
 
 
 def probable_duplicates(conn=None):
@@ -241,6 +250,16 @@ def probable_duplicates(conn=None):
     finally:
         if own:
             conn.close()
+    sig = hash(tuple((r["author_id"], r["name_ar"]) for r in rows))
+    if sig in _DUP_CACHE:
+        return list(_DUP_CACHE[sig])
+    pairs = _probable_duplicates(rows)
+    _DUP_CACHE.clear()
+    _DUP_CACHE[sig] = pairs
+    return list(pairs)
+
+
+def _probable_duplicates(rows):
     def cls(ch):  # letters that a transliteration may swap share one bucket
         return next((min(g) for g in _TRANSLIT if ch in g), ch)
     groups = {}

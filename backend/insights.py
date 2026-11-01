@@ -11,6 +11,7 @@ import os
 from datetime import datetime, timedelta, timezone
 
 from models import get_connection
+import start_taps
 
 RATINGS = ("perfect", "close", "no")
 MATCHES = ("direct", "filler", "shown")
@@ -125,6 +126,8 @@ def summary(days=30):
         pw, pa = _day_filter(prev_start, prev_end)
         ptot = conn.execute(f"SELECT COALESCE(SUM(chosen),0) chosen FROM book_daily WHERE {pw}", pa).fetchone()
         out["previous"] = {"chosen": ptot["chosen"], "satisfaction": _satisfaction(_ratings(conn, prev_start, prev_end))}
+    # «من أين يبدأ الزوار» (STARTTAP, Ibrahim 2026-11-01): taps on the three start choices in the same period
+    out["start_taps"] = start_taps.summary(start, end)
 
     # per-day series (choices and ratings)
     first = start or (conn.execute("SELECT MIN(day) d FROM book_daily").fetchone()["d"] or end)

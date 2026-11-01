@@ -1432,6 +1432,9 @@
         selectTab('settings'); selectSettingsTab('updates');
         const t = sub === 'send' ? 'sendTitle' : 'updTitle';
         setTimeout(() => { $(t).scrollIntoView({ behavior: 'smooth', block: 'start' }); $(t).focus({ preventScroll: true }); }, 300);
+      } else if (view === 'organize') {
+        // PICKALERT (2026-11-01): this month's «اختياراتنا» waiting for approval
+        selectTab('organize'); selectSub('organize', sub === 'events' ? 'events' : 'picks');
       } else if (view === 'alerts') {
         selectSub('alerts', 'dev'); $('alertsSub').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
@@ -1456,7 +1459,7 @@
       } catch (e) { $('alertsState').textContent = 'تعذر تحميل التنبيهات.'; }
       if (SUBS.alerts.cur === 'dev') loadDevNotes(devMsg);
     }
-    // «إرسال البلاغات للمطوّر» (INBOXSEND): on/off, the upload token and «أرسل الآن» are the manager's.
+    // «إرسال البلاغات للمطوّر» (INBOXSEND): on/off and the upload token are the manager's; «أرسل الآن» everyone's (2026-10-29).
     let sendPoll = null;
     async function loadSend(msg) {
       let s;
@@ -1483,7 +1486,12 @@
         if (s.has_token) acts.push(s.enabled ? '<button class="btn secondary" type="button" data-send="off">إيقاف الإرسال</button>'
                                              : '<button class="btn" type="button" data-send="on">تشغيل الإرسال</button>');
         if (!s.not_ready && !s.sending) acts.push('<button class="btn secondary" type="button" data-send="now">أرسل الآن</button>');
-      } else lines.push('تشغيل الإرسال وإيقافه لمدير المكتبة.');
+      } else {
+        lines.push('تشغيل الإرسال وإيقافه لمدير المكتبة.');
+        // «أرسل الآن» for every staff member (Ibrahim 2026-10-29 «افتح للموظفين ارسال البلاغات للمطور»)
+        if (!s.not_ready && !s.sending) acts.push('<button class="btn" type="button" data-send="now">أرسل البلاغات للمطوّر الآن</button>');
+        else if (s.not_ready && s.has_key) lines.push('الإرسال يحتاج يشغّله المدير أول مرة.');
+      }
       $('sendText').textContent = lines.join('\n');
       $('sendActs').innerHTML = acts.join('');
       $('sendActs').querySelectorAll('[data-send]').forEach(b => b.addEventListener('click', async () => {
@@ -1887,7 +1895,9 @@
       ['المخزون', [['instock', 'متوفر', inStock], ['out', 'نافد', b => b.active && !(b.quantity > 0)], ['off', 'موقوف', b => !b.active]]],
       ['البيانات', [['nocover', 'بدون غلاف', b => !b.cover_url], ['nosummary', 'بدون نبذة', b => !b.has_summary],
                    ['confirmed', 'صفات مؤكدة', b => b.counts.confirmed > 0], ['conflict', 'صفات اختلف فيها القرّاء', b => b.counts.conflict > 0],
-                   ['noreviews', 'بدون مراجعات', b => !b.has_reviews]]],
+                   ['noreviews', 'بدون مراجعات', b => !b.has_reviews],
+                   // GRURL (Ibrahim 2026-10-30): the books with no Goodreads page of their own in our records
+                   ['nogoodreads', 'بلا رابط Goodreads', b => !b.goodreads_url]]],
       // BKREV (Ibrahim 2026-10-29): «نأكد انها تم مراجعتها عشان نصفي اللي تحتاج مراجعة» + «قائمة مستقلة يعيد البحث عنها»
       ['المراجعة', [['toreview', 'تحتاج مراجعة', b => !b.reviewed_at && needsReview(b)], ['reviewed', 'تمت مراجعته', b => !!b.reviewed_at],
                     ['requeue', 'بانتظار إعادة البحث', b => !!b.requeue]]],
@@ -2271,7 +2281,8 @@
       } catch (err) { if (!quiet) $('authorCount').textContent = 'تعذر تحميل الأسماء.'; }
     }
     function renderAuthors() {
-      if (!authorsList) return;
+      // still loading: say so, not an empty page (Ibrahim 2026-10-29 «ليه المؤلفون فاضية في الصفحة»)
+      if (!authorsList) { if (onPeople()) $('authorCount').textContent = 'جاري تحميل الأسماء…'; return; }
       const P = ppl(), tr = lib.pane === 'translators';
       const all = authorsList.filter(P.keep);
       const chipGroups = AUTHOR_CHIPS.map(([g, list]) => [g, list.filter(([k]) => !(tr && k === 'translator')).map(([k, label, fn]) => [k, tr && k === 'author' ? 'مؤلف أيضًا' : !tr && k === 'translator' ? 'مترجم أيضًا' : label, fn])]);
@@ -2749,7 +2760,7 @@
               <p class="diff" style="margin:0 0 10px">صحّح من الكتاب نفسه (الغلاف والصفحة الأولى). كل تعديل يُسجَّل باسمك مع القيمة القديمة والجديدة، ويظهر في ملف «تنزيل الكل» اللي يُرسل لإبراهيم.</p>
               <div class="inv basic-grid">
                 <div class="bfull"><label for="bTitle">العنوان</label><input id="bTitle" type="text" maxlength="300" dir="auto" value="${esc(b.title || '')}" /></div>
-                <div class="bfull"><label for="bAuthor">المؤلف</label><input id="bAuthor" type="text" maxlength="200" dir="auto" value="${esc(b.author || '')}" /></div>
+                <div class="bfull"><label for="bAuthor">المؤلف</label><input id="bAuthor" type="text" maxlength="200" dir="auto" placeholder="أكثر من مؤلف؟ افصل بين الأسماء بـ «،»" value="${esc(b.author || '')}" aria-describedby="bAuthorHint" /><span id="bAuthorHint" class="diff">أكثر من مؤلف: افصل بـ «،» (مثل: أحمد علي، سارة محمد). الرسّام أو المحرّر بين قوسين بعد اسمه: (رسوم)، (تحرير)</span></div>
                 <div><label for="bPublisher">الناشر</label><input id="bPublisher" type="text" maxlength="150" dir="auto" value="${esc(b.publisher || '')}" /></div>
                 <div><label for="bGenre">التصنيف</label><select id="bGenre"><option value="">غير مصنف</option>${GENRE_LIST.map(g => `<option value="${esc(g)}" ${g === b.genre ? 'selected' : ''}>${esc(g)}</option>`).join('')}</select></div>
                 <div><label for="bYear">سنة طبعتنا</label><input id="bYear" type="number" min="1000" max="2100" step="1" inputmode="numeric" value="${b.publication_year || ''}" /></div>
@@ -2776,10 +2787,22 @@
             <div class="inv">
               <div><label for="fLang">لغة هذه الطبعة</label><select id="fLang">${langOptions(b.language || 'ar', false)}</select></div>
               <div><label for="fOrig">لغة الأصل</label><select id="fOrig">${langOptions(b.original_language || '', true)}</select></div>
-              <div><label for="fTrans">المترجم</label><input id="fTrans" type="text" maxlength="120" value="${esc(b.translator || '')}" /></div>
+              <div><label for="fTrans">المترجم</label><input id="fTrans" type="text" maxlength="250" placeholder="أكثر من مترجم؟ افصل بـ «،»" value="${esc(b.translator || '')}" aria-describedby="fTransHint" /><span id="fTransHint" class="diff">أكثر من مترجم: افصل بين الأسماء بـ «،»</span></div>
               <button id="saveLang" class="btn" type="button">حفظ</button>
             </div>
             <p id="langState" class="state" role="status"></p>
+            <!-- GRURL (Ibrahim 2026-10-30 «كيف اقدر اضيف الرابط للكتاب؟»): the book's own Goodreads page -->
+            <div class="dev-only dev-box">
+            <h4 class="sub-h">رابط Goodreads <small class="diff">(للمطوّر)</small></h4>
+            <div class="inv">
+              <div class="wide"><label for="fGr">صفحة الكتاب في Goodreads</label><input id="fGr" type="url" dir="ltr" placeholder="https://www.goodreads.com/book/show/…" value="${esc(b.goodreads_url || '')}" aria-describedby="fGrHint" />
+                <span id="fGrHint" class="diff">${b.goodreads_url ? `<a href="${esc(b.goodreads_url)}" target="_blank" rel="noopener noreferrer">افتح الصفحة ↗</a>${b.goodreads_url_source ? ' · المصدر: ' + esc(String(b.goodreads_url_source).split(' (')[0]) : ''}` : 'ما عندنا رابط لهذا الكتاب.'}
+                  · <a href="https://www.goodreads.com/search?q=${encodeURIComponent(String(b.isbn || '').trim() || [b.title, b.author].filter(x => x && !/^(غير معروف|مجهول)$/.test(x)).join(' '))}" target="_blank" rel="noopener noreferrer">ابحث عنه في Goodreads${b.isbn ? ' بالـISBN' : ' بالعنوان والمؤلف'} ↗</a>
+                  · الصق رابط صفحة الكتاب ثم «حفظ»</span></div>
+              <button id="saveGr" class="btn" type="button">حفظ</button>
+            </div>
+            <p id="grState" class="state" role="status"></p>
+            </div>
           </section>
           ${confirmBlock(d)}
           <section class="block"><h3>الغلاف</h3>
@@ -2843,6 +2866,7 @@
       if ($('cfUndo')) $('cfUndo').addEventListener('click', () => sendConfirmation(b.book_id, true));
       $('notBookBtn').addEventListener('click', () => askNotBook(b));
       $('saveLang').addEventListener('click', () => saveLanguage(b.book_id));
+      $('saveGr').addEventListener('click', () => saveGoodreads(b.book_id));
       $('basicEdit').addEventListener('click', () => toggleBasic(true));
       $('basicCancel').addEventListener('click', () => toggleBasic(false));
       $('basicSave').addEventListener('click', () => saveBasic(b));
@@ -2904,7 +2928,7 @@
         ['ويكيبيديا', 'https://ar.wikipedia.org/w/index.php?search=' + q(t)],
         ['صور الغلاف', 'https://www.google.com/search?tbm=isch&q=' + q('غلاف كتاب ' + both)],
       ];
-      return `<section class="block dev-only dev-box"><h3>بحث يدوي عن بيانات الكتاب <span class="dev-tag">مطوّر</span></h3>
+      return `<section class="block" id="webSearchBlock"><h3>بحث يدوي عن بيانات الكتاب</h3>
         <p class="diff" style="margin:0 0 8px">يفتح كل رابط بحثًا في صفحة جديدة. لقيت صفحة طبعتنا؟ الصق رابطها واضغط «اجلب من الرابط» تطلع لك بياناتها وتختار منها، أو عدّل بيدك وحفظ: ينحفظ الرابط مصدرًا للنبذة والعمر، ويُسجَّل مع التعديل.</p>
         <div class="ev-links" style="display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 0 10px">${links.map(([l, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(l)} ↗</a>`).join('')}</div>
         <div class="inv"><div class="bfull" style="flex:1 1 320px"><label for="devSrc">رابط المصدر (اختياري)</label><input id="devSrc" type="url" maxlength="500" dir="ltr" placeholder="https://…" /></div>
@@ -3007,7 +3031,7 @@
     }
     function devSource() {
       const el = $('devSrc');
-      const v = el && document.body.classList.contains('is-dev') ? el.value.trim() : '';
+      const v = el ? el.value.trim() : '';   // every staff member since 2026-10-29
       return /^https?:\/\//i.test(v) ? { source_url: v } : {};
     }
 
@@ -3128,6 +3152,22 @@
         $('sheet').scrollTop = top; $('ageState').textContent = 'تم الحفظ';
       } catch (e) { st.textContent = 'تعذر الحفظ'; }
       finally { if ($('saveAge')) $('saveAge').disabled = false; }
+    }
+    async function saveGoodreads(id) {
+      if (!isDev()) return;   // GRURL: the developer's alone (the server refuses it too)
+      const st = $('grState'); st.className = 'state';
+      const v = $('fGr').value.trim();
+      if (v && !/goodreads\.com\/(?:[a-z]{2}\/)?book\/show\/\d+/i.test(v)) { st.textContent = 'الرابط لازم يكون صفحة كتاب في Goodreads (…/book/show/رقم)'; st.classList.add('error'); return; }
+      st.textContent = 'جاري الحفظ…'; $('saveGr').disabled = true;
+      try {
+        const res = await fetch(`/api/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ goodreads_url: v }) });
+        if (!res.ok) throw new Error();
+        const top = $('sheet').scrollTop;
+        renderCard(await (await fetch(`/api/admin/books/${id}`)).json(), true);
+        $('sheet').scrollTop = top; $('grState').textContent = 'تم الحفظ';
+        loadCatalog();
+      } catch (e) { st.textContent = 'تعذر الحفظ'; st.classList.add('error'); }
+      finally { if ($('saveGr')) $('saveGr').disabled = false; }
     }
     async function saveLanguage(id) {
       const st = $('langState');
@@ -4040,7 +4080,7 @@
     }
     function renderInsights(d) {
       const t = d.totals, s = d.satisfaction, prev = d.previous;
-      if (!t.shown && !t.chosen && !s.total) {
+      if (!t.shown && !t.chosen && !s.total && !(d.start_taps && d.start_taps.total)) {
         $('stBody').innerHTML = '<div class="empty-note">ما فيه بيانات لهذي الفترة بعد. تبدأ الأرقام تظهر لما الزوار يستخدمون المحادثة ويختارون كتبًا.</div>';
         return;
       }
@@ -4088,7 +4128,20 @@
         ${d.low_rated.length ? `<ul class="list-plain">${d.low_rated.map(b => `<li><span>${esc(b.title)}</span><span>${pills(b)}</span></li>`).join('')}</ul>` : '<p class="diff">لا يوجد.</p>'}</div>`;
       const cold = `<div class="panel-card"><h3>يُقترح كثيرًا ولا يُختار</h3><span class="diff">كتب اقتُرحت ٥ مرات أو أكثر ولم يخترها أحد.</span>
         ${d.shown_not_chosen.length ? `<ul class="list-plain">${d.shown_not_chosen.map(b => `<li><span>${esc(b.title)}</span><span class="num">اقتُرح ${num(b.shown)}</span></li>`).join('')}</ul>` : '<p class="diff">لا يوجد.</p>'}</div>`;
-      $('stBody').innerHTML = kpis + `<div class="panels">${days}${sat}${genres}${top}${low}${cold}</div>`;
+      // «من أين يبدأ الزوار» (STARTTAP, Ibrahim 2026-11-01): taps on the three start choices in this period
+      const tp = d.start_taps || { total: 0, counts: {}, pct: {} };
+      const ST_CHOICES = [['chat', '«خلّنا نلقى كتابك» (المحادثة)'], ['reading', '«قرأت كتابًا؟ شاركنا رأيك»'], ['shelf', '«اقترح كتابًا لرفوفنا»']];
+      const tapBars = x => `<div class="hbars">${ST_CHOICES.map(([k, label]) => `<div class="hbar"><span>${label}</span><span class="track"><span class="fill" style="display:block;width:${x.total ? 100 * (x.counts[k] || 0) / x.total : 0}%"></span></span><span class="n">${num(x.counts[k] || 0)} <span class="diff">(${pct(x.pct[k])})</span></span></div>`).join('')}</div>`;
+      const smallerDay = shortDay(tp.links_smaller_day || '2026-10-30', true);
+      const starts = `<div class="panel-card"><h3>من أين يبدأ الزوار</h3><span class="diff">كم مرة ضغط الزوار كل خيار في صفحة البداية${tp.total ? ` · المجموع ${num(tp.total)} ضغطة` : ''}. أرقام فقط، بدون أي بيانات عن الزائر، وما تُحسب ضغطات وضع الاختبار ولا ضغطات من متصفح داخل لوحة الإدارة.</span>
+        ${tp.total ? tapBars(tp) : '<p class="diff">ما فيه ضغطات مسجّلة في هذي الفترة.</p>'}
+        ${tp.compare ? `<h3 style="margin-top:16px;font-size:17px">قبل تصغير الرابطين وبعده (${smallerDay})</h3>
+          <span class="diff">قبل: حتى اليوم السابق له (${num(tp.compare.before.total)} ضغطة)</span>${tapBars(tp.compare.before)}
+          <span class="diff" style="display:block;margin-top:10px">بعد: من اليوم التالي له (${num(tp.compare.after.total)} ضغطة)</span>${tapBars(tp.compare.after)}`
+          : `<p class="diff" style="margin-top:12px">${!tp.started ? 'العدّ يبدأ مع أول ضغطة من زائر.'
+            : tp.started >= (tp.links_smaller_day || '2026-10-30') ? `العدّ بدأ في ${shortDay(tp.started, true)}، بعد تصغير الرابطين (${smallerDay})، فما فيه أرقام قبل التغيير نقارن بها.`
+            : `العدّ بدأ في ${shortDay(tp.started, true)}. اختر فترة أطول لترى الأرقام قبل تصغير الرابطين (${smallerDay}) وبعده.`}</p>`}</div>`;
+      $('stBody').innerHTML = kpis + `<div class="panels">${days}${starts}${sat}${genres}${top}${low}${cold}</div>`;
       $('stBody').querySelectorAll('.days .d').forEach(el => {
         const show = () => { let tip = $('stTip'); if (!tip) { tip = document.createElement('div'); tip.id = 'stTip'; tip.className = 'tip'; document.body.appendChild(tip); }
           tip.textContent = el.dataset.tip; const r = el.getBoundingClientRect(); tip.hidden = false;

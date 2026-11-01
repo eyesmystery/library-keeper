@@ -148,6 +148,72 @@ def set_settings(enabled=None, token=None, clear_token=False):
     return status("manager")
 
 
+# ------------------------------------------------------------------ covers the staff changed (INBOXCOVERS)
+COVER_ACTIONS = ("cover.upload", "cover.fetch", "cover.choose", "cover.delete")
+MAX_COVER_BYTES = 25 * 1024 * 1024
+_built = {"covers_sent": None}     # what the last build_file put in, saved as sent only after the upload succeeds
+
+
+def staff_covers(sent=None, max_bytes=MAX_COVER_BYTES):
+    """INBOXCOVERS (Ibrahim 2026-10-30 «خل البلاغ يحمل الاغلفة من التحديث القادم»): the covers the library's staff
+    uploaded, fetched, chose or removed — each book's cover as it is now — so Ibrahim's catalog gets the same pictures.
+    A cover already sent (same sha256, or «removed» already sent) is not sent again. -> (items, left_for_next_time).
+    items: {"book_id", "ext", "sha256", "source", "by", "at", "data" (base64)} or {"book_id", "removed": True, "by", "at"}."""
+    import hashlib
+    import covers
+    import models
+    sent = sent or {}
+    conn = models.get_connection()
+    try:
+        last = {}
+        try:
+            q = ("SELECT target, action, username, at FROM audit_log WHERE action IN ("
+                 + ", ".join("?" for _ in COVER_ACTIONS) + ") ORDER BY log_id")
+            for r in conn.execute(q, COVER_ACTIONS):
+                if str(r[0] or "").isdigit():
+                    last[int(r[0])] = (r[1], r[2], r[3])
+        except Exception:  # noqa: BLE001 - no audit table: nothing to send
+            return [], 0
+        out, total, left = [], 0, 0
+        for bid, (act, by, at) in sorted(last.items()):
+            row = conn.execute("SELECT cover_url, cover_source FROM books WHERE book_id = ?", (bid,)).fetchone()
+            if row is None:
+                continue
+            url = row[0] or ""
+            name = url.split("?")[0].rsplit("/", 1)[-1] if url.startswith("/covers/") else ""
+            path = covers.cover_path(name) if name else None
+            if not path:
+                if not url and sent.get(str(bid)) != "removed":
+                    out.append({"book_id": bid, "removed": True, "by": by, "at": at})
+                continue
+            with open(path, "rb") as f:
+                data = f.read()
+            sha = hashlib.sha256(data).hexdigest()
+            if sent.get(str(bid)) == sha:
+                continue
+            if total + len(data) > max_bytes:
+                left += 1
+                continue
+            total += len(data)
+            out.append({"book_id": bid, "ext": name.rsplit(".", 1)[-1], "sha256": sha, "source": row[1], "by": by,
+                        "at": at, "data": base64.b64encode(data).decode("ascii")})
+        return out, left
+    finally:
+        conn.close()
+
+
+def _covers_markdown(items, left):
+    lines = ["", "", f"## 14. أغلفة غيّرها الموظفون ({len(items)})", ""]
+    if not items:
+        lines.append("لا يوجد.")
+    for c in items:
+        what = "حُذف الغلاف" if c.get("removed") else f"صورة {c.get('ext')} ({len(c.get('data') or '') * 3 // 4 // 1024} ك.ب)"
+        lines.append(f"- book_id {c['book_id']} · {what} · {c.get('by') or '—'} · {c.get('at') or ''}")
+    if left:
+        lines.append(f"- و{left} غلافًا آخر يُرسل في الملف القادم (حجم الملف)")
+    return "\n".join(lines) + "\n"
+
+
 # ------------------------------------------------------------------ the file and the upload
 def build_file(scope="open", reason="weekly", by=None, request_id=None):
     """-> (file name, sealed bytes, counts)."""
@@ -157,12 +223,19 @@ def build_file(scope="open", reason="weekly", by=None, request_id=None):
         raise SendError("مفتاح المطوّر غير موجود في هذا الإصدار")
     body, counts = inbox_export.build(scope, by or "إرسال تلقائي إلى المطوّر")
     try:
+        cover_items, cover_left = staff_covers(state().get("covers_sent") or {})
+    except Exception:  # noqa: BLE001 - the covers never stop the report itself
+        cover_items, cover_left = [], 0
+    counts = dict(counts, covers=len(cover_items))
+    body += _covers_markdown(cover_items, cover_left)
+    _built["covers_sent"] = {str(c["book_id"]): ("removed" if c.get("removed") else c["sha256"]) for c in cover_items}
+    try:
         with open(os.path.join(ROOT, "VERSION"), encoding="utf-8") as f:
             version = f.read().strip()
     except OSError:
         version = None
     doc = {"format": FORMAT, "created": _now(), "reason": reason, "scope": scope, "request_id": request_id,
-           "by": by, "version": version, "counts": counts, "markdown": body}
+           "by": by, "version": version, "counts": counts, "markdown": body, "covers": cover_items}
     blob = sealed.seal(key, json.dumps(doc, ensure_ascii=False).encode("utf-8"))
     if len(blob) > MAX_FILE:
         raise SendError("ملف البلاغات أكبر من المسموح")
@@ -226,8 +299,10 @@ def send(reason="manual", scope="open", by=None, request_id=None, put=None, audi
             done.append(request_id)
         if pend and request_id and pend.get("id") == request_id and not short:
             pend = None
+        covers_sent = dict(s.get("covers_sent") or {})
+        covers_sent.update(_built.get("covers_sent") or {})
         _save_state(sending=False, last_sent=_now(), last_file=name, last_counts=counts, last_error=None,
-                    requests_done=done, pending_request=pend, last_reason=reason)
+                    requests_done=done, pending_request=pend, last_reason=reason, covers_sent=covers_sent)
         audit = audit or _audit["fn"]
         if audit:
             try:

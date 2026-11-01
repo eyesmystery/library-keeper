@@ -41,8 +41,10 @@ _uploads = {}
 PLACES = {
     "A": "تاريخ", "B": "سير ورحلات", "C": "شعر وأدب", "D": "فلسفة", "E": "فكر", "F": "فكر ودراسات",
     "G": "فكر وسياسة", "H": "روايات إنجليزية", "I": "روايات إنجليزية", "J": "كتب إنجليزية",
-    "K": "روايات", "L": "روايات", "M": "روايات", "N": "روايات", "O": "روايات", "P": "روايات",
-    "Q": "روايات", "R": "روايات", "S": "قصص مصورة وروايات", "Kids": "أطفال ويافعين",
+    # K … M Arabic novels, N … R translated novels (Ibrahim 2026-10-29 «بالنسبة للرفوف من N الى R تعتبر روايات مترجمة»،
+    # «والروايات العربية من K الى M»)
+    "K": "روايات عربية", "L": "روايات عربية", "M": "روايات عربية", "N": "روايات مترجمة", "O": "روايات مترجمة",
+    "P": "روايات مترجمة", "Q": "روايات مترجمة", "R": "روايات مترجمة", "S": "قصص مصورة وروايات", "Kids": "أطفال ويافعين",
     "XC": "متنوعات", "XD": "تطوير الذات وعلم النفس", "XG": "علوم وعلم نفس", "XH": "كتب إنجليزية",
 }
 GENRES = ("رواية", "قصص قصيرة", "أطفال", "يافعين", "تطوير ذاتي", "علم نفس", "تاريخ", "سيرة ذاتية", "دين",
@@ -121,12 +123,27 @@ def normalize_location(text):
     («رف ٣ – الطابق الأرضي»), is kept as typed (spaces trimmed)."""
     s = re.sub(r"\s+", " ", str(text or "")).strip()
     if not s or "·" in s:
-        return s
+        return _replace_place(s) if s else s
     parts = [p for p in re.split(r"[\s/،,+]+", _SHELF_WORD.sub(" ", s)) if p]
     codes = [shelf_code(p) for p in parts]
     if not parts or not all(codes):
         return s
     return location_text(codes) or s
+
+
+_GENERATED = re.compile(r"^(?P<place>[^·]+?) · الرف (?P<codes>[A-Za-z0-9 /]+)$")
+
+
+def _replace_place(text):
+    """A place written the generated way («روايات · الرف R02») whose place name is no longer the one PLACES gives for that
+    shelf (the names changed 2026-10-29: K … M «روايات عربية», N … R «روايات مترجمة») gets the current name. Anything else is kept."""
+    m = _GENERATED.match(str(text or "").strip())
+    if not m or m.group("place").strip() not in set(PLACES.values()) | {"روايات"}:
+        return text
+    codes = [shelf_code(c) for c in m.group("codes").split("/") if c.strip()]
+    if not codes or not all(codes):
+        return text
+    return location_text(codes) or text
 
 
 def normalize_saved_locations(conn):
@@ -140,6 +157,8 @@ def normalize_saved_locations(conn):
     changed = []
     for book_id, loc in rows:
         new = normalize_location(loc)
+        if new == loc:
+            new = _replace_place(loc)
         if new and new != loc:
             changed.append([book_id, loc, new])
     if not changed:

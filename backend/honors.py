@@ -99,6 +99,14 @@ def adaptation_label(row):
     return text
 
 
+def _work_key(title):
+    """A work's title for matching an author record's note to our copy: lower case, no punctuation; a bare form label in brackets
+    («رحالة (رواية)») goes, a part or subtitle stays («أولاد الغيتو (1)» is not part 3)."""
+    t = re.sub(r"\s*[(\[]\s*(?:رواية|روايه|novel|book|كتاب|مسرحية|play)\s*[)\]]\s*$", "", str(title or ""), flags=re.I)
+    t = re.sub(r"[^\w\s]", " ", t.lower())
+    return " ".join(t.split())
+
+
 def load(max_age=60):
     """All rows, cached for a minute: {"book": {bid: [..]}, "author": {aid: [..]}, "adapt": {bid: [..]},
     "book_authors": {bid: [aid, ...]}}. Small tables; read whole."""
@@ -139,6 +147,20 @@ def load(max_age=60):
                 q = ",".join("?" * len(ids))
                 for r in conn.execute(f"SELECT book_id, title FROM books WHERE book_id IN ({q})", ids):
                     data["titles"][r["book_id"]] = r["title"] or ""
+            # QADFIX25 (QAD 2026-10-31, case 27.1): «The Underground Railroad» (5049) was offered as «its author won» while the author's
+            # Pulitzer 2017 and National Book Award 2016 records name that very work («The Underground Railroad — Colson Whitehead»):
+            # an author's record that names the work is that book's own prize too (same source; nothing written to the database)
+            for bid, aids in data["book_authors"].items():
+                tk = _work_key(data["titles"].get(bid))
+                if not tk:
+                    continue
+                own = {(r["award_key"], r.get("year"), r["result"]) for r in data["book"].get(bid, [])}
+                for aid in aids:
+                    for r in data["author"].get(aid, []):
+                        work = r.get("work_title") or re.split(r"\s+[—–-]\s+", str(r.get("note") or ""))[0]
+                        if work and _work_key(work) == tk and (r["award_key"], r.get("year"), r["result"]) not in own:
+                            own.add((r["award_key"], r.get("year"), r["result"]))
+                            data["book"].setdefault(bid, []).append(dict(r, book_id=bid, category=None, derived_from="author_awards"))
     finally:
         conn.close()
     _cache.update(at=time.time(), data=data)

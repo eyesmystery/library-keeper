@@ -802,6 +802,13 @@ def report_text(rep):
         lines += [f"- {c['kind']} {c.get('ref') or ''} «{c.get('text') or ''}»" for c in inbox["not_open"]]
     if inbox.get("error"):
         lines += ["", "## Inbox items were not closed", "", f"- {inbox['error']}"]
+    corr = rep.get("corrections") or {}
+    if corr.get("applied"):
+        lines += ["", f"## Developer corrections written over the library's value ({len(corr['applied'])})", ""]
+        lines += [f"- {c['book_id']} {c['field']}: {c.get('was')!r} → {c.get('value')!r} ({c.get('source') or ''})" for c in corr["applied"]]
+    if corr.get("skipped"):
+        lines += ["", f"## Developer corrections not written ({len(corr['skipped'])})", ""]
+        lines += [f"- {c['book_id']} {c['field']}: {c.get('why')}" for c in corr["skipped"]]
     for name, title, fmt in sections:
         if rep.get(name):
             lines += ["", f"## {title} ({len(rep[name])}{'+' if len(rep[name]) >= MAX_LISTED else ''})", ""]
@@ -985,6 +992,65 @@ def apply_resolutions(db, upd, version, dry_run=False):
     return result
 
 
+# corrections.json (copied by make_release.py from release/library_corrections.json; Ibrahim 2026-10-30 «عدل سنة اصل
+# الكتاب 4045»): a value the developer corrects although the library changed it. The three-way merge keeps the library's
+# own change, so such a fix never arrives by the merge; it is written here only while the library still holds the exact
+# value the developer saw («expect»). A later staff edit (another value) is never overwritten. Each one is in the report.
+CORRECTABLE = {"title", "author", "translator", "publisher", "genre", "page_count", "publication_year", "isbn",
+               "language", "original_language", "original_year", "original_year_source", "original_year_ref",
+               "original_year_checked_at", "summary", "summary_source", "shelf_location", "age_min", "age_max",
+               "goodreads_url", "goodreads_url_source"}
+
+
+def apply_corrections(db, upd, version, dry_run=False):
+    """-> {"applied": [...], "skipped": [...], "error"} for the report. Never raises: the update is installed already."""
+    path = os.path.join(upd, "corrections.json")
+    result = {"applied": [], "skipped": [], "error": None}
+    if not os.path.exists(path):
+        return result
+    try:
+        with open(path, encoding="utf-8") as f:
+            items = [i for i in (json.load(f).get("items") or []) if isinstance(i, dict)]
+        con = sqlite3.connect(f"file:{db}?mode=ro", uri=True) if dry_run else sqlite3.connect(db)
+        try:
+            now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+            by = "تحديث " + (version or "")
+            have_audit = "audit_log" in tables_of(con)
+            with con:
+                for item in items:
+                    bid, field = item.get("book_id"), item.get("field")
+                    label = {"book_id": bid, "field": field, "expect": item.get("expect"), "value": item.get("value"),
+                             "source": item.get("source"), "note": item.get("note")}
+                    if field not in CORRECTABLE or not isinstance(bid, int):
+                        result["skipped"].append(dict(label, why="field not correctable"))
+                        continue
+                    row = con.execute(f"SELECT {q(field)} FROM books WHERE book_id = ?", (bid,)).fetchone()
+                    if row is None:
+                        result["skipped"].append(dict(label, why="no such book here"))
+                        continue
+                    here = row[0]
+                    if str(here if here is not None else "") == str(item.get("value") if item.get("value") is not None else ""):
+                        result["skipped"].append(dict(label, why="already this value"))
+                        continue
+                    if str(here if here is not None else "") != str(item.get("expect") if item.get("expect") is not None else ""):
+                        result["skipped"].append(dict(label, why=f"the library holds another value ({here!r}): left as it is"))
+                        continue
+                    result["applied"].append(dict(label, was=here))
+                    if dry_run:
+                        continue
+                    con.execute(f"UPDATE books SET {q(field)} = ? WHERE book_id = ?", (item.get("value"), bid))
+                    if have_audit:
+                        con.execute("INSERT INTO audit_log (at, username, action, target, details) VALUES (?, ?, ?, ?, ?)",
+                                    (now, by, "book.corrected_by_update", str(bid),
+                                     json.dumps({field: [here, item.get("value")], "source": item.get("source"),
+                                                 "note": item.get("note"), "version": version}, ensure_ascii=False)))
+        finally:
+            con.close()
+    except (OSError, ValueError, sqlite3.Error, KeyError, AttributeError, TypeError) as e:
+        result["error"] = f"{type(e).__name__}: {e}"
+    return result
+
+
 SETTINGS_ALLOWED = {"test_log"}
 
 
@@ -1131,6 +1197,9 @@ def apply(app, upd, dry_run=False, port=PORT, say=print):
         rep["channel"] = apply_channel(app, upd, rep["notes"])
     # dry run: the matches are looked up in the live database without writing anything
     rep["inbox"] = apply_resolutions(db, upd, target, dry_run=dry_run)
+    rep["corrections"] = apply_corrections(db, upd, target, dry_run=dry_run)
+    if rep["corrections"]["error"]:
+        rep["notes"].append("developer corrections were not applied: " + rep["corrections"]["error"])
     if rep["inbox"]["error"]:
         rep["notes"].append("inbox items were not closed: " + rep["inbox"]["error"])
     elif rep["inbox"]["closed"]:

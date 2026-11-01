@@ -17,22 +17,19 @@
       <div class="welcome-top"><button id="welcomeLangBtn" class="language-button" type="button" aria-label="Switch to English">EN</button></div>
       <div class="welcome-main">
         <div class="brand-signature guide-lockup"><img class="brand-mark" src="/static/assets/manar-logo.svg" alt="منار" /><span class="host-under" role="img" aria-label="مكتبة ثلاث"></span></div>
-        <p id="brandSlogan" class="brand-slogan">منار - ذكاء يرشدك إلى ما يناسبك</p>
+        <p id="brandSlogan" class="brand-slogan">ذكاء يرشدك إلى ما يناسبك</p>
         <div class="welcome-copy">
           <h1 id="welcomeTitle">وش ودّك<br />تقرأ اليوم؟</h1>
-          <p id="welcomeBody">سولف معي عن مزاجك، وألقى لك كتاب من الموجود عندنا.</p>
+          <p id="welcomeBody">قل لي وش ودّك تقرأ، أو اسألني عن كتاب معيّن.</p>
         </div>
         <div class="start-card">
-          <p id="startNote">تقدر تبدأ بكلمة، شعور، أو آخر كتاب عجبك.</p>
-          <button id="startBtn" class="start-button" type="button"><span id="startLabel">سولف معي عن مزاجك</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
-          <!-- «ماذا تقرأ الآن؟» (Ibrahim 2026-10-27): a visitor reviews a book they read, or suggests one for the shelves -->
-          <button id="readingBtn" class="start-button reading-button" type="button"><span id="readingLabel">ماذا تقرأ الآن؟</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Zm0 15A2.5 2.5 0 0 0 6.5 23H20" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
-          <!-- Ibrahim 2026-10-29 («مخفية داخل ماذا تقرأ الآن»): suggesting a book for the shelves gets its own button -->
-          <button id="shelfStartBtn" class="start-button shelf-start-button" type="button"><span id="shelfStartLabel">اقترح كتابًا لرفوفنا</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg></button>
+          <button id="startBtn" class="start-button" type="button"><span id="startLabel">خلّنا نلقى كتابك</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+          <!-- «ماذا تقرأ الآن؟» (Ibrahim 2026-10-27) and «اقترح كتابًا لرفوفنا» (2026-10-29): since 2026-10-30 two quiet links under the
+               one big button (Ibrahim «الزوار صاروا يبدؤون مع ماذا تقرأ الان اكثر … ابغى اقلل اهميتها» — proposal أ) -->
+          <p class="start-more"><button id="readingBtn" class="start-link" type="button"><span id="readingLabel">قرأت كتابًا؟ شاركنا رأيك</span></button><span class="start-more-sep" aria-hidden="true">·</span><button id="shelfStartBtn" class="start-link" type="button"><span id="shelfStartLabel">اقترح كتابًا لرفوفنا</span></button></p>
         </div>
-        <p class="welcome-steps"><span id="stepDiscover">اكتشف</span><span id="stepAsk">اسأل</span><span id="stepRead">اقرأ</span></p>
         <section id="picksBox" class="picks-box" aria-labelledby="picksTitle" hidden>
-          <h2 id="picksTitle" class="events-title">اختياراتنا هذا الشهر</h2>
+          <div class="picks-head"><h2 id="picksTitle" class="events-title">اختياراتنا هذا الشهر</h2><span id="picksHint" class="picks-hint" hidden>اسحب لباقي الاختيارات</span></div>
           <div id="picksRow" class="picks-row"></div>
         </section>
         <section id="eventsBox" class="events-box" aria-labelledby="eventsTitle" hidden>
@@ -55,15 +52,19 @@
           <span id="modelStatus" class="model-status" role="status" hidden>النموذج غير متاح · نكمل بالنظام البديل</span>
         </div>
         <div class="header-end">
-          <button id="newChatBtn" class="header-action" type="button">جديدة</button>
+          <button id="newChatBtn" class="header-action new-chat-button" type="button" title="محادثة جديدة"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg><span id="newChatLabel" class="new-chat-label">محادثة جديدة</span></button>
           <button id="chatLangBtn" class="language-button" type="button" aria-label="Switch to English">EN</button>
         </div>
       </header>
       <p id="testBanner" class="notice test-banner" role="note" hidden>وضع الاختبار مفعّل: هذي المحادثة تنحفظ عشان نراجعها ونحسّن المساعد.</p>
       <div id="chatLog" class="chat-log" role="log" aria-live="polite" aria-relevant="additions" aria-label="المحادثة"></div>
-      <div class="composer-area">
+      <!-- CHATFIX 2026-10-30: search badges and suggestions sit at the end of the chat; only the field below stays on screen -->
+      <div class="chat-tail">
         <div id="contextBar" class="context-bar" role="status" hidden><span id="contextTitle" class="context-title">نبحث عن:</span><div id="contextChips" class="context-chips"></div></div>
         <div id="chips" class="chips" aria-label="ردود مقترحة"></div>
+      </div>
+      <div class="composer-area">
+        <button id="newReplyBtn" class="text-button new-reply" type="button" hidden>وصل رد جديد ↓</button>
         <form id="composer" class="composer" autocomplete="off">
           <label id="chatInputLabel" class="sr-only" for="chatInput">اكتب رسالتك لمنار</label>
           <textarea id="chatInput" rows="1" maxlength="500" placeholder="اكتب رسالتك هنا…"></textarea>
@@ -108,6 +109,8 @@
           <div id="dReviewsTags" class="reviews-tags"></div>
           <div id="dReviewsList" class="reviews-list"></div>
         </section>
+        <!-- GRLINK (Ibrahim 2026-10-30 «ممكن يعطيه رابط يفتح على جواله اراء القراء عن الكتاب في goodreads») -->
+        <a id="dGoodreads" class="text-button goodreads-link" target="_blank" rel="noopener noreferrer" hidden>آراء القرّاء في Goodreads ↗</a>
         <button id="reviewBtn" class="text-button review-button" type="button">قرأته؟ شاركنا رأيك</button>
         <button id="reportBtn" class="text-button report-button" type="button" aria-haspopup="dialog">فيه معلومة غلط؟ بلّغنا</button>
       </div>

@@ -239,17 +239,81 @@ def set_endpoint(pid, url):
 _codex_status = {"at": 0.0, "value": None}
 
 
+WIN_RUNNABLE = (".exe", ".cmd", ".bat", ".com")
+
+
+def _codex_candidates(windows=None, env=None, home=None):
+    """Places the `codex` command is installed in when the server's PATH does not show it.
+
+    CODEXWIN (Ibrahim 2026-10-29 «طلع انه مبرمج على ماك. وصلحته على ويندوز»): the list was Mac-only, so at the
+    library's Windows PC choosing Codex never connected. npm on Windows puts `codex.cmd` in %APPDATA%\\npm; the file
+    named plain `codex` there is a shell script Windows cannot start. MANAR_CODEX_PATH names the command by hand."""
+    windows = (os.name == "nt") if windows is None else windows
+    env = os.environ if env is None else env
+    home = os.path.expanduser("~") if home is None else home
+    out = []
+    if env.get("MANAR_CODEX_PATH"):
+        out.append(env["MANAR_CODEX_PATH"])
+    if windows:
+        appdata = env.get("APPDATA") or os.path.join(home, "AppData", "Roaming")
+        local = env.get("LOCALAPPDATA") or os.path.join(home, "AppData", "Local")
+        for folder in (os.path.join(appdata, "npm"), env.get("NPM_CONFIG_PREFIX") or "",
+                       os.path.join(local, "Programs", "codex"), os.path.join(home, ".local", "bin"),
+                       os.path.join(home, "scoop", "shims"), os.path.join(local, "Microsoft", "WinGet", "Links")):
+            if folder:
+                out += [os.path.join(folder, "codex.cmd"), os.path.join(folder, "codex.exe")]
+        # CODEXWIN2 (the library's Codex note, 2026-11-01): the Codex desktop app ships its own codex.exe in
+        # %LOCALAPPDATA%\OpenAI\Codex\bin\<version>\ — newest version first, then a plain bin\codex.exe
+        out += _versioned_codex(os.path.join(local, "OpenAI", "Codex", "bin"))
+    else:
+        out += ["/opt/homebrew/bin/codex", "/usr/local/bin/codex",
+                os.path.join(home, ".npm-global", "bin", "codex"), os.path.join(home, ".local", "bin", "codex")]
+    return out
+
+
+def _version_key(name):
+    return tuple(int(p) if p.isdigit() else -1 for p in re.split(r"[.\-_]", name)) or (-1,)
+
+
+def _versioned_codex(bin_dir):
+    """codex.exe in each version folder under bin_dir (newest version first), then bin_dir\\codex.exe."""
+    out = []
+    try:
+        versions = sorted((d for d in os.listdir(bin_dir) if os.path.isdir(os.path.join(bin_dir, d))),
+                          key=_version_key, reverse=True)
+    except OSError:
+        versions = []
+    for v in versions:
+        out.append(os.path.join(bin_dir, v, "codex.exe"))
+    out.append(os.path.join(bin_dir, "codex.exe"))
+    return out
+
+
+def _runnable(path, windows=None):
+    windows = (os.name == "nt") if windows is None else windows
+    if not path or not os.path.isfile(path):
+        return False
+    if windows:
+        return path.lower().endswith(WIN_RUNNABLE)
+    return os.access(path, os.X_OK)
+
+
 def codex_path():
-    found = shutil.which("codex")
-    if found:
-        return found
-    for cand in ("/opt/homebrew/bin/codex", "/usr/local/bin/codex",
-                 os.path.expanduser("~/.npm-global/bin/codex"), os.path.expanduser("~/.local/bin/codex")):
-        if os.path.isfile(cand) and os.access(cand, os.X_OK):
+    env_path = os.environ.get("MANAR_CODEX_PATH")
+    if env_path and _runnable(env_path):
+        return env_path
+    names = ("codex.cmd", "codex.exe", "codex") if os.name == "nt" else ("codex",)
+    for name in names:
+        found = shutil.which(name)
+        if found and _runnable(found):
+            return found
+    for cand in _codex_candidates():
+        if _runnable(cand):
             return cand
     return None
 
 
+_CODEX_LOGGED_OUT = re.compile(r"\bnot\s+(?:logged|signed)\s+in\b|\blogged\s+out\b|\bno\s+(?:credentials|auth)", re.I)
 _codex_lock = threading.Lock()
 CODEX_TRANSIENT_TTL = 5      # seconds a failed run of the check is kept (a real answer is kept max_age)
 CODEX_OK_GRACE = 600         # a login seen this recently is not undone by one failed run of the check
@@ -281,7 +345,8 @@ def codex_login_status(max_age=60):
                 try:
                     r = subprocess.run([path, "login", "status"], capture_output=True, text=True, timeout=10)
                     text = (r.stdout + r.stderr).strip()
-                    if r.returncode == 0 and "not" not in text.lower():
+                    # CODEXWIN2: the exit code decides; a warning line that merely contains «not» is not a logout
+                    if r.returncode == 0 and not _CODEX_LOGGED_OUT.search(text):
                         value = (True, "مسجّل دخول بحساب ChatGPT عبر Codex")
                     else:
                         value = (False, "Codex غير مسجّل دخول: نفّذ codex login في Terminal")

@@ -56,8 +56,11 @@ for f in (inbox_send.CONFIG, inbox_send.STATE, channel.STATE):
 m = login(A.app.test_client()); s_ = login(A.app.test_client(), "staff")
 st = s_.get("/api/admin/inbox/send").get_json()
 ok(st["enabled"] is False and st["can_manage"] is False and "يشغّله مدير المكتبة" in st["not_ready"], "staff see it is off and cannot manage it")
-ok(s_.post("/api/admin/send-inbox/settings", json={"enabled": True}).status_code == 403
-   and s_.post("/api/admin/send-inbox/now", json={}).status_code == 403, "staff cannot turn it on or send")
+ok(s_.post("/api/admin/send-inbox/settings", json={"enabled": True}, headers={"X-CSRF-Token": s_.csrf}).status_code == 403,
+   "staff cannot turn it on")
+_r = s_.post("/api/admin/send-inbox/now", json={}, headers={"X-CSRF-Token": s_.csrf})
+ok(_r.status_code == 400 and "يشغّله مدير المكتبة" in (_r.get_json() or {}).get("error", ""),
+   "staff may press «أرسل الآن» (Ibrahim 2026-10-29); while it is off they are told the manager turns it on")
 r = m.post("/api/admin/send-inbox/settings", json={"token": "short", "enabled": True})
 ok(r.status_code == 400 and not inbox_send.config()["enabled"], "a broken token is refused and nothing changes")
 TOKEN = "github_pat_" + "A1b2C3d4" * 8

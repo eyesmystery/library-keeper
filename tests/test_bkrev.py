@@ -17,9 +17,9 @@ def ok(cond, msg):
     print(("PASS " if cond else "FAIL ") + msg); P += bool(cond); F += (not cond)
 
 # ---- 3. the place name put back
-cases = {"R02": "روايات · الرف R02", "q4": "روايات · الرف Q04", " r02 ": "روايات · الرف R02", "R02 / R05": "روايات · الرف R02 / R05",
-         "الرف R02": "روايات · الرف R02", "رف A3": "تاريخ · الرف A03", "kids1": "أطفال ويافعين · الرف Kids01", "XD02": "تطوير الذات وعلم النفس · الرف XD02",
-         "روايات · الرف Q04": "روايات · الرف Q04", "رف ٣ – الطابق الأرضي": "رف ٣ – الطابق الأرضي", "عند الكاشير": "عند الكاشير", "": ""}
+cases = {"R02": "روايات مترجمة · الرف R02", "q4": "روايات مترجمة · الرف Q04", " r02 ": "روايات مترجمة · الرف R02", "R02 / R05": "روايات مترجمة · الرف R02 / R05",
+         "الرف R02": "روايات مترجمة · الرف R02", "K02": "روايات عربية · الرف K02", "m3": "روايات عربية · الرف M03", "L01": "روايات عربية · الرف L01", "روايات · الرف K05": "روايات عربية · الرف K05", "n1": "روايات مترجمة · الرف N01", "رف A3": "تاريخ · الرف A03", "kids1": "أطفال ويافعين · الرف Kids01", "XD02": "تطوير الذات وعلم النفس · الرف XD02",
+         "روايات · الرف Q04": "روايات مترجمة · الرف Q04", "روايات إنجليزية · الرف H01": "روايات إنجليزية · الرف H01", "رف ٣ – الطابق الأرضي": "رف ٣ – الطابق الأرضي", "عند الكاشير": "عند الكاشير", "": ""}
 for given, want in cases.items():
     got = L.normalize_location(given)
     ok(got == want, f"place «{given}» → «{got}»")
@@ -32,18 +32,26 @@ s = login(A.app.test_client(), "staff")
 H = lambda c: {"X-CSRF-Token": c.csrf}
 
 r = s.patch(f"/api/books/{b1}", json={"shelf_location": "R02"}, headers=H(s))
-ok(r.status_code == 200 and con.execute("select shelf_location from books where book_id=?", (b1,)).fetchone()[0] == "روايات · الرف R02",
-   "staff save «R02» → «روايات · الرف R02»")
+ok(r.status_code == 200 and con.execute("select shelf_location from books where book_id=?", (b1,)).fetchone()[0] == "روايات مترجمة · الرف R02",
+   "staff save «R02» → «روايات مترجمة · الرف R02»")
 ok(RQ.for_book(b1) is None, "a shelf change alone does not queue the book for research")
 
 # saved before this version: fixed at start-up, written once in the audit
 con.execute("update books set shelf_location='Q4' where book_id=?", (b2,)); con.commit()
 c2 = models.get_connection(); n = L.normalize_saved_locations(c2); c2.close()
-ok(n >= 1 and con.execute("select shelf_location from books where book_id=?", (b2,)).fetchone()[0] == "روايات · الرف Q04",
+ok(n >= 1 and con.execute("select shelf_location from books where book_id=?", (b2,)).fetchone()[0] == "روايات مترجمة · الرف Q04",
    f"start-up pass fixes a place saved as «Q4» ({n})")
 last = con.execute("select action, details from audit_log where action='shelf.normalized' order by log_id desc limit 1").fetchone()
-ok(last and [b2, "Q4", "روايات · الرف Q04"] in json.loads(last[1])["books"], "…and writes before → after in the audit")
+ok(last and [b2, "Q4", "روايات مترجمة · الرف Q04"] in json.loads(last[1])["books"], "…and writes before → after in the audit")
 c2 = models.get_connection(); ok(L.normalize_saved_locations(c2) == 0, "the pass changes nothing the second time"); c2.close()
+con.execute("update books set shelf_location='روايات · الرف N03' where book_id=?", (b2,)); con.commit()
+con.execute("update books set shelf_location='روايات مترجمة · الرف M03' where book_id=?", (b1,)); con.commit()
+c2 = models.get_connection(); L.normalize_saved_locations(c2); c2.close()
+ok(con.execute("select shelf_location from books where book_id=?", (b2,)).fetchone()[0] == "روايات مترجمة · الرف N03",
+   "a place saved with the old name of shelves N … R («روايات») gets «روايات مترجمة» at start (Ibrahim 2026-10-29)")
+ok(con.execute("select shelf_location from books where book_id=?", (b1,)).fetchone()[0] == "روايات عربية · الرف M03",
+   "shelves K, L, M: «روايات عربية»")
+con.execute("update books set shelf_location='روايات مترجمة · الرف R02' where book_id=?", (b1,)); con.commit()
 html = open(os.path.join(os.path.dirname(A.__file__), "..", "admin", "index.html"), encoding="utf-8").read()
 ok("اكتب رمز الرف فقط (R02)، واسم القسم ينكتب تلقائيًا" in html and "await reopenCard(id, 'invState', 'تم الحفظ')" in html,
    "the place field says so and shows the saved place after «حفظ»")
@@ -146,6 +154,26 @@ ok("function reviewChecks(d)" in html and all(x in html for x in ("item('الد�
    and "<span class=\"warn\">ناقص</span>" in html, "the block lists what to check, each with its value or «ناقص»")
 ok('data-chip="toreview"' in html and 'data-chip="requeue"' in html and "lib.chips.clear(); if (!only) lib.chips.add(k);" in html,
    "a tap on the count «تحتاج مراجعة» / «بانتظار إعادة البحث» shows that list")
+# several authors / translators in one field, «،» between them: each linked at once, in order
+r = s.patch(f"/api/books/{b4}", json={"author": "أحمد اختبار المؤلف، سارة اختبار المؤلفة", "translator": "خالد اختبار المترجم، منى اختبار المترجمة"}, headers=H(s))
+links = con.execute("""select a.name_ar, ba.role, ba.position from book_authors ba join authors a using (author_id)
+                       where ba.book_id=? order by ba.role, ba.position""", (b4,)).fetchall()
+ok(r.status_code == 200 and [(n, ro) for n, ro, _ in links] == [("أحمد اختبار المؤلف", "author"), ("سارة اختبار المؤلفة", "author"),
+                                                              ("خالد اختبار المترجم", "translator"), ("منى اختبار المترجمة", "translator")],
+   f"two authors and two translators typed with «،» are linked at once ({links})")
+r = s.patch(f"/api/books/{b4}", json={"translator": "خالد اختبار المترجم"}, headers=H(s))
+ok([n for n, ro, _ in con.execute("select a.name_ar, ba.role, ba.position from book_authors ba join authors a using (author_id) where ba.book_id=? and ba.role='translator'", (b4,))]
+   == ["خالد اختبار المترجم"], "a translator change alone relinks too")
+ok("أكثر من مؤلف: افصل بـ «،»" in html and "أكثر من مترجم: افصل بين الأسماء بـ «،»" in html and 'id="fTrans" type="text" maxlength="250"' in html,
+   "the author and translator fields say how to write several names")
+# «المؤلفون» list: the spelling-pairs check is cached (it took seconds on every opening)
+import authors as AU, time as _t
+AU._DUP_CACHE.clear(); AU._same_word.cache_clear()
+t0 = _t.time(); p1 = AU.probable_duplicates(); t1 = _t.time(); p2 = AU.probable_duplicates(); t2 = _t.time()
+ok(p1 == p2 and (t2 - t1) < 0.5, f"duplicate pairs cached: same pairs, second call {t2 - t1:.3f}s")
+ok(AU._same_word("ر", "رودريغيز") and AU._same_word("بارغاس", "فارغاس") and not AU._same_word("محمد", "محمود")
+   and not AU._same_word("علي", "عبدالرحمن"), "spelling variants as before (initial, ب/ف) and a big length gap refused")
+ok("جاري تحميل الأسماء…" in html, "the names list says it is loading instead of showing an empty page")
 con.close()
 print(f"\n{P} passed, {F} failed")
 sys.exit(1 if F else 0)

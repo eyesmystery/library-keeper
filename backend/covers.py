@@ -12,6 +12,8 @@ Every cover is stored as a local copy in data/covers/<book_id>.<ext> and served 
 cover_url (local path), cover_source and cover_updated_at.
 """
 import html
+import socket
+import ipaddress
 import os
 import re
 import struct
@@ -21,6 +23,7 @@ import urllib.parse
 import urllib.request
 
 import net
+import safe_http
 from datetime import datetime, timezone
 
 from models import get_connection
@@ -164,12 +167,47 @@ def has_local_cover(book):
 
 
 # ---------------------------------------------------------------- fetching
+MAX_REDIRECTS = 5
+
+
+def assert_public(url):
+    """Raises urllib.error.URLError unless url is http(s) on a public address (no loopback, LAN, link-local).
+    AGY-20261029-E1 (P2): a cover address taken from a pasted page («اجلب من الرابط» → «اختيار الغلاف») was fetched
+    with no check, so a page could point the server at an internal address."""
+    p = urllib.parse.urlparse(url)
+    if p.scheme not in ("http", "https") or not p.hostname:
+        raise urllib.error.URLError("not an http(s) address")
+    try:
+        infos = socket.getaddrinfo(p.hostname, p.port or (443 if p.scheme == "https" else 80))
+    except socket.gaierror as e:
+        raise urllib.error.URLError(f"unknown host: {e}")
+    for info in infos:
+        if not ipaddress.ip_address(info[4][0].split("%")[0]).is_global:
+            raise urllib.error.URLError("internal address")
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
 def http_get(url, timeout=15):
-    """-> (final_url, bytes). Raises urllib errors. Replaced in tests."""
-    url = urllib.parse.quote(url, safe=":/?#[]@!$&'()*+,;=%~")  # non-ASCII paths (Arabic slugs) -> %-encoded
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "ar,en;q=0.8"})
-    with urllib.request.urlopen(req, timeout=timeout, context=net.ssl_context()) as resp:
-        return resp.geturl(), resp.read(MAX_BYTES + 1)
+    """-> (final_url, bytes). Raises urllib errors. Replaced in tests.
+    Every address, and every redirect hop, is checked public BEFORE it is requested (AGY-20261029-E1)."""
+    for _ in range(MAX_REDIRECTS + 1):
+        assert_public(url)
+        quoted = urllib.parse.quote(url, safe=":/?#[]@!$&'()*+,;=%~")  # non-ASCII paths (Arabic slugs) -> %-encoded
+        req = urllib.request.Request(quoted, headers={"User-Agent": USER_AGENT, "Accept-Language": "ar,en;q=0.8"})
+        opener = safe_http.opener(net.ssl_context())   # AUDIT 2026-10-30 P2: connect to the checked address
+        try:
+            with opener.open(req, timeout=timeout) as resp:
+                return resp.geturl(), resp.read(MAX_BYTES + 1)
+        except urllib.error.HTTPError as e:
+            location = e.headers.get("Location") if e.code in (301, 302, 303, 307, 308) and e.headers else None
+            if not location:
+                raise
+            url = urllib.parse.urljoin(url, location)
+    raise urllib.error.URLError("too many redirects")
 
 
 def isbn_candidates(*values):

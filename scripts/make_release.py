@@ -78,6 +78,8 @@ EMPTY_TABLES = ["audit_log", "feedback", "book_choices", "book_daily", "usage_da
                 "book_confirmations", "open_questions", "staff_notes", "staff_ideas",
                 # «اختياراتنا هذا الشهر» (PICKS 2026-10-14): the library approves its own picks; rows made on the Mac are tries
                 "monthly_picks", "monthly_pick_months",
+                # STARTTAP (2026-11-01): start-page tap counts are the library's own; the Mac's taps never ship
+                "start_taps",
                 # «ماذا تقرأ الآن؟» (2026-10-27): visitors' reviews and the books they want on the shelves are the library's own
                 "visitor_reviews", "candidate_books",
                 # books looked up outside while visitors asked (AGY-20261027-04): the library builds its own; an update keeps it
@@ -388,6 +390,10 @@ def build_update(stage, version, info, counts, from_zips, zip_path, test_log="ke
     resolutions = os.path.join(ROOT, "release", "inbox_resolutions.json")
     if os.path.exists(resolutions):
         shutil.copy2(resolutions, os.path.join(up, "inbox_resolutions.json"))
+    # values the developer corrects over the library's own change (apply_update.apply_corrections)
+    corrections = os.path.join(ROOT, "release", "library_corrections.json")
+    if os.path.exists(corrections):
+        shutil.copy2(corrections, os.path.join(up, "corrections.json"))
     if test_log in ("on", "off"):      # read by apply_update.apply_settings; "keep" leaves the library's choice
         write(os.path.join(up, "settings.json"), json.dumps({"test_log": test_log == "on"}) + "\n")
     covers_dir = os.path.join(stage, "data", "covers")

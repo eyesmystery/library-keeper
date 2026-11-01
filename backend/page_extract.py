@@ -16,8 +16,11 @@ import socket
 import time
 import urllib.error
 import urllib.parse
+import urllib.request
 
 import covers
+import net
+import safe_http
 
 
 class PageError(Exception):
@@ -50,6 +53,34 @@ def _check_public(url):
         ip = ipaddress.ip_address(info[4][0].split("%")[0])
         if not ip.is_global:
             raise PageError("هذا عنوان داخلي، ما يُقرأ")
+
+
+MAX_REDIRECTS = 5
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None          # a 3xx comes back as HTTPError; safe_get checks the next address before asking it
+
+
+def safe_get(url, timeout=15):
+    """-> (final_url, bytes). AUDFIX 2026-10-29 evening (Codex audit P2): urllib followed a redirect from a public page
+    to an internal address and only the final address was checked, after the internal one had been asked. Now every
+    hop is checked public BEFORE it is requested; at most MAX_REDIRECTS hops."""
+    for _ in range(MAX_REDIRECTS + 1):
+        _check_public(url)
+        quoted = urllib.parse.quote(url, safe=":/?#[]@!$&'()*+,;=%~")
+        req = urllib.request.Request(quoted, headers={"User-Agent": covers.USER_AGENT, "Accept-Language": "ar,en;q=0.8"})
+        opener = safe_http.opener(net.ssl_context())   # AUDIT 2026-10-30 P2: connect to the checked address
+        try:
+            with opener.open(req, timeout=timeout) as resp:
+                return resp.geturl(), resp.read(covers.MAX_BYTES + 1)
+        except urllib.error.HTTPError as e:
+            location = e.headers.get("Location") if e.code in (301, 302, 303, 307, 308) and e.headers else None
+            if not location:
+                raise
+            url = urllib.parse.urljoin(url, location)
+    raise PageError("الصفحة تحوّل لعناوين كثيرة، ما تُقرأ")
 
 
 def _clean(text):
@@ -253,7 +284,7 @@ def extract(url, fetch=None):
     Raises PageError with an Arabic message."""
     url = str(url or "").strip()
     _check_public(url)
-    fetch = fetch or covers.http_get
+    fetch = fetch or safe_get
     try:
         final, raw = fetch(url)
         if len(raw) < 1000:          # Goodreads sometimes answers with an empty page: one polite retry
@@ -279,5 +310,9 @@ def extract(url, fetch=None):
     via.pop("description", None)
     if cover:
         cover = urllib.parse.urljoin(final, html.unescape(cover))
+        try:
+            covers.assert_public(cover)      # AGY-20261029-E1: an internal cover address is not offered at all
+        except urllib.error.URLError:
+            cover = None
     return {"url": url, "final_url": final, "fields": {k: fields[k] for k in FIELDS if k in fields}, "via": via,
             "cover": cover, "description": description, "description_arabic": is_arabic(description) if description else None}

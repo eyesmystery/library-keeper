@@ -366,12 +366,18 @@ _GRADE_N = {normalize(k): v for k, v in {"أول": 1, "اولى": 1, "أولى":
 _GRADE = re.compile(r"(?:ب|في |لل|ال)?(اول|اولي|ثاني|ثانيه|ثالث|ثالثه|رابع|رابعه|خامس|خامسه|سادس|سادسه) "
                     r"(?:ال)?(ابتدائي|متوسط|ثانوي)")
 _STAGE_BASE = {"ابتدائي": 5, "متوسط": 11, "ثانوي": 14}
+# QADFIX25 (QAD 2026-10-31, cases 43.1, 19.1): «ولد بالصف الثالث»، «بنتي بالصف الثاني» — the school year said with «الصف» and no
+# stage is the primary school's (the age was never read: an academic study of the Prophet's life was offered to a boy of 8)
+_GRADE_SAFF = re.compile(r"(?:^| )(?:بال|في ال|لل|ال|ب)?صف (?:ال)?(اول|اولي|ثاني|ثانيه|ثالث|ثالثه|رابع|رابعه|خامس|خامسه|سادس|سادسه)"
+                         r"(?: (?:ال)?(ابتدائي|متوسط|ثانوي))?(?= |$)")
 
 
 def grade_ages(text):
     """«بأولى ابتدائي» -> [6], «ثاني متوسط» -> [13], «روضة» -> [5]: the usual age of that school year."""
     t = " ".join(normalize(text).split())
     out = [_STAGE_BASE[m.group(2)] + _GRADE_N.get(m.group(1), 1) for m in _GRADE.finditer(t)]
+    if not out:
+        out = [_STAGE_BASE[m.group(2) or "ابتدائي"] + _GRADE_N.get(m.group(1), 1) for m in _GRADE_SAFF.finditer(t)]
     if not out and re.search(r"(?:^| )(?:بال|في ال|ال)?(?:روضه|تمهيدي)(?: |$)", t):
         out.append(5)
     return out
@@ -876,3 +882,717 @@ def bare_recommend(message):
 
 _BARE_REC = {normalize(w) for w in "رشحي رشح رشحيلي رشحلي اقترح اقترحي اقترحيلي اقترحلي recommend suggest".split()}
 _BARE_OBJ = {normalize(w) for w in "كتاب كتابا كتب رواية روايه شي شيء book novel something".split()}
+
+
+# CHATFIX30 (library inbox 2026-10-29 13:24, §3 and §8.1–8.2) --------------------------------------------------------------
+# (4) «ايش تعرف عن كتاب زمان الملائكة؟» was answered about book 1412 and still logged «كتاب زمان الملائكه» as «موضوع ما لقينا
+# عنه كتابًا»; (1) «ابحث عن كتاب تشريح الفيلم» logged «كتاب تشريح الفيلم» as «رغبة لا نقدر نبحث بها» and its word «تشريح» was
+# searched as a subject. A phrase that is the title of a book named, asked about or shown is that book, never a subject.
+_TITLE_LEAD = re.compile(r"^(?:(?:عن|ابي|ابغي|ابغا|ابغى|عندكم|عندك|ابحث عن|دور|ادور)\s+)*"
+                         r"(?:ال)?(?:كتاب|كتب|روايه|روايات|قصه|ديوان|book|novel|the book|the novel)\s+")
+
+
+def phrase_title_key(text):
+    """«كتاب زمان الملائكه» -> «زمان الملايكه»: a title as compared (title_key: ة/ه, hamza seats, numbers), without a
+    leading «كتاب / رواية / عن كتاب …» and without its subtitle after «:»."""
+    k = title_key(str(text or "").split(":")[0])
+    prev = None
+    while prev != k:
+        prev, k = k, _TITLE_LEAD.sub("", k)
+    return k.strip()
+
+
+def phrase_is_title(phrase, titles):
+    """Is this wish / topic phrase one of these titles (or a title with its subtitle)?"""
+    pk = phrase_title_key(phrase)
+    if not pk:
+        return False
+    for t in titles or ():
+        if t and pk in (phrase_title_key(t), title_key(t)):
+            return True
+    return False
+
+
+# (2) «سجون نختار أن نحيا فيها» (Doris Lessing's essays) was missing and two Hassan Aourid NOVELS were offered as close to it:
+# fiction and non-fiction are kept apart when books are chosen for their likeness to a book we do not have.
+_FICTION_FORMATS = {"novel", "short_stories", "poetry", "play", "comics"}
+_NONFICTION_FORMATS = {"biography", "history", "thought", "psychology", "self_dev", "science", "travel", "religious",
+                       "business", "essays", "criticism", "arts", "sociology"}
+_FICTION_SHELVES = {"رواية", "قصص قصيرة", "قصص مصورة", "مسرحية", "شعر"}
+_OPEN_SHELVES = {"", "أطفال", "يافعين", "أدب"}   # children's and teenagers' shelves hold both
+_NONFICTION_TAGS = re.compile(r"non-?fiction|essays?|philosophy|psycholog|sociolog|histor(?:y|ical studies)|biograph|memoir|"
+                              r"politic|criticism|textbook|self[- ]help|science|religio|film|cinema|art\b|economics|reference",
+                              re.I)
+_FICTION_TAGS = re.compile(r"(?<!non)(?<!non-)\bfiction|novels?\b|short stories|poetry|plays?\b|drama|fantasy|romance|"
+                           r"thriller|mystery|horror|روايه|رواية|قصص|شعر", re.I)
+
+
+def reference_is_fiction(ref, outside=None):
+    """A book named by the visitor that we do not have -> True (fiction), False (non-fiction) or None (not known).
+    The tags found outside (Goodreads, Open Library …) decide first; else the form the model knows it by."""
+    tags = " | ".join([str(g) for g in ((outside or {}).get("genres") or [])] + [str(s) for s in ((outside or {}).get("subjects") or [])][:8])
+    if tags:
+        nf, fi = bool(_NONFICTION_TAGS.search(tags)), bool(_FICTION_TAGS.search(tags))
+        if re.search(r"non-?fiction", tags, re.I):
+            return False
+        if fi and not nf:
+            return True
+        if nf and not fi:
+            return False
+    fmt = (ref or {}).get("format")
+    if fmt in _FICTION_FORMATS:
+        return True
+    if fmt in _NONFICTION_FORMATS:
+        return False
+    subs = " ".join(str(s) for s in ((ref or {}).get("subgenres") or []))
+    if re.search(r"رواي|novel", normalize(subs)):
+        return True
+    return None
+
+
+def book_is_fiction(book):
+    """Our book by its shelf -> True (a novel, stories, a play, poetry), False (thought, history, psychology …), None (a
+    children's or teenagers' shelf, or none recorded)."""
+    g = str((book or {}).get("genre") or "").strip()
+    if g in _OPEN_SHELVES:
+        return None
+    if g == "قصص مصورة":
+        # QADFIX24 (QAD 2026-10-30, case 45.1): a comic that tells history or a life («نضال النساء: 150 عامًا من النضال…»،
+        # subgenres «تاريخ») is not a story like «ون بيس»
+        subs = str((book or {}).get("subgenres") or "")
+        if re.search(r"[\"']تاريخ[\"']|سيره|سيرة|مذكرات|[\"']فكر[\"']|[\"']علوم[\"']", subs) and not re.search(r"رواية تاريخية|روايه تاريخيه|فانتازيا|مغامر", subs):
+            return False
+    return g in _FICTION_SHELVES
+
+
+def same_form_as(ref_fiction, book):
+    """A likeness candidate kept for a reference of this form (None keeps everything)."""
+    if ref_fiction is None:
+        return True
+    if ref_fiction == "selfhelp":
+        # CHATFIX30b (4): a self-help / spiritual book -> self-help, psychology, religion, thought; never a memoir or a novel
+        return str((book or {}).get("genre") or "").strip() in SELFHELP_SHELVES
+    have = book_is_fiction(book)
+    return have is None or have == ref_fiction
+
+
+# (3) «عندكم كتب روي ياكوبسون؟» -> «تقصد «روي ياكوبسن»؟» -> «صحيح» -> «ما عندنا الآن كتب لـروي ياكوبسن»: the same name in
+# two spellings, and the corrected one leads to no book of ours — the question was a wasted turn (author_flow.resolve).
+
+
+# (5) Ibrahim 2026-10-30: «اقتراح ان منار تجاوب اولا قبل تقترح … ما يقترح على طول من اول سؤال اذا كان السؤال ما يوضح الاقتراح
+# بشكل قريب. يعني سؤال عام بشكل كبير ويحتاج سؤال ثاني»; a visitor (inbox item 10): «أقترح أن تجيبني على سؤالي أولاً بمعزل عن الكتب
+# التي تود اقتراحها … الحوار تسويقي». The words of a first message that say what to read, once greetings, asking words and
+# «كتاب / شي» are taken out: none left («وش عندكم؟»، «رشحي لي رواية»، «مرحبا، ابغى اقرا شي»), or one bare subject with no
+# asking word («فلسفة»، «السعادة») -> a general message: one short question first, no book yet.
+_GEN_ASK = {normalize(w) for w in "رشحي رشح رشحيلي رشحلي اقترح اقترحي اقترحيلي اقترحلي عطني عطيني اعطني ابي ابغى ابغا ابغي "
+            "بغيت ابغي ودي اريد أريد احتاج ابحث دور ادور دوري تنصحني تنصحيني تقترحين انصحني بدي "
+            "recommend suggest give want need looking find".split()}
+_GEN_QUESTION = {normalize(w) for w in "وش ايش شو ماذا ما هو هي شنو عندكم عندك عندكن فيه عندنا متوفر "
+                 "what which do you have any is are".split()}
+_GEN_FILL = {normalize(w) for w in "لي ليا انا اني حاب احب يا منار عن في من على الى و او ثم شي شيء اي أي حلو حلوه زين ممكن لو سمحت "
+             "طيب اوكي تمام كتاب كتابا كتب الكتب كتابين اقرا اقرأ اقراء اقراه قراءه القراءه للقراءه اقراها اقراه بقرا "
+             "اليوم الحين الحين جديد مكتبه المكتبه "
+             "i me to read reading a an the some something books book please about for good start begin starting".split()}
+_GEN_FORM = {normalize(w) for w in "رواية روايه روايات الروايات قصص القصص قصه قصة شعر ديوان novel novels stories poetry".split()}
+_GEN_SURPRISE = re.compile(r"فاج|يفاج|عشوائي|surprise|random")
+
+
+def general_words(message):
+    """-> (the words that say what to read, an asking word or a question was used)."""
+    import keyword_prefs as _kp
+    words = [w for w in re.findall(r"\w+", normalize(message or "")) if not w.isdigit() or len(w) > 2]
+    asked = any(w in _GEN_ASK or w in _GEN_QUESTION for w in words) or bool(re.search(r"[؟?]", str(message or "")))
+    left = [w for w in words if w not in _GEN_ASK and w not in _GEN_QUESTION and w not in _GEN_FILL
+            and w not in _kp.GREETING_WORDS and w not in _BARE_VERBS and (w not in _BARE_FILL or w in _GEN_FORM)]
+    # a form word counts only beside a subject («رواية رعب» is two words; «رشحي لي رواية» none)
+    return (left if any(w not in _GEN_FORM for w in left) else []), asked
+
+
+# QADFIX24 (case 13.1): fields named in two words, said alone as a first message
+_TWO_WORD_FIELDS = {" ".join(normalize(w).split()) for w in (
+    "علم نفس", "علم النفس", "علم اجتماع", "علم الاجتماع", "تطوير ذات", "تطوير الذات", "تطوير ذاتي",
+    "ادب رحلات", "أدب رحلات", "أدب الرحلات", "ادب الرحلات", "تنمية بشرية", "التنمية البشرية",
+    "نقد أدبي", "النقد الأدبي", "فلسفة إسلامية", "تاريخ إسلامي", "التاريخ الإسلامي", "self help")}
+
+
+def general_first_message(message):
+    """CHATFIX30 (5): is this (first) message too general to choose a book by? Forced only where the model's own «clarify»
+    (OWN1, 2026-10-11) was seen to fail: one bare subject with no asking word and no question of his own («فلسفة»، «السعادة»،
+    «كتب فلسفة»), or nothing to choose by at all («وش عندكم؟»، «مرحبا، ابغى اقرا شي»). A form asked for («رواية»، «أبغى رواية»)
+    or a bare «ابي كتاب» stays the model's call (it asks first when it reads the request as too vague)."""
+    import keyword_prefs as _kp
+    if not str(message or "").strip() or _GEN_SURPRISE.search(normalize(message)):
+        return False
+    if books_about_asked(message) or activity_wish(message):
+        return False   # CHATFIX30b (1), (3): «كتب عن أفغانستان»، «التلوين» are clear requests
+    words = re.findall(r"\w+", normalize(message))
+    left, _asked = general_words(message)
+    subjects = [w for w in left if w not in _GEN_FORM]
+    has_form = any(w in _GEN_FORM for w in words)
+    has_verb = any(w in _GEN_ASK or w in _BARE_VERBS for w in words)
+    greeting = any(w in _kp.GREETING_WORDS for w in words)
+    wh = bool(_SUBJ_Q.search(" ".join(normalize(message).split())))
+    if not subjects:
+        return not has_form and (not has_verb or greeting)
+    if len(subjects) == 2 and " ".join(subjects) in _TWO_WORD_FIELDS:
+        # QADFIX24 (QAD 2026-10-30, case 13.1): «علم نفس» alone is one field like «فلسفة», not two subjects
+        subjects = [" ".join(subjects)]
+    return len(subjects) == 1 and not has_form and not has_verb and not (wh and not _AVAIL_Q.search(" ".join(normalize(message).split())))
+
+
+_SUBJ_Q = re.compile(r"(?:^| )(?:وش|ايش|شو|ماذا|ما هو|ما هي|ما هي|ليش|ليه|لماذا|كيف|هل|متى|مين|من هو|من هي|what|why|how|who|is|are|does)(?: |$)")
+_AVAIL_Q = re.compile(r"(?:^| )(?:عندكم|عندك|عندكن|فيه|في عندكم|متوفر|متوفره|موجود|موجوده|have|got|available|in stock)(?: |$)")
+
+
+def subject_question(message):
+    """CHATFIX30 (5): the visitor asks a question of his own about a subject («ليش نقرأ الفلسفة؟»، «وش الفرق بين الفلسفة وعلم
+    النفس؟») — not whether we have something («عندكم روايات رعب؟») — so its answer comes before any book."""
+    t = " ".join(normalize(message or "").split())
+    return (bool(re.search(r"[؟?]", str(message or ""))) and bool(_SUBJ_Q.search(t)) and not _AVAIL_Q.search(t)
+            and bool(general_words(message)[0]))
+
+
+# CHATFIX30 (1): what a missing book is about, from the tags found outside (Goodreads, Open Library …) when the model does not
+# know it: «تشريح الفيلم» came back tagged "Film, Nonfiction, Textbooks" with no theme from the model, and no film book of ours
+# was found. Each tag gives the Arabic words our books' titles, keywords and subgenres use for that subject
+_TAG_WORDS = {
+    "film": "سينما سينمائي سينمائيه افلام فيلم سيناريو", "films": "سينما سينمائي افلام فيلم سيناريو",
+    "cinema": "سينما سينمائي سينمائيه افلام فيلم سيناريو", "movies": "سينما افلام فيلم", "screenwriting": "سيناريو",
+    "philosophy": "فلسفه فلسفي فلسفيه", "psychology": "نفسي نفسيه", "sociology": "اجتماع اجتماعي",
+    "history": "تاريخ تاريخي", "politics": "سياسه سياسي", "political science": "سياسه سياسي", "economics": "اقتصاد",
+    "religion": "دين ديني", "poetry": "شعر", "music": "موسيقي موسيقى", "art": "فنون رسم تشكيلي", "art history": "فنون",
+    "architecture": "عماره معمار", "photography": "تصوير", "theatre": "مسرح", "theater": "مسرح", "drama": "مسرح",
+    "linguistics": "لغه لسانيات", "education": "تعليم تربيه", "parenting": "تربيه", "travel": "رحلات رحله",
+    "biography": "سيره", "memoir": "مذكرات سيره", "essays": "مقالات", "literary criticism": "نقد", "criticism": "نقد",
+    "cooking": "طبخ", "food": "طبخ", "sports": "رياضه", "mathematics": "رياضيات",
+    "physics": "فيزياء", "astronomy": "فلك فضاء", "biology": "احياء", "medicine": "طب", "feminism": "نسويه المراه",
+}
+
+
+def outside_subject_words(outside):
+    """The subject words for a book found outside, from its tags -> set of normalized words (no «ال»)."""
+    out = set()
+    for tag in list((outside or {}).get("genres") or []) + list((outside or {}).get("subjects") or [])[:8]:
+        t = " ".join(str(tag or "").lower().replace("-", " ").split())
+        words = _TAG_WORDS.get(t)
+        if words:
+            out |= {strip_al(w) for w in normalize(words).split()}
+    return out
+
+
+# CHATFIX30 follow-up (MGR replay 2026-10-30 of the 21 library phrases): «هنري ترويا» and «روي ياكوبسن» as a first message were
+# read by the model as «clarify» with no author request and got «تقصد تبغى كتابًا لهنري ترويا؟ وش النوع…» instead of «ما عندنا
+# الآن كتب لـهنري ترويا…» (and no missing-author log). A message that is only a person's name is a request for that author.
+def looks_like_name(message, first_names):
+    """Two to four words, the first a first name some author of ours carries (`first_names`: normalized first words of the
+    catalog's and the author records' names), no asking, question, form, greeting or reading word, no digit, and no word the
+    keyword reader understands as a wish («سرد بسيط»، «تقييم مرتفع»، «جبر القلوب» are not names)."""
+    import keyword_prefs as _kp
+    text = str(message or "").strip(" ؟?!.،,")
+    if not text or re.search(r"\d|[؟?]", text):
+        return False
+    words = normalize(text).split()
+    if not 2 <= len(words) <= 4 or words[0] not in (first_names or ()):
+        return False
+    for i, w in enumerate(words):
+        if i == 0:
+            # a first name of ours («علي» is also «على» once normalized): only an asking word or a greeting is refused here
+            if w in _GEN_ASK or w in _BARE_VERBS or w in _kp.GREETING_WORDS:
+                return False
+            continue
+        if (w in _GEN_ASK or w in _GEN_QUESTION or w in _GEN_FILL or w in _GEN_FORM or w in _BARE_VERBS or w in _BARE_FILL
+                or w in _kp.GREETING_WORDS or len(w) < 2):
+            return False
+        if _kp.understood_anything(_kp.understand([w])):
+            return False
+    return True
+
+
+# CHATFIX30b (2), Ibrahim 2026-10-30 on a visitor's suggestion «أقترح الفصحى في الحوار حول الكتب»: «ممتاز خلها تساير السائل
+# باسلوبه». A visitor who writes Modern Standard Arabic is answered in فصحى; one who writes in a dialect keeps the dialect.
+_DIALECT_WORDS = {normalize(w) for w in (
+    "وش ايش إيش شو ابغى أبغى ابغا ابغي ابي أبي ابيه أبيه ابغاه تبغى تبغي تبي ودي ودّي شلون كذا مو ليش زين حق يبي يبغى عشان "
+    "علشان الحين اللي بس شي عطني اعطني وين ايه إيه هذي هذولا زي برضه شوي شوية يعطيك مب مش ابى "
+    # CHATFIX30c (5): «ليه ما اقترحتها لي؟» was answered in فصحى after earlier فصحى messages — «ليه» and other common
+    # Gulf / Hijazi / Najdi words were missing (the latest clear signal wins)
+    "ليه وشلون كيفك حيل يعني ابا أبا ابيه عطيني ودّي تكفى تكفين يالله لاهنت ماعليه معليش عاد وشو ايوه اوكي").split()}
+_DIALECT_PREFIX = re.compile(r"(?:^| )هال\w{2,}")
+_FUSHA_WORDS = {normalize(w) for w in (
+    "أريد اريد لديكم لديك لدي ماذا لماذا أود اود أرجو ارجو الذي التي الذين اللذين سوف ليس لست يوجد توجد أرغب ارغب "
+    "أبحث ابحث رجاء أفضّل").split()}
+_FUSHA_PHRASES = re.compile(r"(?:^| )(?:هل (?:لديكم|عندكم|يوجد|توجد|تنصح|تنصحين|يمكن|من)|ما هو|ما هي|من فضلك|أبحث عن|ابحث عن|"
+                            r"أود أن|اود ان|هل)(?: |$)")
+
+
+def message_register(text, titles=()):
+    """One visitor message -> "fusha", "dialect" or None (no clear signal). The words of a book title the visitor quotes are
+    not his register (QADFIX25, QAD 2026-10-31 case 23.1: «الرجل الذي كان يحب الكلاب متوفرة؟» was answered in فصحى)."""
+    t = " ".join(normalize(text or "").split())
+    for _ti in sorted({" ".join(normalize(re.split(r"\s*[:：(\[–—]\s*", x or "")[0]).split()) for x in titles if x}, key=len, reverse=True):
+        if len(_ti.split()) >= 2 and _ti in t:
+            t = " ".join(t.replace(_ti, " ").split())
+    if not t or not re.search(r"[؀-ۿ]", str(text or "")):
+        return None
+    words = t.split()
+    d = sum(1 for w in words if w in _DIALECT_WORDS) + len(_DIALECT_PREFIX.findall(" " + t))
+    f = sum(1 for w in words if w in _FUSHA_WORDS) + len(_FUSHA_PHRASES.findall(" " + t + " "))
+    if f > d:
+        return "fusha"
+    if d > f:
+        return "dialect"
+    return None
+
+
+def visitor_register(user_messages, titles=()):
+    """The latest visitor message with a clear signal decides; none -> "dialect" (the default)."""
+    for m in reversed(list(user_messages or [])):
+        r = message_register(m, titles)
+        if r:
+            return r
+    return "dialect"
+
+
+FUSHA_GUIDANCE = (" الزائر يكتب بالفصحى: اكتب ردك كله بالعربية الفصحى المبسّطة (تريد، ما، لدينا، الآن، شيء، هل تفضّل…)، ولا تستعمل"
+                  " كلمات اللهجة (تبغى، وش، عندنا، الحين، شي، اللي، ولا بمعنى أم).")
+DIALECT_GUIDANCE = " الزائر يكتب باللهجة: رد عليه باللهجة السعودية البسيطة كعادتك."
+
+# safe swaps only (whole words, with an optional «و / ف» before them); phrases first
+_FUSHA_PHRASE_SWAPS = [
+    (r"تبغى أقترح لك|تبغاني أقترح لك|تبي أقترح لك", "هل تريد أن أقترح عليك"),
+    (r"تبغى أعرض لك|تبغاني أعرض لك", "هل تريد أن أعرض عليك"),
+    (r"ما عندنا", "ليس لدينا"), (r"ما عندي", "ليس لدي"), (r"ما لقيت", "لم أجد"), (r"ما لقينا", "لم نجد"),
+    (r"ما فيه", "لا يوجد"), (r"وش اللي", "ما الذي"), (r"إيش اللي|ايش اللي", "ما الذي"),
+    (r"هالفترة|هالفتره", "هذه الفترة"), (r"هالكتاب", "هذا الكتاب"), (r"هالرواية|هالروايه", "هذه الرواية"),
+    (r"هالموضوع", "هذا الموضوع"), (r"هالنوع", "هذا النوع"),
+    (r"تبغى تقرأ|تبغى تقرا|تبي تقرأ|تبي تقرا", "تريد أن تقرأ"), (r"تحب تقرأ|تحب تقرا", "تحب أن تقرأ"),
+    (r"ودك تقرأ|ودك تقرا|ودّك تقرأ|ودّك تقرا", "تودّ أن تقرأ"),
+]
+_FUSHA_WORD_SWAPS = {
+    "تبغى": "تريد", "تبغي": "تريد", "تبغاه": "تريده", "تبغاها": "تريدها", "تبغاهم": "تريدهم", "تبي": "تريد", "تبيه": "تريده",
+    "تبيها": "تريدها", "يبغى": "يريد", "يبي": "يريد", "أبغى": "أريد", "ابغى": "أريد",
+    "وش": "ما", "ايش": "ما", "إيش": "ما", "شو": "ما", "عندنا": "لدينا", "عندك": "لديك", "عندكم": "لديكم", "عندي": "لدي",
+    "الحين": "الآن", "شي": "شيء", "ليش": "لماذا", "وين": "أين", "زين": "جيد", "كذا": "هكذا", "هذي": "هذه", "هذولا": "هؤلاء",
+    "زي": "مثل", "برضه": "أيضًا", "شوي": "قليلًا", "شوية": "قليلًا", "مو": "غير", "مب": "غير", "إيه": "نعم", "ايه": "نعم",
+    "أقدر": "أستطيع", "تقدر": "تستطيع", "نقدر": "نستطيع", "يقدر": "يستطيع", "تحس": "تشعر", "تحسّ": "تشعر",
+    "يحسون": "يشعرون", "يحسّون": "يشعرون", "تقرا": "تقرأ", "عجبك": "أعجبك", "عجبه": "أعجبه", "ودك": "تودّ", "ودّك": "تودّ",
+    "حلو": "جميل", "حلوة": "جميلة", "لقيت": "وجدت", "لقينا": "وجدنا", "تلقى": "تجد", "أبشر": "حسنًا", "ابشر": "حسنًا",
+}
+_FUSHA_WORD_RX = re.compile(r"(?<![\wً-ْ])(و|ف)?(" + "|".join(sorted((re.escape(k) for k in _FUSHA_WORD_SWAPS), key=len, reverse=True))
+                            + r")(?![\wً-ْ])")
+
+
+def fusha_rewrite(text, protect=()):
+    """A reply for a visitor who writes فصحى: the commonest dialect words in it swapped for their فصحى words (whole words
+    only), a question's «X ولا Y» made «X أم Y», and a sentence opening with «تريد …» made «هل تريد …».
+    CHATFIX30c (6), AUDIT 2026-10-30 P2: «سلسلة التربية الاجتماعية: خيرا تعمل خيرا تلقى» came out «… خيرا تجد». Every «…»
+    quoted span and every string in `protect` (titles and author names) is kept verbatim."""
+    if not text or not re.search(r"[؀-ۿ]", text):
+        return text
+    kept = []
+    def _hold(s):
+        kept.append(s)
+        return "" + str(len(kept) - 1) + ""
+    out = re.sub(r"«[^»]{1,200}»|“[^”]{1,200}”|\"[^\"]{1,200}\"", lambda m: _hold(m.group(0)), text)
+    for p in sorted({str(p).strip() for p in protect or () if p and len(str(p).strip()) >= 2}, key=len, reverse=True):
+        if p in out:
+            # «لحسن زين الدين»، «وخيرا تعمل…»: a joined «ل / و / ب / ف» before the name is held with it
+            out = re.sub(r"(?<![\wً-ْ])(?:لل|[ولبف])?" + re.escape(p) + r"(?![\wً-ْ])", lambda m: _hold(m.group(0)), out)
+    out = _fusha_words(out)
+    for i in range(len(kept) - 1, -1, -1):   # inner holds were made after outer ones: restore from the last
+        out = out.replace("" + str(i) + "", kept[i])
+    return out
+
+
+def _fusha_words(out):
+    for pat, rep in _FUSHA_PHRASE_SWAPS:
+        out = re.sub(r"(?<![\wً-ْ])(" + pat + r")(?![\wً-ْ])", rep, out)
+    out = _FUSHA_WORD_RX.sub(lambda m: (m.group(1) or "") + _FUSHA_WORD_SWAPS[m.group(2)], out)
+    # «خفيف ولا عميق؟» -> «خفيف أم عميق؟» inside a question only
+    out = re.sub(r"[^.!؟?]*[؟?]", lambda m: re.sub(r"(?<=\S) ولا (?=\S)", " أم ", m.group(0)), out)
+    # «… . تريد أن أقترح …؟» -> «هل تريد …؟»
+    out = re.sub(r"(^|[.!؟?،:]\s*)(تريد|تفضّل|تفضل|تحب|تودّ|تود|تميل)(?= [^.!؟?]*[؟?])", lambda m: m.group(1) + "هل " + m.group(2), out)
+    out = re.sub(r"هل هل ", "هل ", out)
+    return out
+
+
+# CHATFIX30b (1), Ibrahim 2026-10-30 on «كتب عن أفغانستان»: «واضح وتقترح». Books asked for ABOUT a subject («كتب عن X»، «كتاب عن X»،
+# «عندكم كتب عن X؟»، «روايات عن X») are a clear request; a bare word («أفغانستان»، «فلسفة») stays a general first message.
+_BOOKS_ABOUT = re.compile(r"(?:^| )(?:ال)?(?:كتب|كتاب|كتابا|كتابين|روايه|روايات|قصص|قصه|books?|novels?|stories) (?:عن|حول|بخصوص|about|on) \S")
+
+
+def books_about_asked(message):
+    return bool(_BOOKS_ABOUT.search(" ".join(normalize(message or "").split())))
+
+
+# CHATFIX30b (3): «التلوين» / «كتب تلوين» / «ابي كتاب تلوين لبنتي» — colouring and other activity books are children's books
+# («مجموعة التلوين الكبيرة»، «كتاب تلوين حروف وحيوانات»), a concrete kind of book, not a general wish
+_ACTIVITY = re.compile(r"(?:^| )(?:[وبل]|بال|لل|وال)?(?:ال)?(?:تلوين|تلوينيه|ملصقات|استيكرات|ستيكرات|انشطه|نشاطات|متاهات|متاهه|"
+                       r"قص ولصق|كلمات متقاطعه|colou?ring|activity books?|sticker books?|mazes?)(?: |$)")
+_ACTIVITY_ADULT = re.compile(r"(?:^| )(?:للكبار|كبار|الكبار|لي انا|لنفسي|للبالغين|adults?|grown ?ups?|for me)(?: |$)")
+
+
+def activity_wish(message):
+    """A children's activity book asked for (colouring, stickers, mazes …), not for a grown-up («تلوين للكبار»)."""
+    t = " ".join(normalize(message or "").split())
+    return bool(_ACTIVITY.search(t)) and not _ACTIVITY_ADULT.search(t)
+
+
+# CHATFIX30b (4): «قوة الآن» (Eckhart Tolle, self-help / spirituality) missing — «ظلام مرئي: مذكرات الجنون» (a memoir of
+# depression) was offered as close to it. A self-help or spiritual book is answered from those shelves only
+_SELFHELP_TAGS = re.compile(r"self[- ]help|spirituality|personal development|personal growth|mindfulness|meditation|inspirational|"
+                            r"تطوير الذات|تطوير ذات|تنميه بشريه|روحاني", re.I)
+SELFHELP_SHELVES = {"تطوير ذاتي", "علم نفس", "دين", "فكر"}
+
+
+def reference_form(ref, outside=None):
+    """reference_is_fiction, with one narrower non-fiction kind: "selfhelp" for a self-help / spirituality book."""
+    fic = reference_is_fiction(ref, outside)
+    if fic is True:
+        return True
+    first_tags = " | ".join(str(g) for g in ((outside or {}).get("genres") or [])[:3])   # its main tags only
+    subs = " ".join(str(s) for s in ((ref or {}).get("subgenres") or []))
+    if ((ref or {}).get("format") == "self_dev" or (first_tags and _SELFHELP_TAGS.search(first_tags))
+            or _SELFHELP_TAGS.search(normalize(subs))):
+        return "selfhelp"
+    return fic
+
+
+# CHATFIX30c (2), conversation c-mvvbiykv (2026-10-30 21:41): «فاجئيني بكتب جديدة» got «تبغى المفاجأة رواية، ولا كتاب غير روائي؟»
+# — «فاجئيني» is a request for books now; and the «جديدة» of that request stayed through «شي في علم النفس» and «ابا اجمل روايه
+# رومنسيه» (romance limited to 2023+). A wish belongs to the request it came with: it carries only into follow-ups of it
+def surprise_asked(text):
+    return bool(_GEN_SURPRISE.search(" ".join(normalize(text or "").split())))
+
+
+_FOLLOW_WORDS = {normalize(w) for w in (
+    "غيرها غيره غيرهم غير ثاني ثانيه ثانية ثانين ثانيين اخرى أخرى اخر آخر الثاني كمان زياده زيادة المزيد بعد ايضا أيضا "
+    "اقصر أقصر اطول أطول ارخص أرخص اخف أخف اسهل أسهل اثقل أثقل احدث أحدث اقدم أقدم اصغر أصغر اكبر أكبر منها منه منهم "
+    "شي شيء طيب بس اوكي تمام لا ايه إيه نعم ابي ابغى أبغى ابغا ابا أبا ودي هات عطني عطيني اعطني ورني ورّني وريني "
+    "اقتراحات اقتراح ترشيحات خيارات خيار ثانيه وحده واحد واحده كتاب كتب رواية روايه "
+    "more other others another else shorter cheaper lighter newer one ones different").split()}
+
+
+def followup_only(text):
+    """A message that only asks for more of the same or a nearer fit («غيرها»، «أقصر»، «شي ثاني»، "another one") and names no
+    new subject, kind or reader."""
+    words = re.findall(r"\w+", normalize(text or ""))
+    return bool(words) and all(w in _FOLLOW_WORDS or w in _GEN_FILL for w in words)
+
+
+# CHATFIX30c (1), real chat 2026-10-30 23:01: «ابغى روايات تاريخية تقييمها عالي» -> «أغالب مجرى النهر … بعض القرّاء أعطوه تقييمًا
+# عاليًا: فاز بالبوكر العربية 2026» and «قطار إلى سمرقند … وتقييم بعض القرّاء له مرتفع» — a prize called a rating, and a rating
+# claimed with no source. Ratings come only from our data: books.goodreads_rating (GRRATE), shown with 5 ratings or more
+# (Ibrahim 2026-11-01 «غير الحد للاثنين الى ٥ تقاييم»: card and chat, was 50)
+RATING_MIN_COUNT = 5
+_RATING_WISH = re.compile(
+    r"(?:^| )(?:ب|و)?(?:ال)?تقييم(?:ه|ها|هم|ات|اته|اتها)? (?:ال)?(?:عالي|عاليه|عال|مرتفع|مرتفعه|ممتاز|ممتازه|قوي|حلو|كويس|زين)(?: |$)"
+    r"|(?:^| )(?:ال)?(?:اعلي|اعلى|الاعلي|الاعلى|افضل|الافضل|اقوي|احسن) (?:تقييم|تقييما|التقييمات|تقييمات)(?: |$)"
+    r"|(?:^| )(?:عالي|عاليه|مرتفع|مرتفعه) (?:ال)?تقييم(?: |$)|(?:^| )(?:مقيم|مقيمه|مقيّم) (?:عالي|بشكل عالي|زين)(?: |$)"
+    r"|highly rated|high(?:ly)?[- ]rated|best[- ]rated|top[- ]rated|high ratings?|well[- ]rated|good ratings?")
+
+
+def high_rating_wished(text):
+    """«تقييمها عالي»، «الأعلى تقييمًا»، «highly rated»: a wish for books readers rated highly."""
+    return bool(_RATING_WISH.search(" ".join(normalize(text or "").split())))
+
+
+def rating_phrase(u):
+    """An unsupported wish that is only the rating wish («تقييم مرتفع») — never a subject to search."""
+    return high_rating_wished(u)
+
+
+_RATING_CLAIM = re.compile(
+    r"(?:و)?(?:بعض |كثير من |اغلب |أغلب |معظم )?(?:ال)?(?:قرّاء|قراء)?\s*(?:أعطوه|اعطوه|أعطوها|اعطوها|يعطونه|يعطونها|منحوه|منحوها)\s+"
+    r"تقييم(?:ًا|ا)?\s+(?:عاليًا|عاليا|عالٍ|عالي|مرتفعًا|مرتفعا|ممتازًا|ممتازا)"
+    r"|(?:و)?تقييم(?:ه|ها|اته|اتها)?(?:\s+(?:بعض\s+)?(?:ال)?(?:قرّاء|قراء))?(?:\s+(?:له|لها))?\s+(?:عالٍ|عالي|عالية|مرتفع|مرتفعة|ممتاز|ممتازة)"
+    r"|(?:و)?(?:عالي|مرتفع|مرتفعة|عالية) التقييم"
+    r"|(?:and )?(?:is |are )?(?:highly|well) rated|(?:has |with )?(?:a )?(?:high|strong|excellent) ratings?|rated highly",
+    re.IGNORECASE)
+
+
+def strip_unsourced_rating(reply, rated_titles):
+    """Every «rated highly» claim about a book whose facts carry no rating is taken out of the reply (the rest of its
+    sentence stays: «… فاز بالبوكر العربية 2026» is a prize, said as a prize). A claim next to a rated book stays."""
+    if not reply or not _RATING_CLAIM.search(reply):
+        return reply
+    rated = {title_key(t) for t in rated_titles or () if t}
+    sentences = re.split(r"(?<=[.!؟?])\s+", reply)
+    out = []
+    for s in sentences:
+        if not _RATING_CLAIM.search(s):
+            out.append(s)
+            continue
+        titles = [title_key(x) for g in re.findall(r"«([^»]{1,150})»|“([^”]{1,150})”", s) for x in g if x]
+        if titles and any(t in rated for t in titles):
+            out.append(s)
+            continue
+        # clause by clause («؛» / «،» / «:»): the claim goes, the clause's other words stay (titles are held whole)
+        held = []
+        s = re.sub(r"«[^»]{1,150}»|“[^”]{1,150}”", lambda m: (held.append(m.group(0)), "" + str(len(held) - 1) + "")[1], s)
+        parts = re.split(r"(\s*[؛;،,:]\s*)", s)
+        kept = []
+        for p in parts:
+            if _RATING_CLAIM.search(p):
+                rest = _RATING_CLAIM.sub("", p).strip(" ،,؛;:")
+                if len(rest.split()) >= 2 and re.search(r"\w", rest.strip(" .!؟?")):
+                    kept.append(rest)
+                else:
+                    end = re.search(r"[.!؟?]+\s*$", p)   # the sentence's own end stays
+                    if end:
+                        kept.append(end.group(0).strip())
+                continue
+            kept.append(p)
+        s2 = "".join(kept)
+        s2 = re.sub(r"\s*([؛;،,:])\s*(?:[؛;،,:]\s*)+", r"\1 ", s2)          # doubled separators
+        s2 = re.sub(r"\s*[؛;،,:]\s*(?=[.!؟?]|$)", "", s2).strip()            # a separator left before the end
+        s2 = re.sub(r"\s+([.!؟?])", r"\1", s2)
+        for i, h in enumerate(held):
+            s2 = s2.replace("" + str(i) + "", h)
+        if re.search(r"\w", s2):
+            out.append(s2)
+    return " ".join(x for x in out if x)
+
+
+def arabic_digits(text):
+    return str(text).translate(str.maketrans("0123456789.,", "٠١٢٣٤٥٦٧٨٩٫٬"))
+
+
+# CHATFIX30c (4), real chat eae1871d turn 1: «… أو «عصر الحب» لنجيب محفوظ…، وبعض القرّاء يحسّون «التميمة» قراءة خفيفة عاطفيًا،
+# وهي ١٧٦ صفحة…» — a book on the cards named only as the object of a readers' impression, never introduced with its author.
+# Every card book the reply names gets its author at its first mention when the reply never names him
+_NO_AUTHOR_NAMES = {normalize(x) for x in ("غير معروف", "مجهول", "unknown", "مجموعة مؤلفين", "مجموعه مؤلفين", "various")}
+
+
+_IMPRESSION_BEFORE = re.compile(r"(?:يحسّون|يحسون|يحس|يحسّ|يحسونها|يجدون|يرون|وصفوا|يصفون|يشعرون|يعتبرون|وجدوا|اعتبروا|"
+                                r"feel|feels|find|finds|found|describe|describes|described|consider|considers)\s*$", re.IGNORECASE)
+
+
+def _lam(name):
+    """«لـ» before a name as Manar writes it: «لنبيل فاروق»، «للطيب صالح»."""
+    return ("لل" + name[2:]) if name.startswith("ال") else ("ل" + name)
+
+
+def introduce_authors(reply, books, language="ar"):
+    """books: [(title, author as displayed)] of the cards. -> the reply with «X» لـAuthor at X's first mention, for each card
+    book the reply names by its title while its author's name appears nowhere in it."""
+    if not reply:
+        return reply
+    out = reply
+    norm_reply = " " + " ".join(normalize(re.sub(r"«[^»]*»|“[^”]*”", " ", out)).split()) + " "
+    for title, author in books or ():
+        a = " ".join(str(author or "").split())
+        if not title or not a or normalize(a).strip() in _NO_AUTHOR_NAMES:
+            continue
+        aw = [w for w in normalize(a).split() if len(strip_al(w)) >= 3]
+        if not aw or " " + " ".join(normalize(a).split()) + " " in norm_reply or any(" " + w + " " in norm_reply
+                                                                                   or " ل" + w + " " in norm_reply for w in aw[-1:]):
+            continue   # he is named somewhere (in full, or by his family name)
+        keys = {title_key(title), title_key(str(title).split(":")[0])}
+        for m in re.finditer(r"«([^»]{1,150})»|“([^”]{1,150})”", out):
+            q = m.group(1) or m.group(2)
+            if title_key(q) not in keys:
+                continue
+            before = out[max(0, m.start() - 40):m.start()]
+            if not _IMPRESSION_BEFORE.search(before):
+                break   # named the ordinary way; only a title that first comes as the object of an impression is fixed
+            after = out[m.end():m.end() + 30]
+            if re.match(r"\s*(?:ل(?!كن|ان |أن |ها |ه |هم |لأطفال|لاطفال|لكبار|لقراء|لقرّاء|لمبتدئين)\S{2,}|by\s)", after):
+                break   # an author already follows the title
+            add = (" by " + a) if (language == "en" or m.group(2)) else (" " + _lam(a))
+            out = out[:m.end()] + add + out[m.end():]
+            break
+    return out
+
+
+_WHY_WORDS = {normalize(w) for w in "ليش ليه وش ايش شو لماذا ماذا كيف هل وين متى why what how where when".split()}
+
+
+def narrowing_only(text):
+    """CHATFIX30c (2): a short answer that narrows the request just made («رواية»، «أحب الروايات الغامضة»، «ابي شي غير روائي»)
+    — no question of its own («ليش اخترت لي هذه الكتب») and no new field («شي في علم النفس» after «روايات جديدة»)."""
+    raw = str(text or "")
+    words = re.findall(r"\w+", normalize(raw))
+    if not words or len(words) > 6 or re.search(r"[؟?]", raw):
+        return False
+    if any(w in _WHY_WORDS for w in words):
+        return False
+    # a new field («شي في علم النفس» after «روايات جديدة») is a new request; a form or a mood («الغامضة») narrows
+    try:
+        genres = set(keyword_prefs.understand([raw]).get("genres") or ())
+    except Exception:
+        genres = set()
+    return genres <= {"رواية", "قصص قصيرة", "شعر", "مسرحية", "قصص مصورة"}
+
+
+# CHATFIX31 (1d): "a light Arabic novel" is a novel first written in Arabic; "in Arabic" / "Arabic edition" is about the copy
+_AR_ORIGIN = re.compile(r"\barabic (?:\w+ )?(?:novels?|books?|literature|fiction|stories|story|poetry|poems?|writers?|authors?|novelists?|classics?)\b"
+                        r"|\b(?:novels?|books?|literature) (?:by|from) (?:an? )?arab(?:ic)? (?:writers?|authors?)\b|\barab (?:writers?|authors?|novelists?)\b",
+                        re.IGNORECASE)
+_AR_COPY = re.compile(r"\bin arabic\b|\barabic (?:edition|version|translation|copy|copies)\b|\btranslated (?:in|into) arabic\b", re.IGNORECASE)
+
+
+def arabic_origin_asked(text):
+    t = str(text or "")
+    return bool(_AR_ORIGIN.search(t)) and not _AR_COPY.search(t)
+
+
+# CHATFIX31 (1a): the card's «why this book» line. The labels come from the scoring (score_book, score_profile_card, the subject
+# search): the most specific first, the bare shelf only alone
+_SHELF_ONLY = re.compile(r"^من تصنيف «[^»]+» كما طلبت$")
+_REASON_RANK = [
+    (re.compile(r"^(?:يتناول|عنوانه عن|نبذته تذكر|قريب من موضوع) «"), 0),       # the subject asked for
+    (re.compile(r"^(?:قريب من|يشبه|مثل|من نفس نوع|عنوانه مأخوذ من) «"), 1),         # «مثل X»
+    (re.compile(r"^(?:فاز|فازت|مؤلفه فاز|مؤلفها فازت|وصل|وصلت|ضمن|في القائمة)"), 2),  # a prize
+    (re.compile(r"^تحوّل إلى"), 2),
+    (re.compile(r"^(?:من أعمال|كاتبه|كاتبته|لمؤلف|مانجا)"), 3),
+    (re.compile(r"^تصنيفه الفرعي"), 4),
+    (re.compile(r"^(?:أجواؤه|إيقاعه|قراءة|مناسب|لغته|أسلوبه|ما يحتاج|يرجّعك)"), 5),
+    (re.compile(r"^(?:قصير نسبيًا|عمل طويل|عدد صفحاته|سعره)"), 6),
+]
+
+
+def _rank(r):
+    for rx, n in _REASON_RANK:
+        if rx.search(r):
+            return n
+    return 7 if _SHELF_ONLY.search(r) else 6
+
+
+def card_reasons(reasons):
+    """The reasons in the order a visitor reads them best; the bare shelf goes when anything more specific is there."""
+    rs = [r for r in reasons if isinstance(r, str) and r.strip()]
+    if any(not _SHELF_ONLY.search(r) for r in rs):
+        rs = [r for r in rs if not _SHELF_ONLY.search(r)]
+    return sorted(rs, key=_rank)
+
+
+def short_reason(r):
+    """«تصنيفه الفرعي «رواية تاريخية» يوافق طلبك» -> «رواية تاريخية كما طلبت»; «عدد صفحاته ١٧٦» -> «١٧٦ صفحة»; a price in
+    Arabic digits."""
+    m = re.match(r"^تصنيفه الفرعي «([^»]+)» يوافق طلبك$", r)
+    if m:
+        return f"«{m.group(1)}» كما طلبت"
+    m = re.match(r"^سعره ([\d.]+) ريال$", r)
+    if m:
+        return f"سعره {arabic_digits(m.group(1))} ريال"
+    return r
+
+
+# CHATFIX31 (1c), Ibrahim 2026-11-01 «ابدا» (the chat review's «quick answers» step): the tap-ready answers under a reply are
+# short, tied to what was just shown, never the visitor's own request again, never something our data cannot answer. The
+# server pads them to five afterwards (helper_chips.pad, Ibrahim 2026-10-27: «اقل شيء ٥ اختيارات مساعدة»)
+_CHIP_NOT_ANSWERABLE = re.compile(r"(?:^| )(?:ا?حجز\w*|اشتري\w*|شراء|اطلبه|اطلبها|اطلبي|توصيل|توصلونه|"
+                                  r"متوفر بفرع|تاكدي من توفره|وين القاه|وين الاقيه|reserve\w*|buy|order it|delivery|deliver)(?: |$)")
+# (chat.RESPOND_SYSTEM rule 9 already asks for none of these: no booking, buying or delivery in the chat, the place is on the card)
+_CHIP_PRICE = re.compile(r"سعر|بكم|كم يكلف|price|cost")
+_CHIP_PAGES = re.compile(r"كم صفح|صفحاته|pages")
+# questions about the shown books only («روايات مترجمة»، «روايات تقييمها عالي» are new requests and stay)
+_CHIP_RATING = re.compile(r"(?:^| )(?:وش|ايش|شو|كم|ما|what|how)(?: .*)? (?:تقييم\w*|rating\w*|rated)")
+_CHIP_TRANSLATOR = re.compile(r"(?:^| )(?:من|مين|منو|who)(?: .*)? (?:ترجم\w*|مترجم\w*|translat\w*)|translator")
+
+
+def clean_chips(chips, last_message, books, language="ar"):
+    """-> at most five chips: no repeat of the visitor's message, none longer than five words, none the data cannot answer
+    (a price or a page count no shown book has), and one tied to the cards first when the model gave none."""
+    en = language == "en"
+    last = " ".join(normalize(last_message or "").split())
+    books = [b for b in books or [] if isinstance(b, dict)]
+    out, seen = [], set()
+    for c in chips or []:
+        if not isinstance(c, str) or not c.strip():
+            continue
+        k = " ".join(normalize(c).split())
+        if not k or k in seen or k == last or (last and ((len(k) >= 6 and k in last) or (len(last) >= 8 and last in k))):
+            continue
+        if len(k.split()) > 5 or _CHIP_NOT_ANSWERABLE.search(" " + " ".join(re.sub(r"[^\w\s]", " ", k).split()) + " "):
+            continue
+        if _CHIP_PRICE.search(k) and books and not any(b.get("price") for b in books):
+            continue
+        if _CHIP_PAGES.search(k) and books and not any(b.get("page_count") for b in books):
+            continue
+        # «وش تقييمها؟» with no rating in our data (the replay of 2026-11-01), «من مترجم الثاني؟» with no translator recorded
+        if _CHIP_RATING.search(k) and books and not any(b.get("goodreads_rating") and (b.get("goodreads_ratings_count") or 0)
+                                                        >= RATING_MIN_COUNT for b in books):
+            continue
+        if _CHIP_TRANSLATOR.search(k) and books and not any(b.get("translator") for b in books):
+            continue
+        seen.add(k)
+        out.append(c.strip())
+    tied = None
+    if len(books) == 1 and not any(re.search(r"قريب|مثله|زيه|يشبه|similar|like it|like this", " ".join(normalize(c).split())) for c in out):
+        # the card already shows its price, pages and place: the way on is a book like it (the same words the server uses
+        # after a book named, so it is understood when tapped)
+        tied = "Something similar" if en else "كتب قريبة منه"
+    elif len(books) >= 2 and not any(re.search(r"اخف|اقصر|lighter|shorter|اسهل|easier", " ".join(normalize(c).split())) for c in out):
+        tied = ("Which is shortest?" if en else "أي واحد أقصر؟") if sum(1 for b in books if b.get("page_count")) >= 2 else (
+            "Which is lighter?" if en else "أي واحد أخف؟")
+    if tied and " ".join(normalize(tied).split()) not in seen and " ".join(normalize(tied).split()) != last:
+        out.insert(0, tied)
+    return out[:5]
+
+
+# CHATFIX31 (1b), Ibrahim 2026-11-01 «ابدا» (the chat review's «reply length» step): about 45–60 words is asked of the model
+# (chat.RESPOND_SYSTEM rule 8). A reply that still runs far over is cut at sentence boundaries: the first sentence, every
+# sentence that names a book (a «title», or a card's title written plainly) and the final question always stay
+TRIM_OVER = 85      # words: a reply longer than this is trimmed
+TRIM_TO = 70        # words: sentences are dropped until the reply is no longer than this (or none is left to drop)
+
+
+def _sentences(text):
+    """-> the sentences of a reply with their ending (and the space after it); never split inside «…» or “…”."""
+    out, cur, depth = [], "", 0
+    i, s = 0, str(text or "")
+    while i < len(s):
+        ch = s[i]
+        cur += ch
+        if ch in "«“":
+            depth += 1
+        elif ch in "»”" and depth:
+            depth -= 1
+        elif depth == 0 and (ch in ".!؟?\n" and not (ch == "." and i + 1 < len(s) and s[i + 1].isdigit())):
+            while i + 1 < len(s) and s[i + 1] in ".!؟? \n\t":
+                i += 1
+                cur += s[i]
+            out.append(cur)
+            cur = ""
+        i += 1
+    if cur.strip():
+        out.append(cur)
+    return out
+
+
+def _words(text):
+    return len(re.findall(r"[^\s«»“”.,،؛:!؟?()\-–—]+", str(text or "")))
+
+
+def trim_reply(reply, titles=(), over=TRIM_OVER, to=TRIM_TO):
+    """-> (the reply, the sentences dropped). Unchanged when it is no longer than `over` words."""
+    text = str(reply or "")
+    if _words(text) <= over:
+        return text, []
+    parts = _sentences(text)
+    if len(parts) <= 2:
+        return text, []
+    keys = [" ".join(normalize(t).split()) for t in titles or () if t and len(normalize(t).strip()) >= 4]
+    def protected(n):
+        p = parts[n]
+        if n == 0 or "«" in p or "“" in p:
+            return True
+        if n == len(parts) - 1 and re.search(r"[؟?]\s*$", p):
+            return True
+        np = " " + " ".join(normalize(p).split()) + " "
+        return any(k in np for k in keys)
+    keep = list(range(len(parts)))
+    dropped = []
+    for n in reversed(range(len(parts))):
+        if sum(_words(parts[k]) for k in keep) <= to:
+            break
+        if protected(n):
+            continue
+        keep.remove(n)
+        dropped.append(parts[n].strip())
+    if not dropped:
+        return text, []
+    out = "".join(parts[k] for k in keep).strip()
+    return re.sub(r"[ \t]{2,}", " ", out), list(reversed(dropped))

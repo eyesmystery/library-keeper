@@ -44,6 +44,7 @@ def fake_get(url, timeout=15):
         return url, PNG
     raise OSError("no page")
 covers.http_get = fake_get
+PE.safe_get = fake_get   # AUDFIX redirect fix: «اجلب من الرابط» fetches through page_extract.safe_get (redirects: test_audfix_redirect)
 _real_gai = socket.getaddrinfo
 def fake_gai(host, port, *a, **k):
     ip = "127.0.0.1" if host in ("localhost", "intranet.example.com") else "93.184.216.34"
@@ -92,7 +93,8 @@ con.execute("update books set isbn=NULL, translator=NULL, page_count=NULL where 
 d = login(A.app.test_client(), "developer"); s = login(A.app.test_client(), "staff")
 H = lambda c: {"X-CSRF-Token": c.csrf}
 URL = "https://shop.example.com/products/1984"
-ok(s.post(f"/api/admin/books/{bid}/from-page", json={"url": URL}, headers=H(s)).status_code == 403, "developer only")
+_rs = s.post(f"/api/admin/books/{bid}/from-page", json={"url": URL}, headers=H(s))
+ok(_rs.status_code == 200 and _rs.get_json()["fields"].get("isbn") == "9786589090540", "staff may use it too (Ibrahim 2026-10-29 «افتحها للموظفين كلهم»)")
 r = d.post(f"/api/admin/books/{bid}/from-page", json={"url": URL}, headers=H(d))
 j = r.get_json()
 ok(r.status_code == 200 and j["fields"]["isbn"] == "9786589090540" and j["current"]["isbn"] is None, "the developer gets the page's values and ours")
@@ -114,7 +116,7 @@ def fake_complete(system, messages, schema, max_tokens=700, active=None):
     calls.append((system, messages)); return {"summary": "  تعود شابة إلى قريتها بعد الكارثة بحثًا عن أخيها.  "}
 A.llm.complete_json = fake_complete
 DESC = "After the disaster, a young woman returns to her village to look for her brother. A story of loss and hope."
-ok(s.post(f"/api/admin/books/{bid}/summary-from-text", json={"text": DESC}, headers=H(s)).status_code == 403, "Arabic summary: developer only")
+ok(s.post(f"/api/admin/books/{bid}/summary-from-text", json={"text": DESC}, headers=H(s)).status_code == 200, "Arabic summary: staff too")
 ok(d.post(f"/api/admin/books/{bid}/summary-from-text", json={"text": "short"}, headers=H(d)).status_code == 400, "a too-short description is refused")
 r = d.post(f"/api/admin/books/{bid}/summary-from-text", json={"text": DESC}, headers=H(d)); j2 = r.get_json()
 ok(r.status_code == 200 and j2["summary"] == "تعود شابة إلى قريتها بعد الكارثة بحثًا عن أخيها.", f"the model's Arabic summary is returned, trimmed ({j2})")

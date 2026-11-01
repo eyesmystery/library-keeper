@@ -12,6 +12,7 @@ import os
 import testlog
 import staff_ideas
 import staff_notes
+import start_taps
 import visitor_notes
 from models import get_connection
 import integrity
@@ -75,11 +76,12 @@ FIELD_AR = {
     "age_max": "أعلى عمر", "summary": "النبذة", "name_ar": "الاسم", "name_latin": "الاسم اللاتيني",
     "aliases": "أسماء أخرى", "origin": "البلد", "staff_verified": "تأكيد الموظف",
     "title": "العنوان", "author": "المؤلف", "publisher": "الناشر", "genre": "التصنيف", "page_count": "عدد الصفحات",
-    "publication_year": "سنة النشر", "isbn": "ISBN",
+    "publication_year": "سنة النشر", "isbn": "ISBN", "goodreads_url": "رابط Goodreads",
 }
-SKIP_FIELDS = {"summary_source", "summary_updated_at", "age_source"}
+SKIP_FIELDS = {"summary_source", "summary_updated_at", "age_source", "goodreads_url_source"}
 ACTION_AR = {
-    "book.update": "تعديل بيانات كتاب", "book.confirmation": "رد على «تأكيد هوية الكتاب»",
+    "book.update": "تعديل بيانات كتاب", "book.reviewed": "تمت مراجعة الكتاب", "book.unreviewed": "إلغاء مراجعة الكتاب",
+    "book.confirmation": "رد على «تأكيد هوية الكتاب»",
     "book.confirmation.undo": "تراجع عن رد «تأكيد الهوية»", "book.delete": "حذف من الكتالوج",
     "book.restore": "استرجاع منتج محذوف", "book.honor.add": "إضافة جائزة / عمل مقتبس",
     "book.honor.delete": "حذف جائزة / عمل مقتبس", "cover.upload": "رفع غلاف", "cover.delete": "حذف غلاف",
@@ -173,8 +175,8 @@ def _edit_lines(r, books):
     elif act == "book.delete" and isinstance(d, dict):
         out.append(f"- السبب: {REASON_AR.get(d.get('reason'), _md(d.get('reason')))}"
                    + (f" · ملاحظة: {_md(d.get('note'))}" if d.get("note") else ""))
-    elif act == "book.restore":
-        pass
+    elif act in ("book.restore", "book.reviewed", "book.unreviewed"):
+        pass   # the head line says it all (AGY-20261029-E2: a review's evidence ids mean nothing at the developer's)
     elif isinstance(d, dict) and d:
         out.append("- التفاصيل: " + _md(json.dumps(d, ensure_ascii=False))[:400])
     elif d:
@@ -546,6 +548,29 @@ def build(status="open", generated_by=None):
                 + (STATUS_AR.get(r.get("status"), r.get("status")) if r.get("status") != "done"
                    else f"{STATUS_AR.get('done', 'done')} ({_md(r.get('handled_by')) or '—'} {_when(r.get('handled_at'))})"),
                 f"- الآن: الدار {_md(r.get('publisher')) or '—'} · ISBN {_md(r.get('isbn')) or '—'}", ""]
-    counts = {"reviews": len(reviews), "research": len(rq), "candidates": len(cand), "dev_notes": len(dnotes), "confirmations": len(answers), "test_conversations": len(convs) + convs_left, "reports": len(reports), "suggestions": len(suggestions), "questions": len(questions), "edits": len(edits),
+    # «من أين يبدأ الزوار» (STARTTAP, Ibrahim 2026-11-01 «تمام اضف العداد»): taps on the three start choices, per day
+    try:
+        tap_days, tap_started = start_taps.daily(None if status == "all" else EDIT_DAYS)
+    except Exception:  # never break the export over this section
+        tap_days, tap_started = [], None
+    tap_total = sum(d["total"] for d in tap_days)
+    out += [f"## 14. من أين يبدأ الزوار: ضغطات صفحة البداية ({tap_total})", "",
+            ("- المدة: كل السجل" if status == "all" else f"- المدة: آخر {EDIT_DAYS} يومًا، كل يوم بعدده الكامل حتى وقت هذا الملف")
+            + (f" · العدّ بدأ في {tap_started}" if tap_started else " · العدّ لم يبدأ بعد (ما فيه أي ضغطة مسجّلة)")
+            + f" · تصغير الرابطين تحت الزر الكبير كان في {start_taps.LINKS_SMALLER_DAY} الساعة 19:00", "",
+            "> **لـ Claude:** عدد ضغطات كل خيار في صفحة البداية لكل يوم (بتوقيت الرياض): «"
+            + "»، «".join(start_taps.LABELS_AR[c] for c in start_taps.CHOICES) + "». أرقام فقط، بلا أي بيانات عن الزائر؛ "
+            "لا تُحسب ضغطات وضع الاختبار ولا ضغطات متصفح داخل لوحة الإدارة.", ""]
+    if not tap_days:
+        out += ["لا يوجد.", ""]
+    else:
+        out += ["| اليوم | خلّنا نلقى كتابك (المحادثة) | قرأت كتابًا؟ شاركنا رأيك | اقترح كتابًا لرفوفنا | المجموع |",
+                "|---|---|---|---|---|"]
+        for d in tap_days:
+            out.append(f"| {d['day']} | {d['chat']} | {d['reading']} | {d['shelf']} | {d['total']} |")
+        sums = {c: sum(d[c] for d in tap_days) for c in start_taps.CHOICES}
+        cell = lambda c: f"{sums[c]} ({round(100 * sums[c] / tap_total)}٪)"
+        out += [f"| **المجموع** | {cell('chat')} | {cell('reading')} | {cell('shelf')} | {tap_total} |", ""]
+    counts = {"start_taps": tap_total, "reviews": len(reviews), "research": len(rq), "candidates": len(cand), "dev_notes": len(dnotes), "confirmations": len(answers), "test_conversations": len(convs) + convs_left, "reports": len(reports), "suggestions": len(suggestions), "questions": len(questions), "edits": len(edits),
               "staff_changes": len(changes), "imports": len(imports), "ideas": len(ideas)}
     return "\n".join(out).rstrip() + "\n", counts

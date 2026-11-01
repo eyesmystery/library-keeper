@@ -161,7 +161,9 @@ gq, _, _ = author_flow.resolve(dict(nreq, name_as_written="ريم الغامدي
 ok(gq == "ما عندنا كتب لـريم الغامدي الآن، تقصد مين: «خالد الغامدي»، «سارة الغامدي»، «نورة الغامدي» ولا «هند الغامدي»؟", "up to five people with the family name are listed, available books first")
 many_cat = near_cat + [{"author": n + " الغامدي", "active": 1, "quantity": 1} for n in ("ماجد", "ليلى")]
 mq, mnames, _ = author_flow.resolve(dict(nreq, name_as_written="ريم الغامدي"), [{"role": "user", "content": "كتب ريم الغامدي"}], many_cat)
-ok(mq == "ما عندنا كتب لـريم الغامدي الآن، وعندنا أكثر من مؤلف بنفس اللقب. وش اسم المؤلف اللي تقصده كامل؟" and mnames is None, "more than five people with the family name: asked for the full name, no list")
+# QADFIX25 (QAD 2026-10-31, case 25.2): a full name written is not asked for again — «ما عندنا كتب لـريم الغامدي» (the caller's answer)
+ok(mq is None and mnames == set(), "more than five people with the family name: a full name written is not asked for again (QADFIX25)")
+mq = "ما عندنا كتب لـريم الغامدي الآن، وعندنا أكثر من مؤلف بنفس اللقب. وش اسم المؤلف اللي تقصده كامل؟"
 r, names, _ = author_flow.resolve(dict(nreq, name_as_written="ريم الغامدي"), [{"role": "user", "content": "كتب ريم الغامدي"}, {"role": "assistant", "content": mq}, {"role": "user", "content": "ريم الغامدي"}], many_cat)
 ok(r is None and names == set(), "the full-name question is asked once, then the usual no-such-author answer")
 joint_cat = [{"author": a, "active": 1, "quantity": 1} for a in ["ويندي براون", "طلال أسد، جوديث بتلر، ويندي براون، صبا محمود", "دان براون", "مايكل براون"]]

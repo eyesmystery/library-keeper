@@ -176,7 +176,10 @@ def similar_to(text, book_ids, top=4, threshold=None):
     qv = embed([text], timeout=8.0)
     if not qv:
         return []
-    q = qv[0]
+    return _nearest(qv[0], vecs, book_ids, top, threshold)
+
+
+def _nearest(q, vecs, book_ids, top, threshold):
     scored = []
     for i in book_ids:
         v = vecs.get(i)
@@ -188,6 +191,21 @@ def similar_to(text, book_ids, top=4, threshold=None):
     stale = _drop_changed([i for i, _ in scored[:top * 2]])
     scored = [x for x in scored if x[0] not in stale]
     return [x for x in scored if x[1] >= scored[0][1] - LIKE_BAND][:top] if scored else []
+
+
+def similar_to_book(ref_ids, book_ids, top=4, threshold=None):
+    """FALLBACKSIM: books closest in meaning to a book of OURS, by its own stored vector (several references: their mean) —
+    the same likeness as similar_to, with no embedding call, so it works while Ollama and the chat model are down.
+    -> [(book_id, similarity), ...] best first; [] when no reference has a current vector."""
+    vecs = load()
+    refs = [vecs[i] for i in ref_ids if vecs and i in vecs]
+    if not refs:
+        return []
+    q = [sum(c) for c in zip(*refs)]
+    n = math.sqrt(sum(x * x for x in q)) or 1.0
+    q = [x / n for x in q]
+    ref_set = set(ref_ids)
+    return _nearest(q, vecs, [i for i in book_ids if i not in ref_set], top, threshold)
 
 
 def search(phrases, book_ids):

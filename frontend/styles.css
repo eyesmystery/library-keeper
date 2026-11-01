@@ -328,5 +328,90 @@ textarea.field{min-height:92px;resize:vertical}
 .review-item p{margin:0 0 4px;font-size:16px;line-height:1.6;white-space:pre-line}
 .review-item footer{color:oklch(60% .14 75);font-size:13px}.review-item footer span{color:var(--muted)}
 .review-button{display:block;margin:12px auto 0}
+.goodreads-link{display:block;width:max-content;margin:14px auto 0;color:var(--brown-soft);text-decoration:underline;text-underline-offset:3px}
 html[lang="en"] .start-card .reading-button svg{transform:none}
 @media(min-width:700px){.reading-body{width:min(100%,820px);margin-inline:auto;padding:32px 28px}.start-card .reading-button{margin-top:12px}}
+
+/* HOMELINKS (Ibrahim 2026-10-30, proposal أ): «سولف معي» is the one big button; reviewing and suggesting are two quiet links */
+.start-card .start-more{display:flex;flex-direction:column;align-items:center;gap:2px;margin:12px 0 0;font-size:15px}
+.start-card .start-link{width:auto;min-height:0;box-shadow:none;padding:5px 2px;border:0;background:none;color:var(--brown-soft);font:inherit;font-weight:500;text-decoration:underline;text-underline-offset:4px;text-decoration-color:oklch(27.5% .058 40 / .3);cursor:pointer}
+.start-card .start-link:hover{color:var(--brown);text-decoration-color:currentColor}
+.start-card .start-more-sep{display:none}
+html[lang="en"] .start-card .start-more{font-size:14px}
+
+/* HOMEFOLD (Ibrahim 2026-10-30 22:4x, review of the start page P1): «سولف معي» whole in the first view on short screens, Arabic and English;
+   reviewing / suggesting links get 44px touch targets but stay quiet text. Only spacing and headline size change; logo, fonts, colours and copy do not. */
+.start-card .start-more{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:4px 18px;margin-top:8px}
+.start-card .start-link{display:inline-flex;align-items:center;min-height:44px;padding:0 10px}
+@media(max-height:760px){
+  .welcome-top{min-height:52px}
+  .welcome-main{min-height:calc(100dvh - 52px)}
+  .brand-signature{margin-bottom:38px}
+  .brand-slogan{margin-bottom:18px}
+  .welcome-copy{margin-bottom:20px}
+  .welcome-copy h1{font-size:clamp(38px,min(13vw,8vh),59px)}
+  html:not([lang="en"]) .welcome-copy h1{margin-bottom:14px}
+  html[lang="en"] .welcome-copy h1{font-size:clamp(34px,min(11vw,6.6vh),54px)}
+  html[lang="en"] .welcome-copy>p:last-child{font-size:17px;line-height:1.45}
+  .start-card{padding:14px}
+}
+@media(max-height:600px){
+  .brand-signature{margin-bottom:34px}
+  .brand-slogan{margin-bottom:12px}
+  .welcome-copy{margin-bottom:14px}
+  html:not([lang="en"]) .welcome-copy h1{margin-bottom:10px}
+}
+
+/* HOMEFOLD part 2 (Ibrahim 2026-10-30 22:5x): identity colours only. The start button text is bold (Zain 700 / English 700),
+   and the English label 19px, so it is large text: 3:1 is required and surface on coral gives 3.37 (hover 4.12) — no new colour.
+   Focus ring on the start card in the identity brown (the coral ring at 55% was 1.91:1 against the card). */
+.start-card .start-button{font-weight:700}
+html[lang="en"] .start-card .start-button{font-size:19px;font-weight:700}
+@media(min-width:700px){html[lang="en"] .start-card .start-button{font-size:20px}}
+.start-card .start-button:focus-visible,.start-card .start-link:focus-visible{outline:3px solid var(--brown);outline-offset:3px}
+/* «اسحب لباقي الاختيارات» beside «اختياراتنا هذا الشهر», shown only when the row scrolls; the arrow points where the row continues */
+.picks-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 10px}
+.picks-head .events-title{margin:0}
+.picks-hint{flex:none;color:var(--brown-soft);font-size:13px;white-space:nowrap}
+.picks-hint:after{content:" ←";content:" ←" / ""}
+html[lang="en"] .picks-hint:after{content:" →";content:" →" / ""}
+
+/* CHATFIX (Ibrahim 2026-10-30, chat review). The composer area was sticky but never stuck: `.app-shell{overflow:hidden}` makes the
+   shell the sticky element's scroll box. `clip` cuts the same way without being a scroll box (browsers without `clip` keep `hidden`). */
+.app-shell{overflow:clip}
+/* only the field, send and «عندك اقتراح؟» stay on screen; the search badges and suggestions are the end of the chat */
+.chat-tail{margin-top:auto;padding:6px 16px 0}
+.composer-area{margin-top:0}
+@media(min-width:700px){.chat-tail{padding-inline:max(28px,calc((100% - 820px)/2))}}
+.composer textarea::placeholder{color:var(--muted)}
+.start-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.slow-note{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:15px}
+.slow-note .text-button{color:var(--brown)}
+.new-reply{display:block;margin:0 auto 6px}
+.see-cards{display:block;margin-top:4px;padding-inline:4px}
+.toast{display:flex;align-items:center;justify-content:center;gap:12px}
+.toast-action{flex:none;min-height:44px;padding:0 10px;border:0;background:transparent;color:var(--surface);font:inherit;font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.toast-action:focus-visible{outline:2px solid var(--surface);outline-offset:2px}
+
+/* «محادثة جديدة» in the chat header (Ibrahim 2026-10-31): on phones the two words wrapped and touched the «منار» logo;
+   an icon there (44px target, identity brown, the words kept for screen readers), icon + words from 700px */
+.header-end .new-chat-button{display:inline-flex;min-width:44px;align-items:center;justify-content:center;gap:6px;padding-inline:4px}
+.new-chat-button svg{flex:none}
+@media(max-width:699px){.new-chat-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
+@media(min-width:700px){.new-chat-label{white-space:nowrap}}
+/* CHATFIX31 (2), Ibrahim 2026-11-01: the Goodreads line on a book card («★ ٤٫٢ · Goodreads» / «آراء القرّاء على Goodreads»), a link
+   of its own laid over the card's foot (a link is never put inside the card's button); a 44px target, the identity colours */
+.book-item,.pick-item{position:relative;min-width:0}
+.book-item.has-gr>.book-card{padding-bottom:62px}
+.gr-badge{position:absolute;z-index:1;display:inline-flex;min-width:44px;min-height:44px;align-items:center;justify-content:center;gap:5px;padding:4px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--brown);font-size:13px;font-weight:600;line-height:1.25;text-decoration:none;-webkit-tap-highlight-color:transparent}
+.gr-star{color:var(--coral);font-size:14px}
+.gr-badge:hover,.gr-badge:focus-visible{border-color:var(--coral);color:var(--coral-hover)}
+.book-item>.gr-badge{bottom:12px;inset-inline-start:14px;max-width:calc(100% - 118px)}
+html[lang="en"] .book-item>.gr-badge{inset-inline-start:104px;font-family:var(--font-english)}
+.pick-item{display:flex;flex:0 0 142px;scroll-snap-align:start}
+.pick-item>.pick-card{flex:1 1 auto;min-width:0}
+.pick-item.has-gr>.pick-card{padding-bottom:60px}
+.pick-item>.gr-badge{bottom:8px;inset-inline:8px;padding:4px 6px;font-size:12px;text-align:center}
+html[lang="en"] .pick-item>.gr-badge{font-family:var(--font-english)}
+@media(min-width:700px){.pick-item{flex-basis:160px}}
+@media(max-width:360px){.book-item>.gr-badge{inset-inline-start:12px;max-width:calc(100% - 104px)}html[lang="en"] .book-item>.gr-badge{inset-inline-start:94px}}

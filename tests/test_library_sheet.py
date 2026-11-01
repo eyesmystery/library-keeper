@@ -17,8 +17,9 @@ def ok(cond, msg):
 ok(L.shelf_code("R04") == "R04" and L.shelf_code(" r4 ") == "R04" and L.shelf_code("CO3") == "C03", "shelf codes normalized (case, padding, letter O)")
 ok(L.shelf_code("kids01") == "Kids01" and L.shelf_code(".XC01") == "XC01" and L.shelf_code("٫C05") == "C05", "Kids and stray marks")
 ok(L.shelf_code("319") is None and L.shelf_code("4304.0") is None and L.shelf_code("") is None and L.shelf_code("ABCD1") is None, "a bare number is not a shelf")
-ok(L.location_text(["R04"]) == "روايات · الرف R04" and L.location_text(["Kids02"]) == "أطفال ويافعين · الرف Kids02", "place added to the code")
-ok(L.location_text(["K02", "K05", "K02"]) == "روايات · الرف K02 / K05" and L.location_text(["Z09"]) == "الرف Z09" and L.location_text([]) is None, "several shelves / unknown letter / none")
+# shelf names: K … M «روايات عربية», N … R «روايات مترجمة» (Ibrahim 2026-10-29)
+ok(L.location_text(["R04"]) == "روايات مترجمة · الرف R04" and L.location_text(["Kids02"]) == "أطفال ويافعين · الرف Kids02", "place added to the code")
+ok(L.location_text(["K02", "K05", "K02"]) == "روايات عربية · الرف K02 / K05" and L.location_text(["Z09"]) == "الرف Z09" and L.location_text([]) is None, "several shelves / unknown letter / none")
 ok(L.keywords_of("مراهقة، برلين، جريمة، صداقة، هجرة") == ["مراهقة", "برلين", "جريمة", "صداقة", "هجرة"], "keywords split on the Arabic comma")
 ok(L.keywords_of("دمشق - حب - حرب") == ["دمشق", "حب", "حرب"] and L.keywords_of("ما بعد-الحداثة") == ["ما بعد-الحداثة"], "keywords split on spaced dashes only")
 ok(L.keywords_of("أ، ، أ, ب") == ["أ", "ب"] and len(L.keywords_of("،".join(str(i) + "x" for i in range(20)))) == L.MAX_KEYWORDS, "keywords: empty and repeated dropped, capped")
@@ -74,8 +75,8 @@ ok(p["columns"].get("shelf") == "Column 1" and p["columns"].get("title") == "ن�
 before = sqlite3.connect(models.DB_PATH).execute("select count(*) from books where shelf_location is not null and shelf_location<>''").fetchone()[0]
 ok(before == 0, "preview writes nothing")
 upd = {u["book_id"]: u["changes"] for u in p["updated"]}
-ok(upd[novels[1]["book_id"]]["shelf_location"][1] == "روايات · الرف K02", "shelf with its place")
-ok(upd[novels[0]["book_id"]]["shelf_location"][1] == "روايات · الرف K01 / Q01", "a book on two rows keeps both shelves")
+ok(upd[novels[1]["book_id"]]["shelf_location"][1] == "روايات عربية · الرف K02", "shelf with its place")
+ok(upd[novels[0]["book_id"]]["shelf_location"][1] == "روايات عربية · الرف K01 / Q01", "a book on two rows keeps both shelves")
 ok(upd[nopub[0]["book_id"]]["publisher"] == [nopub[0]["publisher"], "دار المكتبة"], "empty publisher filled")
 ok(any(d["book_id"] == novels[0]["book_id"] and d["sheet"] == "دار مختلفة تمامًا" for d in p["publisher_differs"])
    and "publisher" not in upd[novels[0]["book_id"]], "a different publisher is listed, not changed")
@@ -91,7 +92,7 @@ ok(r.status_code == 200 and res["backup"].endswith("-sheet.db"), f"apply {r.stat
 ok(os.path.exists(os.path.join(os.path.dirname(models.DB_PATH), "..", "backups", res["backup"])), "backup made before writing")
 con = sqlite3.connect(models.DB_PATH); con.row_factory = sqlite3.Row
 b1 = dict(con.execute("select * from books where book_id=?", (novels[1]["book_id"],)).fetchone())
-ok(b1["shelf_location"] == "روايات · الرف K02" and json.loads(b1["keywords"]) == ["صداقة", "سفر", "ذاكرة", "حب"], "written")
+ok(b1["shelf_location"] == "روايات عربية · الرف K02" and json.loads(b1["keywords"]) == ["صداقة", "سفر", "ذاكرة", "حب"], "written")
 ok(con.execute("select publisher from books where book_id=?", (novels[0]["book_id"],)).fetchone()[0] == novels[0]["publisher"], "differing publisher untouched")
 ok(con.execute("select genre from books where book_id=?", (hist["book_id"],)).fetchone()[0] == "تاريخ"
    and con.execute("select format from book_profiles where book_id=?", (hist["book_id"],)).fetchone()[0] == "history", "genre + card format")
@@ -99,7 +100,7 @@ run = dict(con.execute("select * from import_runs order by run_id desc limit 1")
 ok(run["source"] == "library_sheet" and json.loads(run["details"])["updated"], "import recorded (inbox file)")
 ok(m.post("/api/admin/library-sheet/apply", json={"upload_id": p["upload_id"]}).status_code == 400, "an upload is applied once")
 pub = {x["book_id"]: x for x in anon.get("/api/books").get_json()}
-ok(pub[novels[1]["book_id"]]["location"] == "روايات · الرف K02" and pub[novels[1]["book_id"]]["location_kind"] == "shelf", "visitor sees the location")
+ok(pub[novels[1]["book_id"]]["location"] == "روايات عربية · الرف K02" and pub[novels[1]["book_id"]]["location_kind"] == "shelf", "visitor sees the location")
 
 # repeated import: nothing left to change
 r = m.post("/api/admin/library-sheet/upload", data={"file": (io.BytesIO(data), "sheet.xlsx")}, content_type="multipart/form-data")

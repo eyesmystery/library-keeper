@@ -7,11 +7,11 @@ const COPY = {
   ar: {
     title: 'منار | مكتبة ثلاث', description: 'منار تساعدك تختار كتابًا متوفرًا الآن في مكتبة ثلاث.',
     switchLanguage: 'Switch to English', tagline: 'الذكي',
-    slogan: 'منار - ذكاء يرشدك إلى ما يناسبك',   // Ibrahim 2026-10-23
+    slogan: 'ذكاء يرشدك إلى ما يناسبك',   // Ibrahim 2026-10-23; «منار - » dropped 2026-10-30 23:00
     hero: 'وش ودّك<br>تقرأ اليوم؟',
-    welcomeBody: 'سولف معي عن مزاجك، وألقى لك كتاب من الموجود عندنا.',
-    startNote: 'تقدر تبدأ بكلمة، شعور، أو آخر كتاب عجبك.', start: 'سولف معي عن مزاجك',
-    discover: 'اكتشف', ask: 'اسأل', read: 'اقرأ', follow: 'تابع مكتبة ثلاث', followOn: 'مكتبة ثلاث على', networks: { instagram: 'انستقرام', snapchat: 'سناب شات', tiktok: 'تيك توك', x: 'إكس' }, newChat: 'جديدة', assistant: 'منار',
+    welcomeBody: 'قل لي وش ودّك تقرأ، أو اسألني عن كتاب معيّن.',   // HOMEFOLD 2026-10-30 (Ibrahim)
+    start: 'خلّنا نلقى كتابك',
+    follow: 'تابع مكتبة ثلاث', followOn: 'مكتبة ثلاث على', networks: { instagram: 'انستقرام', snapchat: 'سناب شات', tiktok: 'تيك توك', x: 'إكس' }, newChat: 'محادثة جديدة', assistant: 'منار',
     modelFallback: 'النموذج غير متاح · نكمل بالنظام البديل',
     testBanner: 'وضع الاختبار مفعّل: هذي المحادثة تنحفظ عشان نراجعها ونحسّن المساعد.',
     conversation: 'المحادثة', suggestedReplies: 'ردود مقترحة', inputLabel: 'اكتب رسالتك لمنار',
@@ -19,7 +19,7 @@ const COPY = {
     back: 'رجوع', home: 'الرجوع للصفحة الرئيسية', accordingReaders: 'حسب القرّاء', closeChoice: 'اختيار قريب من وصفك', language: 'اللغة',
     findAt: 'بتلقاه في', want: 'أبغى هذا الكتاب', feedbackTitle: 'اختيار جميل',
     feedbackQuestion: 'هل كانت التوصية مناسبة؟', perfect: 'مناسبة جدًا', close: 'قريبة', no: 'غير مناسبة',
-    greeting: 'أهلًا فيك! أنا منار. قل لي وش مزاجك اليوم، أو وش آخر كتاب عجبك، وأساعدك تلقى كتاب يناسبك من الموجود عندنا.',
+    greeting: 'أهلًا، أنا منار. اكتب اسم كتاب أو كاتب، أو قل لي وش تحب تقرأ، وأساعدك تلقى شي من الموجود عندنا.',   // CHATFIX 2026-10-30
     startChips: ['أدوّر كتاب معيّن', 'رشّحي لي كتاب يناسب ذوقي أو مزاجي', 'أبغى كتاب هدية', 'أبغى أبدأ قراءة', 'فاجئيني بكتب جديدة'],
     detailsAria: (title, author) => `عرض تفاصيل كتاب ${title} للكاتب ${author}`,
     pages: n => `${n} صفحة`, unknownLength: 'الطول غير معروف', shelf: value => `الرف ${value}`,
@@ -36,14 +36,14 @@ const COPY = {
     moreCount: n => `المتوفر الآن: ${n}`, moreNone: 'ما عندنا كتاب ثاني متوفر الآن.', moreLoading: 'لحظة…',
     moreFailed: 'تعذر التحميل، حاول مرة ثانية.', moreClose: 'إغلاق',
     authorAria: name => `كتب ${name} الثانية`, publisherAria: name => `كتب ثانية من ${name}`,
-    picksTitle: 'اختياراتنا هذا الشهر', picksAria: (title, author) => `اختيارنا هذا الشهر: ${title}${author ? '، ' + author : ''}`,
+    picksTitle: 'اختياراتنا هذا الشهر', picksHint: 'اسحب لباقي الاختيارات', picksAria: (title, author) => `اختيارنا هذا الشهر: ${title}${author ? '، ' + author : ''}`,
     eventsTitle: 'فعالياتنا', eventKicker: 'فعالية في مكتبة ثلاث', eventBook: 'عن كتاب', eventToday: 'اليوم', eventTomorrow: 'بكرة',
     eventsAria: title => `تفاصيل الفعالية: ${title}`, yearLabel: 'سنة النشر',
     addCalendar: 'أضف إلى التقويم', addGoogle: 'أو في تقويم Google', calendarPlace: 'مكتبة ثلاث',
     contextTitle: 'نبحث عن:', contextRemove: label => `إلغاء: ${label}`,
     contextRemoved: label => `شلنا «${label}». اكتب طلبك، أو اضغط «ورّني اقتراحات».`, showNow: 'ورّني اقتراحات',
     afterFeedback: ['اقترح لي كتاب ثاني', 'محادثة جديدة', 'شي أقصر', 'رشّحي لي رواية', 'أبغى كتاب هدية'], oneCopy: 'نسخة واحدة', twoCopies: 'نسختان',
-    copies: n => `${n} نسخ`, availableSuffix: ' متوفرة', switchReset: 'غيّرنا اللغة وبدأنا محادثة جديدة.',
+    copies: n => `${n} نسخ`, availableSuffix: ' متوفرة', switchReset: 'غيّرنا اللغة، والردود الجاية بالعربي.', newChatUndo: 'بدأنا محادثة جديدة.', undo: 'تراجع', stillWorking: 'لسه أجهّز لك الجواب…', cancel: 'إلغاء', retry: 'إعادة الإرسال', rateLimited: 'وصلتنا طلبات كثيرة، جرّب بعد شوي.', newReply: 'وصل رد جديد ↓', seeCards: 'شوف البطاقات فوق ↑', startChipLabels: ['كتاب معيّن', 'حسب ذوقي', 'كتاب هدية', 'أبدأ القراءة', 'فاجئيني'], favoritesLabel: 'تفضيلات قرّاء ثلاث',
     reportBtn: 'فيه معلومة غلط؟ بلّغنا', reportTitle: 'وش الغلط في معلومات الكتاب؟', reportLead: title => `«${title}»`,
     reportReasons: [['title_author', 'العنوان أو المؤلف'], ['cover', 'الغلاف'], ['summary', 'النبذة'], ['details', 'التصنيف أو الصفحات أو اللغة'], ['location', 'المكان أو التوفر'], ['other', 'شي ثاني']],
     reportReasonsLabel: 'نوع الخطأ', reportNoteLabel: 'تفاصيل أكثر (اختياري)', reportPlaceholder: 'مثلًا: اسم المؤلف الصحيح…',
@@ -53,7 +53,7 @@ const COPY = {
     noteSend: 'إرسال', noteSending: 'جاري الإرسال…', noteCancel: 'إلغاء', noteFailed: 'ما قدرنا نرسلها الآن. جرّب مرة ثانية.', noteBusy: 'وصلتنا رسائل كثيرة من هنا. جرّب بعد شوي.',
 
     // «ماذا تقرأ الآن؟» (Ibrahim 2026-10-27)
-    reading: 'ماذا تقرأ الآن؟', readingLead: 'اكتب اسم الكتاب اللي تقرأه أو قرأته من مكتبة ثلاث، وقل لنا رأيك فيه.',
+    reading: 'ماذا تقرأ الآن؟', readingStart: 'قرأت كتابًا؟ شاركنا رأيك', readingLead: 'اكتب اسم الكتاب اللي تقرأه أو قرأته من مكتبة ثلاث، وقل لنا رأيك فيه.',
     searchLabel: 'اسم الكتاب أو المؤلف', searchPlaceholder: 'مثلًا: لاعب الشطرنج', searching: 'لحظة…',
     noResults: 'ما لقينا هذا الكتاب في مكتبتنا. تقدر تقترحه علينا تحت.', notInStock: 'غير متوفر حاليًا',
     shelfLead: 'كتابك مو عندنا؟', shelfBtn: 'ماذا تقترح أن يكون على رفوف مكتبة ثلاث؟', shelfStart: 'اقترح كتابًا لرفوفنا',
@@ -74,17 +74,20 @@ const COPY = {
     wantSaved: title => `شكرًا! وصل طلبك أن يتوفر «${title}» مرة ثانية.`, suggestionSaved: 'شكرًا! وصلنا اقتراحك.',
     suggestionNote: (title, author) => `كتاب مقترح للرفوف: ${title}${author ? ' — ' + author : ''}`,
     reviewsTitle: 'آراء قرّاء مكتبة ثلاث', reviewsSum: (avg, n) => `${formatNumber(avg)} من ٥ · ${n === 1 ? 'قارئ واحد' : n === 2 ? 'قارئان' : formatNumber(n) + (n <= 10 ? ' قرّاء' : ' قارئًا')}`,
-    anonymousReader: 'قارئ من مكتبة ثلاث', reviewBtn: 'قرأته؟ شاركنا رأيك',
+    anonymousReader: 'قارئ من مكتبة ثلاث', reviewBtn: 'قرأته؟ شاركنا رأيك', goodreadsLink: 'آراء القرّاء في Goodreads ↗',
+    // CHATFIX31 (2): the Goodreads line on a book card
+    grRated: r => `★ ${r} · Goodreads`, grReviews: 'آراء القرّاء على Goodreads',
+    grRatedAria: (r, five) => `تقييم القرّاء على Goodreads ${r} من ${five}، يفتح في صفحة جديدة`, grReviewsAria: 'آراء القرّاء على Goodreads، تفتح في صفحة جديدة',
     favoritesChip: 'رشّحي لي تفضيلات قرّاء مكتبة ثلاث', readingFailed: 'ما قدرنا نرسلها الآن. جرّب مرة ثانية.',
   },
   en: {
     title: 'Manar | Thalath', description: 'Manar, the book guide at Thalath, helps you choose a book that is available now.',
     switchLanguage: 'التبديل للعربية', tagline: 'SMART LIBRARY GUIDE',
-    slogan: 'Manar - Intelligence that guides you to what fits you',   // Ibrahim 2026-10-23
+    slogan: 'Intelligence that guides you to what fits you',   // Ibrahim 2026-10-23; «Manar - » dropped 2026-10-30
     hero: 'What would you<br>like to read today?',
-    welcomeBody: "Tell me what you're in the mood for, and I'll find a book that's here now.",
-    startNote: 'Start with a word, a feeling, or the last book you loved.', start: "Tell me what you're in the mood for",
-    discover: 'Discover', ask: 'Ask', read: 'Read', follow: 'Follow Thalath', followOn: 'Thalath on', networks: { instagram: 'Instagram', snapchat: 'Snapchat', tiktok: 'TikTok', x: 'X' }, newChat: 'New', assistant: 'Manar',
+    welcomeBody: "Tell me what you'd like to read, or ask me about a specific book.",   // HOMEFOLD 2026-10-30
+    start: "Let's find your book",
+    follow: 'Follow Thalath', followOn: 'Thalath on', networks: { instagram: 'Instagram', snapchat: 'Snapchat', tiktok: 'TikTok', x: 'X' }, newChat: 'New chat', assistant: 'Manar',
     modelFallback: 'Model unavailable · using fallback',
     testBanner: 'Test mode is on: this conversation is saved so we can review and improve the assistant.',
     conversation: 'Conversation', suggestedReplies: 'Suggested replies', inputLabel: 'Write a message to Manar',
@@ -92,7 +95,7 @@ const COPY = {
     back: 'Back', home: 'Back to the start page', accordingReaders: 'According to readers', closeChoice: 'A close match for what you described', language: 'Language',
     findAt: 'Find it at', want: 'I want this book', feedbackTitle: 'Lovely choice',
     feedbackQuestion: 'Was this recommendation a good fit?', perfect: 'Perfect fit', close: 'Close', no: 'Not for me',
-    greeting: "Welcome! I'm Manar, your book guide at Thalath. Tell me your mood today, or the last book you enjoyed, and I'll help you find something available here.",
+    greeting: "Hi, I'm Manar. Type a book or an author, or tell me what you like to read, and I'll help you find something that's here now.",   // CHATFIX 2026-10-30
     startChips: ['Find a specific book', 'Recommend something for my taste or mood', 'I want a gift book', 'I want to start reading', 'Surprise me with new books'],
     detailsAria: (title, author) => `View details for ${title} by ${author}`,
     pages: n => `${n} pages`, unknownLength: 'Length unknown', shelf: value => `Shelf ${value}`,
@@ -109,14 +112,14 @@ const COPY = {
     moreCount: n => `Available now: ${n}`, moreNone: 'We have no other book available right now.', moreLoading: 'One moment…',
     moreFailed: 'Could not load, please try again.', moreClose: 'Close',
     authorAria: name => `Other books by ${name}`, publisherAria: name => `Other books from ${name}`,
-    picksTitle: 'Our picks this month', picksAria: (title, author) => `Our pick this month: ${title}${author ? ', ' + author : ''}`,
+    picksTitle: 'Our picks this month', picksHint: 'Swipe for more picks', picksAria: (title, author) => `Our pick this month: ${title}${author ? ', ' + author : ''}`,
     eventsTitle: 'Our events', eventKicker: 'An event at Thalath', eventBook: 'About the book', eventToday: 'Today', eventTomorrow: 'Tomorrow',
     eventsAria: title => `Event details: ${title}`, yearLabel: 'Published',
     addCalendar: 'Add to calendar', addGoogle: 'or to Google Calendar', calendarPlace: 'Thalath Bookshop',
     contextTitle: 'Searching for:', contextRemove: label => `Remove: ${label}`,
     contextRemoved: label => `Removed “${label}”. Type your request, or tap “Show me suggestions”.`, showNow: 'Show me suggestions',
     afterFeedback: ['Suggest another book', 'New conversation', 'Something shorter', 'Suggest a novel', 'I want a gift book'], oneCopy: '1 copy', twoCopies: '2 copies',
-    copies: n => `${n} copies`, availableSuffix: ' available', switchReset: 'Language changed — we started a new conversation.',
+    copies: n => `${n} copies`, availableSuffix: ' available', switchReset: 'Language changed — replies will now be in English.', newChatUndo: 'Started a new chat.', undo: 'Undo', stillWorking: 'Still preparing your answer…', cancel: 'Cancel', retry: 'Send again', rateLimited: 'Too many requests right now — try again in a moment.', newReply: 'New reply ↓', seeCards: 'See the cards above ↑', startChipLabels: ['A specific book', 'My taste', 'A gift', 'Start reading', 'Surprise me'], favoritesLabel: "Readers' favourites",
     reportBtn: 'Something wrong? Tell us', reportTitle: 'What is wrong with this book’s details?', reportLead: title => `“${title}”`,
     reportReasons: [['title_author', 'Title or author'], ['cover', 'Cover'], ['summary', 'Summary'], ['details', 'Genre, pages or language'], ['location', 'Location or availability'], ['other', 'Something else']],
     reportReasonsLabel: 'What is wrong', reportNoteLabel: 'More details (optional)', reportPlaceholder: 'For example: the correct author name…',
@@ -126,7 +129,7 @@ const COPY = {
     noteSend: 'Send', noteSending: 'Sending…', noteCancel: 'Cancel', noteFailed: 'We could not send it right now. Please try again.', noteBusy: 'We received many messages from here. Try again in a little while.',
 
     // «What are you reading now?» (Ibrahim 2026-10-27)
-    reading: 'What are you reading now?', readingLead: 'Write the title of a book from Thalath you are reading or have read, and tell us what you think.',
+    reading: 'What are you reading now?', readingStart: 'Read a book? Share your review', readingLead: 'Write the title of a book from Thalath you are reading or have read, and tell us what you think.',
     searchLabel: 'Book title or author', searchPlaceholder: 'For example: The Chess Player', searching: 'One moment…',
     noResults: 'We could not find this book in our shop. You can suggest it to us below.', notInStock: 'Not in stock now',
     shelfLead: 'Not in our shop?', shelfBtn: 'What would you like to see on Thalath’s shelves?', shelfStart: 'Suggest a book for our shelves',
@@ -147,7 +150,9 @@ const COPY = {
     wantSaved: title => `Thank you! We noted that you want “${title}” back in stock.`, suggestionSaved: 'Thank you! We got your suggestion.',
     suggestionNote: (title, author) => `Book suggested for the shelves: ${title}${author ? ' — ' + author : ''}`,
     reviewsTitle: 'What Thalath readers say', reviewsSum: (avg, n) => `${formatNumber(avg)} out of 5 · ${formatNumber(n)} ${n === 1 ? 'reader' : 'readers'}`,
-    anonymousReader: 'A Thalath reader', reviewBtn: 'Read it? Share your review',
+    anonymousReader: 'A Thalath reader', reviewBtn: 'Read it? Share your review', goodreadsLink: 'Readers’ reviews on Goodreads ↗',
+    grRated: r => `★ ${r} · Goodreads`, grReviews: 'Readers’ reviews on Goodreads',
+    grRatedAria: (r, five) => `Readers’ rating on Goodreads ${r} out of ${five}, opens in a new page`, grReviewsAria: 'Readers’ reviews on Goodreads, opens in a new page',
     favoritesChip: "Thalath readers' favourites", readingFailed: 'We could not send it right now. Please try again.',
   }
 };
@@ -167,6 +172,9 @@ let messages = [];
 let conversationId = newId();
 let busy = false;
 let pendingChat = null;       // AbortController of the chat request in flight, if any
+// CHATFIX (2026-10-30): the message in flight (for «إلغاء»), the chips on screen, the books shown as cards, the opened card,
+// the greeting bubble (start chips), the conversation kept for «تراجع», the «still working» timer
+let pendingSend = null, lastChips = [], shownIds = [], lastBooksList = null, lastOpenedCard = null, greetingWrap = null, undoState = null, slowTimer = null, userMoved = false;
 let noteSeq = 0;              // counts openings of the note sheet, so an old send cannot close a newer sheet
 let selectedBook = null;
 let choiceId = null;          // id of the recorded «أبغى هذا الكتاب» choice (anonymous)
@@ -195,11 +203,7 @@ function applyLanguage() {
   $('brandSlogan').textContent = t('slogan');
   $('welcomeTitle').innerHTML = t('hero');
   $('welcomeBody').textContent = t('welcomeBody');
-  $('startNote').textContent = t('startNote');
   $('startLabel').textContent = t('start');
-  $('stepDiscover').textContent = t('discover');
-  $('stepAsk').textContent = t('ask');
-  $('stepRead').textContent = t('read');
   $('socialLabel').textContent = t('follow');
   $('eventsTitle').textContent = t('eventsTitle');
   $('eKicker').textContent = t('eventKicker');
@@ -208,10 +212,13 @@ function applyLanguage() {
   $('eCalendarGoogle').textContent = t('addGoogle');
   $('eventBackBtn').textContent = t('back');
   $('picksTitle').textContent = t('picksTitle');
+  $('picksHint').textContent = t('picksHint');
   loadPicks();
   loadEvents();
   document.querySelectorAll('.social-link').forEach(link => { link.setAttribute('aria-label', `${t('followOn')} ${t('networks')[link.dataset.network]}`); });
-  $('newChatBtn').textContent = t('newChat');
+  // «محادثة جديدة»: an icon on phones (the word stays as its accessible name), icon + word from 700px (Ibrahim 2026-10-31)
+  $('newChatLabel').textContent = t('newChat');
+  $('newChatBtn').title = t('newChat');
   $('chatTitle').textContent = t('assistant');
   $('modelStatus').textContent = t('modelFallback');
   $('testBanner').textContent = t('testBanner');
@@ -221,6 +228,7 @@ function applyLanguage() {
   $('chatInput').placeholder = t('placeholder');
   $('sendBtn').setAttribute('aria-label', t('send'));
   $('trustNote').textContent = t('trust');
+  $('newReplyBtn').textContent = t('newReply');
   ['backBtn', 'chatBackBtn', 'feedbackBackBtn', 'readingBackBtn'].forEach(id => { $(id).textContent = t('back'); });
   applyReadingLanguage();
   document.querySelectorAll('.brand-home').forEach(button => button.setAttribute('aria-label', t('home')));
@@ -250,10 +258,12 @@ function applyLanguage() {
 function switchLanguage() {
   if (busy) return;
   currentLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
-  const hadConversation = messages.length > 0 || currentSection !== 'welcome';
   applyLanguage();
-  if (hadConversation) {
-    newChat();
+  // CHATFIX (Ibrahim 2026-10-30): the conversation is kept and the next replies come in the new language;
+  // an empty chat just greets again in the new language
+  if (currentSection === 'chat' && !messages.length) newChat();
+  else if (messages.length) {
+    if (lastChips.length) setChips(t('fallbackChips'));
     showToast(t('switchReset'));
   }
 }
@@ -281,19 +291,21 @@ function bookCard(book, index) {
   card.type = 'button';
   card.className = 'book-card';
   card.style.animationDelay = `${index * 45}ms`;
-  card.setAttribute('aria-label', t('detailsAria')(book.title, book.author));
   const initial = [...String(book.title || (currentLanguage === 'ar' ? 'ك' : 'B')).trim()][0] || 'B';
   // an unknown detail is left out, not written as «غير معروف» (Ibrahim, 2026-10-08)
   const pages = book.page_count ? t('pages')(formatNumber(book.page_count)) : '';
   // the chat card says «متوفر» without the count, and shows the price (Ibrahim, 2026-10-11)
   const price = Number(book.price) > 0 ? t('currency')(formatNumber(book.price)) : '';
   const shelf = locationText(book) || t('askStaff');
+  // the name a screen reader hears carries what the card shows: reason, price, pages, place (CHATFIX)
+  card.setAttribute('aria-label', [t('detailsAria')(book.title, book.author), book.reason, price, pages, shelf].filter(Boolean).join(currentLanguage === 'ar' ? '، ' : ', '));
   card.innerHTML = `<span class="book-card-copy"><span class="book-title">${escapeHtml(book.title)}</span><span class="book-author">${escapeHtml(book.author)}</span><span class="book-reason">${escapeHtml(book.reason ?? t('closeChoice'))}</span><span class="book-meta"><span class="meta-chip stock-chip">${escapeHtml(t('available'))}</span>${price ? `<span class="meta-chip price-chip">${escapeHtml(price)}</span>` : ''}${pages ? `<span class="meta-chip">${escapeHtml(pages)}</span>` : ''}<span class="meta-chip">${escapeHtml(shelf)}</span></span></span>${book.cover_url ? `<span class="book-token has-cover" aria-hidden="true"><img src="${escapeHtml(book.cover_url)}" alt="" loading="lazy" /></span>` : `<span class="book-token" aria-hidden="true"><span>${escapeHtml(initial)}</span></span>`}`;
-  card.addEventListener('click', () => showBook(book));
-  return card;
+  card.addEventListener('click', () => { lastOpenedCard = card; showBook(book); });
+  return withGoodreads(card, book, 'book');   // CHATFIX31 (2)
 }
 
-function botMessage(text, books = [], extraClass = '') {
+// CHATFIX (Ibrahim 2026-10-30, chat review): `follow` = scroll to the new answer; false while the visitor is reading earlier messages (a «وصل رد جديد» button shows instead).
+function botMessage(text, books = [], extraClass = '', follow = true) {
   const wrap = bubble('bot', text, extraClass);
   if (books.length) {
     // the suggested books come first, then Manar's text and question (Ibrahim, 2026-10-11)
@@ -301,24 +313,46 @@ function botMessage(text, books = [], extraClass = '') {
     list.className = 'chat-books books-first';
     books.forEach((book, index) => list.appendChild(bookCard(book, index)));
     wrap.prepend(list);
+    lastBooksList = list;
   }
-  if ($('chatLog').children.length > 1) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (follow && $('chatLog').children.length > 1) wrap.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
   return wrap;
+}
+
+// A chip shows a short label and sends its full request (the start chips, CHATFIX 2026-10-30).
+function chipButton(label, text) {
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.className = 'chip';
+  chip.textContent = label;
+  chip.disabled = busy;
+  const newConversation = COPY.ar.afterFeedback[1] === text || COPY.en.afterFeedback[1] === text;
+  chip.addEventListener('click', event => {
+    const byKeyboard = event.detail === 0;
+    if (newConversation) startNewChat(); else send(text);
+    if (byKeyboard) $('chatInput').focus();   // the chip is gone: a keyboard user goes on in the text field
+  });
+  return chip;
 }
 
 function setChips(items) {
   const box = $('chips');
   box.replaceChildren();
-  items.forEach(text => {
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'chip';
-    chip.textContent = text;
-    const newConversation = COPY.ar.afterFeedback[1] === text || COPY.en.afterFeedback[1] === text;
-    chip.addEventListener('click', () => (newConversation ? newChat() : send(text)));
-    box.appendChild(chip);
-  });
+  lastChips = items;
+  items.forEach(item => box.appendChild(typeof item === 'string' ? chipButton(item, item) : chipButton(item.label, item.text)));
   box.hidden = items.length === 0;
+}
+
+// The start choices sit right under the greeting while the chat is empty, with short labels.
+function startChipsRow() {
+  const row = document.createElement('div');
+  row.className = 'start-chips';
+  row.setAttribute('aria-label', t('suggestedReplies'));
+  const labels = t('startChipLabels');
+  t('startChips').forEach((text, index) => row.appendChild(chipButton(labels[index] || text, text)));
+  // «رشّحي لي تفضيلات قرّاء مكتبة ثلاث» once enough books have readers' reviews (2026-10-27)
+  if (favoritesReady) row.appendChild(chipButton(t('favoritesLabel'), t('favoritesChip')));
+  return row;
 }
 
 function typing(on) {
@@ -331,21 +365,60 @@ function typing(on) {
     el.innerHTML = '<span></span><span></span><span></span>';
     $('chatLog').appendChild(el);
     scrollToEnd();
-  } else if (!on && el) el.remove();
+    clearTimeout(slowTimer);
+    slowTimer = setTimeout(showSlowNote, 8000);
+  } else if (!on) {
+    if (el) el.remove();
+    clearTimeout(slowTimer);
+    const note = $('slowNote');
+    if (note) note.remove();
+  }
+}
+
+// After 8 seconds: an honest «still working» line and a way to cancel that keeps the conversation (CHATFIX).
+function showSlowNote() {
+  if (!busy || $('slowNote')) return;
+  const note = document.createElement('div');
+  note.id = 'slowNote';
+  note.className = 'msg msg-bot slow-note';
+  const text = document.createElement('span');
+  text.textContent = t('stillWorking');
+  const cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.className = 'text-button';
+  cancel.textContent = t('cancel');
+  cancel.addEventListener('click', cancelChat);
+  note.append(text, cancel);
+  $('chatLog').appendChild(note);
+  if (!userMoved || isNearBottom()) scrollToEnd();
 }
 
 function setBusy(value) {
   busy = value;
-  $('sendBtn').disabled = value;
   $('sendIcon').hidden = value;
   $('sendSpinner').hidden = !value;
   $('sendBtn').setAttribute('aria-busy', String(value));
   document.querySelectorAll('.chip, .language-button').forEach(control => { control.disabled = value; });
+  updateSendState();
 }
 
+// Send is off while waiting and while the field is empty.
+function updateSendState() {
+  $('sendBtn').disabled = busy || !$('chatInput').value.trim();
+}
+
+function scrollBehavior() {
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+}
+
+// The composer stays at the bottom of the screen (sticky, CHATFIX): going to the end of the page keeps the last message above it.
 function scrollToEnd() {
-  const last = $('chatLog').lastElementChild;
-  if (last) last.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: scrollBehavior() });
+  $('newReplyBtn').hidden = true;
+}
+
+function isNearBottom() {
+  return document.documentElement.scrollHeight - (window.scrollY + window.innerHeight) < 160;
 }
 
 function setModelStatus(fallbackActive) {
@@ -355,9 +428,14 @@ function setModelStatus(fallbackActive) {
 async function send(text) {
   const content = String(text || '').trim();
   if (!content || busy) return;
-  bubble('user', content);
+  document.querySelectorAll('#chatLog .start-chips').forEach(row => row.remove());
+  $('newReplyBtn').hidden = true;
+  userMoved = false;
+  const userBubble = bubble('user', content);
   messages.push({ role: 'user', content });
-  $('chatInput').value = '';
+  const chipsBefore = lastChips;
+  // a draft typed in the field is kept when a chip is sent (CHATFIX)
+  if ($('chatInput').value.trim() === content) $('chatInput').value = '';
   autoGrow();
   setChips([]);
   setBusy(true);
@@ -367,6 +445,7 @@ async function send(text) {
   const askedIn = conversationId;
   const controller = typeof AbortController === 'function' ? new AbortController() : null;
   pendingChat = controller;
+  pendingSend = { content, chips: chipsBefore, userBubble };
   try {
     const response = await fetch(`${API}/chat`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -374,9 +453,16 @@ async function send(text) {
       signal: controller ? controller.signal : undefined
     });
     if (askedIn !== conversationId) return;
+    if (response.status === 429) {
+      // too many requests: the server's own words, not «check your connection» (CHATFIX)
+      const body = await response.json().catch(() => ({}));
+      const limited = new Error('rate_limited');
+      limited.reply = body.reply;
+      throw limited;
+    }
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    if (askedIn !== conversationId) return;
+    if (askedIn !== conversationId || (controller && controller.signal.aborted)) return;
     const books = Array.isArray(data.books) ? data.books : [];
     setModelStatus(data.understanding !== 'ai');
     setTestMode(!!data.test_mode);
@@ -387,38 +473,145 @@ async function send(text) {
       if (contextItems.some(item => item.key === 'audience')) audienceCleared = false;
       renderContext();
     }
+    // follow the answer unless the visitor scrolled away to read while waiting
+    const follow = !userMoved || isNearBottom();
     typing(false);
-    botMessage(data.reply || t('fallbackReply'), books);
+    // the same books as the cards already on screen: answer in text and point back to them (CHATFIX)
+    const repeat = books.length > 0 && lastBooksList && lastBooksList.isConnected && books.length === shownIds.length
+      && books.every(book => shownIds.includes(book.book_id));
+    const wrap = botMessage(data.reply || t('fallbackReply'), repeat ? [] : books, '', follow);
+    if (repeat) {
+      const target = lastBooksList;
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'text-button see-cards';
+      back.textContent = t('seeCards');
+      back.addEventListener('click', () => target.scrollIntoView({ behavior: scrollBehavior(), block: 'start' }));
+      wrap.appendChild(back);
+    } else if (books.length) shownIds = books.map(book => book.book_id);
+    if (!follow) $('newReplyBtn').hidden = false;
     messages.push({ role: 'assistant', content: data.reply || '', book_ids: books.map(book => book.book_id) });
     const chips = Array.isArray(data.suggestions) ? data.suggestions : [];
     setChips(chips.length || !books.length ? chips : t('fallbackChips'));
   } catch (error) {
     if (askedIn !== conversationId) return;
+    if (controller && controller.signal.aborted) return;   // cancelled by the visitor: cancelChat() has tidied up
     typing(false);
     messages.pop();
-    botMessage(t('connectionError'), [], 'msg-error');
-    setChips([content]);
+    botMessage(error.message === 'rate_limited' ? (error.reply || t('rateLimited')) : t('connectionError'), [], 'msg-error');
+    // the message comes back to the field to edit, unless the visitor has typed something new (CHATFIX)
+    if (!$('chatInput').value.trim()) { $('chatInput').value = content; autoGrow(); }
+    setChips([{ label: t('retry'), text: content }]);
   } finally {
-    if (askedIn === conversationId) { pendingChat = null; setBusy(false); }
+    if (askedIn === conversationId && pendingChat === controller) { pendingChat = null; pendingSend = null; setBusy(false); }
   }
+}
+
+// «إلغاء» while waiting: the request stops, the visitor's message goes back to the field, the conversation stays.
+function cancelChat() {
+  if (!pendingSend) return;
+  const { content, chips, userBubble } = pendingSend;
+  const controller = pendingChat;
+  pendingChat = null;
+  pendingSend = null;
+  if (controller) { try { controller.abort(); } catch (error) { /* already finished */ } }
+  typing(false);
+  if (userBubble) userBubble.remove();
+  if (messages.length && messages[messages.length - 1].role === 'user') messages.pop();
+  if (!$('chatInput').value.trim()) $('chatInput').value = content;
+  autoGrow();
+  setBusy(false);
+  if (!messages.length && greetingWrap && greetingWrap.isConnected) greetingWrap.appendChild(startChipsRow());
+  else setChips(chips || []);
+  $('chatInput').focus();
 }
 
 function newChat() {
   if (pendingChat) { try { pendingChat.abort(); } catch (error) { /* nothing to cancel */ } pendingChat = null; }
+  pendingSend = null;
   typing(false);
   setBusy(false);
   messages = [];
   conversationId = newId();
   chosenInChat = {};
   contextItems = []; droppedContext = []; audienceCleared = false;
+  shownIds = []; lastBooksList = null; lastOpenedCard = null;
   renderContext();
   selectedBook = null;
   $('chatLog').replaceChildren();
+  $('newReplyBtn').hidden = true;
   showSection('chat');
-  botMessage(t('greeting'));
-  // «رشّحي لي تفضيلات قرّاء مكتبة ثلاث» once enough books have readers' reviews (2026-10-27)
-  setChips(favoritesReady ? t('startChips').concat([t('favoritesChip')]) : t('startChips'));
+  greetingWrap = botMessage(t('greeting'));
+  greetingWrap.appendChild(startChipsRow());
+  setChips([]);
   $('chatInput').focus();
+}
+
+// «محادثة جديدة» with messages on screen: start fresh, and offer «تراجع» for a few seconds (CHATFIX; no pop-up).
+function startNewChat() {
+  if (pendingSend) cancelChat();
+  if (!messages.length) { newChat(); return; }
+  const saved = { messages, conversationId, chosenInChat, contextItems, droppedContext, audienceCleared, shownIds, lastBooksList, greetingWrap,
+    nodes: [...$('chatLog').children], chips: lastChips, draft: $('chatInput').value };
+  newChat();
+  undoState = saved;
+  showToast(t('newChatUndo'), { label: t('undo'), run: undoNewChat, ms: 7000, expire: () => { undoState = null; } });
+}
+
+function undoNewChat() {
+  const saved = undoState;
+  undoState = null;
+  if (!saved || messages.length || busy) return;   // the new chat is already under way
+  ({ messages, conversationId, chosenInChat, contextItems, droppedContext, audienceCleared, shownIds, lastBooksList, greetingWrap } = saved);
+  $('chatLog').replaceChildren(...saved.nodes);
+  renderContext();
+  setChips(saved.chips || []);
+  if (!$('chatInput').value.trim() && saved.draft) { $('chatInput').value = saved.draft; autoGrow(); }
+  showSection('chat');
+  scrollToEnd();
+}
+
+// GRLINK (Ibrahim 2026-10-30): the readers' reviews of this book on Goodreads, opened on the visitor's phone. The book's own
+// Goodreads page when our records hold it (its summary came from there), otherwise a Goodreads search by title and author.
+function goodreadsUrl(book) {
+  const m = String(book.goodreads_url || book.summary_source || '').match(/https?:\/\/(?:www\.)?goodreads\.com\/book\/show\/[\w.-]+/);
+  if (m) return m[0].replace(/^http:/, 'https:');
+  const q = [book.title, book.author].map(x => String(x || '').trim()).filter(x => x && !/^(غير معروف|مجهول|unknown)$/i.test(x)).join(' ');
+  return q ? 'https://www.goodreads.com/search?q=' + encodeURIComponent(q) : '';
+}
+
+// CHATFIX31 (2), Ibrahim 2026-11-01: every book card a visitor sees (the chat's, «اختياراتنا هذا الشهر», «more by») carries the
+// readers' rating on Goodreads when enough readers rated it («★ ٤٫٢ · Goodreads»), otherwise «آراء القرّاء على Goodreads» when
+// we hold the book's own Goodreads page. It is a link of its own beside the card (never inside the card's button), opens in a
+// new tab, and a tap on it never opens the card.
+const GR_MIN_RATINGS = 5;   // the same floor as the chat's ratings (chat_rules.RATING_MIN_COUNT; Ibrahim 11-01: 50 → 5)
+function goodreadsBadge(book) {
+  const rated = Number(book.goodreads_rating) > 0 && (Number(book.goodreads_ratings_count) || 0) >= GR_MIN_RATINGS;
+  const ownPage = /goodreads\.com\/book\/show\//.test(String(book.goodreads_url || ''));
+  if (!rated && !ownPage) return null;
+  const href = goodreadsUrl(book);
+  if (!href) return null;
+  const a = document.createElement('a');
+  a.className = 'gr-badge';
+  a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  if (rated) {
+    const r = new Intl.NumberFormat(currentLanguage === 'ar' ? 'ar-SA' : 'en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(Number(book.goodreads_rating));
+    a.innerHTML = `<span class="gr-star" aria-hidden="true">★</span><span>${escapeHtml(t('grRated')(r).replace(/^★\s*/, ''))}</span>`;
+    a.setAttribute('aria-label', t('grRatedAria')(r, formatNumber(5)));
+  } else {
+    a.textContent = t('grReviews');
+    a.setAttribute('aria-label', t('grReviewsAria'));
+  }
+  a.addEventListener('click', event => event.stopPropagation());
+  return a;
+}
+function withGoodreads(card, book, kind) {
+  const gr = goodreadsBadge(book);
+  if (!gr) return card;
+  const item = document.createElement('div');
+  item.className = `${kind}-item has-gr`;
+  item.append(card, gr);
+  return item;
 }
 
 function showBook(book) {
@@ -476,6 +669,9 @@ function showBook(book) {
   $('dReason').textContent = book.reason || '';
   $('dReason').hidden = !book.reason;
   loadBookReviews(book);
+  const gr = goodreadsUrl(book);
+  $('dGoodreads').hidden = !gr;
+  if (gr) { $('dGoodreads').href = gr; $('dGoodreads').textContent = t('goodreadsLink'); }
   showSection('bookDetail');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -638,10 +834,14 @@ function renderPicks(list) {
       : `<span class="pick-cover-mark" aria-hidden="true">${escapeHtml(initial)}</span>`;
     card.innerHTML = `<span class="pick-cover">${cover}</span><span class="pick-text"><strong dir="auto">${escapeHtml(book.title)}</strong><span class="pick-author" dir="auto">${escapeHtml(book.author || '')}</span>${book.line ? `<span class="pick-line" dir="auto">${escapeHtml(book.line)}</span>` : ''}</span>`;
     card.addEventListener('click', () => showBook(Object.assign({}, book, { reason: book.line || '', fromPicks: true })));
-    row.appendChild(card);
+    row.appendChild(withGoodreads(card, book, 'pick'));   // CHATFIX31 (2)
   });
   $('picksBox').hidden = list.length === 0;
+  updatePicksHint();
 }
+// HOMEFOLD (Ibrahim 2026-10-30): «اسحب لباقي الاختيارات» only while the row is wider than the screen
+function updatePicksHint() { const row = $('picksRow'); $('picksHint').hidden = !(row.clientWidth && row.scrollWidth > row.clientWidth + 2); }
+if ('ResizeObserver' in window) new ResizeObserver(updatePicksHint).observe($('picksRow')); else window.addEventListener('resize', updatePicksHint);
 
 // ---------------- «فعالياتنا» (2026-10-08): upcoming library events on the start page; staff add
 // them in the admin. Tapping one opens its page; an event about a book links to the book.
@@ -916,7 +1116,7 @@ async function loadReviewStatus() {
   } catch (error) { favoritesReady = false; }
 }
 function applyReadingLanguage() {
-  $('readingLabel').textContent = t('reading');
+  $('readingLabel').textContent = t('readingStart');
   $('shelfStartLabel').textContent = t('shelfStart');
   $('rTitle').textContent = t('reading');
   if (!$('sForm').hidden) $('rTitle').textContent = t('shelfStart');
@@ -941,6 +1141,7 @@ function applyReadingLanguage() {
   $('rAgain').textContent = t('again');
   $('rHome').textContent = t('homeBtn');
   $('reviewBtn').textContent = t('reviewBtn');
+  $('dGoodreads').textContent = t('goodreadsLink');
   $('dReviewsTitle').textContent = t('reviewsTitle');
   if (reviewBook && !$('rForm').hidden) { renderReviewBook(); renderStars(); renderTags(); }
   if (!$('rFind').hidden && $('rSearch').value.trim()) searchReview($('rSearch').value);
@@ -1225,11 +1426,23 @@ function showSection(id, fromHistory = false) {
   currentSection = id;
   ['welcome', 'chat', 'eventDetail', 'reading', 'bookDetail', 'feedback'].forEach(section => { $(section).hidden = section !== id; });
 }
-function showToast(message) {
+function showToast(message, action) {
   clearTimeout(toastTimer);
-  $('toast').textContent = message;
-  $('toast').hidden = false;
-  toastTimer = setTimeout(() => { $('toast').hidden = true; }, 3000);
+  const toast = $('toast');
+  const text = document.createElement('span');
+  text.textContent = message;
+  toast.replaceChildren(text);
+  // an optional action, e.g. «تراجع» after «محادثة جديدة» (CHATFIX 2026-10-30)
+  if (action) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'toast-action';
+    button.textContent = action.label;
+    button.addEventListener('click', () => { clearTimeout(toastTimer); toast.hidden = true; action.run(); });
+    toast.appendChild(button);
+  }
+  toast.hidden = false;
+  toastTimer = setTimeout(() => { toast.hidden = true; if (action && action.expire) action.expire(); }, action ? action.ms || 6000 : 3000);
 }
 function formatNumber(value) {
   return new Intl.NumberFormat(currentLanguage === 'ar' ? 'ar-SA' : 'en-US', { maximumFractionDigits: 2 }).format(value);
@@ -1263,6 +1476,7 @@ function autoGrow() {
   const field = $('chatInput');
   field.style.height = 'auto';
   field.style.height = `${Math.min(field.scrollHeight, 140)}px`;
+  updateSendState();
 }
 
 $('composer').addEventListener('submit', event => { event.preventDefault(); send($('chatInput').value); });
@@ -1273,8 +1487,19 @@ $('chatInput').addEventListener('keydown', event => {
   }
 });
 $('chatInput').addEventListener('input', autoGrow);
+// «من أين يبدأ الزوار» (STARTTAP, Ibrahim 2026-11-01): count a tap on one of the three start choices. Only the choice
+// and the language are sent; it never waits, never blocks the button's own action, and its errors stay silent.
+function startTap(choice) {
+  try {
+    const body = JSON.stringify({ choice, lang: currentLanguage });
+    let sent = false;
+    try { sent = !!(navigator.sendBeacon && navigator.sendBeacon(`${API}/start-tap`, new Blob([body], { type: 'application/json' }))); } catch (e) { sent = false; }
+    if (!sent) fetch(`${API}/start-tap`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body }).catch(() => {});
+  } catch (e) { /* counting never gets in the visitor's way */ }
+}
 // coming back to the start page keeps the conversation; «جديدة» in the chat starts a fresh one
-$('startBtn').addEventListener('click', () => { if (messages.length) { showSection('chat'); scrollToEnd(); } else newChat(); });
+// (MGR 11-01: going back to an open conversation is not a new start, so only a fresh start counts)
+$('startBtn').addEventListener('click', () => { if (messages.length) { showSection('chat'); scrollToEnd(); } else { newChat(); startTap('chat'); } });
 $('chatBackBtn').addEventListener('click', goBack);
 document.querySelectorAll('.brand-home').forEach(button => button.addEventListener('click', goHome));
 $('eventBackBtn').addEventListener('click', goBack);
@@ -1296,12 +1521,23 @@ window.addEventListener('popstate', event => {
   if (section === 'chat' && !messages.length && !$('chatLog').children.length) section = 'welcome';
   if (section === 'eventDetail' && !selectedEvent) section = 'welcome';
   showSection(section, true);
-  if (section === 'chat') scrollToEnd();
+  // back from a book page: to the card that was opened, not to the end of the chat (CHATFIX)
+  if (section === 'chat') { if (lastOpenedCard && lastOpenedCard.isConnected) { lastOpenedCard.focus(); lastOpenedCard.scrollIntoView({ block: 'center' }); } else scrollToEnd(); lastOpenedCard = null; }
   if (section === 'feedback') updateFeedbackLocation();
 });
-$('newChatBtn').addEventListener('click', newChat);
-$('readingBtn').addEventListener('click', () => openReading());
-$('shelfStartBtn').addEventListener('click', () => { openReading(); shelfFromStart = true; openShelf(''); });
+$('newChatBtn').addEventListener('click', startNewChat);
+$('newReplyBtn').addEventListener('click', () => {
+  const replies = document.querySelectorAll('#chatLog .msg-bot');
+  const last = replies[replies.length - 1];
+  if (last) last.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+  $('newReplyBtn').hidden = true;
+});
+window.addEventListener('scroll', () => { if (!$('newReplyBtn').hidden && isNearBottom()) $('newReplyBtn').hidden = true; }, { passive: true });
+// a visitor who scrolls or pages while waiting is reading: the answer then does not pull the page (CHATFIX)
+['wheel', 'touchmove', 'keydown'].forEach(type => window.addEventListener(type, event => { if (busy && !(type === 'keydown' && event.target === $('chatInput'))) userMoved = true; }, { passive: true }));
+updateSendState();
+$('readingBtn').addEventListener('click', () => { openReading(); startTap('reading'); });
+$('shelfStartBtn').addEventListener('click', () => { openReading(); shelfFromStart = true; openShelf(''); startTap('shelf'); });
 $('readingBackBtn').addEventListener('click', readingBack);
 $('reviewBtn').addEventListener('click', () => { if (selectedBook) openReading(selectedBook); });
 $('rSearch').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => searchReview($('rSearch').value), 300); });

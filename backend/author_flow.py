@@ -198,6 +198,22 @@ def _family_spelling(written, names):
     return False
 
 
+def same_name_spelling(written, full):
+    """CHATFIX30: «روي ياكوبسون» / «روي ياكوبسن» — two or more name words, the same count, each pair the same word spelt
+    differently (authors._same_word), and not the very same spelling."""
+    if not written or not full:
+        return False
+    try:
+        import authors as _ar
+        wa, wb = _ar.key(written).split(), _ar.key(full).split()
+        if bool(re.search(r'[A-Za-z]', written)) != bool(re.search(r'[A-Za-z]', full)):
+            # «روي ياكوبسون» / "Roy Jacobsen" (the replay after the fix): the model wrote the same name in Latin letters
+            return len(wa) == len(wb) >= 2
+        return (len(wa) == len(wb) >= 2 and wa != wb and all(_ar._same_word(_bare(x), _bare(y)) for x, y in zip(wa, wb)))
+    except Exception:
+        return False
+
+
 def _bare(word):
     """«العقاد» and «عقاد» are the same family name."""
     return word[2:] if word.startswith('ال') and len(word) > 4 else word
@@ -571,12 +587,30 @@ def resolve(request, conversation, books, english=False):
         # only share the family name
         if not (same and near_declined) and not _respelt_by_visitor(written, conversation):
             near = near_authors(written, by_display, books)
+            _ww = key(written).split()
+            if near is TOO_MANY and (len(_ww) >= 3 or (len(_ww) == 2 and _ww[0] not in ('عبد', 'ابو', 'ابن', 'بن', 'ام', 'ال')))\
+                    and (not full or key(full) == key(written) or same_name_spelling(written, full)):
+                # QADFIX25 (QAD 2026-10-31, case 25.2): «طيب عندكم أي شي لعمرو عبد الحميد؟» — the visitor wrote the full name;
+                # «وعندنا أكثر من مؤلف بنفس اللقب. وش اسم المؤلف كامل؟» asked for what he had just given. We have none of his
+                # books: the caller says so under his name and offers close books
+                near = []
             if near is TOO_MANY:
                 many = (f'We don’t have an author named {written}, and several of our authors share that family name. What is the full name of the author you mean?'
                         if english else (f'ما عندنا كتب لـ{written} الآن، ' if len(str(written).split()) >= 2 else f'ما عندنا مؤلف باسم {written}، ') + 'وعندنا أكثر من مؤلف بنفس اللقب. وش اسم المؤلف اللي تقصده كامل؟')
                 if not any(c['role'] == 'assistant' and c['content'] == many for c in conversation):
                     return many, None, mode == 'works'
             elif near:
+                _n0 = sorted(near)[0] if not isinstance(near, (list, tuple)) else near[0]
+                if (len(near) == 1 and len(key(written).split()) == 1 and len(_bare(key(written))) >= 6
+                        and _family_spelling(written, [_n0])
+                        and (not full or key(full) in ({key(_n0)} | {key(a) for a in allowed(_n0)}) or _family_spelling(full, [_n0]))):
+                    # QADFIX25 (QAD 2026-10-31, case 22.1): «موركامي عندكم له شي؟» -> «تقصد «هاروكي موراكامي»؟» while «دستوفسكي»
+                    # and «كونديره» were answered at once: one catalog author whose family name is the visitor's word with one
+                    # letter off (QADFIX17's rule for a family name in another spelling) — his books are shown, no question
+                    request.update(name_as_written=_n0, full_name=_n0, aliases=[])
+                    if mode in ('similar', 'both'):
+                        return None, None, False
+                    return None, allowed(_n0), True
                 return near_question(written, near, english), None, mode == 'works'
 
     # «أي شي باسم معلوف؟» right after «أمين معلوف» (none of whose books we have): the family name alone is now the
@@ -627,6 +661,20 @@ def resolve(request, conversation, books, english=False):
     # his books are not here, under the name as the records hold it
     if ambiguous and not options and known_record and full and len(key(written).split()) >= 2:
         ambiguous = False
+        written = full
+        request['name_as_written'] = full
+    # CHATFIX30 (library inbox 2026-10-29, conversation 8.1): «عندكم كتب روي ياكوبسون؟» -> «تقصد «روي ياكوبسن»؟» -> «صحيح» -> «ما
+    # عندنا الآن كتب لـروي ياكوبسن». The model's full name is the visitor's own name in another spelling (every word the same word,
+    # spelt differently) and no catalog author is near it: the question changes nothing and wastes a turn. The answer is at once
+    # that we have none of his books now (the caller says so under that name and offers close books, and logs it). «تقصد …؟» stays
+    # when the corrected name leads to books we hold (options) or the two names are different people
+    if ambiguous and not options and same_name_spelling(written, full):
+        ambiguous = False
+        request['spelling_of'] = written
+        if re.search(r'[A-Za-z]', full) and not re.search(r'[A-Za-z]', written):
+            # the Arabic answer names him as the visitor wrote him; the Latin spelling is kept for an English answer
+            request['aliases'] = [a for a in (request.get('aliases') or []) if isinstance(a, str)] + [full]
+            request['full_name'] = full = written
         written = full
         request['name_as_written'] = full
     # «وش عندكم لموراكامي؟»: a family name alone that only one catalog author carries needs no

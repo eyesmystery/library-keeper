@@ -50,6 +50,7 @@ import page_extract
 import events
 import picks
 import start_paths
+import start_taps
 import embeddings
 import outside_books
 import chat_rules
@@ -90,7 +91,10 @@ STAFF_PREFIXES = ("/api/admin/catalog", "/api/admin/books/", "/api/admin/me", "/
                   # library sections, audit log, about. Since 2026-10-24 (ADMSTF, Ibrahim: «الموظفون يظهر للمدير والمطور»،
                   # «الذكاء الاصطناعي من صلاحيات المدير») staff accounts and the AI settings (model, keys, usage, test
                   # mode) are manager/developer only. «الاستيراد», «إحصائيات الزوار» stay manager-only.
-                  "/api/admin/trial", "/api/admin/sections", "/api/admin/audit", "/api/admin/version")
+                  "/api/admin/trial", "/api/admin/sections", "/api/admin/audit", "/api/admin/version",
+                  # «أرسل الآن» of «إرسال البلاغات للمطوّر» for every staff member (Ibrahim 2026-10-29 «افتح للموظفين ارسال
+                  # البلاغات للمطور»); turning the sending on/off and the upload token stay the manager's (send-inbox/settings)
+                  "/api/admin/send-inbox/now")
 # Developer-only writes (ADMSTF 2026-10-24): author spelling merge and restoring a deleted product.
 DEV_ONLY_WRITES = ("/api/admin/authors/merge", "/api/admin/books/deleted/")
 
@@ -250,7 +254,7 @@ MEDIUM_TIER = 0.65
 # for children/teens: better fewer books than an unsuitable one.
 AUDIENCE_KEYWORDS = {
     "children": ["طفل", "طفله", "اطفال", "ولدي الصغير", "بنتي الصغيره", "ابني الصغير", "صغير عمره",
-                 "صغيره عمرها", "ابتدائي", "روضه", "قصص اطفال", "لطفلي", "لطفلتي", "child", "children", "kid", "kids", "my little", "little son", "little daughter", "toddler",
+                 "صغيره عمرها", "ابتدائي", "روضه", "قصص اطفال", "للصغار", "الصغار", "لطفلي", "لطفلتي", "child", "children", "kid", "kids", "my little", "little son", "little daughter", "toddler",
                  "kindergarten", "elementary", "primary school", "bedtime story", "picture book"],
     "young_adult": ["مراهق", "مراهقه", "مراهقين", "يافع", "يافعين", "ثانوي", "ثانويه", "المتوسطه",
                     "في المتوسط", "مراهقتي", "teen", "teens", "teenager", "young adult", "high school", "middle school"],
@@ -287,7 +291,7 @@ def detect_audience(normalized_query):
             return "children"
         if 13 <= age <= 17:
             return "young_adult"
-    for age in chat_rules.kid_ages(normalized_query):   # «بنتي ١٥» (QAD 2026-10-12, case 38)
+    for age in chat_rules.kid_ages(normalized_query) + chat_rules.grade_ages(normalized_query):   # «بنتي ١٥» (QAD 2026-10-12, case 38); QADFIX25: «بالصف الثالث»
         if 2 <= age <= 12:
             return "children"
         if 13 <= age <= 17:
@@ -1000,6 +1004,25 @@ def prefs_from_ai(ai, normalized):
               "audience": ai.get("audience") or detect_audience(normalized),
               "avoid": set(ai.get("avoid_content") or [])}
     exclusions = {"moods": set(ai["moods_exclude"]), "weight": set(ai["weight_exclude"])}
+    if (not prefs["original_languages"] and not prefs.get("translated")
+            and re.search(r"\barabic (?:novel|novels|story|stories|literature|poetry|fiction|novella)\b", normalized or "")
+            and not re.search(r"in arabic|arabic (?:translation|copy|copies|edition|version)|translated|translation", normalized or "")):
+        # QADFIX25 (full replay of QAD 2026-10-31, case 14.1; HOMEFOLD observation 2026-10-30): "a short Arabic novel" is a novel
+        # written in Arabic — the interpreter sometimes left it out and «رفيقي» (Gorky, translated) came
+        prefs["original_languages"] = {"ar"}
+    if women_wish(normalized):
+        # QADFIX25 (QAD 2026-10-31, case 2.1, grave): «كاتبة من السعودية اخذت البوكر العربية» — «كاتبة» is the women-authors wish
+        # (read from the author records below), never a subject: as one it emptied the candidates («ما لقينا») while Raja Alem's
+        # «باهبل» (IPAF shortlist 2024) was in stock
+        unsupported = [u for u in unsupported if not _PEOPLE_WOMEN.search(" " + " ".join(normalize(u).split()) + " ")]
+    if era_said(normalized):
+        # QADFIX25 (case 49.1, grave): «الأدب الإنجليزي الفيكتوري» — the era is a range of first-publication years (years_said),
+        # not a subject searched in the summaries (it found nothing and ~40 Victorian books in stock were never offered)
+        unsupported = [u for u in unsupported if not era_said(u) and not _ERA_WORD.search(" " + " ".join(normalize(u).split()) + " ")]
+    if pprefs.get("audience") in ("children", "young_adult") and "سيرة نبوية" in prefs["genres"]:
+        # QADFIX25 (case 43.1, grave): the Prophet's life for a child is on the children's religious shelf («سلسلة قصص نبي الرحمة»،
+        # «قصص الأنبياء»), not the academic studies catalogued «سيرة نبوية» / «تاريخ»
+        prefs["genres"] = (set(prefs["genres"]) - {"سيرة نبوية"}) | {"دين"}
     return prefs, pprefs, exclusions, unsupported
 
 
@@ -1036,15 +1059,50 @@ def score_books(books, prefs, pprefs, cards):
 
 
 def reason_text(reasons, language="ar"):
-    reasons = list(dict.fromkeys(reasons))[:3]  # the strongest reasons only, no repeats
+    # CHATFIX31 (1a), Ibrahim 2026-11-01 «ابدا» (the chat review's «reasons» step): the card line names what in the request the
+    # book meets, most specific first (subject, «مثل X», prize, kind, mood, length, price), and the bare shelf («من تصنيف «رواية»
+    # كما طلبت») only when nothing more specific is there; two reasons at most, one short line
+    reasons = chat_rules.card_reasons(list(dict.fromkeys(reasons)))[:2]
     if reasons:
         if language == "en":
             return "Matches what you asked for: " + "; ".join(localize_reason(r) for r in reasons) + "."
-        return "اخترناه لأنه " + "، و".join(reasons) + "."
+        return "اخترناه لأنه " + "، و".join(chat_rules.short_reason(r) for r in reasons) + "."
     # Matched only through Medium-tier profile values: ranking signal,
     # never quoted as a guarantee (schema §4/§7).
     return ("It may be close to what you described, based on early reader impressions that have not been reviewed yet."
             if language == "en" else "قد يكون قريبًا من وصفك حسب انطباعات قرّاء أولية لم تُراجع بعد.")
+
+
+# CHATFIX31 (1a), the replay of 2026-11-01: «اخترناه لأنه من تصنيف «رواية» كما طلبت.» stayed on most cards (no more specific
+# label: the lightness the visitor asked for is only an early impression, the length and the origin are filters). A chat card
+# whose line says only that (or only its price, or only «قد يكون قريبًا…») shows the book's own short line instead (books.hook,
+# written for visitors: «مغامرة عبثية مضحكة تبدأ من داخل خزانة.»); in English, its kind, original language and length
+_WEAK_REASON_AR = re.compile(r"^(?:اخترناه لأنه (?:من تصنيف «[^»]+» كما طلبت|سعره [^،.]+ ريال)|"
+                             r"قد يكون قريبًا من وصفك حسب انطباعات قرّاء أولية لم تُراجع بعد)\.$")
+_IMPRESSION_EN = "It may be close to what you described, based on early reader impressions that have not been reviewed yet."
+
+
+def card_line(reason, book, language="ar"):
+    r = str(reason or "")
+    if language == "en":
+        rest = r.removeprefix("Matches what you asked for: ").removesuffix(".")
+        if r != _IMPRESSION_EN and not (r.startswith("Matches what you asked for: ")
+                                         and rest.lower() in {str(v).lower() for v in GENRE_LABELS_EN.values()} | {"the category you named"}):
+            return r
+        parts = [GENRE_LABELS_EN.get(book.get("genre") or "", "")]
+        _ol = (book.get("original_language") or "").strip()
+        if _ol in LANG_NAMES_EN:
+            parts.append("originally " + LANG_NAMES_EN[_ol])
+        if book.get("page_count"):
+            parts.append(f"{book['page_count']} pages")
+        parts = [p for p in parts if p]
+        return (parts[0][:1].upper() + parts[0][1:] + "".join(", " + p for p in parts[1:]) + ".") if len(parts) >= 2 else r
+    if not _WEAK_REASON_AR.match(r):
+        return r
+    hook = " ".join(str(book.get("hook") or "").split())
+    if not hook or len(hook) > 140:
+        return r
+    return hook if hook.endswith((".", "؟", "!", "…", "»")) else hook + "."
 
 
 _WESTERN = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
@@ -1293,7 +1351,8 @@ def chat_context(prefs, pprefs, user_messages, publisher_name=None, country=None
         if en:
             add("pubyear", "published " + (f"{lo}–{hi}" if lo and hi else f"from {lo}" if lo else f"until {hi}"))
         else:
-            add("pubyear", "نُشر " + (f"من {fmt_num(lo)} إلى {fmt_num(hi)}" if lo and hi else f"من {fmt_num(lo)}" if lo else f"حتى {fmt_num(hi)}"))
+            # CHATFIX31: «صادرة من ٢٠٢٣» — the visitor sees the year filter is on and can remove it (✕)
+            add("pubyear", "صادرة " + (f"من {fmt_num(lo)} إلى {fmt_num(hi)}" if lo and hi else f"من {fmt_num(lo)}" if lo else f"حتى {fmt_num(hi)}"))
     if publisher_name:
         add("publisher", publisher_name)
     if country:
@@ -1631,6 +1690,26 @@ def feedback():
     return jsonify({"ok": True}), 201
 
 
+@app.route("/api/start-tap", methods=["POST"])
+def start_tap():
+    """«من أين يبدأ الزوار» (STARTTAP, Ibrahim 2026-11-01 «تمام اضف العداد»): one tap on one of the three start
+    choices (chat / reading / shelf), sent by navigator.sendBeacon. Only a count per day, choice and language is
+    stored (backend/start_taps.py). Not counted: test mode, a browser signed in to the admin page, and taps past
+    the per-address limit (kept in memory only)."""
+    data = request.get_json(silent=True, force=True)   # a beacon may arrive as text/plain
+    if not isinstance(data, dict):
+        return jsonify({"ok": False, "error": "invalid request"}), 400
+    choice = start_taps.clean_choice(data.get("choice"))
+    if choice is None:
+        return jsonify({"ok": False, "error": "unknown choice"}), 400
+    if not start_taps.allow(request.remote_addr):
+        return jsonify({"ok": False, "error": "rate_limited"}), 429
+    if testlog.enabled() or (session.get("uid") and current_user() is not None):
+        return "", 204
+    start_taps.record(choice, data.get("lang"))
+    return "", 204
+
+
 # ---------------------------------------------------------------------------
 # Visitor reports about a book's information, and visitor suggestions (2026-10-03).
 # Anonymous; a report never changes the book. Shown in admin → «البلاغات».
@@ -1947,6 +2026,24 @@ def _latest(conn, sql, args=()):
         return 0, None
 
 
+_MONTHS_AR = ("يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر")
+
+
+def _picks_alert():
+    """PICKALERT (Ibrahim 2026-11-01 «اضف التنبيه المقترح»): this month's «اختياراتنا» waits for a staff approval
+    (until then visitors keep seeing the last approved month) -> one alert row that opens «تنظيم منار» → «اختياراتنا».
+    «latest» is the first day of the month, so the row shows «جديد» once per month on each device."""
+    month = picks.this_month()
+    name = _MONTHS_AR[int(month[5:7]) - 1]
+    try:
+        waiting = picks.approval(month) is None
+    except Exception:  # noqa: BLE001 — picks tables missing on an old database: no alert
+        waiting = False
+    label = (f"«اختياراتنا» لشهر {name} تنتظر الاعتماد — الزوار يشوفون آخر شهر معتمد" if waiting
+             else f"«اختياراتنا» لشهر {name} معتمدة")
+    return ("picks", label, "organize:picks", (1, f"{month}-01T00:00:00+03:00") if waiting else (0, None))
+
+
 @app.route("/api/admin/inbox/alerts")
 def admin_alerts():
     conn = get_connection()
@@ -1976,6 +2073,7 @@ def admin_alerts():
              ((1, (inbox_send.state().get("pending_request") or {}).get("at"))
               if (inbox_send.state().get("pending_request") or {}).get("id") and inbox_send.ready() else (0, None))),
             # «كتب تحتاج تأكيد هويتها» removed (ADMSTF, Ibrahim 2026-10-24); the coloured section stays in the book card
+            _picks_alert(),
         ]
     finally:
         conn.close()
@@ -2012,8 +2110,8 @@ def admin_channel_install():
 
 
 # «إرسال البلاغات للمطوّر» (INBOXSEND, Ibrahim 2026-10-23 «رفع تلقائي مشفّر»): the inbox file sealed for Ibrahim, sent
-# every week and when he asks (backend/inbox_send.py). Everyone sees the state; only the manager turns it on or off,
-# saves the upload token or sends now (/api/admin/send-inbox/* is outside STAFF_PREFIXES, so guard() refuses staff).
+# every week and when he asks (backend/inbox_send.py). Everyone sees the state and can «أرسل الآن» (2026-10-29); only the
+# manager turns it on or off and saves the upload token (/api/admin/send-inbox/settings is outside STAFF_PREFIXES).
 @app.route("/api/admin/inbox/send")
 def admin_inbox_send_status():
     return jsonify(inbox_send.status((acting_user() or {}).get("role")))
@@ -2197,7 +2295,15 @@ def _validate_book_fields(data):
                     raise ValueError
                 clean[key] = v or (None if key == "original_language" else "ar")
         if "translator" in data:
-            clean["translator"] = str(data["translator"] or "").strip()[:120] or None
+            clean["translator"] = str(data["translator"] or "").strip()[:250] or None   # room for several, «،» between
+        if "goodreads_url" in data:
+            # GRURL (Ibrahim 2026-10-30 «كيف اقدر اضيف الرابط للكتاب؟»): only a Goodreads book page, kept in one form
+            raw = str(data["goodreads_url"] or "").strip()
+            m = re.search(r"goodreads\.com/(?:[a-z]{2}/)?book/show/(\d+)", raw)
+            if raw and not m:
+                raise ValueError
+            clean["goodreads_url"] = f"https://www.goodreads.com/book/show/{m.group(1)}" if m else None
+            clean["goodreads_url_source"] = "staff" if m else None
         if "price" in data:
             clean["price"] = float(data["price"])
             if clean["price"] < 0:
@@ -2241,6 +2347,9 @@ def patch_book(book_id):
     data = request.get_json(silent=True) or {}
     if get_book(book_id) is None:
         return jsonify({"ok": False, "error": "book not found"}), 404
+    # GRURL (Ibrahim 2026-10-30 «الرابط ذا خله للمطور بس هو اللي يضيفه»): only the developer sets the Goodreads link
+    if "goodreads_url" in data and not auth.is_developer((acting_user() or {}).get("role")):
+        return jsonify({"ok": False, "error": "رابط Goodreads يضيفه المطوّر فقط"}), 403
     fields = _validate_book_fields(data)
     if fields is None:
         return jsonify({"ok": False, "error": "invalid value"}), 400
@@ -2253,7 +2362,12 @@ def patch_book(book_id):
         fields["summary_source"] = _src
     if _src and (fields.get("age_min") is not None or fields.get("age_max") is not None):
         fields["age_source"] = _src
+    if fields.get("goodreads_url_source") == "staff":     # GRURL: who pasted the link
+        fields["goodreads_url_source"] = f"developer: {_who() or '?'}"
     before = dict(get_book(book_id))
+    if "goodreads_url" in fields and fields["goodreads_url"] != before.get("goodreads_url"):
+        # AUDIT 2026-10-31 P2: the stored rating was read on the old page; another page's rating is not this one's
+        fields.update(goodreads_rating=None, goodreads_ratings_count=None, goodreads_rating_source=None, goodreads_rating_at=None)
     update_book(book_id, fields)
     if "genre" in fields and fields["genre"] != before.get("genre"):
         conn = get_connection()
@@ -2269,15 +2383,18 @@ def patch_book(book_id):
             conn.commit()
         finally:
             conn.close()
-    if "author" in fields and fields["author"] != before.get("author"):
+    # several authors or translators are typed in one field, separated by «،» (Ibrahim 2026-10-29 «اذا الكتاب له اكثر من مترجم
+    # كيف يقدر الموظف يضيف المترجمين؟»); a translator change relinks too (it waited for the next start before)
+    if any(k in fields and fields[k] != before.get(k) for k in ("author", "translator")):
         try:
-            authors.sync()  # links the book to the right author record
+            authors.sync()  # links the book to the right author record(s)
         except Exception:
             app.logger.exception("authors sync after a staff edit failed")
     _changes = {k: [before.get(k), v] for k, v in fields.items() if before.get(k) != v}
     if _src and _changes:
         _changes["source"] = _src
-    auth.audit(acting_user(), "book.update", book_id, _changes)
+    if _changes:   # AGY-20261029-E2: a save that changed nothing writes no empty «تعديل بيانات كتاب» row
+        auth.audit(acting_user(), "book.update", book_id, _changes)
     _queue_research(book_id, list(_changes))
     return jsonify({"ok": True})
 
@@ -2396,8 +2513,7 @@ def admin_book_from_page(book_id):
     book = get_book(book_id)
     if book is None:
         return jsonify({"error": "book not found"}), 404
-    if not auth.is_developer((acting_user() or {}).get("role")):
-        return jsonify({"ok": False, "error": "للمطور فقط"}), 403
+    # open to every staff member since 2026-10-29 (Ibrahim «افتحها للموظفين كلهم»)
     url = str((request.get_json(silent=True) or {}).get("url") or "").strip()[:500]
     try:
         out = page_extract.extract(url)
@@ -2429,8 +2545,7 @@ def admin_book_summary_from_text(book_id):
     book = get_book(book_id)
     if book is None:
         return jsonify({"error": "book not found"}), 404
-    if not auth.is_developer((acting_user() or {}).get("role")):
-        return jsonify({"ok": False, "error": "للمطور فقط"}), 403
+    # open to every staff member since 2026-10-29 (Ibrahim «افتحها للموظفين كلهم»)
     text = re.sub(r"\s+", " ", str((request.get_json(silent=True) or {}).get("text") or "")).strip()[:3000]
     if len(text) < 40:
         return jsonify({"ok": False, "error": "الوصف قصير جدًا"}), 400
@@ -2590,6 +2705,58 @@ def visitor_ruled_out(book_ids, all_books, user_texts):
     return out
 
 
+# QADFIX24 (QAD 2026-10-30, case 8.2, grave): «طيب انسى الفيلم، ابي بس قصة تناسب عمره ٤» — «انسى / خلك من / بدون / مو لازم X»
+# lifts the wish X said before (the screen adaptation, a prize), like «غير X» rules out a title: the cartoon wish stayed and
+# only «أليس في بلاد العجائب» (7–11) was left, so «ما عندنا قصة لعمر ٤» was said with «سمكة قوس قزح» (4–8) in stock
+_FORGET_WISH = re.compile(r"(?:^| )(?:انسي|انسى|انساك من|خلك من|خليك من|خلنا من|خلينا من|بلاش|بدون|بلا|مو لازم|مب لازم|مش لازم"
+                          r"|ما يهم|مايهم|مو شرط|مب شرط|مش شرط|لا تهتم ب|لا تهتمين ب|forget(?: about)?|never mind|no need for|skip"
+                          r"|doesn.t (?:need|have) to (?:be|have)(?: a)?)\s+(?:ال|the |a |an )?(\S+)")
+_FORGET_KIND = (("adaptation", re.compile(r"فلم|فيلم|افلام|مسلسل|كرتون|كارتون|انمي|انيمي|رسوم|film|movie|series|show|cartoon|anime")),
+                ("awards", re.compile(r"جائز|جوائز|بوكر|نوبل|prize|award")))
+
+
+def forgotten_wishes(text):
+    """QADFIX24: the earlier wishes the latest message lifts («انسى الفيلم»، «مو لازم جائزة»، "forget the movie") -> set of
+    "adaptation" / "awards"."""
+    out = set()
+    for m in _FORGET_WISH.finditer(" " + " ".join(normalize(text or "").split()) + " "):
+        for kind, rx in _FORGET_KIND:
+            if rx.search(m.group(1)):
+                out.add(kind)
+    return out
+
+
+# QADFIX24 (case 6.2): an order asked over all of an author's books («أقصر رواية له عندكم»، «أقصر شي كتبه»، "his shortest")
+_AUTHOR_WIDE = re.compile(r" (?:له|لها|لهم) (?:عندكم|عندك|كلها|كلهم|كله|في المكتبه)(?= )| (?:من )?(?:كتبه|كتبها|رواياته|رواياتها|اعماله|اعمالها"
+                          r"|مؤلفاته|مؤلفاتها)(?= )| (?:كتبه|كتبها|الفه|الفها)(?= )| (?:of|by) (?:his|her|him) | his (?:books|novels|works) "
+                          r"| her (?:books|novels|works) ")
+
+
+# QADFIX24 (cases 49.1, 45.1): a part number written in the title only («(ج 2)»، «ج3»، «الجزء الثاني»، "Vol. 2")
+_TITLE_PART = re.compile(r"[\s(\[]+(?:ج|جزء|الجزء|vol\.?|volume|part|book)\s*[.:]?\s*(\d{1,2}|الاول|الأول|الثاني|الثالث|الرابع|الخامس)\s*[)\]]?\s*$",
+                         re.I)
+_PART_WORDS = {"الاول": 1, "الأول": 1, "الثاني": 2, "الثالث": 3, "الرابع": 4, "الخامس": 5}
+
+
+def title_part(title):
+    """-> (the title without its part, the part number) or None: «روايتي لروايتي (ج 2)» -> («روايتي لروايتي», 2)."""
+    t = str(title or "").strip()
+    m = _TITLE_PART.search(t)
+    if not m or m.start() == 0:
+        return None
+    n = m.group(1)
+    num = int(n) if n.isdigit() else _PART_WORDS.get(n)
+    base = chat_rules.title_key(normalize(t[:m.start()].strip(" -–—:،,")))
+    return (base, num) if num and base else None
+
+
+# QADFIX24 (replay of case 3.1): books for toddlers by their form, named in the title
+_TODDLER_FORM = re.compile(r"طي اللوحات|اللوحات القابله للطي|كتب? قماش|القماشيه|المس واشعر|لمس وتحسس|كتاب الحمام|lift.the.flap|board book|touch and feel")
+
+
+_COMICS_SAID = re.compile(r"كوميكس|كومكس|كومك|مانجا|مانغا|قصص مصوره|قصه مصوره|روايه مصوره|روايات مصوره|comic|manga|graphic novel")
+
+
 def title_author_said(title, message, all_books):
     """QADFIX23 (case 37): the author the visitor gave with a title — «المسخ لكافكا»، «المسخ حق فرانز كافكا»، «Metamorphosis by
     Kafka» -> the author's name as written (one or two words) when it names a writer we know or stock, else None."""
@@ -2613,6 +2780,43 @@ _ABOUT_LIST = re.compile(r"(?:^| )(?:عن|حول|about|on)\s+((?:\S+)(?:\s+(?:ا
 _title_word_count = {"n": None, "words": {}}
 
 
+_first_names_cache = {"n": None, "names": frozenset()}
+_NOT_FIRST_NAMES = {normalize(w) for w in "مجموعه مجموعة د دكتور الدكتور الشيخ الامام الإمام غير unknown".split()}
+
+
+def _author_first_names(all_books):
+    """CHATFIX30 follow-up: the first words of our authors' names (catalog strings and author records), normalized —
+    «هنري»، «روي»، «علي» -> frozenset; cached while the catalog size stays the same."""
+    if _first_names_cache["n"] != len(all_books):
+        names = set()
+        people = set()
+        for b in all_books.values():
+            people.update(author_flow._people(author_flow.display(b.get("author") or "")))
+        try:
+            conn = get_connection()
+            try:
+                people.update(r[0] for r in conn.execute("SELECT name_ar FROM authors") if r[0])
+            finally:
+                conn.close()
+        except sqlite3.OperationalError:
+            pass
+        for p in people:
+            ws = normalize(p).split()
+            if len(ws) >= 2 and ws[0] not in _NOT_FIRST_NAMES:
+                names.add(ws[0])
+        _first_names_cache.update(n=len(all_books), names=frozenset(names))
+    return _first_names_cache["names"]
+
+
+def _title_word_count_of(word, all_books):
+    """How many available titles carry this word (without «ال») — a family name is in few or none."""
+    title_subject_names("", all_books)   # fills _title_word_count for this catalog
+    return _title_word_count["words"].get(strip_al(normalize(word).strip()), 0)
+
+
+_TSN_GENERIC = {strip_al(normalize(w)) for w in "كتاب كتب كتابا روايه رواية روايات قصه قصص ديوان مجموعه سلسله book novel".split()}
+
+
 def title_subject_names(message, all_books, most=8):
     """QADFIX23 (case 2.2): the words after «عن» (one or a few joined by «او / و») that stand in the titles of 1 to `most` books in
     stock — a philosopher, a person, a rare subject («هيغل»، «هوبز») -> list of words as written."""
@@ -2628,7 +2832,9 @@ def title_subject_names(message, all_books, most=8):
         for w in re.split(r"\s+(?:او|و|ولا|or|and)\s+", m.group(1)):
             w = w.strip()
             k = strip_al(w)
-            if len(k) >= 4 and 1 <= _title_word_count["words"].get(k, 0) <= most and w not in out:
+            # CHATFIX30: «ايش تعرف عن كتاب زمان الملائكة؟» — «كتاب» after «عن» names no subject (it was logged as a wish)
+            if (len(k) >= 4 and 1 <= _title_word_count["words"].get(k, 0) <= most and w not in out
+                    and k not in _TSN_GENERIC):
                 out.append(w)
     return out
 
@@ -2648,6 +2854,52 @@ def thalath_readers_unclaimed(reply):
             p = _THALATH_READERS.sub(lambda m: "some readers" if re.match(r"[A-Za-z]", m.group(0)) else "بعض القرّاء", p)
         out.append(p)
     return "".join(out)
+
+
+def _q24_name_forms(ask):
+    """The spellings of the person asked about (as written, full, aliases, and our record's names)."""
+    names = [ask.get("name_as_written"), ask.get("full_name")] + list(ask.get("aliases") or [])
+    rec = None
+    for n in names:
+        if isinstance(n, str) and n.strip():
+            rec = authors.lookup(n)
+            if rec:
+                break
+    if rec:
+        names += authors.names_of(rec)
+    return [n for n in names if isinstance(n, str) and n.strip()]
+
+
+def name_said_now(ask, message):
+    """QADFIX24 (case 42.2): the person is named in this message (any spelling, by a word of 3+ letters other than «ابو / ابن …»),
+    or pointed at («كتاب عنه / عنها»)."""
+    m = " " + " ".join(normalize(message or "").split()) + " "
+    if re.search(r" (?:عنه|عنها|حوله|حولها|about (?:him|her)) ", m):
+        return True
+    words = {strip_al(w) for w in m.split()}
+    for n in _q24_name_forms(ask):
+        toks = {strip_al(w) for w in normalize(n).split() if len(strip_al(w)) >= 3} - {"ابو", "ابن", "بن", "بنت", "عبد", "ام"}
+        if toks and toks & words:
+            return True
+    return False
+
+
+_LIKENESS_LEAD = re.compile(r"(?:^| )(?:مثل|زي|زيّ|شبه|يشبه|تشبه|نفس|على طريقه|علي طريقه|باسلوب|بأسلوب|اسلوب|ستايل|like|similar to|in the style of"
+                            r"|style of|the likes of)\s+(?:\S+\s+){0,2}$")
+
+
+def name_as_likeness(ask, message):
+    """QADFIX24 (case 42.1): the person is named as the likeness of the books wanted («مثل أجاثا كريستي»، "like Agatha Christie")."""
+    m = " ".join(normalize(message or "").split())
+    for n in _q24_name_forms(ask):
+        toks = [strip_al(w) for w in normalize(n).split() if len(strip_al(w)) >= 3]
+        for t in toks:
+            for w in m.split():
+                if strip_al(w) == t:
+                    before = m.split(" " + w, 1)[0] if (" " + w) in m else ""
+                    if _LIKENESS_LEAD.search(before + " "):
+                        return True
+    return False
 
 
 def books_about_person(author_request, all_books, limit=6):
@@ -2874,6 +3126,11 @@ def book_fact(book, card, why, language="ar"):
         fact["thalath_readers"] = {"stars_out_of_5": _tr["avg"], "readers": _tr["count"],
                                    "said": [f"{t['label']} ({t['n']})" for t in _tr["tags"][:4]],
                                    "quotes": [r["text"][:200] for r in _tr["reviews"]]}
+    # CHATFIX30c (1): the readers' average on Goodreads (GRRATE, the page it was read on is books.goodreads_rating_source),
+    # given only with enough ratings to mean something; the only rating Manar may speak of besides «قرّاء مكتبة ثلاث»
+    if book.get("goodreads_rating") and (book.get("goodreads_ratings_count") or 0) >= chat_rules.RATING_MIN_COUNT:
+        fact["goodreads_rating"] = {"average_out_of_5": round(float(book["goodreads_rating"]), 1),
+                                    "ratings": int(book["goodreads_ratings_count"]), "site": "Goodreads"}
     if not card:
         return fact
     if language == "en":
@@ -3019,6 +3276,25 @@ _DECADES_EN = {"twenties": 1920, "thirties": 1930, "forties": 1940, "fifties": 1
                "eighties": 1980, "nineties": 1990}
 
 
+# QADFIX25 (QAD 2026-10-31, case 49.1, grave): «الأدب الفيكتوري»، «القرن التاسع عشر» are first-publication years
+_ERA_WORD = re.compile(r"(?:^| )(?:ال)?(?:فيكتوري|فكتوري|فيكتوريه|فكتوريه)(?: |$)|victorian")
+_CENTURY = re.compile(r"(?:^| )(?:ال)?قرن (?:ال)?(ثامن عشر|تاسع عشر|عشرين|العشرين|سابع عشر)(?: |$)|(?:^| )(17|18|19)(?:th)? century")
+_CENTURY_START = {"سابع عشر": 1601, "ثامن عشر": 1701, "تاسع عشر": 1801, "عشرين": 1901, "العشرين": 1901,
+                  "17": 1601, "18": 1701, "19": 1801}
+
+
+def era_said(text):
+    """«الأدب الفيكتوري» -> (1837, 1901); «القرن التاسع عشر» -> (1801, 1900); else None."""
+    t = " ".join(normalize(text or "").split())
+    if _ERA_WORD.search(" " + t + " "):
+        return 1837, 1901
+    m = _CENTURY.search(" " + t + " ")
+    if m:
+        start = _CENTURY_START[m.group(1) or m.group(2)]
+        return start, start + 99
+    return None
+
+
 def decade_said(text):
     """«في الستينات»، «الستينيات»، "the sixties", «1960s» -> (1960, 1969); else None."""
     m = _DECADE_RX.search(" ".join(normalize(text).split()))
@@ -3032,7 +3308,8 @@ def decade_said(text):
 # it), not the longlist or a prize of the author (QAD 2026-10-15, case 29.1); «الفائزة» = winners only
 _SHORTLIST_RX = re.compile(r"(?:ال)?قائمه (?:ال)?قصيره|shortlist|short list")
 _LONGLIST_RX = re.compile(r"(?:ال)?قائمه (?:ال)?طويله|longlist|long list")
-_WINNER_RX = re.compile(r"(?:^| )(?:ال)?(?:فائزه|فايزه|فائزين|فايزين|فازت|فاز)(?: |$)|winners?(?: |$)|(?:^| )won(?: |$)")
+# QADFIX25 (QAD 2026-10-31, case 2.1): «كاتبة … اخذت البوكر العربية» — «أخذت / حصلت على / نالت» a prize is winning it
+_WINNER_RX = re.compile(r"(?:^| )(?:ال)?(?:فائزه|فايزه|فائزين|فايزين|فازت|فاز|اخذت|اخذ|حصلت|حصل|نالت|نال)(?: |$)|winners?(?: |$)|(?:^| )won(?: |$)")
 
 
 _PLATFORM = re.compile(r"نتفلكس|نتفليكس|نيتفلكس|نتفلیکس|netflix|شاهد vip|osn|امازون برايم|برايم فيديو|prime video|hbo|ديزني بلس|disney")
@@ -3067,6 +3344,9 @@ def years_said(text):
     d = decade_said(t)
     if d:
         return d
+    e = era_said(t)
+    if e:
+        return e
     lo = hi = None
     m = _YEAR_BEFORE.search(t)
     if m:
@@ -3127,7 +3407,9 @@ def new_release_said(text):
 _NEW_START = {" ".join(normalize(x).split()) for x in ("فاجئيني بكتب جديدة", "Surprise me with new books")}
 _NEW_WORD = re.compile(r"(^| )(جديد|جديده|الجديد|الجديده|حديث|حديثه|حديثا|new|newer|newest|recent)( |$)")
 _NOT_NEW = re.compile(r"(مو|مب|ما|مش|غير) (لازم|شرط|ضروري|مهم) (تكون |يكون )?(جديد|حديث)|(اي|كل) (سنه|السنوات)"
-                      r"|(^| )(قديم|قديمه|القديمه|كلاسيك|كلاسيكي|كلاسيكيه)( |$)|any year|not new|doesn.?t have to be new|older|classic")
+                      r"|(^| )(قديم|قديمه|القديمه|كلاسيك|كلاسيكي|كلاسيكيه)( |$)|any year|not new|doesn.?t have to be new|older|classic"
+                      # CHATFIX31: «ما يهم السنة»، «بغض النظر عن سنة النشر»، «أي تاريخ»
+                      r"|(ما|مو|مب) (يهم|مهم|تفرق|فارقه) (ال)?(سنه|تاريخ|النشر|متي)|بغض النظر عن (ال)?(سنه|تاريخ)|(^| )اي تاريخ( |$)")
 
 
 _EDITION_ASK = re.compile(r"(?:احدث|اخر|اجدد|اقدم|كم|اي|وش|ايش) (?:ال)?(?:طبعه|طبعات|نسخه|نسخ|edition|editions)|(?:^| )(?:ال)?طبعات(?: |$)|which edition|latest edition|newest edition")
@@ -3143,6 +3425,10 @@ def new_release_wished(user_messages):
     if new_release_said(last) or last in _NEW_START:
         return "said"
     earlier = [" ".join(normalize(m).split()) for m in user_messages[:-1]]
+    # CHATFIX31 (Ibrahim 2026-11-01, reverting the CHATFIX30c restriction): «على حسب، يمكن يبغى يضيف ويحدد اكثر مو انه يغير
+    # الكتاب. المفروض يظل عالسياق الا اذا هو الغى السياق او بدأ محادثة جديدة». The «جديدة» wish stays in the conversation's
+    # context, through new subjects too, until the visitor takes it back in words («مو لازم جديدة»، «أي سنة»، «حتى القديمة»:
+    # _NOT_NEW), removes its badge («صادرة من ٢٠٢٣», drop_context «pubyear») or starts a new chat
     for t in reversed(earlier):
         if _NOT_NEW.search(t):
             return None
@@ -3287,6 +3573,20 @@ def audience_age(user_messages):
     the «we are searching for» badge. With two children named, each keeps his own age (QAFIX 2026-10-11,
     case 12: «نرجع لبنتي» got her brother's 16). The model's reading of this turn comes first (QADFIX14 #2)."""
     if getattr(_model_reader_age, "msgs", None) is user_messages and getattr(_model_reader_age, "age", None):
+        # QADFIX24 (QAD 2026-10-30, case 7.1): «بنت بأول ابتدائي» is 6, not the 9 the model read: a school year said in the latest
+        # message (one child only) gives the age when the model's reading is far from it
+        # (the latest message that names a school year; an age said in a message after it is the newer reading)
+        _g24 = []
+        for _i24 in range(len(user_messages or []) - 1, -1, -1):
+            _g24 = chat_rules.grade_ages(user_messages[_i24])
+            if _g24:
+                # a later message about a person or an age («ولأختهم الصغيرة سنة ونص؟») is another reading: the model's
+                if any(re.search(r"بنت|ولد|ابن|اخت|اخو|طفل|حفيد|صغير|كبير|عمر|سنه|سنين|سنوات|عام|ابتدائي|متوسط|ثانوي|روضه|daughter|son|kid|child|year",
+                                 " ".join(normalize(t).split())) for t in user_messages[_i24 + 1:]):
+                    _g24 = []
+                break
+        if len(_g24) == 1 and abs(int(_model_reader_age.age) - _g24[0]) > 1:
+            return _g24[0]
         return max(1, int(_model_reader_age.age))
     age = chat_rules.reader_person(user_messages)[1]
     return age if age is not None and 2 <= age <= 17 else None
@@ -3941,9 +4241,200 @@ def fallback_author(message, all_books):
     return rec["name_ar"], sorted(avail, key=lambda b: -(b.get("quantity") or 0))
 
 
-def chat_keyword_fallback(user_messages, all_books, shown, cards, language="ar"):
+# FALLBACKSIM (library log 2026-11-01 13:15, model down → «النظام البديل»): «قرأت مؤخرا كل صيف تلاه. ابغاه شيء مقارب له» got one
+# card, «كل صيف تلاه» itself, and «هذا الكتاب اللي قرأته. انا ابغى كتب مشابهه له» after it got «ما لقيت … كتابًا بهذا الوصف».
+# Without the model, a wish for books like a book — a title named with a likeness word («مثل / زي / شبه / مشابه / مقارب / قريب
+# من …»، «قرأت X وابغى …»، "something like X"), or the book(s) just shown («مشابه له»، «مثله»، «زيه»، "similar to this") — is
+# answered with books in stock close to it, as the model path does for a book of ours (its «similar» relations, then the
+# nearest stored meanings, embeddings.similar_to_book), never with the book itself, another edition of it or another part
+# of its series (unless the parts are asked about). No reference found -> the keyword answer as before.
+_FB_LIKE_AR = re.compile(
+    r"(?:^| )(?:[وف]?(?:مثل|مثله|مثلها|زي|زيه|زيها|شبه|يشبه|تشبه|يشبهه|يشبهها|تشبهه|تشبهها|شبيه|شبيهه|مشابه|مشابهه|مشابهين"
+    r"|مشابهات|متشابه|متشابهه|مقارب|مقاربه|مقاربين|مقاربات|قريب|قريبه|قريبين|قريبات)"
+    r"|على غرار|علي غرار|نفس (?:ال)?(?:جو|نوع|اسلوب|طابع|نمط|فكره|ستايل))(?: |$)")
+_FB_LIKE_EN = re.compile(r"\b(?:similar|resembl\w*|in the vein of|along the lines of|the likes of)\b"
+                         r"|\b(?:something|anything|books?|novels?|stories|ones?|stuff|more|reads?|titles?)\s+like\b|^like\b")
+_FB_LIKE_IT = re.compile(
+    r"(?:^| )(?:[وف]?(?:مثله|مثلها|زيه|زيها|يشبهه|يشبهها|تشبهه|تشبهها|يشبهونه)"
+    r"|(?:شبيه|شبيهه|مشابه|مشابهه|مشابهين|مشابهات|مقارب|مقاربه|مقاربين|قريب|قريبه|قريبين)\s+(?:له|لها|لهم|منه|منها|منهم|لهذا|لهذي"
+    r"|لهذه|لذا|من هذا|من هذي|من هذه)"
+    r"|(?:مثل|زي|شبه|يشبه|تشبه)\s+(?:هذا|هذي|هذه|ذا|ذي|هاذا|هاذي|ذاك)"
+    r"|نفس (?:ال)?(?:جو|نوع|اسلوب|طابع|نمط|فكره))(?: |$)"
+    r"|(?:^| )(?:مشابهه|مشابهين|مشابهات|مقاربه|مقاربين|شبيهه)$"
+    r"|\b(?:similar|like|resembling|close)\s+(?:to\s+)?(?:this|that|it|these|those|them)\b|\bsomething similar\b"
+    r"|\bsimilar (?:ones|books|novels|reads|titles)\b")
+_FB_READ_WANT = re.compile(r"(?:^| )(?:قرات|قريت|خلصت|انهيت|i read|i just read|i finished|i loved)(?: |$)")
+_FB_WANT = re.compile(r"(?:^| )(?:ابغي|ابي|ابغا|ابا|ابغاه|ودي|رشح|رشحي|اقترح|اقترحي|عطني|عطيني|recommend|suggest|want|looking for)(?: |$)")
+_FB_AUTHOR_WISH = re.compile(r"(?:^| )(?:ال|لل|ل)?(?:مؤلف|مولف|كاتب|كاتبه|مؤلفه|مولفه)(?: |$)|\b(?:author|writer)\b")
+_FB_FORM_WORDS = {normalize(w) for w in "قصص قصة قصه كتب كتاب روايات رواية روايه شعر ديوان مقالات حكايات قصائد".split()}
+_fb_title_cache = {"n": None, "keys": []}
+
+
+def _fb_title_keys(all_books):
+    """[(title key, [book ids])] of every book (with and without its subtitle), the longest key first; cached per catalog."""
+    if _fb_title_cache["n"] != len(all_books):
+        keys = {}
+        for b in all_books.values():
+            t = str(b.get("title") or "")
+            for k in {chat_rules.title_key(normalize(t)), chat_rules.title_key(normalize(t.split(":")[0]))}:
+                if k:
+                    keys.setdefault(k, []).append(b["book_id"])
+        _fb_title_cache.update(n=len(all_books), keys=sorted(keys.items(), key=lambda kv: -len(kv[0])))
+    return _fb_title_cache["keys"]
+
+
+def _fb_reading_words(k):
+    """«رواية رومانسية»، «قصص قصيرة»: a wish in reading words, never taken for a title."""
+    und = keyword_prefs.understand
+    return (keyword_prefs.understood_anything(und([k]))
+            and all(w in _FB_FORM_WORDS or keyword_prefs.understood_anything(und([w])) for w in k.split()))
+
+
+def fallback_like_reference(message, all_books, last_ids=()):
+    """FALLBACKSIM: the book(s) the visitor wants books like -> (reference books, how) or None.
+    how = "named" (its title in the message) or "shown" (the books of the last turn, pointed at: «مشابه له»، "similar to this")."""
+    m = " ".join(normalize(message or "").split())
+    if not m or _FB_AUTHOR_WISH.search(m):
+        return None   # «من نفس المؤلف»: the author's books, not likeness (the author paths answer it)
+    mk = " " + chat_rules.title_key(m) + " "
+    for k, ids in _fb_title_keys(all_books):
+        words = k.split()
+        if len(k) < 4 or (" " + k + " ") not in mk:
+            continue
+        rest = mk.replace(" " + k + " ", " | ", 1)
+        before = rest.split(" | ", 1)[0] + " "
+        lead = bool(_LIKENESS_LEAD.search(before) or re.search(r"(?:^| )(?:like|to|of)\s+$", before))
+        if len(words) == 1 and not (len(k) >= 5 and lead):
+            continue   # one word is a title only right after «مثل / like»
+        if len(words) >= 2 and len(k) < 6:
+            continue
+        if _fb_reading_words(k):
+            continue
+        rest = " ".join(rest.replace("|", " ").split())
+        cue = (_FB_LIKE_AR.search(rest) or _FB_LIKE_EN.search(rest) or lead
+               or (_FB_READ_WANT.search(rest) and _FB_WANT.search(rest)))
+        if not cue:
+            return None
+        refs = [all_books[i] for i in ids if i in all_books]
+        refs.sort(key=lambda b: (b["book_id"] not in set(last_ids or ()), not is_available(b), b["book_id"]))
+        return (refs, "named") if refs else None
+    if last_ids and _FB_LIKE_IT.search(m):
+        refs = [all_books[i] for i in last_ids if i in all_books]
+        return (refs[:3], "shown") if refs else None
+    return None
+
+
+def fallback_similar_books(refs, all_books, shown, cards, message, language="ar", limit=4):
+    """FALLBACKSIM: in-stock books like the reference books -> [(book, reason, match)], at most one per author and per series.
+    Never a reference itself, another edition of it, or (unless the visitor asks about parts) another part of its series."""
+    en = language == "en"
+    ref_ids = {b["book_id"] for b in refs}
+    for b in list(refs):
+        ref_ids |= {e["book_id"] for e in same_book_editions(b, all_books)}
+    like_ids = set(ref_ids)   # the work itself: its relations and its stored meaning are the likeness
+    for b in list(refs):
+        # … and never the same work under another title or language («Love in the time of cholera» for «الحب في زمن الكوليرا»)
+        ref_ids |= {e["book_id"] for e in work_copies_other_titles(b, all_books)}
+
+    def _k(s):
+        return chat_rules.title_key(normalize(s or ""))
+    ref_keys = {_k(all_books[i].get("title")) for i in ref_ids if i in all_books}
+    series_ids, series_keys = set(), set()
+    if not chat_rules.part_asked(message):
+        for b in refs:
+            series_ids |= {x["book_id"] for x in chat_rules.series_others(b, all_books)}
+            series_keys |= {k for k in (_k(b.get("series_name")), (title_part(b.get("title")) or ("",))[0], _k(b.get("title"))) if k}
+    ref0 = refs[0]
+    form = chat_rules.book_is_fiction(ref0)
+    child = ref0.get("genre") in CHILD_GENRES
+
+    def _ok(b):
+        if not b or b["book_id"] in ref_ids or b["book_id"] in shown or b["book_id"] in series_ids or not is_available(b):
+            return False
+        if _k(b.get("title")) in ref_keys:
+            return False
+        if series_keys and (_k(b.get("series_name")) in series_keys or (title_part(b.get("title")) or ("",))[0] in series_keys):
+            return False
+        return chat_rules.same_form_as(form, b) and (b.get("genre") in CHILD_GENRES) == child
+    pool = [b for b in all_books.values() if _ok(b)]
+    # a wish said beside the likeness («شي مثله بس أقصر»): the keyword reading of the message without the title
+    _rest = normalize(message or "")
+    for b in refs:
+        _rest = _rest.replace(normalize(b.get("title") or ""), " ")
+    _und = local_understand([_rest])
+    if keyword_prefs.understood_anything(_und):
+        _p, _pp, _ex, _ = prefs_from_ai(_und, " ".join(_rest.split()))
+        pool, _labels = constrain(pool, _p, _pp, _ex, cards)
+    allowed = {b["book_id"] for b in pool}
+    t0 = ref0.get("title") or ""
+    found, seen = [], set()
+    authors_seen, series_seen = set(), set()
+
+    def _add(bid, why, match):
+        b = all_books.get(bid)
+        if not b or bid in seen or bid not in allowed:
+            return
+        ak = " ".join(normalize(b.get("author") or "").split())
+        sk = _k(b.get("series_name")) or (title_part(b.get("title")) or ("",))[0]
+        if (ak and ak in authors_seen) or (sk and sk in series_seen):
+            return
+        seen.add(bid)
+        authors_seen.add(ak) if ak else None
+        series_seen.add(sk) if sk else None
+        found.append((b, why, match))
+    rel = relations.for_books(sorted(like_ids))
+    rows = sorted((r for rs in rel.values() for r in rs), key=lambda r: -(r.get("confidence") or 0))
+    for r in rows:
+        if r["relation_type"] == "similar" and len(found) < limit:
+            _add(r["target_book_id"], (f"Similar to «{t0}»" if en else f"مشابه لـ«{t0}»: {r.get('reason_ar') or ''}".rstrip(": ")),
+                 "related")
+    if len(found) < limit:
+        for bid, _s in embeddings.similar_to_book(sorted(like_ids), sorted(allowed), top=limit * 4):
+            if len(found) >= limit:
+                break
+            _add(bid, (f"Close to «{t0}» in what it is about" if en else f"قريب من «{t0}» في موضوعه"), "reference")
+    for r in rows:
+        if r["relation_type"] == "same_topic" and len(found) < limit:
+            _add(r["target_book_id"], (f"A subject close to «{t0}»" if en else f"موضوعه قريب من «{t0}»"), "related")
+    return found[:limit]
+
+
+def fallback_similar_answer(user_messages, all_books, shown, cards, language="ar", last_ids=()):
+    """FALLBACKSIM: the whole keyword answer to «books like X» -> dict, or None when no reference book is found."""
+    if not user_messages:
+        return None
+    got = fallback_like_reference(user_messages[-1], all_books, last_ids)
+    if not got:
+        return None
+    refs, how = got
+    en = language == "en"
+    found = fallback_similar_books(refs, all_books, set(shown), cards, user_messages[-1], language)
+    several = how == "shown" and len(refs) > 1
+    t = refs[0].get("title") or ""
+    if found:
+        reply = (("These books are close to the ones I showed you and available now." if several
+                  else f"These books are close to «{t}» and available now.") + " Tap a book to see its details." if en else
+                 ("هذي كتب قريبة من الكتب اللي عرضتها لك ومتوفرة الآن." if several else f"هذي كتب قريبة من «{t}» ومتوفرة الآن.")
+                 + " اضغط على أي كتاب تشوف تفاصيله.")
+    else:
+        reply = ((f"I could not find an available book close to «{t}» right now. Tell me what you liked about it (its mood, its "
+                  "subject, its style?) and I will look, or ask the library staff.") if en else
+                 (f"ما لقيت الآن بين الكتب المتوفرة كتابًا قريبًا من «{t}». قل لي وش عجبك فيه (أجواؤه؟ موضوعه؟ أسلوبه؟) "
+                  "وأدوّر لك، أو اسأل موظف المكتبة."))
+    return {"reply": reply,
+            "books": [with_origin(dict(b, reason=why, match=match), language) for b, why, match in found],
+            "suggestions": (["Something lighter", "A novel", "Show me others"] if en else ["شي أخف", "رواية", "ورّني غيرها"]),
+            "understanding": "keywords",
+            "_debug": {"mode": "keywords", "why": "similar to a book", "reference": [b["book_id"] for b in refs], "how": how,
+                       "found": [b["book_id"] for b, _, _ in found]}}
+
+
+def chat_keyword_fallback(user_messages, all_books, shown, cards, language="ar", last_ids=()):
     """Safe answer without a model: keyword understanding of the visitor's messages, read in
     order (later messages override earlier ones), with the same constraints as the AI path."""
+    _sim = fallback_similar_answer(user_messages, all_books, shown, cards, language, last_ids)
+    if _sim:
+        return _sim
     understood = local_understand(user_messages)
     if user_messages and keyword_prefs.is_greeting(user_messages[-1]) and not keyword_prefs.understood_anything(understood):
         en = language == "en"
@@ -4158,6 +4649,29 @@ def reference_kind_matches(ref, all_books, suitable, reader_age=None, exclude=()
     return out
 
 
+def outside_subject_matches(words, ref, all_books, pool, exclude=(), language="ar", limit=4):
+    """CHATFIX30 (1): books in `pool` whose own title, keywords or subgenres carry the subject words of a missing book's
+    outside tags (chat_rules.outside_subject_words: «Film» -> سينما، أفلام، فيلم، سيناريو) — never a word of the missing
+    book's title, never a shelf name alone («فنون وسينما» holds embroidery too) -> [(book, why, "reference")]."""
+    if not words:
+        return []
+    scored = []
+    for bid in pool:
+        b = all_books.get(bid)
+        if not b or bid in exclude or not is_available(b) or normalize(b["title"]) == normalize(ref["title"]):
+            continue
+        have = set(normalize(b.get("title") or "").split())
+        for t in _json_list(b.get("keywords")) + _json_list(b.get("subgenres")):
+            if isinstance(t, str):
+                have |= set(normalize(t).split())
+        hit = sorted(words & {strip_al(w) for w in have})
+        if hit:
+            scored.append((len(hit), b, hit))
+    scored.sort(key=lambda x: (-x[0], x[1]["book_id"]))
+    return [(b, (f"Close to «{ref['title']}» in its subject: " + ", ".join(hit)) if language == "en" else
+             (f"قريب من «{ref['title']}» في موضوعه: " + "، ".join(hit)), "reference") for _s, b, hit in scored[:limit]]
+
+
 def _subgenre_words(text):
     out = set()
     for w in normalize(text or "").split():
@@ -4278,7 +4792,8 @@ def starter_picks(pool, cards, researched, language="ar", n=3):
     return picks
 
 
-def _run_chat_once(messages, active=None, language="ar", clear_audience=False, drop_context=None, second_look_note=None):
+def _run_chat_once(messages, active=None, language="ar", clear_audience=False, drop_context=None, second_look_note=None,
+                   register_msgs=None):
     """Core conversation turn. Raises ValueError for malformed input. run_chat() below may call it a second time."""
     if not isinstance(messages, list) or not messages:
         raise ValueError("messages required")
@@ -4314,6 +4829,10 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
     user_text = " ".join(user_messages)
     # «ورّني كتب على طول»: the visitor skips the remaining questions
     skip_questions = start_paths.is_skip(user_messages[-1])
+    # CHATFIX30c (2), conversation c-mvvbiykv: «فاجئيني بكتب جديدة» (the start button, or typed) got «تبغى المفاجأة رواية، ولا
+    # كتاب غير روائي؟» — a surprise asked for is a request for books now
+    if chat_rules.surprise_asked(user_messages[-1]):
+        skip_questions = True
     if skip_questions:
         streak = max(streak, 2)
     cards = get_profile_cards()
@@ -4321,6 +4840,8 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
     active = active if active is not None else llm.get_active()
     # a tapped start button: Manar asks that path's first question before any book (Ibrahim 2026-10-11)
     _opening = start_paths.opener(user_messages, language)
+    if _opening and chat_rules.surprise_asked(user_messages[0]):
+        _opening = None   # CHATFIX30c (2): «فاجئيني بكتب جديدة» brings books at once (Ibrahim «ابدا الاصلاح كله», 2026-10-30)
     if _opening:
         return {"reply": _opening[0], "books": [], "suggestions": list(_opening[1]), "understanding": "ai",
                 "provider": active[0] if active else None, "model": active[1] if active else None,
@@ -4371,7 +4892,7 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
     if it is not None and streak < 2 and start_paths.is_undecided(user_messages[-1]):
         it["intent"] = "clarify"   # «ما أدري وش يحب»: one more question first (Ibrahim 2026-10-11)
     if it is None:
-        out = chat_keyword_fallback(user_messages, all_books, set(shown), cards, language)
+        out = chat_keyword_fallback(user_messages, all_books, set(shown), cards, language, last_ids=last_reply_ids)
         if active:
             out["_debug"].update(failed_stage="interpret", call=dict(chat.last_failure.get("call") or {}))
         return out
@@ -4425,6 +4946,23 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             author_request = dict(author_request or {}, name_as_written=_named_author["name_ar"],
                                   full_name=_named_author["name_ar"], aliases=[], mode="works")
             it["author_request"], it["intent"], it["author_question"] = author_request, "recommend", _named_author["name_ar"]
+        elif find_publisher([], user_messages[-1], all_books):
+            # QADFIX24 (replay of QAD 2026-10-30, case 5.1): «المتوسط تنشر شعر؟» read as off topic («ما عندي تفاصيل عن إصدارات
+            # دار المتوسط»): a question about a publisher we stock is a reading question
+            it["intent"] = "recommend"
+    # CHATFIX30 follow-up (MGR replay 2026-10-30): «هنري ترويا» / «روي ياكوبسن» alone, read by the model as «clarify» with no
+    # author request, got «تقصد تبغى كتابًا لهنري ترويا؟ وش النوع…». A message that is only a person's name (chat_rules.
+    # looks_like_name) and names no book is a request for that author: the author flow answers it (his books, «تقصد …؟» for a
+    # catalog author of that family name, or «ما عندنا الآن كتب لـX…» logged as a missing author)
+    if (len(user_messages) == 1 and it.get("intent") in ("clarify", "smalltalk", "off_topic", "recommend")
+            and (author_request or {}).get("mode") in (None, "", "none") and not it.get("mentioned_titles")
+            and not _exact_said and not _greeting_only
+            and chat_rules.looks_like_name(user_messages[-1], _author_first_names(all_books))
+            and _title_word_count_of(user_messages[-1].split()[-1], all_books) <= 2):
+        _bn = " ".join(user_messages[-1].strip(" ؟?!.،,").split())
+        author_request = dict(author_request or {}, name_as_written=_bn, full_name=_bn, mode="works", bare_name=True,
+                              aliases=list((author_request or {}).get("aliases") or []))
+        it["author_request"], it["intent"] = author_request, "recommend"
     # a publisher's name is not an author: «كتب مسكلياني» and then a tapped «أبغى قراءة خفيفة» was answered
     # with «وش اسم المؤلف كامل؟» (QAFIX 2026-10-11, case 30)
     _aw = str(author_request.get("name_as_written") or "").strip()
@@ -4465,6 +5003,11 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
     # «ايه المتنبي الشاعر… كتاب عنه أو ديوانه» (case 30.2): the name read as an author wish or a subject, not as an author request
     _about_asks += [{"name_as_written": n, "full_name": n, "aliases": []} for n in list(_pr0.get("authors") or []) + list(_pr0.get("unsupported_requests") or [])
                     if isinstance(n, str) and 1 <= len(n.split()) <= 4 and authors.lookup(n)]
+    # QADFIX24 (QAD 2026-10-30, case 42.2, grave): "Do you have any mysteries in English?" after "Something like Agatha Christie"
+    # — the name carried from the message before (a style the visitor likes, not a person to read about) turned the answer
+    # into two Arabic books ABOUT Christie and «no English copy», with Inferno in English in stock. Books about a person only
+    # for a name said in THIS message, and never for a name given as a likeness («مثل / زي / like X»)
+    _about_asks = [a for a in _about_asks if name_said_now(a, user_messages[-1]) and not name_as_likeness(a, user_messages[-1])]
     for _ask in _about_asks:
         _about_name, _about_books = books_about_person(_ask, all_books)
         if _about_books:
@@ -4512,6 +5055,13 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         # author's books are the answer (QADFIX4, QAD 2026-10-16 case 21.1)
         it["intent"] = "recommend"
     prefs, pprefs, exclusions, unsupported = prefs_from_ai(it["prefs"], normalize(user_text))
+    # CHATFIX31 (1d), HOMEFOLD's live check 2026-10-30: "a light Arabic novel, under 200 pages" got «الرقة» (Foenkinos, translated)
+    # — the model read «Arabic» as the copy's language. In English, an «Arabic novel / book / literature / author» is a work
+    # first written in Arabic; only «in Arabic», "Arabic edition / version / translation / copy" is about the copy
+    if chat_rules.arabic_origin_asked(user_messages[-1]) and not any(str(k).split(":")[0] == "lang" for k in drops):
+        prefs["original_languages"] = set(prefs.get("original_languages") or ()) | {"ar"}
+        if it.get("copy_language") == "ar":
+            it["copy_language"] = None
     if pprefs.get("audience") == "young_adult" and "يافعين" in prefs["genres"] and prefs.get("subgenres"):
         # QADFIX16 (QAD 2026-10-24, case 24.2): a teenager gets every book that fits the kind asked for (QADFIX12 #7, Ibrahim
         # 2026-10-22), the young readers' shelf first: «يافعين» is that shelf, not a wish that hides the Arabic dystopias
@@ -4595,6 +5145,50 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                                         pprefs.get("use_cases"), pprefs.get("weight"), pprefs.get("pace"), unsupported))
     if it["intent"] == "clarify" and _wish_kinds >= 2 and not start_paths.is_undecided(user_messages[-1]):
         it["intent"] = "recommend"
+    # CHATFIX30 (5), Ibrahim 2026-10-30: «اقتراح ان منار تجاوب اولا قبل تقترح المفروض يكون كذا اذا كان السؤال ما يتضمن اقتراح.
+    # وغالبا يكون السؤال الاول وانا طلبت هالشيء انه ما يقترح على طول من اول سؤال اذا كان السؤال ما يوضح الاقتراح بشكل قريب. يعني
+    # سؤال عام بشكل كبير ويحتاج سؤال ثاني» (his rule of 2026-10-11, OWN1: questions before suggestions unless the request is clear;
+    # it rested on the model's «clarify», and «فلسفة» or «السعادة» alone were read as «recommend» and got three books at once).
+    # A visitor's FIRST message that names at most one bare subject and nothing else to choose by (chat_rules.general_first_message)
+    # is answered with one short question; no book on that turn
+    # CHATFIX30b (3), Ibrahim 2026-10-30: «التلوين» / «كتب تلوين» got «تقصد كتب عن التلوين، ولا كتب تلوين…؟» or «الحرب والتربنتين»
+    # (a novel about a painter) while 2093 «مجموعة التلوين الكبيرة» and 3877 «كتاب تلوين حروف وحيوانات» are in stock: with no reader
+    # named the reader was taken for a grown-up, and a request that names neither a genre nor a child keeps the children's shelf out
+    # (meets_constraints). A colouring / activity book is a children's book: its reader is a child unless the visitor says
+    # «للكبار»; and the child's age is not asked first («ابي كتاب تلوين لبنتي»): such books suit young children broadly
+    _activity_now = chat_rules.activity_wish(user_messages[-1])
+    if _activity_now and not pprefs.get("audience"):
+        pprefs["audience"] = "children"
+        if isinstance(it.get("prefs"), dict):
+            it["prefs"]["audience"] = "children"
+    if _activity_now and it["intent"] in ("clarify", "smalltalk"):
+        it["intent"] = "recommend"
+    _q30_general = bool(
+        len(user_messages) == 1 and not shown and not skip_questions and it["intent"] in ("recommend", "clarify")
+        and not it.get("mentioned_titles") and not it.get("references") and not it.get("thalath_favorites")
+        and (author_request or {}).get("mode") in (None, "", "none") and not it.get("author_countries")
+        and not it.get("order_by") and not prefs.get("awards") and not prefs.get("adaptation") and not prefs.get("length")
+        and not prefs.get("original_languages") and not prefs.get("translated") and not pprefs.get("audience")
+        and not _exact_said and chat_rules.general_first_message(user_messages[-1])
+        # CHATFIX30 follow-up: an author's name alone («ماركيز» with a record of ours) is never «general»
+        and not authors.lookup(user_messages[-1].strip(" ؟?!.،,"), spelling=False))
+    if _q30_general:
+        it["intent"] = "clarify"
+    elif (len(user_messages) == 1 and it.get("intent") == "clarify" and pprefs.get("audience") in ("children", "young_adult")
+          and not skip_questions and re.search(r"(?:^| )(?:تحب|يحب|حب|مجنونه|مجنون|مهووسه|مهووس|تموت علي|يموت علي|تعشق|يعشق|متعلقه ب|متعلق ب"
+                                               r"|loves|likes|is into|crazy about|obsessed with)\s+\S+",
+                                               " ".join(normalize(user_messages[-1]).split()))):
+        # QADFIX24 (QAD 2026-10-30, case 7.1): «عندي بنت بأول ابتدائي مجنونة بالقطط، وتقرا انجليزي أكثر من عربي» names the child,
+        # what she loves and the language: books for her, not «وش ودّها تحس وهي تقرأ؟» first
+        it["intent"] = "recommend"
+        if not unsupported:
+            _lv24 = re.search(r"(?:^| )(?:تحب|يحب|حب|مجنونه|مجنون|مهووسه|مهووس|تموت علي|يموت علي|تعشق|يعشق|متعلقه|متعلق)\s+(\S+)",
+                              " ".join(normalize(re.sub(r"[؟?!.,،]", " ", user_messages[-1])).split()))
+            if _lv24:
+                _w24 = re.sub(r"^(?:بال|بـ|ب|في)", "", _lv24.group(1))
+                _w24 = _w24 if _w24.startswith("ال") else "ال" + _w24
+                if topics.searchable([_w24], topics.index(all_books)):
+                    unsupported = unsupported + [_w24]
     pprefs["reader_age"] = audience_age(user_messages) if pprefs["audience"] in ("children", "young_adult") else None
     _lastq = " ".join(normalize(user_messages[-1]).split())
     if (re.search(r"(?:^| )(?:ال)?تاريخ(?: |$)", _lastq) and not re.search(r"روايه|روايات|سيره|سير |مذكرات|novel|biograph", _lastq)
@@ -4720,6 +5314,9 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                 _ysrc = _m
                 break
     pub_years = None
+    if (_lo or _hi) and era_said(_ysrc) and not prefs.get("awards"):
+        # QADFIX25 (case 49.1): an era is the years the work was written, never the year of our edition
+        it["first_publication"] = True
     _new_wish = new_release_wished(user_messages)
     if (_lo or _hi) and (prefs.get("awards") or re.search(r"فاز|فائز|فايز|جائز|جايز|جوائز|prize|award|won", normalize(_ysrc))):
         prefs["awards"] = prefs.get("awards") or ["any"]
@@ -4788,7 +5385,7 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
     if (kid and not any(_ages(t) for t in user_messages) and not age_asked and not clear_audience
             and not it.get("reader_age") and not chat_rules.parent_reader(user_messages)
             and not said_for_adult(user_messages) and not author_only and not it["mentioned_titles"]
-            and it["intent"] in ("recommend", "clarify")):
+            and it["intent"] in ("recommend", "clarify") and not _activity_now):   # CHATFIX30b (3): colouring books, no age first
         en = language == "en"
         f = kid == "f"
         if en:
@@ -4898,11 +5495,23 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
     # read it so); the subject searched in the whole stock keeps that kind, not «تاريخ المدرسة النصرية بغرناطة»
     _story_now = {"رواية"} if re.search(r"(?:^| )(?:شي|شيء|قصه|قصص|روايه|روايات|حكايه|حكايات)? ?واقعي(?:ه|ة)?(?: |$)|realistic",
                                         " ".join(normalize(user_messages[-1]).split())) else set()
+    # QADFIX24 (QAD 2026-10-30, case 27.2, grave): «طيب بثينة العيسى عندكم لها روايات؟» right after «روائية كويتية فازت بجائزة؟»
+    # kept the prize wish of the message before: her two novels in stock were filtered out and «ما عندي كتب مطابقة» was said.
+    # An earlier prize or screen wish is opened like the other wishes unless this very message asks for it again
+    _q24_last = " ".join(normalize(user_messages[-1]).split())
+    _q24_award_now = bool(re.search(r"جائز|جوائز|بوكر|نوبل|غونكور|كتارا|فاز|فائز|حائز|\bprize|\baward|\bwon\b|\bwinn", _q24_last))
+    _q24_screen_now = bool(re.search(r"فلم|فيلم|افلام|مسلسل|انمي|انيمي|كرتون|كارتون|رسوم متحرك|\bfilm|\bmovie|\bseries|\banime|\bcartoon|\btv\b",
+                                     _q24_last))
     def _open_prefs(p):
-        return dict(p, genres=set(p["genres"]) & (set(latest["genres"]) | _story_now), subgenres=[], soft_subgenres=[],
-                    length=p["length"] if latest["length"] else None,
-                    original_languages=p["original_languages"] if latest["original_languages"] else set(),
-                    translated=p.get("translated") if latest["translated"] else None)
+        out = dict(p, genres=set(p["genres"]) & (set(latest["genres"]) | _story_now), subgenres=[], soft_subgenres=[],
+                   length=p["length"] if latest["length"] else None,
+                   original_languages=p["original_languages"] if latest["original_languages"] else set(),
+                   translated=p.get("translated") if latest["translated"] else None)
+        if not _q24_award_now:
+            out.update(awards=[], award_year=None, award_min_year=None, award_max_year=None)
+        if not _q24_screen_now:
+            out.update(adaptation=None, adaptation_max_year=None, adaptation_min_year=None, adaptation_origin=None)
+        return out
     def _open_pprefs(pp):
         return dict(pp, moods=set(latest["moods_include"]), pace=set(latest["pace"]),
                     weight=set(latest["weight_include"]), use_cases=set(latest["use_cases"]),
@@ -4955,6 +5564,16 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             prefs["adaptation"] = None
         elif kind == "topic":
             unsupported = [u for u in unsupported if u != val]
+    # QADFIX24 (case 8.2): «انسى الفيلم» lifts the screen wish (and «مو لازم جائزة» the prize wish) said before
+    _q24_forget = forgotten_wishes(user_messages[-1])
+    if "adaptation" in _q24_forget and prefs.get("adaptation"):
+        prefs.update(adaptation=None, adaptation_max_year=None, adaptation_min_year=None, adaptation_origin=None)
+    if "awards" in _q24_forget and prefs.get("awards"):
+        prefs.update(awards=[], award_year=None, award_min_year=None, award_max_year=None)
+    if (pprefs.get("audience") == "children" and (pprefs.get("reader_age") or 99) <= 8 and "قصص مصورة" in (prefs.get("genres") or ())
+            and not any(_COMICS_SAID.search(" ".join(normalize(t).split())) for t in user_messages)):
+        # QADFIX24 (case 8.2): «قصة تناسب عمره ٤» is a picture book on the children's shelf, not the comics shelf («قصص مصورة»)
+        prefs["genres"] = (set(prefs["genres"]) - {"قصص مصورة"}) | {"أطفال"}
     if author_only:
         # «هل في كتاب لرضوى عاشور» after «قصص أطفال»: the author's books, without the earlier
         # genre, length or language unless this message asks for them (library trial, 2026-10-08)
@@ -4986,7 +5605,10 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             # Ahlam Mosteghanemi) is a real author we hold nothing of: say that, not «no author by this name»
             # (Ibrahim 2026-10-12 for well-known authors; QAD 2026-10-14, case 46)
             _full = str(author_request.get("full_name") or "").strip()
-            if _full and any(re.search(r"[A-Za-z]{3}", str(a or "")) for a in author_request.get("aliases") or []):
+            # CHATFIX30 (3): … or the name the visitor wrote is the model's full name in another spelling («روي ياكوبسون» /
+            # «روي ياكوبسن»; author_flow.resolve answers at once, no «تقصد …؟»)
+            if _full and (any(re.search(r"[A-Za-z]{3}", str(a or "")) for a in author_request.get("aliases") or [])
+                          or author_request.get("spelling_of") or author_request.get("bare_name")):
                 open_questions.record("missing_author", _full)
                 _lat = next((a for a in author_request.get("aliases") or [] if re.search(r"[A-Za-z]{3}", str(a or ""))), _full)
                 return author_answer(f"We have no books by {_lat} in stock now. Would you like books close to their writing?" if language == "en" else
@@ -5029,6 +5651,12 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         themed = [b for b in pool if theme_score.get(b["book_id"])]
         if themed:
             child_theme = _shared_now[0]
+            # QADFIX25 (QAD 2026-10-31, case 4, grave): «ولدي ١٥ سنة مهووس بالفلك» — a teenager also gets the field's general books
+            # («أنت والكون»، «عن هذا الكون الفسيح»): with the pool cut to the children's shelves, every book left was for 3–12 and the
+            # age check (QADFIX24) had nothing older to keep
+            _ra25 = audience_age(user_messages)
+            if pprefs["audience"] == "young_adult" and (_ra25 is None or _ra25 >= 13):
+                themed = themed + [b for b in pool if b not in themed and (b.get("genre") or "").strip() == child_theme]
             pool = themed
             prefs = dict(prefs, genres=set(prefs["genres"]) - {child_theme})
     pool_before = pool
@@ -5069,6 +5697,18 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             # the publisher named earlier stays until the visitor removes its badge, names another one or says
             # «أي دار» (it used to stay for one short message only: «روايات بس، ومترجمة», QA 2026-10-08)
             found_pub, _pub_carried = _pub_before, True
+    _q24_pub_kind = set()
+    _q24_lastw = set(" ".join(normalize(re.sub(r"[؟?!.,،]", " ", _last_msg)).split()).split())
+    _q24_said_kind = set(latest.get("genres") or ()) or {
+        g for g in set((it.get("prefs") or {}).get("genres") or ()) if g not in CHILD_GENRES
+        and {normalize(w) for w in g.split()} <= ({strip_al(w) for w in _q24_lastw} | _q24_lastw)}
+    if found_pub and _q24_said_kind:
+        latest = dict(latest, genres=sorted(_q24_said_kind))   # «لا ابي شعر تحديدًا» was read as no kind by the word reader
+        # QADFIX24 (QAD 2026-10-30, cases 5.1, 5.2): «المتوسط تنشر شعر؟» / «ابي شعر تحديدًا من المتوسط» — the kind asked of the
+        # publisher in this message is a firm wish (the model sometimes read none): «ما عندنا شعر من المتوسط» is said, never
+        # «إيه، تنشر كتبًا أدبية» or «لقيت لك من إصداراتها» beside an essay and a novel
+        _q24_pub_kind = set(latest["genres"])
+        prefs["genres"] = set(prefs.get("genres") or ()) | _q24_pub_kind
     if found_pub:
         key, publisher_name = found_pub
         pub_pool = [b for b in pool_before if publisher_key(b.get("publisher")) == key]
@@ -5082,6 +5722,8 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         _subj = [p for p in topics.searchable(unsupported, topics.index(all_books))
                  if any(f & _said_in([_last_msg]) for f in topics.content_words(p))] if _pub_carried else []
         p_pool, p_labels, p_prefs, _ = constrain_relaxing(pub_pool, prefs, pprefs, exclusions, cards)
+        if _q24_pub_kind and not any((b.get("genre") or "").strip() in _q24_pub_kind for b in p_pool):
+            p_pool = []   # QADFIX24 (case 5.1): none of that kind from this publisher — never its other books instead
         if _subj and not any(topics.match(_subj, b["book_id"], topics.index(all_books))[0] for b in pub_pool):
             # a publisher from an earlier message, and now a subject none of its books covers: the new
             # request wins and the visitor is told
@@ -5093,6 +5735,8 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         else:
             o_prefs, o_pprefs = _open_prefs(prefs), _open_pprefs(pprefs)
             p_pool, p_labels, o_prefs, _ = constrain_relaxing(pub_pool, o_prefs, o_pprefs, _open_excl, cards)
+            if _q24_pub_kind and not any((b.get("genre") or "").strip() in _q24_pub_kind for b in p_pool):
+                p_pool = []   # QADFIX24 (case 5.1)
             if p_pool:
                 pool, labels, prefs, pprefs, exclusions = p_pool, p_labels, o_prefs, o_pprefs, _open_excl
             else:
@@ -5239,11 +5883,36 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                 e_pool = []
             if e_pool:
                 prefs, pprefs, exclusions, labels = prefs2, _open_pprefs(pprefs), _open_excl, _l
+        # QADFIX24 (replay of QAD 2026-10-30 case 7.1): «تقرا انجليزي أكثر من عربي» is a preference, not a limit — with no copy in
+        # that language on the subject asked for («القطط») and one in the other language («حكايات القط الشقي»), the subject wins
+        # and the reply says no copy in that language is about it (before: «ما لقينا كتابًا عن القطط»)
+        _q24_soft = bool(re.search(r"(?:اكثر|افضل) من (?:ال)?(?:عربي|انجليزي)|(?:^| )(?:يفضل|تفضل|نفضل|افضل|ياليت|يا ليت|لو امكن|اذا امكن|ان امكن)(?: |$)"
+                                   r"|preferabl|if possible|mostly|more than arabic|rather than arabic",
+                                   " ".join(normalize(" ".join(user_messages[-2:])).split())))
+        if e_pool and _q24_soft and unsupported:
+            _ti24 = topics.index(all_books)
+            if (not any(topics.match(unsupported, b["book_id"], _ti24)[0] for b in e_pool)
+                    and any(topics.match(unsupported, b["book_id"], _ti24)[0] for b in pool)):
+                q7["edition_soft"] = (edition, list(unsupported))
+                e_pool = []
         if e_pool:
             pool = e_pool
             hard.append(lambda b, _e=edition: ((b.get("language") or "ar").strip() or "ar") == _e)
+        elif q7.get("edition_soft"):
+            edition = None   # a preference only: the copies in the other language on the subject are offered
         else:
-            edition_missing = True
+            # QADFIX24 (replay of QAD 2026-10-30, case 25.2): «وش عندكم لدان براون بالانجليزي؟» right after «Inferno» and «The Lost
+            # Symbol» were shown — the new-options pool had left them out and «ما لقينا نسخة بالإنجليزية» was said: the copies in
+            # that language just shown, by the author asked for, are the answer
+            _e_auth = [a for a in (prefs.get("authors") or []) if str(a or "").strip()]
+            _e_shown = [all_books[i] for i in shown if i in all_books and is_available(all_books[i])
+                        and ((all_books[i].get("language") or "ar").strip() or "ar") == edition and all(h(all_books[i]) for h in hard)
+                        and (author_only or (_e_auth and any(author_matches(a, all_books[i].get("author")) for a in _e_auth)))]
+            if _e_shown:
+                pool = _e_shown
+                hard.append(lambda b, _e=edition: ((b.get("language") or "ar").strip() or "ar") == _e)
+            else:
+                edition_missing = True
     # the publication year («after 2020»، «صدر حديثًا»): the work's first publication, or our edition's
     # year when that is unknown (QA2 2026-10-09; original year ORIGYR 2026-10-11)
     pub_missing = False
@@ -5265,9 +5934,9 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                 prefs, pprefs, exclusions, labels = prefs2, _open_pprefs(pprefs), _open_excl, _l
         if y_pool:
             pool = y_pool
-        elif _new_wish == "carried" and not (_lo or _hi):
-            pub_years = None   # an earlier «جديدة» that this request cannot meet is let go, not announced
         else:
+            # CHATFIX31 (3), Ibrahim 2026-11-01 («المفروض يظل عالسياق الا اذا هو الغى السياق»): an earlier «جديدة» this request
+            # cannot meet is no longer let go quietly: it stays (its badge too), and the reply says none of these is that new
             pub_missing = True
     if pub_years and not pub_missing and not author_only:
         hard.append(_pub_ok)
@@ -5373,6 +6042,18 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             # QADFIX6 (QAD 2026-10-18, cases 11.2, 14.3): «in English please» for a 5-year-old — nothing in stock for
             # that age in that language; the answer says so instead of offering 8–12 books as if they fitted
             it["no_age_fit"] = reader_age
+    if reader_age is not None and (pprefs.get("audience") == "young_adult" or reader_age >= 9):
+        # (also a child of 9 or more: «سلسلة طي اللوحات… المطار» (3+) was offered to a boy of 11 who asks about Ibn Battuta)
+        # QADFIX24 (QAD 2026-10-30, case 46.3): a teenager's books are not cut by age (QADFIX12 #7), but books recorded for small
+        # children are not hers: «سلسلة الكَوْن» (3+) was offered to a 13-year-old who likes science
+        def _q24_too_young(b):
+            lo, hi = b.get("age_min"), b.get("age_max")
+            return ((hi is not None and hi < reader_age - 2) or (hi is None and lo is not None and lo <= reader_age - 8)
+                    # a toddler's book by its very form, age not recorded («طي اللوحات»، «كتب قماش»، lift-the-flap, board book)
+                    or (lo is None and hi is None and bool(_TODDLER_FORM.search(normalize(b.get("title") or "")))))
+        _q24_teen = [b for b in pool if not _q24_too_young(b)]
+        if _q24_teen:
+            pool = _q24_teen
     researched = _profile_formats()
     # «كتب تشبه فلان»: only researched books close to the author's known style, never generic
     # fillers or unresearched books (Ibrahim, 2026-09-30).
@@ -5417,9 +6098,19 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                         key=lambda x: x[0], reverse=True)
     if country and not country_missing:
         _place = country_place(list(country[1]))
-        scored = [(s + 1, [f"كاتبه من {_place}"] + r, b) for s, r, b in scored]
+        # QADFIX24 (QAD 2026-10-30, case 40.1): «شنو عندكم من الأدب العماني؟» left out Jokha Alharthi («سيدات القمر», International
+        # Booker 2019): a prize the book (or its author) won puts it a little higher among the country's books
+        _hd24 = honors.load()
+        def _won24(b):
+            # a small lift: it orders books that fit about as well, never a poorer fit over a better one
+            if any(r.get("result") == "winner" for r in _hd24["book"].get(b["book_id"], [])):
+                return 0.6
+            return 0.3 if any(r.get("result") == "winner" for a in _hd24["book_authors"].get(b["book_id"], [])
+                            for r in _hd24["author"].get(a, [])) else 0
+        scored = sorted(((s + 1 + _won24(b), [f"كاتبه من {_place}"] + r, b) for s, r, b in scored), key=lambda x: x[0], reverse=True)
     if child_theme:
-        scored = sorted(((s + 1 + theme_score.get(b["book_id"], 0), [f"كتاب للصغار فيه {child_theme}"] + r, b)
+        scored = sorted(((s + 1 + theme_score.get(b["book_id"], 0),
+                          ([f"كتاب للصغار فيه {child_theme}"] if b["book_id"] in theme_score else []) + r, b)
                          for s, r, b in scored), key=lambda x: x[0], reverse=True)
     # A subject the visitor named («عن الأندلس»، «أترك التسويف»): looked up in title, subjects and
     # summary; a book that covers it ranks first and says so (2026-10-06).
@@ -5504,6 +6195,22 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
     if _q7_series:
         unsupported = [u for u in unsupported if not _SERIES_WISH.search(" " + " ".join(normalize(u).split()) + " ")
                        and not re.search(r"مسلسل|اتابع|نتابع|متابعه", normalize(u))]
+    # CHATFIX30 (library inbox 2026-10-29, §8.1 and §8.2): «ابحث عن كتاب تشريح الفيلم» — the title the visitor named came back
+    # as a subject too («كتاب تشريح الفيلم»), was cut to its rarest word «تشريح» and brought «العين: كاميرا الجسم المذهلة» and
+    # «بيولوجيا السلوك الإجرامي»; «ايش تعرف عن كتاب زمان الملائكة؟» logged «كتاب زمان الملائكه» as a subject not found. A title
+    # named is that book (found, or missing and answered by likeness), never a subject searched by its words; a subject said
+    # after «عن» («كتب عن الحرب والسلام») stays one
+    _named_titles = list(it.get("mentioned_titles") or []) + [r.get("title") for r in it.get("references") or []
+                                                              if isinstance(r, dict) and r.get("title")]
+    _title_phrases = [u for u in unsupported if _named_titles and chat_rules.phrase_is_title(u, _named_titles)
+                      and not re.search(r"(?:^| )(?:عن|حول|about) (?!(?:ال)?(?:كتاب|روايه|book|novel) )" + re.escape(chat_rules.phrase_title_key(u)),
+                                        chat_rules.title_key(user_messages[-1]))]
+    if _title_phrases:
+        unsupported = [u for u in unsupported if u not in _title_phrases]
+    # CHATFIX30c (1): «تقييمها عالي» is a wish for the readers' rating (books.goodreads_rating), never a subject searched by its
+    # words (library inbox §3: «تقييم مرتفع» logged as a wish we cannot search)
+    _rating_wish = chat_rules.high_rating_wished(user_messages[-1]) or any(chat_rules.rating_phrase(u) for u in unsupported)
+    unsupported = [u for u in unsupported if not chat_rules.rating_phrase(u)]
     # QADFIX20 (QAD 2026-10-25, case 33.1; AGY-20261025-01 c): «مجموعات قصصية فازت بجائزة الملتقى للقصة القصيرة» — a prize the
     # visitor names that our records do not hold is a prize wish, not a subject: never cut to a word of its name («الملتقى») and
     # matched against titles («ملتقى البحرين»); it stays among the wishes the search cannot apply
@@ -5588,6 +6295,10 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                 _other = [v[0] for v in _SEASONS.values() if v[0] != _own]
                 sem[p] = [(i, x) for i, x in sem[p]
                           if not any(o in normalize((all_books.get(i) or {}).get("title") or "") for o in map(normalize, _other))]
+    if sem and all(topics.split_region(topic_phrases)):
+        # CHATFIX30c (3): «الإسلام في أوروبا» — a book near in meaning to «أوروبا» alone («مسيرة الفيل») or to «الإسلام» alone is
+        # not on the subject; only the books the region-aware match accepts stay
+        sem = {p: [(i, x) for i, x in hits if topics.match(topic_phrases, i, topic_index)[0]] for p, hits in sem.items()}
     sem_ids = {i: p for p, hits in sem.items() for i, _ in hits}
     # only for a subject the latest message itself names: a subject carried from an earlier message never
     # throws away what the visitor asks for now («ابيها لكاتبة خليجية» after «دراما عائلية» ended with one
@@ -5652,6 +6363,22 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             topics_semantic += [p for p, hits in sem.items() if p not in topics_semantic and any(i == b["book_id"] for i, _ in hits)]
         topics_mentioned = [x for x in topics_mentioned if x not in topics_found]
         topics_semantic = [x for x in topics_semantic if x not in topics_found and x not in topics_mentioned]
+    _common25 = [u for u in unsupported if u not in topic_phrases and len(normalize(u).split()) == 1
+                 and len(strip_al(normalize(u))) >= 3 and not author_only and not similar_author]
+    if _common25 and not it["mentioned_titles"]:
+        # QADFIX25 (QAD 2026-10-31, cases 45.1, 30.2): «فكر وفلسفة خفيفة»، «رواية عن أي حرب» — a word too common for the subject
+        # search («فلسفة»، «الحرب») was dropped, and «حياة الكتب السرية» / «ما لقيت رواية عن الحرب» came while «مدخل إلى الفلسفة»،
+        # «الدفتر الكبير»، «حرب نهاية العالم» were in stock: a book that carries the word in its title or recorded subjects comes first
+        _cw25 = {strip_al(normalize(u)).removesuffix("ه") for u in _common25}
+        def _carries25(b):
+            _t = " ".join(strip_al(w) for w in normalize((b.get("title") or "") + " " + " ".join(_json_list(b.get("subjects")))).split())
+            return [w for w in _cw25 if re.search(r"(?:^| )[وبلفك]?" + re.escape(w) + r"(?:ه|ي|يه|ات)?(?: |$)", _t)]
+        _sc25 = []
+        for s, r, b in scored:
+            _c = _carries25(b)
+            _sc25.append((s + 3, [("its title or subjects name «" if language == "en" else "عنوانه أو موضوعاته تذكر «") + "»، «".join(_c) + "»"] + r, b)
+                         if _c else (s, r, b))
+        scored = sorted(_sc25, key=lambda x: x[0], reverse=True)
     if adult_reader and chat_rules.parent_reader(user_messages) and not author_only and not it["mentioned_titles"]:
         # a parent asking for himself about his child («ابي كتاب يساعدني انا افهم ولدي المراهق»): books on
         # bringing up children first — before, «بيولوجيا السلوك الإجرامي» came first because of «عصبي»
@@ -5783,6 +6510,10 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             and re.search(r"(?:^| )(?:من كذا|من كذي|منها|منهم|منهن|من هذا|من هذي|من هذول|من هذولا|من ذول|من اللي|than these|than those|than that|than them)(?: |$)",
                           " ".join(normalize(user_messages[-1]).split()))):
         _shown_only = False
+    # QADFIX24 (QAD 2026-10-30, case 6.2, recurring from QAD 2026-10-29 9.2): «وش أقصر رواية له عندكم؟» after three of Mahfouz's
+    # novels asks over ALL his books in stock («الكرنك» 116), not among the three shown («قشتمر» 150)
+    if _shown_only and _AUTHOR_WIDE.search(" " + " ".join(normalize(re.sub(r"[؟?!.,،]", " ", user_messages[-1])).split()) + " "):
+        _shown_only = False
     if _shown_only:
         it["mentioned_titles"] = []
         if _short == "shorter":
@@ -5884,6 +6615,10 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             q7["nopages"] = [x[2]["title"] for x in _base if x[2]["book_id"] in topic_about_ids and not _val(x[2])][:2]
             _have = []
         _have.sort(key=lambda x: (_val(x[2]), x[2]["book_id"]))
+        if _shown_only and not cheapest:
+            # QADFIX24 (QAD 2026-10-30, case 2.2): «وش أقصر واحد فيهم؟» with one of the two shown having no page count — «أنا
+            # عبوة ديناميت (510) أقصر واحد» was said; the reply gives the known count and says the other's is not recorded
+            q7["short_nopages"] = [x[2]["title"] for x in _base if not _val(x[2])][:3]
         if _have:
             order_by, order_first = ("cheapest" if cheapest else _short), _have[0][2]
             order_list = [x[2] for x in _have[:4]]
@@ -5924,6 +6659,7 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         # («البلدة الأخيرة» (3) before «غابة الصنوبر» (1), QAD 2026-10-15, case 4.1)
         _ids = {b["book_id"] for _s, _r, b in scored}
         _swapped = []
+        _p1_24 = None   # QADFIX24: part-1 titles in stock, built when first needed
         for _s, _r, b in scored:
             _pos, _ser = b.get("series_position"), (b.get("series_name") or "").strip()
             if (_ser and isinstance(_pos, (int, float)) and _pos > 1
@@ -5933,6 +6669,24 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                 if _first:
                     _ids.add(_first["book_id"])
                     _swapped.append((_s, _r + ([f"the first part of «{_ser}»"] if language == "en" else [f"الجزء الأول من «{_ser}»"]), _first))
+                    continue
+            # QADFIX24 (QAD 2026-10-30, cases 49.1, 45.1): «روايتي لروايتي (ج 2)»، «الزميل: الانتقام الهادئ ج3» carry their part in
+            # the title only (no series_name): part 1 in stock («(ج 1)»، «ج1») is offered instead, as for a recorded series
+            _tp = title_part(b.get("title"))
+            if (not _ser and _tp and _tp[1] > 1
+                    and not any(k and (k in chat_rules.title_key(normalize(b.get("title") or ""))) for k in _named_keys)):
+                if _p1_24 is None:
+                    _p1_24 = {}
+                    for x in all_books.values():
+                        _xp = title_part(x.get("title")) if is_available(x) else None
+                        if _xp and _xp[1] == 1:
+                            _p1_24.setdefault(_xp[0], x)
+                _first = _p1_24.get(_tp[0])
+                if _first and (_first["book_id"] in shown or _first["book_id"] in _ids):
+                    _first = None
+                if _first:
+                    _ids.add(_first["book_id"])
+                    _swapped.append((_s, _r + (["the first part"] if language == "en" else ["الجزء الأول"]), _first))
                     continue
             _swapped.append((_s, _r, b))
         scored = _swapped
@@ -6030,6 +6784,20 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             _on = (lambda b: b["book_id"] in topic_ids or b["book_id"] in topic_about_ids) if topic_phrases else (lambda b: True)
             scored = ([x for x in scored if not _is_en(x[2]) and _on(x[2])] + [x for x in scored if _is_en(x[2]) and _on(x[2])]
                       + [x for x in scored if not _is_en(x[2]) and not _on(x[2])] + [x for x in scored if _is_en(x[2]) and not _on(x[2])])
+    _k25 = set(prefs.get("genres") or ()) & {"أعمال", "تطوير ذاتي", "علم نفس"}
+    if "practical_learning" in (pprefs.get("use_cases") or ()) and _k25 and not author_only:
+        # QADFIX25 (QAD 2026-10-31, case 32.1): «صديقي ترقى مدير، أبغى أهديه كتاب يفيده بالإدارة» — two studies of the history of
+        # administration («إدارة الدولة في صدر الإسلام») came before «Leaders Eat Last» / «Start with Why»: for a practical wish the
+        # kind asked for comes first, a history or a memoir that only has the word after it
+        scored = [x for x in scored if (x[2].get("genre") or "").strip() in _k25] + [x for x in scored if (x[2].get("genre") or "").strip() not in _k25]
+    if _rating_wish:
+        # CHATFIX30c (1): «روايات تاريخية تقييمها عالي» — among the books that fit, those with a Goodreads average (50 ratings or
+        # more) come first, the highest first; the rest keep their order after them
+        def _gr(b):
+            return (float(b.get("goodreads_rating") or 0)
+                    if (b.get("goodreads_ratings_count") or 0) >= chat_rules.RATING_MIN_COUNT else None)
+        scored = ([x for x in sorted((x for x in scored if _gr(x[2]) is not None), key=lambda x: -_gr(x[2]))]
+                  + [x for x in scored if _gr(x[2]) is None])
     candidates = [] if similar_author else [(b, reason_text(r, language), "direct") for s, r, b in scored if s > 0][:6]
     # A subject the visitor names now (or keeps, answering only «رواية») narrows the books: only the ones
     # about it, mentioning it or close to it in meaning; never «a novel, as you asked» beside them, and no
@@ -6056,6 +6824,7 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
     topic_strict = bool(topic_phrases and (_topic_now or _form_only or _more_only or q7.get("nopages")) and not author_only and not similar_author
                         and not publisher_name and not order_by and not it["mentioned_titles"] and not _relaxed_only)
     topic_nothing = False
+    _q24_pre = None
     def _fits_topic(i):
         """A book (also one shown earlier) about the subject, mentioning it (not as an event) or close in meaning."""
         if i in topic_ids or i in sem_ids:
@@ -6073,10 +6842,40 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         _keep_par = set()
         if adult_reader and chat_rules.parent_reader(user_messages):
             _keep_par = {b["book_id"] for b, why, _m in candidates if "للوالدين عن التربية" in str(why)}
+        _q24_before_strict = list(candidates)
+        _q24_pre = len(_q24_before_strict)
         candidates = [c for c in candidates if c[0]["book_id"] in topic_ids or c[0]["book_id"] in _keep_par]
         # the books shown earlier that fit the subject count too: «رواية تدور أحداثها في أكتوبر» right after
         # «الخريف» and «Drums of Autumn» were shown is not «nothing» (they come back as «shown» below)
         topic_nothing = not candidates and (_more_only or not any(_fits_topic(i) for i in shown[-4:]))
+        # QADFIX24 (QAD 2026-10-30, case 46.1, grave): «بنت اختي ١٣ سنة تحب العلوم والتجارب» — «التجارب» is a side of the field
+        # the child likes, named in the same message; no book about experiments is no reason to show nothing: the field's
+        # books for her age are offered and the reply says none is about experiments in particular (non-fiction fields only:
+        # «رواية عن أكتوبر» still gets only books on the subject, Ibrahim 2026-10-13)
+        _q24_kind_now = {g for g in set(prefs.get("genres") or ()) | set((it.get("prefs") or {}).get("genres") or ())
+                         if g not in _Q7_FICTION and g not in CHILD_GENRES
+                         and (len(user_messages) == 1 or g in set(latest.get("genres") or ()))}
+        if topic_nothing and _q24_kind_now and not _more_only and pprefs.get("audience") in ("children", "young_adult"):
+            _kb24 = [c for c in _q24_before_strict if (c[0].get("genre") or "").strip() in _q24_kind_now]
+            if not _kb24:
+                # the field itself was relaxed away: its books in stock, those made for the reader's age first
+                # (the children's shelves hold the field too: «سلسلة لوسي وستيفن هوكينج» is on «أطفال», its summary on physics)
+                _ra = pprefs.get("reader_age")
+                _fw = re.compile("|".join({"علوم": r"العلوم|علمي|علميه|فيزياء|الفلك|الفضاء|الكون|كيمياء|اختراع|تجرب"}.get(g, normalize(g))
+                                          for g in sorted(_q24_kind_now)))
+                def _in_field(b):
+                    g = (b.get("genre") or "").strip()
+                    return g in _q24_kind_now or (g in CHILD_GENRES and bool(_fw.search(normalize((b.get("title") or "") + " " + (b.get("summary") or "")))))
+                _fb = [b for b in all_books.values() if is_available(b) and _in_field(b) and all(h(b) for h in hard)
+                       and not (_ra and b.get("age_max") is not None and b["age_max"] < _ra - 2)
+                       and not (_ra and b.get("age_max") is None and b.get("age_min") is not None and b["age_min"] <= _ra - 8)]
+                _fb.sort(key=lambda b: (-(age_fit(b, _ra) if _ra else 0), (b.get("genre") or "").strip() not in CHILD_GENRES, b["book_id"]))
+                _why = ["from the shelf you asked for" if language == "en" else f"من تصنيف «{'، '.join(sorted(_q24_kind_now))}» كما طلبت"]
+                _kb24 = [(b, reason_text(_why, language), "direct") for b in _fb[:6]]
+            if _kb24:
+                candidates = _kb24
+                topic_nothing = False
+                q7["within_kind"] = (list(topic_phrases), sorted(_q24_kind_now))
         if candidates and it["intent"] == "clarify":
             it["intent"] = "recommend"   # «ايش الكتب اللي تتكلم عن أكتوبر؟»: the books that do, not a question first
     if (it["intent"] == "clarify" and len(user_messages) > 1 and _carry_from and candidates
@@ -6306,6 +7105,15 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         if guess:
             asked_books, it["mentioned_titles"], it["intent"] = guess, [user_messages[-1]], "about_book"
             candidates, starters = [], False
+    # CHATFIX30 (inbox 2026-10-29 §8.1): «ابحث عن كتاب تشريح الفيلم» read as a wish (recommend) whose only subject is the title
+    # asked for: it is a question about that book — said to be missing, answered by likeness only, logged as a missing book
+    if (it["intent"] in ("recommend", "clarify") and it["mentioned_titles"] and not asked_books and not topic_phrases
+            and not similar_author and not author_only and not publisher_name
+            and any(isinstance(r, dict) and r.get("relation") in (None, "", "same_book")
+                    and chat_rules.phrase_is_title(r.get("title"), it["mentioned_titles"]) for r in it.get("references") or [])
+            and not chat_rules.general_words(" ".join(chat_rules.title_key(user_messages[-1]).replace(
+                chat_rules.phrase_title_key(it["mentioned_titles"][0]), " ").split()))[0]):
+        it["intent"] = "about_book"
     missing_title = (it["intent"] == "about_book" and bool(it["mentioned_titles"]) and not asked_books
                      and not similar_author and not author_only)
     # QADFIX22 (QAD 2026-10-27, case 2.1, grave): «عندكم رواية ديفيد معلوف اللي تحكي عن حياة الشاعر أوفيد؟» — the model gave a
@@ -6487,6 +7295,12 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         # visitor stated («من نوع ألف ليلة وليلة بس بدون واقعية سحرية»: subgenres_exclude, moods, length ...) still holds
         return (meets_constraints(b, cards.get(b["book_id"]), prefs, pprefs, exclusions, _genres, form=False)
                 and all(h(b) for h in hard))
+    # CHATFIX30 (inbox 2026-10-29 §8.1): a book asked for by its title and missing here is matched by what IT is about; the kind of
+    # book wished for earlier in the conversation («رواية تاريخية» four turns before «تشريح الفيلم») does not narrow the likeness
+    # search (it found «إنكي» for a book on film language); every wish and refusal held by _kind_ok still applies
+    _ref_suitable = suitable
+    if missing_title and it.get("references"):
+        _ref_suitable = {b["book_id"] for b in all_books.values() if is_available(b) and _kind_ok(b)}
     if it.get("references") and (it["intent"] != "about_book" or missing_title):
         formats = {bid: (p or {}).get("format") for bid, p in _profile_formats().items()}
         for ref in it["references"]:
@@ -6507,24 +7321,43 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                 # «عمرو عبد الحميد» and «عمرو عبدالحميد» are the same man
                 said, real = normalize(ref.get("author") or ""), normalize(outside.get("author") or "")
                 same = (not said or not real or _same_author(said, real)
-                        or said.replace(" ", "") == real.replace(" ", ""))
+                        or said.replace(" ", "") == real.replace(" ", "")
+                        # CHATFIX30 (inbox 2026-10-29 §8.1): «برنارد ف. ديك» / "Bernard F. Dick" — names in two scripts cannot
+                        # be compared letter by letter; the model's themes of «تشريح الفيلم» («السينما») were dropped and no
+                        # film book could be found
+                        or bool(re.search(r"[a-z]", said)) != bool(re.search(r"[a-z]", real)))
                 ref = dict(ref, author=outside.get("author") or "", known=True,
                            themes=ref.get("themes") if same else [], moods=ref.get("moods") if same else [],
                            format=ref.get("format") if same else None)
-            found = reference_matches(ref, all_books, cards, suitable, formats) if ref["known"] else []
+            # CHATFIX30 (inbox 2026-10-29 §8.1, «سجون نختار أن نحيا فيها»: two NOVELS offered for a book of essays): the books
+            # chosen for their likeness to a book we do not have are of its form — fiction for fiction, non-fiction for non-fiction
+            # CHATFIX30b (4): … and a self-help / spiritual book («قوة الآن») gets self-help, psychology, religion or thought
+            # books, never a memoir of illness («ظلام مرئي: مذكرات الجنون»)
+            _ref_fiction = None if in_stock else chat_rules.reference_form(ref, outside)
+            found = reference_matches(ref, all_books, cards, _ref_suitable, formats) if ref["known"] else []
+            found = [x for x in found if chat_rules.same_form_as(_ref_fiction, x[0])]
             if outside:
                 text = outside_books.text_for_meaning(outside)
                 got = {b["book_id"] for b, _, _ in found}
-                near = [i for i in suitable if i not in got and i in all_books and is_available(all_books[i])
-                        and normalize(all_books[i]["title"]) != normalize(ref["title"])]
+                near = [i for i in _ref_suitable if i not in got and i in all_books and is_available(all_books[i])
+                        and normalize(all_books[i]["title"]) != normalize(ref["title"])
+                        and chat_rules.same_form_as(_ref_fiction, all_books[i])]
                 for bid, _sim in (embeddings.similar_to(text, near, top=4) if text else []):
                     found.append((all_books[bid], (f"Close to «{ref['title']}» in what it is about" if language == "en"
                                                    else f"قريب من «{ref['title']}» في موضوعه"), "reference"))
             if len(found) < 2 and ref.get("known") and not in_stock:
                 # a well-known book we do not have: books of the same kind for this reader (QAD 2026-10-14, case 48)
-                _kind = reference_kind_matches(ref, all_books, suitable, audience_age(user_messages) if pprefs.get("audience") in ("children", "young_adult") else None,
+                _kind = reference_kind_matches(ref, all_books, {i for i in _ref_suitable if i in all_books and chat_rules.same_form_as(_ref_fiction, all_books[i])},
+                                               audience_age(user_messages) if pprefs.get("audience") in ("children", "young_adult") else None,
                                                exclude={b["book_id"] for b, _, _ in found}, language=language)
                 found = found + _kind
+            if len(found) < 2 and outside and not in_stock:
+                # CHATFIX30 (1): «تشريح الفيلم» unknown to the model, tagged "Film" outside: our books on film (by their own
+                # titles, keywords and subgenres), never books with the word «تشريح»
+                found = found + outside_subject_matches(
+                    chat_rules.outside_subject_words(outside), ref, all_books,
+                    [i for i in _ref_suitable if i in all_books and chat_rules.same_form_as(_ref_fiction, all_books[i])],
+                    exclude={b["book_id"] for b, _, _ in found}, language=language, limit=4 - len(found))
             if not in_stock and ref.get("relation") in (None, "example", "similar"):
                 # QADFIX17 (QAD 2026-10-24, case 7.1): «من نوع كليلة ودمنة أو ألف ليلة وليلة» — a book of ours whose title
                 # carries the work's name («ليالي ألف ليلة» by Mahfouz) is of that kind
@@ -6542,7 +7375,7 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                             _n += 1
             # QADFIX16 (QAD 2026-10-24, case 8.2): "similar but by an Iranian author" — the books chosen for the likeness keep
             # the visitor's hard wishes too (the authors' country, publisher, years)
-            found = [x for x in found if all(h(x[0]) for h in hard)]
+            found = [x for x in found if all(h(x[0]) for h in hard) and chat_rules.same_form_as(_ref_fiction, x[0])]
             for b, why, match in found:
                 add(b, why, match)
             ref_notes.append((ref, in_stock, bool(found), outside))
@@ -6590,7 +7423,7 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
     _ref_dbg = {"refs": len(ref_notes), "found": [n[2] for n in ref_notes], "outside": [bool(n[3]) for n in ref_notes], "missing_title": missing_title, "similar_author": bool(similar_author),
                 "author_only": bool(author_only), "topic_phrases": list(topic_phrases or []), "publisher": publisher_name,
                 "other_wishes": [k for k in llm.PREFS_SCHEMA["properties"] if (prefs or {}).get(k) and k not in ("unsupported_requests", "title_keywords")],
-                "unmatched_only": ref_unmatched_only}
+                "unmatched_only": ref_unmatched_only, "q24": {"pre_strict": _q24_pre, "within_kind": q7.get("within_kind"), "edition_soft": q7.get("edition_soft")}}
     similar_found, style_source, author_record = False, None, None
     own_shown, own_extra = 0, []
     if similar_author:
@@ -6873,6 +7706,14 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                     if language == "en" else
                     f"ما لقينا بين كتبنا المتوفرة كتابًا عن «{named}» ولا قريبًا منه: قل ذلك بصراحة في جملة، ولا تعرض أي كتاب"
                     " (show_book_ids فارغة)، واسأله سؤالًا واحدًا يوضح وش يقصد بالضبط أو وش يقبل بداله.")
+    if q7.get("within_kind"):
+        # QADFIX24 (case 46.1): the field's books for the young reader, the side of it asked for not found
+        _wk_t, _wk_g = q7["within_kind"]
+        guidance += ((f" None of our books is about «{', '.join(_wk_t)}» in particular: say so in one short sentence, then offer the"
+                      f" {', '.join(_wk_g)} books in facts that suit the reader's age (each with its age range when facts give it).")
+                     if language == "en" else
+                     (f" ما لقينا كتابًا عن «{'، '.join(_wk_t)}» تحديدًا: قل ذلك في جملة قصيرة، ثم اعرض كتب «{'، '.join(_wk_g)}»"
+                      " اللي في facts وتناسب عمر القارئ (واذكر العمر المناسب لكل كتاب إذا كان في facts). لا تقل إنه ما عندنا شي قريب."))
     _months_asked = [p for p in topic_phrases if months_in(p)] if topic_phrases and not topic_nothing else []
     if _months_asked and not _EVENT_WORDS.search(normalize(" ".join(user_messages))):
         _season = _SEASONS[MONTH_SEASON[months_in(_months_asked[0])[0]]]
@@ -6935,11 +7776,13 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         guidance += ((f" The visitor asked for «{_mt}» by {_by}. A book of ours with a similar title is by someone else and is not it."
                       f" facts hold {_by}'s books in stock ({', '.join('«' + x + '»' for x in _his_t)}): if one of them is this very work"
                       f" under another (translated) title — judge by its title and summary — say plainly that we have it under that title."
-                      f" Never call his book unavailable when it is in facts.")
+                      f" Never call his book unavailable when it is in facts. If none of them is it, say first that «{_mt}» itself is not"
+                      f" in stock now, then offer these books of his as the alternative (QADFIX24, replay of case 25.1).")
                      if language == "en" else
                      (f" الزائر طلب «{_mt}» لـ{_by}. الكتاب اللي عندنا بعنوان قريب منه لمؤلف آخر وليس هو."
                       f" في facts كتب {_by} المتوفرة ({'، '.join('«' + x + '»' for x in _his_t)}): إذا كان أحدها هو العمل نفسه بعنوان"
-                      f" آخر (ترجمة أخرى) — احكم من عنوانه ونبذته — فقل بوضوح إنه عندنا بهذا العنوان. لا تقل عن كتاب له في facts إنه غير متوفر."))
+                      f" آخر (ترجمة أخرى) — احكم من عنوانه ونبذته — فقل بوضوح إنه عندنا بهذا العنوان. لا تقل عن كتاب له في facts إنه غير متوفر."
+                      f" وإذا ما كان أحدها هو، فقل أولًا إن «{_mt}» نفسه غير متوفر عندنا الآن، ثم اعرض كتب {_by} هذه بديلًا، ولا تحيله للموظف."))
     if _about_books:
         # QADFIX23 (case 30): his own works are not here; books about him are
         guidance += ((f" The visitor asked for {_about_name}; none of his own works (his poetry collection, his books) is in stock."
@@ -7235,6 +8078,15 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             guidance += ((f" In stock now for this prize wish: {nb} books that won it themselves, {na} more whose author won it, {nl} more that were only shortlisted / longlisted / nominated ({_n_people} authors in all). facts hold only some: when asked who / which / how many / what else, start with the number that fits the question (a «who won» / «which winners» question: the books that won it themselves), then name a few as examples and offer more; never call the books in facts all of them or count only those (QADFIX14 م1).")
                          if language == "en" else
                          f" المتوفر عندنا الآن لطلب الجائزة: {fmt_num(nb)} كتابًا فاز هو نفسه، و{fmt_num(na)} كتابًا فاز مؤلفه، و{fmt_num(nl)} كتابًا وصل للقوائم أو رُشّح فقط (لـ{fmt_num(_n_people)} مؤلفًا). facts فيها بعضها فقط: إذا سأل «مين» أو «أي» أو «كم» أو «وش غيره» فابدأ بالعدد المناسب لسؤاله (سؤال «وش فاز» = الفائزة هي نفسها) ثم اذكر بعضها أمثلة واعرض أن تذكر المزيد؛ لا تقل إن كتب facts هي كلها ولا تعدّها وحدها.")
+            if nb == 0 and nl:
+                # QADFIX25 (QAD 2026-10-31, case 27.1): «الكتب اللي أخذت آرثر سي كلارك؟» — none won it itself; «فرانكشتاين في بغداد»
+                # (shortlisted 2019) was left out for books whose authors won, and the reply named the work an author won for from
+                # memory («عن سكة حديدية تحت الأرض») while saying no book here won it
+                guidance += (" None of our books won this prize itself: first offer the books that were themselves shortlisted / longlisted /"
+                             " nominated (as their awards say in facts), then books whose author won it. Never say which work an author"
+                             " won it for unless facts write that work." if language == "en" else
+                             " ما عندنا كتاب فاز بهذه الجائزة هو نفسه: اعرض أولًا الكتب التي وصلت هي نفسها لقوائمها أو رُشّحت لها (كما في"
+                             " awards في facts)، ثم كتب مؤلفين فازوا بها. ولا تقل عن أي عمل إن مؤلفه فاز عنه إلا إذا كان ذلك العمل مكتوبًا في facts.")
         if len(_lib_won) > len(_kinds["book"]) and _n_people > 1:
             guidance += ((f" Those counts are within his other wishes now in force (subgenre, mood, copy language, country ...): {len(_kinds['book'])}"
                           f" won it themselves within them. Without those wishes, the whole library has {len(_lib_won)} available books of this kind"
@@ -7260,7 +8112,11 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                          if language == "en" else
                          f" ما لقينا في سجلاتنا كتابًا متوفرًا {named}. قل ذلك بصراحة، وأضف أن سجلات الجوائز والأفلام عندنا ما زالت تُستكمل، واسأله وش يبغى بداله. لا تذكر جائزة أو فيلمًا من معرفتك.")
             open_questions.record("adaptation" if prefs.get("adaptation") and not prefs.get("awards") else "award", named)
-    guidance += " Facts are a selected candidate list, NOT the entire inventory. Never infer that an author's works are absent from the library from their absence here. Author metadata may be incomplete."
+    guidance += " Facts are a selected candidate list, NOT the entire inventory."
+    if not absent_author:
+        # QADFIX24 (QAD 2026-10-30, cases 10.2, 33.2): when the records already say none of the author's books is in stock, this
+        # line made the model answer «ما أقدر أجزم… اسأل الموظف» instead of «ما عندنا من كتبه شيء الآن»
+        guidance += " Never infer that an author's works are absent from the library from their absence here. Author metadata may be incomplete."
     people = author_request.get("people") or {}
     if len(people) >= 2:
         # «لغازي القصيبي أو تركي الحمد»: each named author on his own (QA2 2026-10-09)
@@ -7315,6 +8171,7 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             # each named author is checked on his own: «درويش ونزار» with only Darwish in stock (2026-10-06)
             guidance += (" No available book was found under: " + ", ".join(missing_authors)
                          + ". Say plainly that you found no available books by that author in our current records and that a bookseller can double-check; do not say you lack details.")
+    _nw_dbg = None
     if pub_years:
         lo, hi = pub_years
         _span = (f"{lo}–{hi}" if lo and hi else f"from {lo} on" if lo else f"up to {hi}")
@@ -7334,6 +8191,28 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                          if language == "en" else
                          (f" الزائر يبغى كتبًا منشورة {_span_ar}: " + ("ما لقينا كتابًا متوفرًا مسجلة سنة نشره ضمن ذلك؛ قل ذلك واسأله وش يبغى بداله." if pub_missing
                            else "كتب facts صدرت ضمن ذلك (first_published، أو edition_year إذا ما فيه first_published)؛ اذكر السنة.")))
+        if _new_wish == "carried" and lo and not hi:
+            # CHATFIX31 (3), Ibrahim 2026-11-01: the «جديدة» asked earlier still holds through this new request; the reply says
+            # so in a few words («من الكتب الصادرة من ٢٠٢٣»), or, when none of these is that new, says that plainly
+            guidance += ((f" The wish for new books said earlier still holds (the badge «published from {lo}» is on): "
+                          + (f"none of our books for this request came out from {lo}; say so in a few words, show the cards as the"
+                             " nearest ones, and say the visitor can remove «published from " + str(lo) + "» above to see all years."
+                             if pub_missing else f"say in a few words that these are from the books published from {lo}."))
+                         if language == "en" else
+                         (f" طلب الكتب الجديدة اللي قاله الزائر قبل ما زال قائمًا (شارة «صادرة من {fmt_num(lo)}» ظاهرة): "
+                          + (f"ما عندنا لهذا الطلب كتاب صادر من {fmt_num(lo)}؛ قل ذلك باختصار، واعرض البطاقات على أنها الأقرب،"
+                             f" وقل إنه يقدر يشيل «صادرة من {fmt_num(lo)}» من فوق ليشوف كل السنوات." if pub_missing
+                             else f"قل باختصار إنها «من الكتب الصادرة من {fmt_num(lo)}».")))
+            _nw_dbg = {"from": lo, "met": not pub_missing}
+    if q7.get("edition_soft"):
+        # QADFIX24 (replay of case 7.1)
+        _es_l, _es_t = q7["edition_soft"]
+        _es = {"en": ("English", "الإنجليزية"), "ar": ("Arabic", "العربية")}.get(_es_l, (_es_l, _es_l))
+        guidance += ((f" The visitor prefers copies in {_es[0]}, and none of ours in that language is about «{', '.join(_es_t)}»: say that in"
+                      " a few words, then offer the books in facts on that subject, saying the language of each copy.")
+                     if language == "en" else
+                     (f" الزائر يفضّل نسخًا باللغة {_es[1]}، وما عندنا نسخة بهذه اللغة عن «{'، '.join(_es_t)}»: قل ذلك في كلمات قليلة، ثم اعرض"
+                      " كتب facts عن الموضوع واذكر لغة نسخة كل كتاب."))
     if edition:
         _ed = {"en": ("English", "الإنجليزية"), "ar": ("Arabic", "العربية")}[edition]
         guidance += ((f" The visitor wants copies in {_ed[0]}: " + ("none is available; say so and ask what else they would like." if edition_missing
@@ -7375,7 +8254,9 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                          if language == "en" else
                          (f" ما عندنا من «{_t}» نسخة باللغة {_ed[1]}: قل هذا بوضوح في أول جملة، ثم قل إن نسختنا المتوفرة "
                           + ("بالعربية" if edition == "en" else "بالإنجليزية") + "."))
-    if author_only and language != "en" and not edition and candidates:
+    if (author_only and language != "en" and not edition and candidates
+            # QADFIX25 (QAD 2026-10-31, case 7.2): said once in a conversation, not again in the next turn
+            and not any("نسخ إنجليزية من كتبه" in (c.get("content") or "") for c in conv if c.get("role") == "assistant")):
         # «وش عندكم لموراكامي؟»: his books in Arabic are shown; when English copies of his are in stock too, the
         # reply ends by offering them (Ibrahim 2026-10-15: «يضيف بعد الجواب انه يوجد نسخ انجليزي. هل تريد ان تلقي نظرة عليها؟»)
         _ba = honors.load()["book_authors"]
@@ -7481,7 +8362,9 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         guidance += (f" The visitor wants recent prizes: start with the newest, give each prize's year, and prefer the book's own prize over its author's."
                      if language == "en" else
                      f" الزائر يبغى جوائز حديثة: ابدأ بالأحدث واذكر سنة كل جائزة، وقدّم جائزة الكتاب نفسه على جائزة مؤلفه.")
-    if child_theme:
+    if child_theme and not any(f["available"] and f["id"] not in theme_score for f in facts):
+        # QADFIX25 (replay of case 4.1): said only when every book offered is from the young readers' shelves — the general science
+        # books a teenager now gets are not «كتب أطفال تتناول الموضوع»
         guidance += (f" The visitor asked for {child_theme} books for a child: we keep no such category, so these are children's books that touch on it; say so in a few words."
                      if language == "en" else
                      f" طلب الزائر كتب {child_theme} لطفل: ما عندنا تصنيف بهذا الاسم للصغار، وهذه كتب أطفال تتناول الموضوع؛ قل ذلك بكلمات قليلة.")
@@ -7596,6 +8479,14 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         guidance += (" The visitor wants something shorter: the books in facts are shorter than the ones shown before, sorted from the shortest; say each page count (pages_approx)."
                      if en else
                      " الزائر يبغى شيئًا أقصر: كتب facts أقصر مما عُرض قبل ومرتبة من الأقصر؛ اذكر عدد صفحات كل كتاب (pages_approx).")
+    if order_by in ("shortest", "shorter") and q7.get("short_nopages"):
+        # QADFIX24 (case 2.2)
+        _np24 = q7["short_nopages"]
+        guidance += ((" These shown books have no page count recorded: " + ", ".join(f"«{t}»" for t in _np24)
+                      + ". So never call another book the shortest of them or shorter than these: give the page count you have and say theirs is not recorded.")
+                     if en else
+                     (" هذه الكتب المعروضة ما عندنا عدد صفحاتها: " + "، ".join(f"«{t}»" for t in _np24)
+                      + ". فلا تقل عن كتاب آخر إنه الأقصر بينها أو أقصر منها: اذكر عدد الصفحات المعروف، وقل إن عدد صفحاتها غير مسجّل."))
     if order_by in ("shortest", "shorter") and len(order_list) >= 2:
         # QADFIX5 #13 (QAD 2026-10-17, case 12.2): «أقصرها 104، بعدها 241، ثم 157» — the order is spelled out
         guidance += ((" Exact order, shortest first: " + "; ".join(f"«{b['title']}» {b['page_count']} pages" for b in order_list) + ".")
@@ -7642,8 +8533,33 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                      if en else
                      (f" ما في facts كتاب مناسب لعمر {fmt_num(_a)} سنوات بالطلب نفسه (اللغة أو النوع): قل ذلك بوضوح أولًا، ثم اعرض الأقرب"
                       " واذكر العمر الذي يناسبه، أو اعرض النوع نفسه باللغة الثانية."))
+    _ra24 = pprefs.get("reader_age") if pprefs.get("audience") in ("children", "young_adult") else None
+    _young24 = [all_books[f["id"]]["title"] for f in facts if _ra24 and f.get("id") in all_books
+                and all_books[f["id"]].get("age_max") is not None and all_books[f["id"]]["age_max"] < _ra24 - 1]
+    if _young24:
+        # QADFIX24 (QAD 2026-10-30, case 20.1): «Magic Tree House» (6–9) offered for a boy in the sixth grade (11) — the reply says
+        # plainly that it is written for younger children, so the parent can judge
+        guidance += ((" Written for younger children than this reader (" + str(_ra24) + "): " + ", ".join(f"«{t}»" for t in _young24[:3])
+                      + ". Say so plainly in a few words when you show it (it may be easy or young for him).")
+                     if en else
+                     (f" هذه مكتوبة لأطفال أصغر من عمر القارئ ({fmt_num(_ra24)}): " + "، ".join(f"«{t}»" for t in _young24[:3])
+                      + ". قل ذلك بوضوح في كلمات قليلة إذا عرضتها (قد تكون سهلة أو صغيرة عليه)."))
     if second_look_note:
         guidance += second_look_note
+    _ser25 = {}
+    for f in facts:
+        _b = all_books.get(f["id"]) or {}
+        if f["available"] and (_b.get("series_name") or "").strip() and isinstance(_b.get("series_position"), (int, float)):
+            _ser25.setdefault(_b["series_name"].strip(), []).append(_b)
+    for _sn, _bs in _ser25.items():
+        if len(_bs) >= 2:
+            # QADFIX25 (QAD 2026-10-31, case 11.2): «النار والعنقاء: صقر قريش (٢)» recommended in the words, its part 1 only a card
+            _bs = sorted(_bs, key=lambda b: b["series_position"])
+            guidance += ((f" «{_bs[0]['title']}» is an earlier part of the same series as «{_bs[-1]['title']}»: if you recommend the series, "
+                          "start with the earlier part and say the later one comes after it; never offer a later part as the start.")
+                         if language == "en" else
+                         f" «{_bs[0]['title']}» جزء سابق من نفس سلسلة «{_bs[-1]['title']}»: إن رشّحت السلسلة فابدأ بالجزء السابق وقل إن اللاحق"
+                         " يأتي بعده، ولا تقدّم جزءًا لاحقًا كبداية.")
     if q7.get("nopages"):
         guidance += ((f" The book(s) about the subject asked for have no page count recorded: {', '.join(q7['nopages'])}. Say it is the one we have on that subject and that its page count is not recorded; do not say you found no book on the subject."
                       if en else f" الكتاب الموجود عندنا عن الموضوع ما عندي عدد صفحاته: «{'»، «'.join(q7['nopages'])}». قل إنه الموجود عندنا عن الموضوع وإن عدد صفحاته غير مسجل، ولا تقل إنك ما لقيت كتابًا عن الموضوع."))
@@ -7692,7 +8608,7 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         guidance += (" No matching books are available; say so plainly and ask about an alternative."
                      if language == "en" else " لا توجد كتب متوفرة مطابقة؛ قل ذلك بصراحة واسأله عن بديل.")
 
-    debug = {"mode": "ai", "intent": it["intent"], "prefs": it["prefs"],
+    debug = {"mode": "ai", "intent": it["intent"], "prefs": it["prefs"], "new_wish_carried": _nw_dbg,
              "author_request": author_request, "author_style": it.get("author_style"), "style_source": style_source,
              "author_record": author_record and author_record["author_id"],
              "mentioned_titles": it["mentioned_titles"], "wants_new_options": it["wants_new_options"],
@@ -7713,6 +8629,57 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         # English guidance lines say "a bookseller"; the model translated it as «البوّاق» / «الكتبّاس»
         # (QA 2026-10-08): the Arabic words are given
         guidance = guidance.replace("a bookseller", "«موظف المكتبة»").replace("bookseller", "«موظف المكتبة»")
+    if _q30_general:
+        # CHATFIX30 (5): a general first message — no book on this turn: the model gets none to name, and asks one question
+        it["intent"] = "clarify"
+        facts = []
+        _subj = " ".join(chat_rules.general_words(user_messages[-1])[0])
+        guidance = ((f"This is the visitor's first message and it is still general{(' (only «' + _subj + '»)') if _subj else ''}. Do not"
+                     " suggest or name any book yet (show_book_ids empty), and never say books are unavailable or that you cannot see"
+                     " titles (we have many; the question is to pick the best for him). If he asked a question, answer it first in one"
+                     " short sentence."
+                     " Then ask ONE short, friendly question that narrows what he wants"
+                     + (f" from «{_subj}» (which side of it, light or deep, a beginner or not)" if _subj else
+                        " (mood, a recent favourite, light or deep, story or knowledge)") + ".")
+                    if language == "en" else
+                    (f"هذي أول رسالة من الزائر وطلبه ما زال عامًا{(' (قال «' + _subj + '» فقط)') if _subj else ''}. لا تقترح ولا تذكر أي"
+                     " كتاب الآن (show_book_ids فارغة)، ولا تقل إن الكتب غير متوفرة أو إنك ما تشوف عناوين (عندنا كتب كثيرة، والسؤال"
+                     " عشان نختار له الأنسب). إذا سأل سؤالًا فأجب عنه أولًا في جملة قصيرة. ثم اسأله سؤالًا واحدًا قصيرًا ولطيفًا"
+                     " يوضّح طلبه" + (f" في «{_subj}» (أي جانب منه، خفيف ولا عميق، مبتدئ ولا متعمق)" if _subj else
+                                       " (المزاج، آخر كتاب عجبه، خفيف ولا عميق، قصة ولا معرفة)") + "."))
+        guidance += f" Today's date is {time.strftime('%Y-%m-%d')}."
+    elif (it.get("intent") in ("recommend", "clarify") and not asked_books and not author_only and not similar_author
+          and chat_rules.subject_question(user_messages[-1])):
+        # CHATFIX30 (5): a visitor's own question about a subject («وش أهم شي في الفلسفة الرواقية؟») is answered first; books
+        # follow only when they fit (inbox item 10: «أقترح أن تجيبني على سؤالي أولاً بمعزل عن الكتب التي تود اقتراحها»)
+        guidance += (" The visitor asked a question: answer that question itself first, briefly (one or two sentences), before any"
+                     " book; then offer books from facts only if they fit what he asked." if language == "en" else
+                     " الزائر سأل سؤالًا: أجب عن سؤاله نفسه أولًا باختصار (جملة أو جملتين) قبل أي كتاب، ثم اعرض من facts الكتب"
+                     " اللي تناسب سؤاله فقط إن وجدت.")
+    # CHATFIX30b (2), Ibrahim 2026-10-30: «ممتاز خلها تساير السائل باسلوبه» — a visitor who writes فصحى is answered in فصحى
+    # (the reply is also rewritten after the model in run_chat: chat_rules.fusha_rewrite)
+    # QADFIX25 (replay of case 2.1): a second look's rewrite («هل لديكم رواية لرجاء عالم؟») is not the visitor's own register
+    if language != "en" and chat_rules.visitor_register(
+            register_msgs or user_messages, titles=list(it.get("mentioned_titles") or []) + [f.get("title") for f in facts]) == "fusha":
+        guidance += chat_rules.FUSHA_GUIDANCE
+        debug["register"] = "fusha"
+    # CHATFIX30c (1): ratings only from data — goodreads_rating in facts, never a prize or an impression called a rating
+    if _rating_wish and facts:
+        if any(f.get("goodreads_rating") for f in facts):
+            guidance += (" The visitor wants highly rated books: the books in facts that carry goodreads_rating come first, the"
+                         " highest first. For each book you offer, give its rating as it is in facts, e.g. «its average on Goodreads"
+                         " is 4.2 out of 5 (1,530 ratings)»; for a book with no goodreads_rating, say we have no rating for it."
+                         " A prize is a prize, never a rating." if language == "en" else
+                         " الزائر يبغى كتبًا تقييمها عالٍ: كتب facts اللي فيها goodreads_rating مرتّبة من الأعلى تقييمًا. لكل كتاب"
+                         " تعرضه اذكر تقييمه كما هو في facts بالأرقام العربية، مثل «متوسط تقييمه على Goodreads ٤٫٢ من ٥ (١٬٥٣٠ تقييمًا)»؛"
+                         " والكتاب اللي ما فيه goodreads_rating قل إن ما عندنا تقييم له. الجائزة جائزة وليست تقييمًا.")
+        else:
+            guidance += (" The visitor wants highly rated books, and none of the books in facts has a rating in our records: say"
+                         " plainly that we have no rating for these books (call none of them highly rated), then offer them for"
+                         " the other wishes." if language == "en" else
+                         " الزائر يبغى كتبًا تقييمها عالٍ، وما في كتب facts أي كتاب له تقييم في سجلاتنا: قل بوضوح إن ما عندنا"
+                         " تقييمات لهذه الكتب (ولا تصف أيًا منها بأن تقييمه عالٍ)، ثم اعرضها على باقي طلبه.")
+        debug["rating_wish"] = [f["id"] for f in facts if f.get("goodreads_rating")]
     resp = (chat.respond(conv, json.dumps(facts, ensure_ascii=False), guidance, active, language)
             if language == "en" else chat.respond(conv, json.dumps(facts, ensure_ascii=False), guidance, active))
     if resp is None and missing_title:
@@ -7724,7 +8691,7 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
                 "books": [], "suggestions": [], "understanding": "ai", "provider": active[0], "model": active[1],
                 "_debug": {"mode": "ai", "interpreted": debug, "failed_stage": "respond", "missing_title_answer": True}}
     if resp is None:
-        out = chat_keyword_fallback(user_messages, all_books, set(shown), cards, language)
+        out = chat_keyword_fallback(user_messages, all_books, set(shown), cards, language, last_ids=last_reply_ids)
         out["understanding"] = "keywords"
         out["_debug"].update(interpreted=debug, failed_stage="respond",
                              call=dict(chat.last_failure.get("call") or {}))
@@ -7735,6 +8702,13 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         # QADFIX23 (QAD 2026-10-29, cases 9.1, 23.1, 38.1): «قرّاء مكتبة ثلاث وصفوا أجواءها…» with no approved review of the library's
         # readers in facts — the general readers' impressions are «بعض القرّاء», never the library's own readers
         resp["reply"] = thalath_readers_unclaimed(resp["reply"])
+    # CHATFIX30c (1): «بعض القرّاء أعطوه تقييمًا عاليًا: فاز بالبوكر العربية 2026»، «وتقييم بعض القرّاء له مرتفع» — a rating claimed
+    # for a book whose facts carry none is taken out (the prize stays, said as a prize)
+    _rep0 = resp["reply"]
+    resp["reply"] = chat_rules.strip_unsourced_rating(resp["reply"], [f.get("title") for f in facts
+                                                                       if f.get("goodreads_rating") or f.get("thalath_readers")])
+    if resp["reply"] != _rep0:
+        debug["unsourced_rating_removed"] = True
     if _like_last:
         # INBOXFIX2: «رشّحي لي كتابًا» right after «ظل الريح» — the book just seen is not offered again
         # (««ظل الريح» نفسه متوفر عندنا إذا ما قرأته.» opened every replay answer)
@@ -7749,11 +8723,19 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         resp["show_book_ids"] = [i for i in resp["show_book_ids"]
                                  if not (i in all_books and chat_rules.title_key(all_books[i]["title"]) == _lk)]
     # what the visitor asked and our data could not answer: short phrases only (layer 4, 2026-10-08)
-    for p in topic_phrases:
-        if p not in topics_found and p not in topics_mentioned and p not in topics_semantic:
+    # CHATFIX30 (inbox 2026-10-29 §3 rows 4 and 6): «كتاب زمان الملائكه» was logged as «موضوع ما لقينا عنه كتابًا» while book 1412
+    # «زمان الملائكة» was the answer, «كتاب تشريح الفيلم» as «رغبة لا نقدر نبحث بها» beside the missing book: a phrase that is the
+    # title of a book named, asked about, offered or shown is never a subject or a wish (the missing one is logged below as such);
+    # and a general first message answered with a question (CHATFIX30 (5)) searched for nothing, so nothing is logged for it
+    _logged_titles = (list(it.get("mentioned_titles") or []) + [b.get("title") for b in asked_books]
+                      + [f.get("title") for f in facts] + [all_books[i]["title"] for i in shown[-8:] if i in all_books]
+                      + [r.get("title") for r in it.get("references") or [] if isinstance(r, dict)])
+    for p in ([] if _q30_general else topic_phrases):
+        if (p not in topics_found and p not in topics_mentioned and p not in topics_semantic
+                and not chat_rules.phrase_is_title(p, _logged_titles)):
             open_questions.record("topic", p)
-    for p in unsupported:
-        if p not in topic_phrases:
+    for p in ([] if _q30_general else unsupported):
+        if p not in topic_phrases and not chat_rules.phrase_is_title(p, _logged_titles):
             open_questions.record("wish", p)
     if missing_title:
         open_questions.record("missing_book", it["mentioned_titles"][0])
@@ -7859,6 +8841,23 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         return any((len(f.split()) >= 2 or (i in _in_play and len(f) >= 5)) and (" " + f + " ") in _reply_key for f in forms)
     # QADFIX16 (QAD 2026-10-24, cases 24.2, 25.2): a book this turn's checks dropped from the model's choice, or one the reply
     # names only to rule it out, never gets its card back from being named
+    # QADFIX25 (QAD 2026-10-31, case 20.2): «ولو تبي شي بالإنجليزي؟» — «A Game of Thrones» (part 1) was dropped by the checks while
+    # «A Feast for Crows» (part 4) of the same series stayed: the reply lost its first sentence and began «و«A Feast for Crows»…»
+    # with «الكتابان». An earlier part of a series whose later part is valid is valid too (same reader checks)
+    _vser25 = {}
+    for i in valid:
+        _b = all_books.get(i) or {}
+        if (_b.get("series_name") or "").strip() and isinstance(_b.get("series_position"), (int, float)):
+            _k = (_b["series_name"].strip(), (_b.get("language") or "ar").strip() or "ar")
+            _vser25[_k] = max(_vser25.get(_k, 0), _b["series_position"])
+    for f in facts:
+        _b = all_books.get(f["id"]) or {}
+        _k = ((_b.get("series_name") or "").strip(), (_b.get("language") or "ar").strip() or "ar")
+        if (f["id"] not in valid and f["available"] and _k in _vser25 and isinstance(_b.get("series_position"), (int, float))
+                and _b["series_position"] < _vser25[_k] and f["id"] not in _cmp_ids and f["id"] not in _rejected_ids
+                and age_allowed(cards.get(f["id"]), pprefs.get("audience"), pprefs.get("avoid") or (), _b,
+                                pprefs.get("reader_age"), _cartoon_id(f["id"]))):
+            valid.add(f["id"])
     _dropped_now = {i for i in resp["show_book_ids"] if i not in valid}
     _excluded_reply = set(resp.get("excluded_book_ids") or [])
     # QADFIX23 (QAD 2026-10-28, case 16): «عندكم شي لماركيز غير مية عام من العزله؟» — a title the visitor ruled out in his own
@@ -7870,6 +8869,11 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         i = f["id"]
         _k = (" ".join(normalize(all_books[i]["title"]).split()), " ".join(normalize(all_books[i].get("author")).split())) if i in all_books else None
         if i in _dropped_now or i in _excluded_reply:
+            continue
+        _tp24 = title_part(all_books[i].get("title")) if i in all_books else None
+        if _tp24 and any((title_part(all_books[j].get("title")) or (None,))[0] == _tp24[0] for j in ids if j in all_books):
+            # QADFIX24 (replay of QAD 2026-10-30 cases 45.1, 49.1): the reply named part 1 («الزميل: الانتقام الهادئ ج1»); parts 2
+            # and 3 share its head title and were taken as named too — one card per series named by title
             continue
         if (len(ids) < 4 and f["available"] and i not in ids and i in all_books and _k not in _seen_books and _named_in_reply(i)
                 and age_allowed(cards.get(i), pprefs.get("audience"), pprefs.get("avoid") or (), all_books.get(i),
@@ -7921,6 +8925,13 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         ids = [i for i in ids if _named_in_reply(i)]
     if ref_unmatched_only:  # nothing chosen for likeness: no book, whatever the model chose
         ids = []
+    if _q30_general:        # CHATFIX30 (5): a general first message gets a question, no book
+        ids = []
+    if missing_title:
+        # CHATFIX30 (1): «"تشريح الفيلم" غير متوفر عندنا، وما لقيت … شيئًا قريبًا منه كفاية» and still two anatomy books: a book
+        # asked for and missing gets only books chosen for their likeness to it, and none when nothing close was found
+        ids = ([i for i in ids if reason_by_id.get(i, ("", ""))[1] in ("reference", "asked")]
+               if any(n[2] for n in ref_notes) else [])
     if topic_nothing:       # nothing about the subject asked for: no book; the visitor is asked instead
         # … except a book shown earlier that the reply names again as the closest (QADFIX5 #9, case 36.3: the parent
         # guide named without its card)
@@ -7980,6 +8991,8 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             _cut = False
             _keep.append(_s)
         if _keep and len(_keep) < len(_sents):
+            # QADFIX25 (case 20.2): the sentence left first no longer follows another — «و«A Feast for Crows»…» loses its «و»
+            _keep[0] = re.sub(r"^\s*و(?=«|[A-Za-z])", "", _keep[0])
             resp["reply"] = " ".join(_keep)
             debug["reply_trimmed"] = _gone
         # QADFIX23 (cases 15.2, 50.2): no helper names a book the reply no longer offers («قولي لي عن ألترامان»)
@@ -7995,6 +9008,8 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
         reason = (why if match in ("direct", "filler", "related", "reference")
                   else ("Shown to you earlier, and it still fits." if language == "en" else "عرضته لك قبل، وما زال يناسب طلبك.") if match == "shown"
                   else "سألت عنه، وهو متوفر الآن.")
+        if match in ("direct", "filler", "related"):
+            reason = card_line(reason, all_books[i], language)   # CHATFIX31 (1a): never the bare shelf when the book says more
         books.append(dict(all_books[i], reason=reason, match=match))
     if not books and chat_rules.says_not_found(resp["reply"]):
         # QADFIX5 #15 (QAD 2026-10-17, case 16.1): «الحزام غير موجود» with chips about a book («كم سعره؟ وين موقعه؟») —
@@ -8009,6 +9024,15 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
     debug["calls"] = {"interpret": interpret_call, "respond": dict(llm.last_call)}
     debug["dropped_ids"] = [i for i in resp["show_book_ids"] if i not in valid]
     debug["excluded_ids"] = sorted(_excluded_reply)
+    # CHATFIX31 (1b): a reply that still runs far over the 45–60 words asked of the model is cut at sentence boundaries; the
+    # first sentence, every sentence naming a book and the final question stay
+    resp["reply"], _trimmed = chat_rules.trim_reply(resp["reply"], [b.get("title") for b in books])
+    if _trimmed:
+        debug["trimmed"] = _trimmed
+    # CHATFIX30c (4): «… وبعض القرّاء يحسّون «التميمة» قراءة خفيفة…» — a card book named without its author gets him at its
+    # first mention («التميمة» لنبيل فاروق)
+    resp["reply"] = chat_rules.introduce_authors(resp["reply"], [(b.get("title"), author_flow.display(b.get("author") or ""))
+                                                                 for b in books], "en" if language == "en" else "ar")
     return {"reply": resp["reply"], "books": [with_origin(b, language) for b in books], "suggestions": resp["suggestions"],
             "understanding": "ai", "provider": active[0], "model": active[1],
             "audience": pprefs.get("audience"),
@@ -8017,7 +9041,9 @@ def _run_chat_once(messages, active=None, language="ar", clear_audience=False, d
             "context": chat_context(prefs, pprefs, user_messages, publisher_name, country if country and not country_missing else None,
                                     topics_found + [x for x in topics_mentioned if x not in topics_found], language,
                                     edition if edition and not edition_missing else None,
-                                    pub_years if pub_years and not pub_missing else None,
+                                    # CHATFIX31 (3): a carried «جديدة» keeps its badge even when this request has none that new,
+                                    # so the visitor sees it is still on and can remove it
+                                    pub_years if pub_years and (not pub_missing or _new_wish == "carried") else None,
                                     extra=_extra_badges),
             "_debug": debug}
 
@@ -8133,11 +9159,55 @@ def run_chat(messages, active=None, language="ar", clear_audience=False, drop_co
         if isinstance(res, dict) and isinstance(res.get("suggestions"), list):
             _lang = "en" if (language == "en" or _english_reply(res)) else "ar"
             _dbg = res.get("_debug") if isinstance(res.get("_debug"), dict) else {}
+            if _dbg.get("mode") != "start_path" and res["suggestions"]:
+                # CHATFIX31 (1c), Ibrahim 2026-11-01 «ابدا»: the model's quick answers are cleaned at the server before the
+                # padding — never the visitor's own words again, never longer than five words, never a price or a page count
+                # no shown book has, and one tied to the cards first («كم سعره؟»، «أي واحد أقصر؟»)
+                _last_user = next((str(m.get("content") or "") for m in reversed(messages if isinstance(messages, list) else [])
+                                   if isinstance(m, dict) and m.get("role") == "user"), "")
+                _before = list(res["suggestions"])
+                res["suggestions"] = chat_rules.clean_chips(_before, _last_user, res.get("books") or [], _lang)
+                if res["suggestions"] != _before:
+                    res.setdefault("_debug", {})["chips_cleaned"] = _before
             res["suggestions"] = helper_chips.pad(res["suggestions"], bool(res.get("books")), _lang, visitor_reviews.ready(),
                                                   none_on_purpose=_dbg.get("mode") == "start_path")
     except Exception as exc:  # noqa: BLE001 - helpers never break a turn
         app.logger.warning("helper chips failed: %s", exc)
+    try:
+        # CHATFIX30b (2), Ibrahim 2026-10-30 («خلها تساير السائل باسلوبه»): a visitor who writes فصحى gets every reply in فصحى —
+        # the model's (steered by FUSHA_GUIDANCE) and the fixed ones («ما عندنا الآن كتب لـX. تبغى أقترح لك…» -> «ليس لدينا الآن كتب
+        # لـX. هل تريد أن أقترح عليك…»): the commonest dialect words are swapped, whole words only. The chips are not touched
+        # (the server knows several of them by their exact words)
+        if isinstance(res, dict) and res.get("reply") and language != "en" and not _english_reply(res):
+            _users = [str(m.get("content") or "") for m in (messages if isinstance(messages, list) else [])
+                      if isinstance(m, dict) and m.get("role") == "user"]
+            if chat_rules.visitor_register(_users, titles=[b.get("title") for b in (res.get("books") or [])]) == "fusha":
+                # CHATFIX30c (6), AUDIT 2026-10-30 P2: titles and author names are never rewritten («خيرا تعمل خيرا تلقى»)
+                _prot = [x for b in (res.get("books") or []) for x in (b.get("title"), author_flow.display(b.get("author") or ""))]
+                _prot += [a for a in _catalog_author_names() if a in res["reply"]]
+                res["reply"] = chat_rules.fusha_rewrite(res["reply"], protect=_prot)
+                if isinstance(res.get("_debug"), dict):
+                    res["_debug"]["register"] = "fusha"
+    except Exception as exc:  # noqa: BLE001 - a wording pass never breaks a turn
+        app.logger.warning("fusha rewrite failed: %s", exc)
     return res
+
+
+_author_names_cache = {"n": None, "names": ()}
+
+
+def _catalog_author_names():
+    """CHATFIX30c (6): every author name of the catalog as displayed (each person of a co-authored book), cached while the
+    catalog size stays the same — kept verbatim by fusha_rewrite."""
+    books = list_books(only_active=False)
+    if _author_names_cache["n"] != len(books):
+        names = set()
+        for b in books:
+            for p in author_flow._people(author_flow.display(b["author"] or "")):
+                if p and len(p.split()) >= 2 and normalize(p).strip() not in _NO_AUTHOR:   # one-word names may be plain words
+                    names.add(p)
+        _author_names_cache.update(n=len(books), names=tuple(sorted(names, key=len, reverse=True)))
+    return _author_names_cache["names"]
 
 
 def _english_reply(res):
@@ -8195,6 +9265,7 @@ def _run_chat_looked(messages, active=None, language="ar", clear_audience=False,
                     m["content"] += (" — for me as a parent" if language == "en" else " — الكتاب لي أنا كولي أمر")
                 break
         second = _run_chat_once(msgs2, active, language, clear_audience, drop_context,
+                                register_msgs=[str(m.get("content") or "") for m in messages if isinstance(m, dict) and m.get("role") == "user"],
                                 second_look_note=second_look.note(last, used, first.get("reply") or "", language,
                                                                   [b.get("title") for b in first.get("books") or [] if b.get("title")]))
         if second.get("understanding") == "ai" and second.get("books"):
@@ -8537,6 +9608,7 @@ def admin_catalog():
             "reviewed_at": (reviewed_map.get(b["book_id"]) or {}).get("at"),
             "reviewed_by": (reviewed_map.get(b["book_id"]) or {}).get("by"),
             "requeue": b["book_id"] in requeue,
+            "goodreads_url": b.get("goodreads_url"),   # GRURL (MGR 2026-10-30): the developer's «بلا رابط Goodreads» chip
         })
     return jsonify(out)
 
@@ -9098,7 +10170,9 @@ def _pick_book(b, language="ar"):
         return None
     b = with_origin(dict(b), language)
     keep = ("book_id", "title", "author", "publisher", "genre", "cover_url", "hook", "price", "quantity", "origin",
-            "location", "location_kind", "page_count", "line", "translator", "original_year", "publication_year")
+            "location", "location_kind", "page_count", "line", "translator", "original_year", "publication_year",
+            "goodreads_url",   # CHATFIX30b (5): the Goodreads readers' link of the book page (GRURL)
+            "goodreads_rating", "goodreads_ratings_count")   # CHATFIX31 (2): the card's «★ ٤٫٢ · Goodreads»
     out = {k: b.get(k) for k in keep}
     out["line"] = b.get("line") or picks.visitor_line(b)
     return out
@@ -9530,6 +10604,13 @@ def admin_usage_set():
     return jsonify(limits.usage(7))
 
 
+def _safe(fn):
+    try:
+        fn()
+    except Exception:  # noqa: BLE001 - a warm-up only
+        pass
+
+
 if __name__ == "__main__":
     init_db()
     seed_books()
@@ -9541,6 +10622,9 @@ if __name__ == "__main__":
         authors.sync()  # author records and links are refreshed from the books on every start
     except Exception as exc:  # never block the server on this
         print("authors sync failed:", exc, flush=True)
+    # «المؤلفون» (Ibrahim 2026-10-29 «ليه المؤلفون فاضية في الصفحة»): the spelling-pairs check is worked out once in the
+    # background at start, so the first opening of the list does not wait for it
+    threading.Thread(target=lambda: _safe(authors.probable_duplicates), daemon=True).start()
     try:
         # an update installed while the server was stopped (AUTOUPD): its outcome is read once and logged
         _res = channel.after_start(auth.audit)

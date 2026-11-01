@@ -34,7 +34,8 @@ ok(r.status_code == 200 and con.execute("select summary_source from books where 
 
 html = open(os.path.join(os.path.dirname(A.__file__), "..", "admin", "index.html"), encoding="utf-8").read()
 ok("function webSearchBlock(b)" in html and "${webSearchBlock(b)}" in html, "the book card has the search block")
-ok('<section class="block dev-only dev-box"><h3>بحث يدوي عن بيانات الكتاب' in html, "drawn as the developer's own (dev-only, dev colour)")
+ok('<section class="block" id="webSearchBlock"><h3>بحث يدوي عن بيانات الكتاب</h3>' in html and "const v = el ? el.value.trim() : '';" in html,
+   "open to every staff member since 2026-10-29 (no longer dev-only), the source link sent for all")
 ok(all(x in html for x in ("site:neelwafurat.com", "site:abjjad.com", "goodreads.com/search", "openlibrary.org/search")),
    "links: Google, نيل وفرات, أبجد, Goodreads, Open Library …")
 ok("Object.assign({ summary: $('fSummary').value }, devSource())" in html and "Object.assign({}, body, devSource())" in html,

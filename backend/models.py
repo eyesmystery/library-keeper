@@ -177,6 +177,18 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         # للبحث والربط»): a JSON list of short words, written by backend/library_sheet.py; used by the subject
         # search (topics.py) and to link books on a shared subject (relations.py).
         "keywords": "TEXT",
+        # The book's page on Goodreads (GRURL, Ibrahim 2026-10-30 «اضف لي كم مطور في الفلتر في المكتبة الكتب اللي ما عندنا
+        # لها رابط في goodreads»): https://www.goodreads.com/book/show/<id>, and where it was found (reviews_gr research
+        # file, the summary's source, evidence, the original-year page). Shown to visitors as «آراء القرّاء في Goodreads».
+        "goodreads_url": "TEXT",
+        "goodreads_url_source": "TEXT",
+        # Goodreads readers' average rating of the book (GRRATE, Ibrahim 2026-10-30 «ابدا الاصلاح كله» after Manar said
+        # «تقييمها عالي» with no source): average out of 5, number of ratings, the page it was read on and when.
+        # Only from a page we read (research/reviews_gr); never estimated.
+        "goodreads_rating": "REAL",
+        "goodreads_ratings_count": "INTEGER",
+        "goodreads_rating_source": "TEXT",
+        "goodreads_rating_at": "TEXT",
     }
     existing_books = {row["name"] for row in conn.execute("PRAGMA table_info(books)")}
     for column, column_type in book_additions.items():
@@ -641,7 +653,9 @@ def update_book(book_id: int, fields: dict) -> None:
                "translator", "cover_source", "cover_updated_at", "summary", "summary_source", "summary_updated_at",
                "age_min", "age_max", "age_source",
                "title", "author", "publisher", "genre", "page_count", "publication_year", "isbn",
-               "original_year", "original_year_source", "original_year_ref", "original_year_checked_at"}
+               "original_year", "original_year_source", "original_year_ref", "original_year_checked_at",
+               "goodreads_url", "goodreads_url_source",
+               "goodreads_rating", "goodreads_ratings_count", "goodreads_rating_source", "goodreads_rating_at"}
     updates = {k: v for k, v in fields.items() if k in allowed}
     if not updates:
         return

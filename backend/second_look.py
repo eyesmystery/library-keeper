@@ -49,6 +49,9 @@ the shop's catalog may hold under another name or another word. Think of:
   العمانيين» = books about Oman's history) is not a request for authors from there («كاتب من عمان»);
 - a subject asked broadly, which books carry under concrete names in their titles and summaries («سيرة عالم أو مخترع»
   -> «ماري كوري، أينشتاين، إديسون، نيوتن»; «رواية عن الحروب الصليبية» -> «صلاح الدين، حطين، الصليبيين»).
+A reading never narrows what the visitor said: no war, period, place, people or person he did not name in the rewrite or
+the clarify line («رواية حرب ما فيها رومانسية» stays any war — never «جنود الحرب العالمية الأولى»); concrete names belong only
+in query, as search words (QADFIX25, QAD 2026-10-31 case 30.1).
 Only readings you are confident about; never invent a book or an author. When the visitor wrote an author's FULL name
 («أمين معلوف»), never offer another author who only shares the family name; only a bare family name («معلوف») may be. When the first answer is plainly right and
 no other reading is reasonable (a well-known book or author the shop simply does not have), return [].

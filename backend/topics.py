@@ -127,11 +127,24 @@ _SAME = [("تاريخ", "اصل", "نشاه", "نشوء", "تطور"),
           "سوشيال", "السوشيال", "انترنت", "الانترنت", "الإنترنت", "التواصل", "شاشات", "الشاشات", "smartphone", "smartphones",
           "phone", "phones", "internet", "social"),
          # QADFIX9 (case 1.1): «ودي أبطل السهر» — «لماذا ننام»، «نوم هانئ»
-         ("نوم", "النوم", "ننام", "ينام", "تنام", "انام", "سهر", "السهر", "ارق", "الارق", "sleep", "insomnia")]
+         ("نوم", "النوم", "ننام", "ينام", "تنام", "انام", "سهر", "السهر", "ارق", "الارق", "sleep", "insomnia"),
+         # QADFIX24 (QAD 2026-10-30, case 31.1): «كيف تشتغل الذاكرة» — the science books speak of the brain and its memories
+         # («رحلة استكشاف الدماغ»: «نشوء الأفكار والذكريات»); one way only, so «الدماغ» does not find every memoir of «ذكريات»
+         ("ذاكره", "الذاكره", "دماغ", "الدماغ", "memory"),
+         # QADFIX25 (QAD 2026-10-31, case 50.2): «الأساطير اليونانية» for a boy of 12 — «الإلياذة: رواية مصورة» (Homer's epic of the
+         # Trojan war) was in stock and «ما لقيت كتابًا عن الأساطير اليونانية» was said
+         ("اساطير", "الاساطير", "اسطوره", "الاسطوره", "ميثولوجيا", "الميثولوجيا", "ملحمه", "الملحمه", "ملاحم", "الملاحم",
+          "الالياذه", "الاوديسه", "هوميروس", "mythology", "myths", "myth"),
+         ("يونانيه", "اليونانيه", "يوناني", "اليوناني", "اليونان", "اغريقي", "الاغريقي", "اغريقيه", "الاغريقيه", "الاغريق",
+          "طرواده", "هوميروس", "greek", "greece"),
+         # QADFIX25 (case 32.1): «كتاب يفيده بالإدارة» for a new manager — the leadership books say «القيادة» / "Leaders"
+         ("اداره", "الاداره", "بالاداره", "اداري", "الاداري", "قياده", "القياده", "قائد", "القائد", "قاده", "القاده",
+          "management", "manager", "managers", "leadership", "leaders", "leader")]
 # QADFIX9 (QAD 2026-10-20, case 41.1): words that lead to a group but that the group does not lead to — «ماينكرافت»
 # must not find «المراسلة الإلكترونية» in the summary of «رسالة في قارورة»; «الألعاب الإلكترونية» still finds the games
 _ONE_WAY = {normalize(w) for w in ("الكترونيه", "الالكترونيه", "فيديو", "الفيديو", "افتراضي", "الافتراضي", "افتراضيه",
-                                    "الافتراضيه", "virtual", "التواصل", "social", "phone", "phones")}
+                                    "الافتراضيه", "virtual", "التواصل", "social", "phone", "phones",
+                                    "ذاكره", "الذاكره", "memory")}
 _SAME_AS = {}
 for _group in _SAME:
     for _w in _group:
@@ -187,7 +200,113 @@ for _w in _KIND_WORDS.split():
     _KIND_FORMS |= {normalize(_w)} | set(stems(normalize(_w)))
 
 
+# CHATFIX30c (3), real chat c-mvvfgqji (2026-10-30 23:33): «ابغى روايات تاريخية عن الاسلام في اوروبا» offered «مسيرة الفيل»
+# (a journey across Europe, nothing of Islam) and missed 3647 «باري» (the Emirate of Bari, Muslims in Italy). A subject IN a
+# region is one subject: a book must carry both — the region itself or one of its places — or a place where that subject
+# happened in that region (the Islamic places of Europe stand for «الإسلام في أوروبا» on their own).
+REGION_PLACES = {
+    "اوروبا": ("اسبانيا إسبانيا ايطاليا إيطاليا فرنسا البرتغال اليونان قبرص صقليه صقلية البلقان البوسنه البوسنة سراييفو المانيا "
+               "ألمانيا بريطانيا انجلترا إنجلترا روسيا النمسا فيينا المجر بولندا هولندا بلجيكا سويسرا السويد النرويج الدنمارك "
+               "البانيا ألبانيا كرواتيا صربيا بلغاريا رومانيا مالطه مالطة لشبونه لشبونة مدريد روما باريس لندن برلين"),
+}
+REGION_WORDS = {"اوروبا": "اوروبا أوروبا اوروبي أوروبي اوروبيه أوروبية الاوروبيه الأوروبية القاره العجوز europe european"}
+# a subject that happened in a region, and the places that stand for it on their own
+PAIRED_PLACES = [
+    ("اسلام الاسلام إسلام الإسلام اسلامي إسلامي اسلاميه إسلامية مسلم مسلمين المسلمين مسلمون المسلمون العرب الموريسكيين "
+     "موريسكي المورسكيين عثماني العثماني العثمانيين العثمانية muslims islam islamic moors",
+     "اوروبا",
+     ("الاندلس الأندلس اندلس أندلس اندلسي أندلسي قرطبه قرطبة غرناطه غرناطة اشبيليه إشبيلية طليطله طليطلة بلنسيه بلنسية "
+      "سرقسطه سرقسطة صقليه صقلية باري البوسنه البوسنة سراييفو موريسكي الموريسكيين المورسكيين بلاط_الشهداء بواتييه")),
+]
+
+
+def _norm_words(text):
+    return {strip_al(normalize(w)) for w in str(text).split() if w}
+
+
+_REGION_FORMS = {k: _norm_words(v) for k, v in REGION_WORDS.items()}
+_REGION_PLACE_FORMS = {k: _norm_words(v) for k, v in REGION_PLACES.items()}
+_PAIRS = [(_norm_words(s), r, [p.split("_") for p in places.split()]) for s, r, places in PAIRED_PLACES]   # «_» joins a place of two words
+
+
+def region_of(phrase):
+    """«أوروبا»، «في أوروبا» -> the region key, when the phrase is only a region; else None."""
+    ws = {strip_al(w) for w in normalize(phrase).split() if strip_al(w) not in {"في", "من", "عن"}}
+    for k, forms in _REGION_FORMS.items():
+        if ws and ws <= forms:
+            return k
+    return None
+
+
+def split_region(phrases):
+    """[«الإسلام في أوروبا»] or [«الإسلام»، «أوروبا»] -> (the other subjects, region keys); no region -> (phrases, [])."""
+    others, regions = [], []
+    for p in phrases:
+        r = region_of(p)
+        if r:
+            regions.append(r)
+            continue
+        ws = normalize(p).split()
+        hit = [k for k, forms in _REGION_FORMS.items() if any(strip_al(w) in forms for w in ws)]
+        if hit and len(ws) >= 2:
+            rest = " ".join(w for w in ws if strip_al(w) not in _REGION_FORMS[hit[0]] and w not in ("في", "من", "عن"))
+            if rest.strip():
+                others.append(rest)
+                regions.append(hit[0])
+                continue
+        others.append(p)
+    return others, list(dict.fromkeys(regions))
+
+
+def _tokens_have(tokens, words):
+    """Do these normalized words all stand among the book's tokens (each in any of its forms)?"""
+    return all(stems(w) & tokens for w in words)
+
+
+def _match_region(others, regions, book_id, idx):
+    entry = idx[0].get(book_id)
+    if not entry:
+        return 0, [], []
+    title, subj, text = entry
+    s, about, mentioned = _match_plain(others, book_id, idx)
+    others_words = {strip_al(w) for p in others for w in normalize(p).split()}
+    for region in regions:
+        # a place where this subject happened in this region stands for the whole («الأندلس» for «الإسلام في أوروبا»)
+        for sub_forms, r, places in _PAIRS:
+            if r == region and others_words & sub_forms:
+                for where, score in ((title, TITLE), (subj, SUBJECTS), (title | subj | text, TEXT)):
+                    if score == TEXT and not (about or mentioned):
+                        break   # a place named only in a summary («باري» a character's name) needs the subject beside it
+                    if any(_tokens_have(where, pl) for pl in places):
+                        lab = list(dict.fromkeys(others + [region]))
+                        return (score * len(lab), lab, []) if score > TEXT else (score * len(lab), [], lab)
+        if not (about or mentioned):
+            return 0, [], []
+        # … otherwise the subject AND the region (or one of its places), at least one of them in the title or the book's own
+        # subjects: a summary that only mentions both in passing is not a book on «الإسلام في أوروبا»
+        forms = _REGION_FORMS[region] | _REGION_PLACE_FORMS.get(region, set())
+        for where, score in ((title | subj, SUBJECTS), (title | subj | text, TEXT)):
+            if any(stems(w) & where for w in forms):
+                if score == TEXT and not about:
+                    return 0, [], []
+                return s + score, about + ([region] if score > TEXT else []), mentioned + ([] if score > TEXT else [region])
+        return 0, [], []
+    return s, about, mentioned
+
+
 def match(phrases, book_id, idx):
+    """CHATFIX30c (3): a subject in a region («الإسلام في أوروبا») is matched as one (see _match_region); else _match_plain."""
+    others, regions = split_region(phrases)
+    if regions and others:
+        s, a, m = _match_region(others, regions, book_id, idx)
+        if not s:
+            return 0, [], []
+        # the visitor's own phrases are the labels (the callers compare them with the subjects asked for)
+        return (s, list(phrases), []) if a else (s, [], list(phrases))
+    return _match_plain(phrases, book_id, idx)
+
+
+def _match_plain(phrases, book_id, idx):
     """-> (score, subjects the book is about, subjects its summary only mentions) for one book.
     A subject needs at least one specific word and counts where ALL its words are found
     («معنى الحياة» needs both). In the title or the listed subjects the book is about it; in the
@@ -271,5 +390,8 @@ def core_word(phrase, idx):
 
 def searchable(phrases, idx):
     """The subjects that have at least one specific word (the others cannot be searched)."""
+    _o, _r = split_region(phrases)
+    if _o and _r:
+        return list(phrases)   # CHATFIX30c (3): «الإسلام» + «أوروبا» are searched together, as one subject
     return [p for p in phrases
             if any(kind != "text" or specific_words(v, idx) for kind, v in _variants(p))]

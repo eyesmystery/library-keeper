@@ -16,6 +16,7 @@ To ask the library for a file now: backend/venv/bin/python scripts/channel_publi
 GitHub is reached with the gh CLI and Ibrahim's own login; the library's upload token is never needed here.
 """
 import argparse
+import base64
 import json
 import os
 import re
@@ -122,7 +123,18 @@ def pull(again=False):
         stem = name[:-len(".manar")]
         with open(os.path.join(OUT, stem + ".md"), "w", encoding="utf-8") as f:
             f.write(doc.get("markdown") or "")
-        meta = {k: v for k, v in doc.items() if k != "markdown"}
+        # INBOXCOVERS: the covers the staff changed come as pictures; saved beside the file, applied by
+        # scripts/apply_library_covers.py (never here)
+        cov = doc.get("covers") or []
+        if cov:
+            cdir = os.path.join(OUT, stem + "_covers")
+            os.makedirs(cdir, exist_ok=True)
+            for c in cov:
+                if c.get("data") and re.fullmatch(r"jpg|png|webp", str(c.get("ext") or "")) and str(c.get("book_id")).isdigit():
+                    with open(os.path.join(cdir, f"{int(c['book_id'])}.{c['ext']}"), "wb") as f:
+                        f.write(base64.b64decode(c["data"]))
+        meta = {k: v for k, v in doc.items() if k not in ("markdown", "covers")}
+        meta["covers"] = [{k: v for k, v in c.items() if k != "data"} for c in cov]
         with open(os.path.join(OUT, stem + ".json"), "w", encoding="utf-8") as f:
             json.dump(meta, f, ensure_ascii=False, indent=1)
         done[name] = {"opened": stem + ".md", "created": doc.get("created"), "reason": doc.get("reason"),

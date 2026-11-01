@@ -9,7 +9,7 @@ P = F = 0
 def ok(cond, msg):
     global P, F
     print(("PASS " if cond else "FAIL ") + msg); P += bool(cond); F += (not cond)
-AR, EN = "منار - ذكاء يرشدك إلى ما يناسبك", "Manar - Intelligence that guides you to what fits you"
+AR, EN = "ذكاء يرشدك إلى ما يناسبك", "Intelligence that guides you to what fits you"   # «منار - » dropped (Ibrahim 2026-10-30 23:00)
 c = A.app.test_client()
 page = c.get("/").get_data(as_text=True)
 js = c.get("/static/app.js").get_data(as_text=True)
