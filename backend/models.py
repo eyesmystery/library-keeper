@@ -260,6 +260,12 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         """
     )
     conn.execute("CREATE INDEX IF NOT EXISTS idx_book_authors_author ON book_authors(author_id)")
+    # GENDERFIELD (Ibrahim 2026-11-05 «سوي الحقل»): the author's gender as its own field — 'f' / 'm', NULL when not
+    # known or not a plain woman/man — and where it came from (a URL, or «style_note_ar» for an older note). The chat
+    # reads it first and the first word of style_note_ar only as a fallback (app.author_gender), so a research import
+    # that rewrites the note no longer loses it. It travels with the update's catalog (apply_update merges every column).
+    _add_column(conn, "authors", "gender", "TEXT")
+    _add_column(conn, "authors", "gender_source", "TEXT")
     # Library sections by category (approved 2026-09-27; see backend/sections.py). Rewaa has no
     # location column, so a book's location is: the shelf a staff member typed, else the active
     # section of its category, else nothing (the visitor is told to ask a staff member).

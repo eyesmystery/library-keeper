@@ -195,6 +195,11 @@ def reason_label(row, author=False):
     won = "فازت ترجمته " if (row.get("category") or "").startswith("الترجمة") and not author else "فاز "   # Zayed / Hamad translation
     verb = {"winner": won + bi, "shortlist": "وصل إلى القائمة القصيرة " + li,
             "longlist": "وصل إلى القائمة الطويلة " + li, "nominated": "رُشّح " + li}.get(row.get("result"), name)
+    # QADFIX27 #5 (QAD 2026-11-05 case 29.2): «ما عندي تفاصيل عن فرع الجائزة» while book_awards.category says «الآداب» — the branch
+    # of a prize (Zayed «الآداب»، «المؤلف الشاب»…) is said with it; the translation branch is said by «فازت ترجمته» already
+    _cat = str(row.get("category") or "").strip()
+    if _cat and not _cat.startswith("الترجمة") and not author and row.get("award_key") == "zayed":
+        verb += f" (فرع {_cat})"
     text = ("مؤلفه " if author else "") + verb + (f" {row['year']}" if row.get("year") else "")
     if author and row.get("work_title"):
         text += f" عن «{row['work_title']}»"
@@ -261,6 +266,20 @@ def matches_award(book_id, keys, year=None, min_year=None, max_year=None, result
             if _wanted(r, keys, want_any) and _in_years(r, year, min_year, max_year) and (not results or r["result"] in results):
                 rows.append((True, reason_label(r, True)))
     return [label for _, label in sorted(rows, key=lambda x: x[0])]
+
+
+def in_category(book_id, keys, branch):
+    """QADFIX27 #5 (QAD 2026-11-05 case 29.1): the book's own row of one of these prizes is in that branch («الآداب» for «فرع الآداب»;
+    book_awards.category), compared without «ال», diacritics or hamza seats."""
+    want = [w for w in _nw(branch) if w not in ("فرع", "فئه")]
+    if not want:
+        return False
+    for r in load()["book"].get(book_id, []):
+        if r["award_key"] in keys or ("any" in keys and r["result"] == "winner"):
+            have = _nw(r.get("category"))
+            if have and all(any(h == w or h.startswith(w) or w.startswith(h) for h in have) for w in want[:1]):
+                return True
+    return False
 
 
 def newest_award_year(book_id, keys, min_year=None, max_year=None):

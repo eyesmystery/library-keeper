@@ -1471,7 +1471,7 @@
       $('sendBox').hidden = false;
       const lines = [], acts = [];
       if (msg) lines.push(msg);
-      lines.push(s.enabled ? `الإرسال: يعمل — كل ${num(s.every_days)} أيام` : 'الإرسال: متوقف');
+      lines.push(s.enabled ? (s.daily_at ? `الإرسال: يعمل — يوميًا الساعة ${s.daily_at === '21:00' ? '٩ مساءً' : s.daily_at}` : `الإرسال: يعمل — كل ${num(s.every_days)} أيام`) : 'الإرسال: متوقف');
       if (s.pending_request) lines.push(`المطوّر طلب الملف (${whenAr(s.pending_request.at)})` + (s.not_ready ? ' — يُرسل بعد تشغيل الإرسال' : ' — يُرسل خلال ساعة'));
       if (s.sending) lines.push('جاري الإرسال الآن…');
       if (s.last_sent) lines.push(`آخر إرسال: ${whenAr(s.last_sent)}`);
@@ -2358,6 +2358,7 @@
         ${a.style_note_ar ? `<p style="margin:0 0 10px;font-size:15px;line-height:1.7">${esc(a.style_note_ar)}</p>` : ''}
         ${rRows ? `<div class="facts">${rRows}</div>` : (a.style_note_ar ? '' : '<p class="no-ev">ما فيه أسلوب مبحوث لهذا الشخص بعد.</p>')}
         <p class="state" style="margin:8px 0 0">${esc(AUTHOR_STATUS_AR[a.research_status] || a.research_status || '')}${a.confidence != null ? ` · الثقة ${Math.round(a.confidence * 100)}٪` : ''}${a.origin ? ` · ${esc(a.origin)}` : ''} · المصادر: ${srcLine}</p>
+        <p class="state" style="margin:4px 0 0">الجنس: ${a.gender === 'f' ? 'كاتبة' : a.gender === 'm' ? 'كاتب' : 'غير مسجّل'}${a.gender && a.gender_source ? ` · من ${/^https?:/i.test(a.gender_source) ? `<a href="${esc(a.gender_source)}" target="_blank" rel="noopener">${esc(sourceLabel(a.gender_source))}</a>` : esc(a.gender_source === 'style_note_ar' ? 'ملاحظة الأسلوب' : a.gender_source)}` : ''}</p>
         <p class="state" style="margin:4px 0 0">هذا اللي تعتمد عليه المحادثة لما يطلب الزائر كتبًا تشبه هذا المؤلف، ويُعطى الزائر منه جملة عامة فقط.</p></section>`;
       // for staff (ADMSTF 2026-10-24): the style sentence and known works only, folded
       const knownFor = [].concat(a.known_for || []).filter(Boolean);

@@ -136,15 +136,36 @@ _SAME = [("تاريخ", "اصل", "نشاه", "نشوء", "تطور"),
          ("اساطير", "الاساطير", "اسطوره", "الاسطوره", "ميثولوجيا", "الميثولوجيا", "ملحمه", "الملحمه", "ملاحم", "الملاحم",
           "الالياذه", "الاوديسه", "هوميروس", "mythology", "myths", "myth"),
          ("يونانيه", "اليونانيه", "يوناني", "اليوناني", "اليونان", "اغريقي", "الاغريقي", "اغريقيه", "الاغريقيه", "الاغريق",
-          "طرواده", "هوميروس", "greek", "greece"),
+          "طرواده", "هوميروس", "greek", "greece",
+          # QADFIX26 (QAD 2026-11-02 case 10.1): «تاريخ الفلسفة اليونانية» — the histories of philosophy speak of its philosophers
+          "سقراط", "افلاطون", "ارسطو", "ارسطوطاليس", "هيراقليطس", "فيثاغورس", "socrates", "plato", "aristotle"),
          # QADFIX25 (case 32.1): «كتاب يفيده بالإدارة» for a new manager — the leadership books say «القيادة» / "Leaders"
          ("اداره", "الاداره", "بالاداره", "اداري", "الاداري", "قياده", "القياده", "قائد", "القائد", "قاده", "القاده",
-          "management", "manager", "managers", "leadership", "leaders", "leader")]
+          "management", "manager", "managers", "leadership", "leaders", "leader"),
+         # QADFIX26 (QAD 2026-11-03 case 36.1, grave): «أبوي يحب سير الخلفاء» — «عمر بن عبد العزيز: خامس الخلفاء» and «الفاروق عمر»
+         # speak of «خلافته» / «الخليفة الثاني» (the broken plural is not a stem of the singular); without this the title word
+         # alone was taken for another meaning and «ما لقيت» was said
+         ("خلفاء", "الخلفاء", "الخليفه", "خلافته", "الخلافه", "caliph", "caliphs", "caliphate"),
+         # QADFIX26 (QAD 2026-11-01 case 32, grave): «كيف سقطت غرناطة» — a history of al-Andalus tells it («مختصر تاريخ الأندلس»);
+         # its cities lead to al-Andalus, not the other way round (one way, below)
+         ("اندلس", "الاندلس", "اندلسي", "الاندلسي", "اندلسيه", "الاندلسيه", "غرناطه", "قرطبه", "اشبيليه", "طليطله", "andalus",
+          "andalusia", "granada"),
+         # QADFIX29 #3 (QAD 2026-11-06 case 8.2, grave): «وعن الحيوانات البحرية؟» for a boy of 5 → «ما لقيت كتابًا متوفرًا عن الحيوانات
+         # البحرية» while «سمكة قوس قزح» («أسماك المحيط»)، «كلماتي الأولى - البحر» and «رحلة حص البحر» are in stock: «البحرية» has no
+         # stem «بحر» (a three-letter root keeps its «يه»), and the books say the sea, the ocean, a fish. The fish words lead to the sea,
+         # not the other way round (one way, below)
+         ("بحر", "البحر", "بحري", "البحري", "بحريه", "البحريه", "بحار", "البحار", "محيط", "المحيط", "محيطات", "المحيطات",
+          "اسماك", "الاسماك", "سمكه", "السمكه", "سمك", "السمك", "حوت", "الحوت", "حيتان", "الحيتان", "دلفين", "الدلفين",
+          "sea", "ocean", "oceans", "marine", "fish")]
 # QADFIX9 (QAD 2026-10-20, case 41.1): words that lead to a group but that the group does not lead to — «ماينكرافت»
 # must not find «المراسلة الإلكترونية» in the summary of «رسالة في قارورة»; «الألعاب الإلكترونية» still finds the games
 _ONE_WAY = {normalize(w) for w in ("الكترونيه", "الالكترونيه", "فيديو", "الفيديو", "افتراضي", "الافتراضي", "افتراضيه",
                                     "الافتراضيه", "virtual", "التواصل", "social", "phone", "phones",
-                                    "ذاكره", "الذاكره", "memory")}
+                                    "ذاكره", "الذاكره", "memory",
+                                    "غرناطه", "قرطبه", "اشبيليه", "طليطله", "granada",
+                                    # QADFIX29 #3: a fish is a sea animal; «البحر» does not lead to every fish of a title
+                                    "اسماك", "الاسماك", "سمكه", "السمكه", "سمك", "السمك", "حوت", "الحوت", "حيتان", "الحيتان",
+                                    "دلفين", "الدلفين", "fish")}
 _SAME_AS = {}
 for _group in _SAME:
     for _w in _group:

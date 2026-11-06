@@ -49,7 +49,8 @@ ok('author_request = dict(author_request, mode="works")' in _src and '(_pr.get("
    "7.1: an author named with a series or prize wish is the book's author")
 ok("(?:عن|حول|بخصوص|about|on)" in _af, "16.3: a person the book is about is not a second author")
 ok("key(p) == key(written or '')" in _af, "16.3: a family name alone is looked up under the full name")
-ok('q7["women"] = [x[2]["title"] for x in _wf[:4] if _g.get(x[2]["book_id"]) == "f"]' in _src, "45.2: «author records say» only of records")
+# QADFIX29 #5 (QAD 2026-11-06 case 1.3): the list now holds every woman's book of the pool (12), still only of records
+ok('q7["women"] = ([x[2]["title"] for x in _wf[:12] if _g.get(x[2]["book_id"]) == "f"]' in _src, "45.2: «author records say» only of records")
 ok("QADFIX21 (QAD 2026-10-26, case 11.2)" in _src and "topics.match(topic_phrases, b[\"book_id\"], topic_index)[0], b) for b in pool_before" in _src,
    "11.2: a subject beside a likeness is searched")
 ok("_no_pages = " in _src, "10.1: the same author's copies under another title when the page count is missing")

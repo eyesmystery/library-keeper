@@ -1,0 +1,42 @@
+{
+  "format": "work-links-1",
+  "about": "Copies in stock that are the same work under titles in different languages, when no shared work record (original_year_ref) links them yet. Read by app.same_work_copy (AUDFIX 2026-11-05, Codex audit P2): a copy in the visitor's language takes another copy's place only when the two are proven the same work, never for the same author and year alone. Each entry: the work record, the author as written on our copies, the titles of our copies, and the source that names them (BOARD.md rule 12). The author link in our records is still required.",
+  "works": [
+    {
+      "work": "https://www.wikidata.org/wiki/Q935935",
+      "author": ["Gabriel García Márquez", "غابرييل غارسيا ماركيز"],
+      "titles": ["Chronicle of a Death Foretold", "قصة موت معلن"],
+      "source": "Wikidata Q935935 (Crónica de una muerte anunciada, 1981, Gabriel García Márquez): English label «Chronicle of a Death Foretold»; its Arabic Wikipedia article is titled «قصة موت معلن» (checked 2026-11-05)"
+    },
+    {
+      "work": "https://www.wikidata.org/wiki/Q150827",
+      "author": ["Mary Shelley"],
+      "titles": ["Frankenstein", "فرانكشتاين", "فرانكنشتاين"],
+      "source": "Wikidata Q150827 (1818 novel by Mary Shelley): English label «Frankenstein; or, The Modern Prometheus», Arabic label «فرانكنشتاين», Arabic alias «فرانكشتاين» (checked 2026-11-05)"
+    },
+    {
+      "work": "https://www.wikidata.org/wiki/Q180736",
+      "author": ["Victor Hugo"],
+      "titles": ["Les misérables", "البؤساء"],
+      "source": "Wikidata Q180736 (1862 novel by Victor Hugo): English label «Les Misérables», Arabic label «البؤساء» (checked 2026-11-05)"
+    },
+    {
+      "work": "https://www.wikidata.org/wiki/Q210784",
+      "author": ["Fyodor Dostoyevsky"],
+      "titles": ["The idiot", "الأبله 2/1"],
+      "source": "Wikidata Q210784 (novel by Fyodor Dostoyevsky): English label «The Idiot», Arabic label «الأبله»; our Arabic copy «الأبله 2/1» is the two parts in one volume (checked 2026-11-05)"
+    },
+    {
+      "work": "https://www.wikidata.org/wiki/Q182961",
+      "author": ["Charlotte Brontë"],
+      "titles": ["JANE EYRE", "جين إير"],
+      "source": "Wikidata Q182961 (1847 novel by Charlotte Brontë): Arabic label «جين أير», aliases «جين اير», «جاين آير» (checked 2026-11-05)"
+    },
+    {
+      "work": "https://www.wikidata.org/wiki/Q51530290",
+      "author": ["Jordan Peterson"],
+      "titles": ["12 Rules for Life", "12 قاعدة للحياة"],
+      "source": "Wikidata Q51530290 (2018 book by Jordan Peterson): English label «12 Rules for Life», Arabic label «اثنتا عشرة قاعدة للحياة» (the same title with the number in words) (checked 2026-11-05)"
+    }
+  ]
+}

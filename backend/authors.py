@@ -377,6 +377,9 @@ def author_detail(author_id, conn=None):
         for f in _TEXT_FIELDS:
             out[f] = r[f]
         out["confidence"], out["researched_at"] = r["confidence"], r["researched_at"]  # «الأسلوب من البحث» (2026-10-01)
+        # GENDERFIELD (2026-11-05): shown read-only in the developer's research block, with where it came from
+        out["gender"] = r["gender"] if "gender" in r.keys() else None
+        out["gender_source"] = r["gender_source"] if "gender_source" in r.keys() else None
         return out
     finally:
         if own:
@@ -469,6 +472,9 @@ def merge_authors(keep_id, drop_id):
                 "name_latin": keep["name_latin"] or drop["name_latin"]}
         for f in _TEXT_FIELDS:
             sets[f] = keep[f] if keep[f] else drop[f]
+        # GENDERFIELD (2026-11-05): the kept record's gender, else the dropped one's, with its own source
+        if "gender" in keep.keys() and not keep["gender"] and drop["gender"]:
+            sets["gender"], sets["gender_source"] = drop["gender"], drop["gender_source"]
         for f in _LIST_FIELDS:
             merged = _load(keep[f]) + [x for x in _load(drop[f]) if x not in _load(keep[f])]
             sets[f] = json.dumps(merged, ensure_ascii=False)

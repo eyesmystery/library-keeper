@@ -74,6 +74,8 @@ def needed(first, messages):
     dbg = first.get("_debug") or {}
     if dbg.get("intent") not in ("recommend", "about_book", "compare"):
         return False
+    if dbg.get("firm28"):
+        return False   # QADFIX28: our records settled the answer; a second reading only replaced it with a worse one
     last = ""
     for m in reversed(messages or []):
         if isinstance(m, dict) and m.get("role") == "user":

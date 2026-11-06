@@ -125,6 +125,115 @@ for msgs, why in (([{"role": "user", "content": "ابغى رواية زي ما �
        f"(5) unchanged: {why} ({a['reply'][:60]}… {ids(a)} / {ids(b)})")
 ok(ids(A.run_chat([{"role": "user", "content": "عندكم كل صيف تلاه؟"}])) == [2017], "(5) the title asked about is still shown")
 
+# --- AUDFIX (audit 2026-11-01 P2): the visitor's conditions are read from the whole conversation --------------------------------
+# «ابغى رواية قصيرة» -> a book shown -> «كتب قريبة منه» brought four 350-page books; «… بس قصيرة» then brought none at all
+con = models.get_connection()
+for bid, pages, price in ((2017, 300, 50), (2019, 350, 25), (2021, 120, 60), (2022, 350, 80), (2023, 150, 28), (2030, 350, 90)):
+    con.execute("UPDATE books SET page_count=?, price=? WHERE book_id=?", (pages, price, bid))
+con.commit(); con.close()
+SHORT = {2021, 2023}
+SHOWN = {"role": "assistant", "content": "هذا الكتاب اللي سألت عنه.", "book_ids": [2017]}
+def conv(first, last):
+    return [{"role": "user", "content": first}, SHOWN, {"role": "user", "content": last}]
+def pages_of(r):
+    return [(b["book_id"], b.get("page_count")) for b in r["books"]]
+r6 = A.run_chat(conv("ابغى رواية قصيرة", "كتب قريبة منه"))
+print("   short before:", r6["reply"], pages_of(r6))
+ok(r6["_debug"].get("why") == "similar to a book" and ids(r6) and set(ids(r6)) <= SHORT,
+   f"(6) «قصيرة» said before the likeness stays: only the short neighbours ({pages_of(r6)})")
+r6b = A.run_chat(conv("ابغى رواية قصيرة", "كتب قريبة منه بس قصيرة"))
+ok(ids(r6b) and set(ids(r6b)) <= SHORT, f"(6) «قصيرة» said again with the likeness: the short neighbours, not an empty answer ({pages_of(r6b)})")
+r6c = A.run_chat(conv("ابغى رواية قصيرة", "عادي طويل، كتب قريبة منه"))
+ok(r6c["_debug"].get("why") == "similar to a book" and set(ids(r6c)) - SHORT,
+   f"(6) the length lifted in the latest message («عادي طويل»): longer books come back ({pages_of(r6c)})")
+r6d = A.run_chat(conv("ابغى رواية ما تتعدى ٣٠ ريال", "كتب قريبة منه"))
+ok(ids(r6d) and all(0 < (b.get("price") or 0) <= 30 for b in r6d["books"]),
+   f"(6) a price limit said before stays ({[(b['book_id'], b.get('price')) for b in r6d['books']]})")
+r6e = A.run_chat(conv("ابغى كتاب تطوير ذات", "كتب قريبة منه"))
+ok(r6e["_debug"].get("why") == "similar to a book" and ids(r6e) and 2025 not in ids(r6e),
+   f"(6) an earlier kind of book (self-help) gives way to the likeness of the novel shown, nothing emptied ({ids(r6e)})")
+r6f = A.run_chat([{"role": "user", "content": "I want a short novel"}, SHOWN, {"role": "user", "content": "similar to this one please"}], language="en")
+ok(ids(r6f) and set(ids(r6f)) <= SHORT, f"(6) English: «short» said before stays ({pages_of(r6f)})")
+con = models.get_connection()
+con.execute("UPDATE books SET page_count=400 WHERE book_id IN (2021, 2023)"); con.commit(); con.close()
+r6g = A.run_chat(conv("ابغى رواية قصيرة", "كتب قريبة منه"))
+ok(r6g["books"] == [] and "قصير" in r6g["reply"] and "تحب نخفف" in r6g["reply"],
+   f"(6) no short book close to it: said plainly with the condition, and the visitor may relax it ({r6g['reply']})")
+con = models.get_connection()
+con.execute("UPDATE books SET page_count=120 WHERE book_id=2021"); con.execute("UPDATE books SET page_count=150 WHERE book_id=2023")
+con.commit(); con.close()
+
+# --- AUDFIX (audit 2026-11-01 P3): a title edit renews the title-reference memory while the number of books stays the same -------
+from auth_helper import login
+books = {b["book_id"]: dict(b) for b in A.list_books(only_active=False)}
+ok(A.fallback_like_reference("أبغى كتب مثل كل صيف تلاه", books), "(7) the memory is warm: «كل صيف تلاه» is known")
+n0 = len(books)
+dev = login(A.app.test_client(), "developer")
+resp = dev.patch("/api/books/2017", json={"title": "حين يعود الربيع"}, headers={"X-CSRF-Token": dev.csrf})
+books = {b["book_id"]: dict(b) for b in A.list_books(only_active=False)}
+ok(resp.status_code == 200 and len(books) == n0 and books[2017]["title"] == "حين يعود الربيع",
+   f"(7) the developer renamed book 2017, the number of books unchanged ({resp.status_code}, {n0} -> {len(books)})")
+new = A.fallback_like_reference("أبغى كتب مثل حين يعود الربيع", books)
+old = A.fallback_like_reference("أبغى كتب مثل كل صيف تلاه", books)
+ok(bool(new) and new[0][0]["book_id"] == 2017, f"(7) the new title is known at once, without a restart ({new and [b['book_id'] for b in new[0]]})")
+ok(not old or 2017 not in [b["book_id"] for b in old[0]], f"(7) the old title no longer points at book 2017 ({old and [b['book_id'] for b in old[0]]})")
+dev.patch("/api/books/2017", json={"title": "كل صيف تلاه"}, headers={"X-CSRF-Token": dev.csrf})
+books = {b["book_id"]: dict(b) for b in A.list_books(only_active=False)}
+back = A.fallback_like_reference("أبغى كتب مثل كل صيف تلاه", books)
+ok(bool(back) and back[0][0]["book_id"] == 2017, "(7) and back again after the title is restored")
+
+# --- AUDFIX (audit 2026-11-04 P2): a young reader and «مافيها شي للكبار» hold in «books like X» without the model too --------------
+# «لبنت أخوي عمرها ١٣ سنة تبي رواية رومانسية مافيها شي للكبار» -> a book shown -> «كتب قريبة منه» brought book 2022, whose record
+# carries sexual content (confidence 0.6, severity 1): the strict rule of QADFIX26 #1 (CLEAN_YOUNG) was read on the model path only
+import json
+con = models.get_connection()
+con.execute("INSERT OR REPLACE INTO book_profiles (book_id, format, sensitive_content) VALUES (2022, 'novel', ?)", (json.dumps(["sexual_content"]),))
+con.execute("INSERT INTO attribute_evidence (book_id, attribute_name, attribute_value, confidence, source_site, severity) "
+            "VALUES (2022, 'sensitive_content', 'sexual_content', 0.6, 'test_fallbacksim', 1)")
+con.execute(f"INSERT OR REPLACE INTO books ({COLS}) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (2031, "صيف في المخيم", "كاتبة يافعين", "يافعين", 3, 1, "ar", "مغامرة صيفية لأصدقاء في مخيم عند بحيرة", "صيف ومغامرة", None, None))
+con.commit(); con.close()
+CLEAN = "لبنت أخوي عمرها ١٣ سنة تبي رواية رومانسية مافيها شي للكبار"
+def strict_ok(r, age=13):
+    cards = A.get_profile_cards()
+    return all(A.age_allowed(cards.get(b["book_id"]), "young_adult", {A.CLEAN_YOUNG}, dict(A.get_book(b["book_id"])), age)
+               for b in r["books"])
+cards8 = A.get_profile_cards()
+ok(not A.age_allowed(cards8.get(2022), "young_adult", {A.CLEAN_YOUNG}, dict(A.get_book(2022)), 13), "(8) set-up: book 2022 fails the strict guard")
+r8 = A.run_chat(conv(CLEAN, "كتب قريبة منه"))
+print("   clean young:", r8["reply"], ids(r8), r8["_debug"])
+ok(r8["_debug"].get("why") == "similar to a book" and r8["_debug"].get("clean_young") is True,
+   f"(8) the likeness answer reads the young reader and the clean wish ({r8['_debug']})")
+ok(2022 not in ids(r8), f"(8) the book with sexual content in its record is never offered ({ids(r8)})")
+ok(strict_ok(r8), f"(8) every book offered passes the strict guard of the model's answer ({ids(r8)})")
+_all8 = [b["book_id"] for b in A.clean_young_shelf({b["book_id"]: dict(b) for b in A.list_books(only_active=False)},
+                                                  {2017}, cards8, "young_adult", 13)]
+_shelf8 = _all8[:4]
+ok(2031 in _all8 and 2022 not in _all8, f"(8) set-up: the young readers' shelf has clean books in stock ({_shelf8})")
+ok(ids(r8) == r8["_debug"].get("clean_young_shelf") == _shelf8
+   and r8["reply"].startswith("ما لقيت الآن بين الكتب المتوفرة كتابًا قريبًا من «كل صيف تلاه» يناسب عمر القارئ وما فيه شي للكبار")
+   and all((b.get("reason") or "").startswith("من رف اليافعين") for b in r8["books"]),
+   f"(8) nothing close is clean for her: said first, then the young readers' shelf, as the model's answer does ({r8['reply'][:90]}…)")
+con = models.get_connection()
+con.execute("UPDATE books SET age_min=12, age_max=16 WHERE book_id=2023"); con.commit(); con.close()
+r8b = A.run_chat(conv(CLEAN, "كتب قريبة منه"))
+ok(2023 in ids(r8b) and 2022 not in ids(r8b) and strict_ok(r8b) and r8b["reply"].startswith("هذي كتب قريبة من «كل صيف تلاه»"),
+   f"(8) a neighbour whose recorded age range fits her and with a clean record is still offered as close ({ids(r8b)})")
+r8e = A.run_chat([{"role": "user", "content": "For my 13 year old niece, a clean romance novel, nothing adult"}, SHOWN,
+                  {"role": "user", "content": "similar to this one please"}], language="en")
+ok(r8e["_debug"].get("clean_young") is True and 2022 not in ids(r8e) and strict_ok(r8e),
+   f"(8) English: the same rule ({ids(r8e)}, {r8e['reply'][:70]}…)")
+r8c = A.run_chat(conv("لبنت أخوي عمرها ١٣ سنة تبي رواية رومانسية", "كتب قريبة منه"))
+ok(not r8c["_debug"].get("clean_young") and 2022 in ids(r8c),
+   f"(8) no clean wish: unchanged (Ibrahim: «لا تمنع. فلتر اذا الزائر طلب») — the teenager gets the books close to it ({ids(r8c)})")
+r8k = A.run_chat([{"role": "user", "content": CLEAN}])
+ok(r8k["_debug"].get("why") != "similar to a book" and 2022 not in ids(r8k) and strict_ok(r8k),
+   f"(8) the general keyword answer (no reference) keeps the same rule ({ids(r8k)})")
+con = models.get_connection()
+con.execute("UPDATE books SET age_min=NULL, age_max=NULL WHERE book_id=2023"); con.commit(); con.close()
+ok(src.count("clean_young_wish(") == 4 and src.count("clean_young_shelf(") == 3,
+   "(8) one rule (clean_young_wish) for the model's answer, the keyword answer and the likeness answer; one shelf (clean_young_shelf)")
+
 # --- the helpers and the paths ----------------------------------------------------------------------------------------------
 ok(E.similar_to_book([2017], [2019, 2025, 9999])[:1] == [(2025, E.similar_to_book([2017], [2025])[0][1])]
    and E.similar_to_book([424242], [2019]) == [], "embeddings.similar_to_book: stored vectors only, [] without a vector")

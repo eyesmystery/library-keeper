@@ -9,7 +9,8 @@ Ibrahim 2026-10-23: «تجارب الموظفين والزوار اللي تنح
   where     a file in the private repository eyesmystery/manar-inbox (GitHub contents API), written with an upload
             token limited to that repository; the manager pastes the token once in «التنبيهات», it is kept in
             data/inbox_send.json on this computer only (never in git, never in a package, never shown again)
-  when      - every `every_days` days (7) while sending is on
+  when      - every day at `daily_at` (21:00 Riyadh time) while sending is on (Ibrahim 2026-11-05 «ابغى بلاغات
+              المكتبة تصير تنرسل يوميا الساعة ٩ الليل»; was every `every_days` = 7 days)
             - when Ibrahim asks: a signed request in the update channel (backend/channel.py) is sent at the next
               hourly check, once per request id
             - «أرسل الآن» (manager)
@@ -34,7 +35,7 @@ DATA = os.path.join(ROOT, "data")
 CONFIG = os.path.join(DATA, "inbox_send.json")
 STATE = os.path.join(DATA, "inbox_send_state.json")
 DEFAULTS = {"enabled": False, "token": None, "repo": "eyesmystery/manar-inbox", "folder": "inbox",
-            "api": "https://api.github.com", "every_days": 7}
+            "api": "https://api.github.com", "every_days": 7, "daily_at": "21:00"}
 FORMAT = "manar-inbox-1"
 MAX_FILE = 40 * 1024 * 1024
 RIYADH = timezone(timedelta(hours=3))
@@ -101,11 +102,29 @@ def _parse(iso):
         return None
 
 
-def next_due(cfg=None, s=None):
+def _daily_at(cfg):
+    """-> (hour, minute) of the daily send in Riyadh time, or None (then every `every_days` days)."""
+    try:
+        h, m = str(cfg.get("daily_at") or "").split(":")
+        h, m = int(h), int(m)
+        return (h, m) if 0 <= h < 24 and 0 <= m < 60 else None
+    except (TypeError, ValueError):
+        return None
+
+
+def next_due(cfg=None, s=None, now=None):
+    """The next automatic send: the first daily time (Riyadh) after the last file, or last + every_days."""
     cfg, s = cfg or config(), s if s is not None else state()
     last = _parse(s.get("last_sent"))
     if not last:
         return None
+    at = _daily_at(cfg)
+    if at:
+        local = last.astimezone(RIYADH)
+        due = local.replace(hour=at[0], minute=at[1], second=0, microsecond=0)
+        if due <= local:
+            due += timedelta(days=1)
+        return due.isoformat(timespec="seconds")
     return (last + timedelta(days=max(1, int(cfg.get("every_days") or 7)))).isoformat(timespec="seconds")
 
 
@@ -124,7 +143,8 @@ def ready(cfg=None):
 def status(role=None):
     cfg, s = config(), state()
     return {"enabled": bool(cfg.get("enabled")), "has_token": bool(cfg.get("token")), "has_key": bool(public_key()),
-            "every_days": int(cfg.get("every_days") or 7), "repo": cfg.get("repo"),
+            "every_days": int(cfg.get("every_days") or 7), "daily_at": cfg.get("daily_at") if _daily_at(cfg) else None,
+            "repo": cfg.get("repo"),
             "last_sent": s.get("last_sent"), "last_file": s.get("last_file"), "last_counts": s.get("last_counts"),
             "last_try": s.get("last_try"), "last_error": s.get("last_error"), "sending": bool(s.get("sending")),
             "next_due": next_due(cfg, s) if cfg.get("enabled") else None, "pending_request": s.get("pending_request"),
@@ -347,7 +367,7 @@ def on_request(req, audit=None, run=None):
 
 
 def tick(audit=None, put=None):
-    """The hourly look: a waiting request first, else the weekly file when it is due. -> what was done or None."""
+    """The regular look: a waiting request first, else the daily (or every_days) file when it is due. -> what was done or None."""
     cfg, s = config(), state()
     if ready(cfg):
         return None
@@ -357,7 +377,9 @@ def tick(audit=None, put=None):
                     put=put, audit=audit)
     due = next_due(cfg, s)
     if not s.get("last_sent") or (due and datetime.now(timezone.utc) >= _parse(due)):
-        return send(reason="weekly", scope="open", by="الإرسال الأسبوعي", put=put, audit=audit)
+        daily = bool(_daily_at(cfg))
+        return send(reason="daily" if daily else "weekly", scope="open", by="الإرسال اليومي" if daily else "الإرسال الأسبوعي",
+                    put=put, audit=audit)
     return None
 
 
@@ -377,7 +399,7 @@ def start_background(audit=None):
                 tick(audit)
             except Exception:  # noqa: BLE001
                 pass
-            time.sleep(3600)
+            time.sleep(600)   # every 10 minutes, so the 21:00 file leaves by 21:10
     t = threading.Thread(target=loop, daemon=True)
     _timer["thread"] = t
     t.start()

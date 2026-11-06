@@ -1,0 +1,13 @@
+{
+ "format": "omnibus-parts-1",
+ "about": "Works that one volume in stock holds as its parts, when the volume's own title and summary do not name them (QADFIX29, QAD 2026-11-06 case 3.1: «عندكم «الغرف الموصدة» لبول أوستر؟» → «مو متوفر» and other novels of his, while «ثلاثية نيويورك» holds it). Read by app.omnibus_part29: a part named by the visitor that is no book of its own in stock is answered with the volume. Each entry: our book_id and title, the parts under the titles a visitor may use (Arabic translations and the originals), and the source that lists the parts (BOARD.md rule 12).",
+ "volumes": [
+  {
+   "book_id": 4114,
+   "title": "ثلاثية نيويورك",
+   "author": "بول أوستر",
+   "parts": ["مدينة الزجاج", "الأشباح", "أشباح", "الغرفة الموصدة", "الغرف الموصدة", "الغرفة المغلقة", "City of Glass", "Ghosts", "The Locked Room"],
+   "source": "https://en.wikipedia.org/wiki/The_New_York_Trilogy"
+  }
+ ]
+}

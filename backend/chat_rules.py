@@ -52,6 +52,14 @@ _add("مئة مائة مية hundred", 100)
 _add("مئتين مائتين ميتين مئتان", 200)
 _add("ألف thousand", 1000)
 _add("ألفين ألفان", 2000)
+# QADFIX27 (QAD 2026-11-05 case 15.1, grave): «فوق السبعمية صفحة» — the hundreds as one word
+_add("ثلاثمية ثلاثمئة ثلاثمائة ثلثمية ثلاثميه", 300)
+_add("أربعمية أربعمئة أربعمائة ربعمية", 400)
+_add("خمسمية خمسمئة خمسمائة", 500)
+_add("ستمية ستمئة ستمائة", 600)
+_add("سبعمية سبعمئة سبعمائة", 700)
+_add("ثمانمية ثمانمئة ثمانمائة ثمنمية", 800)
+_add("تسعمية تسعمئة تسعمائة", 900)
 
 
 def _num_token(tok):
@@ -85,7 +93,8 @@ def num_canon(text):
             nx = _num_token(toks[j])
             if nx is None or nx[0] != "و":
                 break
-            if (val < 10 and 20 <= nx[1] < 100 and nx[1] % 10 == 0) or (100 <= val and nx[1] < 100 and val % 100 == 0):
+            if ((val < 10 and 20 <= nx[1] < 100 and nx[1] % 10 == 0) or (100 <= val and nx[1] < 100 and val % 100 == 0)
+                    or (1000 <= val and nx[1] < 1000 and val % 1000 == 0)):   # QADFIX27: «ألف وخمسمية» = 1500
                 val += nx[1]
                 j += 1
             else:
@@ -299,6 +308,18 @@ _SHORTEST = re.compile(r"(?:^| )(?:ال)?اقصر(?: |$)|(?:^| )(?:shortest|shor
 _SUPERLATIVE = re.compile(r"الاقصر|اقصر (?:كتاب|روايه|قصه|شي|واحد|وحده|عمل|ديوان)|shortest")
 
 
+# QADFIX29 #2 (QAD 2026-11-06 case 4.2, grave): «وش أقصر رواية عندكم أصلاً؟» after «بين ٨٠ و١٥٠ صفحة» → «حارس ذكريات» 144 pages,
+# while «الشاب» has 48: «أصلًا / على الإطلاق / في المكتبة كلها» asks over everything in stock, not within the wishes said before
+_ABSOLUTE29 = re.compile(r"(?:^| )(?:اصلا|اصلن|علي الاطلاق|بالاطلاق|في المكتبه كلها|بالمكتبه كلها|في المكتبه|بالمكتبه|عندكم كلها"
+                         r"|من كل الكتب|من كل الروايات|بين كل|كلها|at all|of all|in the (?:whole )?(?:shop|library|store)|overall|ever)(?: |$)")
+
+
+def absolute_asked(text):
+    """«وش أقصر رواية عندكم أصلاً؟» -> True: a superlative over the whole stock, not within the wishes said before."""
+    t = " ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split())
+    return bool(_ABSOLUTE29.search(t)) and bool(_SHORTEST.search(t) or re.search(r"(?:^| )(?:ال)?(?:اطول|ارخص|اقدم|احدث)(?: |$)|longest|cheapest|oldest|newest", t))
+
+
 def shortest_asked(text):
     """-> "shortest" («وش أقصر كتاب له؟»), "shorter" («أقصر» after some books), or None."""
     t = " ".join(normalize(text).split())
@@ -380,7 +401,18 @@ def grade_ages(text):
         out = [_STAGE_BASE[m.group(2) or "ابتدائي"] + _GRADE_N.get(m.group(1), 1) for m in _GRADE_SAFF.finditer(t)]
     if not out and re.search(r"(?:^| )(?:بال|في ال|ال)?(?:روضه|تمهيدي)(?: |$)", t):
         out.append(5)
+    if not out:
+        # QADFIX26 (QAD 2026-11-01, case 3.1): «بنت عمي بالمتوسط» — the stage alone, no year: the middle of its years
+        # («أول متوسط … ثالث متوسط» = 12–14 → 13; secondary 15–17 → 16; primary 6–11 → 9)
+        m = _STAGE_ONLY.search(t)
+        if m:
+            out.append(_STAGE_MID[m.group(1) or m.group(2)])
     return out
+
+
+_STAGE_ONLY = re.compile(r"(?:^| )(?:بال|في ال|ب ال|فال)(متوسط|ثانوي|ثانويه|ابتدائي|ابتدائيه)(?: |$)(?!(?:ال)?(?:طول|حجم|سعر|مستوي))"
+                         r"|(?:^| )(?:بال|في ال|ال)?مرحله (?:ال)?(متوسطه|ثانويه|ابتدائيه)(?: |$)")
+_STAGE_MID = {"متوسط": 13, "متوسطه": 13, "ثانوي": 16, "ثانويه": 16, "ابتدائي": 9, "ابتدائيه": 9}
 
 
 # «بنتي ١٥»، «ولدي ٩ وبنتي ٤»: an age right after the child, with no «عمرها» / «سنة» (QAD 2026-10-12, case 38:
@@ -696,8 +728,12 @@ def title_skeleton(text):
 _PAGES_UNDER = re.compile(r"(?<!\S)(?:اقل من|اقل|تحت|ما يتعدي|ما تتعدي|ما يتجاوز|ما تتجاوز|لا يتعدي|لا تتعدي|لا يتجاوز|لا تتجاوز"
                           r"|ما يزيد عن|ما تزيد عن|لا يزيد عن|لا تزيد عن|حدود|بحدود|less than|under|fewer than|below|max|maximum)"
                           r"\s+(\d{2,4})\s*(?:صفحه|صفحات|صفحة|ص|pages?)(?:\s|$)")
-_PAGES_OVER = re.compile(r"(?:اكثر من|فوق|اكبر من|more than|over|at least|عل[يى] الاقل)\s+(\d{2,4})\s*(?:صفحه|صفحات|صفحة|ص|pages?)(?:\s|$)")
+_PAGES_OVER = re.compile(r"(?:اكثر من|فوق|اكبر من|اطول من|more than|over|longer than|at least|عل[يى] الاقل)\s+(\d{2,4})\s*(?:صفحه|صفحات|صفحة|ص|pages?)(?:\s|$)")
 _PAGES_BARE = re.compile(r"(?:^| )(\d{2,4})\s*(?:صفحه|صفحات|صفحة|pages)(?:\s|$)")
+# QADFIX29 #2 (QAD 2026-11-06 case 4.1, grave): «يعني بين ٨٠ و١٥٠ صفحة» went to unsupported_requests and «صفحه» became a subject —
+# a range of pages is a lower and an upper limit
+_PAGES_BETWEEN = re.compile(r"(?:^| )(?:بين|من|between|from)\s+(\d{2,4})\s*(?:صفحه |صفحات |pages )?(?:و|الي|ل|-|–|to|and)\s*(\d{2,4})\s*"
+                            r"(?:صفحه|صفحات|صفحة|ص|pages?)(?:\s|$)|(?:^| )(\d{2,4})\s*[-–]\s*(\d{2,4})\s*(?:صفحه|صفحات|صفحة|ص|pages?)(?:\s|$)")
 _PAGES_ANY = re.compile(r"(?:اي|مو مهم|ما يهم) (?:عدد )?(?:ال)?صفحات|الطول (?:مو مهم|ما يهم)|any length")
 
 
@@ -706,9 +742,15 @@ def page_limit(user_messages):
     stays through the conversation until another is named or it is lifted («مو مهم عدد الصفحات»)."""
     lo = hi = None
     for text in user_messages:
-        t = " ".join(num_canon(text).split())
+        t = " ".join(num_canon(_pages_al(text)).split())
         if _PAGES_ANY.search(t):
             lo = hi = None
+        m_bt = _PAGES_BETWEEN.search(t)
+        if m_bt:
+            a, b = sorted(int(x) for x in m_bt.groups() if x)
+            if a < b:
+                lo, hi = a, b
+                continue
         m_hi, m_lo = _PAGES_UNDER.search(t), _PAGES_OVER.search(t)
         if m_hi:
             hi = int(m_hi.group(1))
@@ -716,12 +758,55 @@ def page_limit(user_messages):
                 hi -= 1   # «أقل من ١٠٠ صفحة»: 99 at most
         if m_lo:
             lo = int(m_lo.group(1))
-            if re.match(r"(?:اكثر|فوق|اكبر|more|over)", m_lo.group(0)):
+            if re.match(r"(?:اكثر|فوق|اكبر|اطول|more|over|longer)", m_lo.group(0)):
                 lo += 1   # «أكثر من ١٠٠ صفحة»: 101 at least; «على الأقل ١٠٠» keeps 100 (AUDFIX, audit 2026-10-16 P3)
         if not m_hi and not m_lo and _PAGES_BARE.search(t) and re.search(r"(?:^| )(?:حول|تقريبا|بحدود|around|about)(?: |$)", t):
             n = int(_PAGES_BARE.search(t).group(1))
             lo, hi = int(n * 0.8), int(n * 1.2)
     return hi, lo
+
+
+def _pages_al(text):
+    """QADFIX27 (QAD 2026-11-05 cases 15.1–15.2, grave): «فوق السبعمية صفحة»، «فوق الألف صفحة» — a number word with «ال» right
+    before «صفحة» is that number (num_canon itself keeps «ال» words as they are, titles rely on it)."""
+    toks = normalize(text or "").split()
+    for k, w in enumerate(toks):
+        if (w.startswith("ال") and w[2:] in _NUM and len(w) > 4 and k + 1 < len(toks)
+                and re.match(r"(?:صفحه|صفحات|ص|pages?)$", toks[k + 1])):
+            toks[k] = w[2:]
+    return " ".join(toks)
+
+
+# QADFIX27 (QAD 2026-11-05 case 15.3, grave): «وش أطول رواية عندكم؟» — the longest, ordered from page_count like «الأقصر»;
+# «أطول منها / أطول شوي» is longer than the books shown
+_LONGEST = re.compile(r"(?:^| )(?:ال)?اطول(?: |$)|(?:^| )longest(?: |$)")
+_LONGER = re.compile(r"(?:^| )اطول (?:شوي|شويه|منها|منه|منهم|من كذا|من كذي|من هذا|من هذي|من هذول|من اللي|بشوي|بعد)(?: |$)"
+                     r"|(?:^| )longer(?: |$)")
+
+
+def longest_asked(text):
+    """-> "longest" («وش أطول رواية عندكم؟»), "longer" («أطول منها شوي») or None."""
+    t = " ".join(num_canon(_pages_al(re.sub(r"[؟?!.،,]", " ", text or ""))).split())
+    if re.search(r"(?:^| )اطول من \d|longer than \d", t):
+        return None   # «أطول من ٥٠٠ صفحة»: a page limit (page_limit), not an order
+    if _LONGER.search(t):
+        return "longer"
+    return "longest" if _LONGEST.search(t) else None
+
+
+_BRANCH = re.compile(r"(?:^| )(?:ب|في |ف)?(?:ال)?(?:فرع|فئه|فئة|مجال)\s+((?:ال)?[^\s]{3,}(?: (?:ال)?(?:شاب|شابه|عربيه|العربيه))?)"
+                     r"|(?:^| )(?:in the |the )?([a-z]+(?: [a-z]+)?) (?:category|branch)(?: |$)")
+
+
+def award_branch(text):
+    """QADFIX27 #5 (QAD 2026-11-05 case 29.1, grave): «جائزة زايد في فرع الآداب» -> «الاداب» (the prize's branch, matched against
+    book_awards.category), not the shelf «أدب»; None when no branch is named."""
+    t = " ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split())
+    m = _BRANCH.search(t)
+    if not m:
+        return None
+    b = (m.group(1) or m.group(2) or "").strip()
+    return b if b and b not in ("هذا", "ذا", "the", "this") else None
 
 
 def is_pages_phrase(phrase):

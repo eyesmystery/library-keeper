@@ -88,11 +88,23 @@ ok(doc["format"] == "manar-inbox-1" and "بلاغات الكتب من الزوا
 s = inbox_send.state()
 due = datetime.fromisoformat(inbox_send.next_due())
 ok(s["last_sent"] and s["last_file"] == name and s["last_error"] is None
-   and timedelta(days=6, hours=23) < due - datetime.now(timezone.utc) <= timedelta(days=7), "the next file is due in a week")
-ok(inbox_send.tick(put=put) is None and len(sent) == 1, "nothing is sent before the week is over")
-inbox_send._save_state(last_sent=(datetime.now(timezone.utc) - timedelta(days=8)).isoformat())
+   and due.astimezone(inbox_send.RIYADH).strftime("%H:%M") == "21:00"
+   and timedelta(0) < due - datetime.now(timezone.utc) <= timedelta(days=1), "the next file is due at the next 21:00 Riyadh (daily, Ibrahim 11-05)")
+ok(inbox_send.tick(put=put) is None and len(sent) == 1, "nothing is sent before 21:00")
+inbox_send._save_state(last_sent=(datetime.now(timezone.utc) - timedelta(days=1, minutes=5)).isoformat())
 r = inbox_send.tick(put=put)
-ok(r and r[0] and sent[-1][1].endswith("-weekly.manar"), "after a week the weekly file is sent")
+ok(r and r[0] and sent[-1][1].endswith("-daily.manar"), "a day later the daily file is sent")
+# the daily time: a file sent at 20:59 Riyadh is followed the same evening at 21:00; one sent at 21:05 → tomorrow 21:00
+R = inbox_send.RIYADH
+d1 = datetime(2026, 11, 5, 20, 59, tzinfo=R); d2 = datetime(2026, 11, 5, 21, 5, tzinfo=R)
+n1 = datetime.fromisoformat(inbox_send.next_due(inbox_send.config(), {"last_sent": d1.isoformat()}))
+n2 = datetime.fromisoformat(inbox_send.next_due(inbox_send.config(), {"last_sent": d2.isoformat()}))
+ok(n1 == datetime(2026, 11, 5, 21, 0, tzinfo=R) and n2 == datetime(2026, 11, 6, 21, 0, tzinfo=R), "next_due: the first 21:00 Riyadh after the last file")
+ok(inbox_send.status()["daily_at"] == "21:00", "status shows the daily time for the admin page")
+old = dict(inbox_send.DEFAULTS); inbox_send.DEFAULTS["daily_at"] = None
+n3 = datetime.fromisoformat(inbox_send.next_due(inbox_send.config(), {"last_sent": d1.isoformat()}))
+inbox_send.DEFAULTS.update(old)
+ok(n3 - d1 == timedelta(days=7), "without a daily time the old every-7-days rule still works")
 logged = models.get_connection().execute("SELECT COUNT(*) FROM audit_log WHERE action='inbox.sent'").fetchone()[0]
 ok(logged == 0, "send() without audit writes nothing to the log (the server passes auth.audit)")
 
