@@ -547,7 +547,9 @@ def to_english(text):
     t = str(text or "")
     for ar, en in _EN_VERBS:
         t = t.replace(ar, en)
-    for k, ar in AWARDS.items():
+    # QADFIX30 (QAD 2026-11-07 case 49.1, minor): «winner of Booker Prize الدولية 2024» in an English reply — «جائزة البوكر» was replaced
+    # inside «جائزة البوكر الدولية»: the longer names go first
+    for k, ar in sorted(AWARDS.items(), key=lambda kv: -len(kv[1])):
         t = t.replace(ar, AWARDS_EN.get(k, ar))
     for k, ar in RESULTS.items():
         t = t.replace(": " + ar, ": " + {"winner": "winner", "shortlist": "shortlisted", "longlist": "longlisted",

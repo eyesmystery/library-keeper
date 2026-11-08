@@ -143,8 +143,11 @@ ok(s["update"]["status"] == "failed", "after a failed install the same update st
 channel._set_update(status="available")
 m = login(A.app.test_client()); s_ = login(A.app.test_client(), "staff")
 r = s_.get("/api/admin/inbox/channel").get_json()
-ok(r["update"]["status"] == "available" and r["can_install"] is False, "staff see the update but cannot install it")
-ok(s_.post("/api/admin/channel/install", json={"version": newer}).status_code == 403, "an install request from staff is refused")
+# STAFFUPD (Ibrahim 2026-11-08 «صلاحية التثبيت للموظفين»): staff may approve an install too
+ok(r["update"]["status"] == "available" and r["can_install"] is True, "staff see the update and may install it (STAFFUPD)")
+ok(s_.post("/api/admin/channel/install", json={"version": "0.0.1"}).status_code == 409, "a staff approval passes the role check (409 = another version than shown, not 403)")
+ok(A.app.test_client().post("/api/admin/channel/install", json={"version": newer}).status_code in (401, 403), "without signing in, an install request is refused")
+ok("/api/admin/channel/install" in A.STAFF_PREFIXES, "the install route is open to staff accounts (STAFFUPD)")
 ok(m.get("/api/admin/inbox/channel").get_json()["can_install"] is True, "the manager may")
 ok(m.post("/api/admin/channel/install", json={"version": "0.0.1"}).status_code == 409, "an approval for another version than shown is refused")
 al = s_.get("/api/admin/inbox/alerts").get_json()

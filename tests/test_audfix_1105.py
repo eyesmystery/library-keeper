@@ -39,7 +39,8 @@ def swap(x, y, language, reason=("عن الزراعة كما طلبت", "direct"
     ns = {"edition": None, "it": {}, "order_by": None, "language": language, "book_author_map": A.book_author_map,
           "facts": [{"id": x["book_id"], "title": x["title"]}], "all_books": all_books, "reason_by_id": {x["book_id"]: reason},
           "cards": {}, "pprefs": {}, "work_copies_other_titles": A.work_copies_other_titles, "is_available": A.is_available,
-          "age_allowed": A.age_allowed, "book_fact": A.book_fact, "_cartoon_id": lambda x: False, "same_work_copy": A.same_work_copy}
+          "age_allowed": A.age_allowed, "book_fact": A.book_fact, "_cartoon_id": lambda x: False, "same_work_copy": A.same_work_copy,
+          "hard": [], "_copy_reason1106": A._copy_reason1106}
     exec(block, ns)
     return ns
 

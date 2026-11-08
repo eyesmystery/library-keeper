@@ -275,8 +275,22 @@ def next_part(anchor, want, all_books):
 _PRICE = re.compile(r"(?:^|(?<=\s))[وبل]?(\d{1,4})\s*(?:ريال|ريالات|ر س|sar|sr|riyal|riyals)(?:\s|$)")
 _PRICE_ANY = re.compile(r"(?:اي|مو مهم|مب مهم|مو شرط|ما يهم|ما يهمني) (?:ال)?(?:سعر|اسعار)|السعر (?:مو مهم|ما يهم|مب مهم)"
                         r"|any price|price (?:doesn t|does not) matter")
-_CHEAPEST = re.compile(r"(?:^| )(?:ال)?(?:ارخص|رخيص|رخيصه|cheapest|cheaper|cheap)(?: |$)|اقل سعر|lowest price")
-_PRICE_WORD = re.compile(r"ريال|سعر|اسعار|رخيص|ارخص|ميزاني|price|cheap|budget|(?:^| )sar(?: |$)")
+# QADFIX31 #1 (QAD 2026-11-08 case 1.3, grave): «وأغلى كتاب أطفال؟» after two turns → «ما أقدر أحدد أغلى كتاب أطفال» — a superlative
+# word may carry «و / ف / ب» in front of it («والأرخص»، «وأقصر»، «فالأطول»)
+_CHEAPEST = re.compile(r"(?:^| )[وفب]?(?:ال)?(?:ارخص|رخيص|رخيصه|cheapest|cheaper|cheap)(?: |$)|اقل سعر|lowest price")
+_PRICE_WORD = re.compile(r"ريال|سعر|اسعار|رخيص|ارخص|ميزاني|price|cheap|budget|(?:^| )sar(?: |$)"
+                         # QADFIX30 #1 (QAD 2026-11-07 case 46.2): «أغلى كتاب» went to unsupported_requests and was searched as a subject
+                         r"|(?:^| )(?:ال)?(?:اغلي|اغلا)(?: |$)|expensive|priciest")
+# QADFIX30 #1 (QAD 2026-11-07 cases 46.1–46.2, grave): «أغلى كتاب فنون عندكم كم سعره؟» → «المنمنمات الإسلامية ٥٢٫٣٠» from the few
+# candidates, while «The Cosmic Script» (700) is in stock: the most expensive is an order on books.price, like «الأرخص»
+_DEAREST = re.compile(r"(?:^| )[وفب]?(?:ال)?(?:اغلي|اغلا)(?: |$)(?!من \d)|(?:^| )[وفب]?(?:ال)?اعلي (?:سعر|سعرا|سعرن)(?: |$)|اكثر (?:كتاب |واحد )?(?:غلا|سعرا)(?: |$)"
+                      r"|most expensive|priciest|highest price|dearest")
+
+
+def dearest_asked(text):
+    """«أغلى كتاب فنون عندكم»، «الأعلى سعرًا»، "the most expensive art book" -> True (QADFIX30 #1)."""
+    t = " ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split())
+    return bool(_DEAREST.search(t))
 
 
 def price_wish(user_messages):
@@ -304,20 +318,83 @@ def is_price_phrase(phrase):
     return bool(_PRICE_WORD.search(" ".join(normalize(phrase).split())))
 
 
-_SHORTEST = re.compile(r"(?:^| )(?:ال)?اقصر(?: |$)|(?:^| )(?:shortest|shorter)(?: |$)")
+_SHORTEST = re.compile(r"(?:^| )[وفب]?(?:ال)?اقصر(?: |$)|(?:^| )(?:shortest|shorter)(?: |$)")   # QADFIX31 #1: «وأقصر»
 _SUPERLATIVE = re.compile(r"الاقصر|اقصر (?:كتاب|روايه|قصه|شي|واحد|وحده|عمل|ديوان)|shortest")
 
 
 # QADFIX29 #2 (QAD 2026-11-06 case 4.2, grave): «وش أقصر رواية عندكم أصلاً؟» after «بين ٨٠ و١٥٠ صفحة» → «حارس ذكريات» 144 pages,
 # while «الشاب» has 48: «أصلًا / على الإطلاق / في المكتبة كلها» asks over everything in stock, not within the wishes said before
 _ABSOLUTE29 = re.compile(r"(?:^| )(?:اصلا|اصلن|علي الاطلاق|بالاطلاق|في المكتبه كلها|بالمكتبه كلها|في المكتبه|بالمكتبه|عندكم كلها"
-                         r"|من كل الكتب|من كل الروايات|بين كل|كلها|at all|of all|in the (?:whole )?(?:shop|library|store)|overall|ever)(?: |$)")
+                         r"|من كل الكتب|من كل الروايات|بين كل|كلها|at all|of all|in the (?:whole )?(?:shop|library|store)|overall|ever"
+                         # QADFIX30 #1 (QAD 2026-11-07 case 46.2): «… على الإطلاق، مو من المعروض» — not among the books shown
+                         r"|(?:مو|مب|مش|موب|ليس|لا) (?:من )?(?:المعروض|المعروضه|اللي عرضتي|اللي عرضتيها|اللي عرضتها|الكتب المعروضه)"
+                         r"|not (?:just )?(?:from )?(?:the ones|these|those) (?:you )?(?:shown|showed))(?: |$)")
 
 
 def absolute_asked(text):
     """«وش أقصر رواية عندكم أصلاً؟» -> True: a superlative over the whole stock, not within the wishes said before."""
     t = " ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split())
-    return bool(_ABSOLUTE29.search(t)) and bool(_SHORTEST.search(t) or re.search(r"(?:^| )(?:ال)?(?:اطول|ارخص|اقدم|احدث)(?: |$)|longest|cheapest|oldest|newest", t))
+    return bool(_ABSOLUTE29.search(t)) and bool(_SHORTEST.search(t) or _DEAREST.search(t)   # QADFIX30 #1: «أغلى … على الإطلاق»
+                                                or re.search(r"(?:^| )[وفب]?(?:ال)?(?:اطول|ارخص|اقدم|احدث)(?: |$)|longest|cheapest|oldest|newest", t))
+
+
+# QADFIX30 #4 (QAD 2026-11-07 case 45.1, grave): «… بس مو العادات الذرية لأني قريته» → «الزائر طلب «العادات الذرية» لـاني» (آني إرنو):
+# «لأني / لأنه / لأن …» (because) and the other everyday words that begin with «ل» are never «لـ + an author»
+_LAM_WORDS30 = {normalize(w) for w in (
+    "لأني لاني لأنه لانه لأنها لانها لأنك لانك لأنكم لانكم لأنهم لانهم لأنو لانو لأن لان لأجل لاجل لأجلي لاجلي لأجلها لكي لكن لكني "
+    "لما لماذا لمين لمن للأسف للاسف لازم لسه لسا لين لو لولا ليش لذلك لهذا لهذي لها له لي لنا لكم لهم ليه لاحقا لحد لغاية لغايه "
+    "لوحدي لوحده لوحدها لنفسي لنفسه لنفسها لبنتي لولدي لابني لأمي لامي لأبوي لابوي لأختي لاختي لأخوي لاخوي لزوجتي لزوجي لصديقي لصديقتي "
+    "لطفل لطفلة لطفله لأطفال لاطفال للأطفال للاطفال لكبار للكبار لصغار للصغار لعمر لسن").split()}
+
+
+def lam_is_word(token):
+    """«لأني»، «لأنه»، «لبنتي» -> True: a word of its own, not «لـ» + a name (QADFIX30 #4)."""
+    return normalize(token or "") in _LAM_WORDS30
+
+
+# QADFIX30 #3 / #4 (QAD 2026-11-07 cases 25.2 and 45.1, grave): «شي ثاني بس مو لمحفوظ» kept محفوظ as the author asked for; «بس مو
+# العادات الذرية لأني قريته» offered the book read as the book asked for. What comes right after «مو / غير / بدون / إلا …» is refused
+# («إلا» is left out: «ما أبي إلا نجيب محفوظ» means only him)
+_NEG_LEAD30 = (r"(?:^| )(?:(?:بس|لكن|و|بشرط) )?(?:مو|مب|مش|موب|ماهو|ماهي|غير|بدون|عدا|ماعدا|ما عدا|ما ابي|ما ابغي|ما ابغا|ما اريد"
+               r"|ومو|ومب|ومش|وغير|وبدون|not|except|but not|other than|anything but|no more)\s+")
+_NEG_NAME30 = re.compile(_NEG_LEAD30 + r"(?:(?:من )?(?:كتب|تاليف|روايات|اعمال) |حق |by )?(\S+(?: \S+){0,2})")
+
+
+def negated_spans(text):
+    """«شي ثاني بس مو لمحفوظ» -> ["لمحفوظ"]; «غير نجيب محفوظ لو سمحت» -> ["نجيب محفوظ لو"] (up to three words each, normalized;
+    the caller decides which words name an author)."""
+    t = " ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split())
+    return [m.group(1) for m in _NEG_NAME30.finditer(t)]
+
+
+def title_refused(title, text):
+    """«ابي كتاب عن بناء العادات بس مو العادات الذرية لأني قريته» -> True for «العادات الذرية»: the visitor rules this title out
+    (QADFIX30 #4). «مو / مب / مش» only after «بس / لكن / و» or with «لأني قريته» after it («مو الخيميائي حلوة؟» asks)."""
+    t = " ".join(normalize(re.sub(r"[؟?!.،,«»\"]", " ", title or "")).split())
+    m = " " + " ".join(normalize(re.sub(r"[؟?!.،,«»\"]", " ", text or "")).split()) + " "
+    if not t or (" " + t + " ") not in m:
+        return False
+    before, after = m.split(" " + t + " ", 1)
+    before = " " + before.strip() + " "
+    _read = re.match(r"\s*(?:لاني|لان|لانه|عشان|كوني|because|since|as)?\s*(?:انا )?(?:قد )?(?:قريته|قريتها|قراته|قراتها|قريت|خلصته|خلصتها"
+                     r"|عندي|موجود عندي|i (?:ve |have )?(?:already )?read|already read|read it)", after)
+    if re.search(r"(?:^| )(?:(?:بس|لكن|و) (?:مو|مب|مش|موب)|ومو|ومب|ومش)\s+(?:(?:ك|ال)?كتاب |(?:ال)?روايه )?$", before):
+        return True
+    if re.search(r"(?:^| )(?:غير|وغير|بدون|وبدون|عدا|ماعدا|ما عدا|ما ابي|ما ابغي|ما ابغا|ما اريد|except|other than|not|besides)\s+"
+                 r"(?:(?:ك|ال)?كتاب |(?:ال)?روايه )?$", before):
+        return True
+    return bool(_read) and bool(re.search(r"(?:^| )(?:مو|مب|مش|موب)\s+$", before))
+
+
+# QADFIX30 #5 (QAD 2026-11-07 case 17.3, grave): «ابي شي من رف اليافعين» names the young readers' shelf (genre «يافعين»)
+_YA_SHELF30 = re.compile(r"(?:رف|قسم|ركن|جناح|كتب|روايات|ادب|اداب)\s+(?:ال)?(?:يافعين|يافعات|ناشئه|ناشئين|مراهقين|شباب)(?: |$)|(?:^| )لليافعين(?: |$)"
+                         r"|young adults?(?: shelf| section| books| novels| fiction)?|(?:^| )ya (?:shelf|section|books|novels|fiction)|teen (?:shelf|section|books|fiction)")
+
+
+def ya_shelf_said(text):
+    """«ابي شي من رف اليافعين»، «روايات لليافعين»، "from the young adult shelf" -> True (QADFIX30 #5)."""
+    t = " ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split()).lower()
+    return bool(_YA_SHELF30.search(t))
 
 
 def shortest_asked(text):
@@ -418,7 +495,9 @@ _STAGE_MID = {"متوسط": 13, "متوسطه": 13, "ثانوي": 16, "ثانو�
 # «بنتي ١٥»، «ولدي ٩ وبنتي ٤»: an age right after the child, with no «عمرها» / «سنة» (QAD 2026-10-12, case 38:
 # «كم عمر بنتك؟» was asked again)
 _KID_AGE = re.compile(r"(?:^| )[وف]?ل?(?:بنتي|ابنتي|ولدي|ابني|طفلي|طفلتي|حفيدي|حفيدتي|اخوي|اختي|بنت اختي|بنت اخوي|ولد اختي"
-                      r"|ولد اخوي|my daughter|my son|my kid|my child)\s*[،,:]?\s*(\d{1,2})(?!\d)"
+                      # QADFIX31 (replay of QAD 2026-11-08 case 44, fresh "my daughter is 9 and loves animals" → "something with pictures
+                      # maybe" gave toddlers' word books): "my daughter is 9" is her age too
+                      r"|ولد اخوي|my daughter|my son|my kid|my child)(?: (?:is|who is|turned|turns|just turned))?\s*[،,:]?\s*(\d{1,2})(?!\d)"
                       r"(?! ?(?:كتاب|كتب|صفحه|ريال|روايه|روايات|قصه|قصص|جزء|book|books|pages?))")
 
 
@@ -438,7 +517,7 @@ _NUM_WORDS = {
 _NUM_ALT = "|".join(sorted((re.escape(k) for k in _NUM_WORDS), key=len, reverse=True))
 _NUM_AFTER = re.compile(r"((?:^| )(?:عمره|عمرها|عمري|عمر|عمرهم|عمرهما|age|aged)\s+)(" + _NUM_ALT + r")(?= |$)")
 _NUM_BEFORE = re.compile(r"((?:^| )[وب]?)(" + _NUM_ALT + r")(?= (?:سنه|سنين|سنوات|اعوام|عام|years?)(?: |$))")
-_KID_NUM = re.compile(r"((?:^| )[وف]?ل?(?:بنتي|ابنتي|ولدي|ابني|طفلي|طفلتي|حفيدي|حفيدتي|my daughter|my son)\s+)(" + _NUM_ALT
+_KID_NUM = re.compile(r"((?:^| )[وف]?ل?(?:بنتي|ابنتي|ولدي|ابني|طفلي|طفلتي|حفيدي|حفيدتي|my daughter|my son)(?: is| who is)?\s+)(" + _NUM_ALT   # QADFIX31: "is nine"
                       + r")(?= |$)")
 
 
@@ -735,6 +814,20 @@ _PAGES_BARE = re.compile(r"(?:^| )(\d{2,4})\s*(?:صفحه|صفحات|صفحة|pa
 _PAGES_BETWEEN = re.compile(r"(?:^| )(?:بين|من|between|from)\s+(\d{2,4})\s*(?:صفحه |صفحات |pages )?(?:و|الي|ل|-|–|to|and)\s*(\d{2,4})\s*"
                             r"(?:صفحه|صفحات|صفحة|ص|pages?)(?:\s|$)|(?:^| )(\d{2,4})\s*[-–]\s*(\d{2,4})\s*(?:صفحه|صفحات|صفحة|ص|pages?)(?:\s|$)")
 _PAGES_ANY = re.compile(r"(?:اي|مو مهم|ما يهم) (?:عدد )?(?:ال)?صفحات|الطول (?:مو مهم|ما يهم)|any length")
+# QADFIX30 #2 (QAD 2026-11-07 case 2.1, grave): «كتاب تاريخ ما يقل عن ١٠٠ صفحة ولا يزيد عن ٢٠٠» → «ما ظهر لي كتاب أقدر أتأكد إنه بين
+# ١٠٠ و٢٠٠ صفحة» while 50 fit: «ما / لا يقل عن N» is the fewest pages, «ولا يزيد عن M» the most, and once the message speaks of pages a
+# bound may leave out the word «صفحة» («… ولا يزيد عن ٢٠٠»); a price or a year is never one
+_NOT_UNIT30 = r"(?!\s*(?:ريال|ريالات|ر س|sar|sr|riyals?|سنه|سنة|سنين|سنوات|عام|ساعه|ساعات|دقيقه|دقايق|years?|hours?|minutes?))"
+_UNIT30 = r"\s*(?:صفحه|صفحات|صفحة|ص|pages?)?" + _NOT_UNIT30 + r"(?:\s|$)"
+_LO30 = (r"(?<!\S)و?(?:ما|لا|مو|مب) (?:يقل|تقل|ينقص|تنقص|يكون اقل|تكون اقل)(?: (?:عدد )?(?:صفحاته|صفحاتها|صفحاتهم))? (?:عن|من)"
+         r"|(?<!\S)(?:not|no) (?:less|fewer) than|(?<!\S)(?:اقله|اقلها|كحد ادني|حد ادني)")
+_HI30 = (r"(?<!\S)و?(?:ما|لا|مو|مب) (?:يزيد|تزيد|يتعدي|تتعدي|يتجاوز|تتجاوز|يكون اكثر|تكون اكثر|يطلع اكثر|تطلع اكثر)(?: (?:عدد )?(?:صفحاته|صفحاتها|صفحاتهم))? (?:عن|من)?"
+         r"|(?<!\S)(?:no|not) more than|(?<!\S)at most|(?<!\S)up to|(?<!\S)(?:اكثره|اكثرها|كحد اقصي|حد اقصي)")
+_PAGES_LO30 = re.compile(r"(?:" + _LO30 + r")\s*(\d{2,4})" + _UNIT30)
+_PAGES_HI30 = re.compile(r"(?:" + _HI30 + r")\s*(\d{2,4})" + _UNIT30)
+_PAGES_WORD30 = re.compile(r"صفح|(?:^| )ص(?: |$)|pages?(?: |$)")
+_PAGES_FROM30 = re.compile(r"(?:^| )(?:من|بين|between|from)\s+(\d{2,4})\s*(?:صفحه |صفحات |pages )?(?:الي|لين|لغايه|لحد|حتي|ل|و|to|and|till|until)\s*"
+                           r"(\d{2,4})" + _UNIT30)
 
 
 def page_limit(user_messages):
@@ -751,6 +844,21 @@ def page_limit(user_messages):
             if a < b:
                 lo, hi = a, b
                 continue
+        if _PAGES_WORD30.search(t):
+            # QADFIX30 #2 (QAD 2026-11-07 case 2.1): «ما يقل عن ١٠٠ صفحة ولا يزيد عن ٢٠٠»، «من ١٠٠ لين ٢٠٠ صفحة»
+            m_fr = _PAGES_FROM30.search(t)
+            if m_fr:
+                a, b = sorted(int(x) for x in m_fr.groups())
+                if a < b and not (a >= 1000 and b <= 2100):   # «من 1950 إلى 1960» is years
+                    lo, hi = a, b
+                    continue
+            m_lo30, m_hi30 = _PAGES_LO30.search(t), _PAGES_HI30.search(t)
+            if m_lo30:
+                lo = int(m_lo30.group(1))
+            if m_hi30:
+                hi = int(m_hi30.group(1))
+            for m30 in sorted((m for m in (m_lo30, m_hi30) if m), key=lambda m: -m.start()):
+                t = t[:m30.start()] + " " + t[m30.end():]   # «لا يكون أقل من ١٠٠» is not «أقل من ١٠٠» below
         m_hi, m_lo = _PAGES_UNDER.search(t), _PAGES_OVER.search(t)
         if m_hi:
             hi = int(m_hi.group(1))
@@ -779,7 +887,7 @@ def _pages_al(text):
 
 # QADFIX27 (QAD 2026-11-05 case 15.3, grave): «وش أطول رواية عندكم؟» — the longest, ordered from page_count like «الأقصر»;
 # «أطول منها / أطول شوي» is longer than the books shown
-_LONGEST = re.compile(r"(?:^| )(?:ال)?اطول(?: |$)|(?:^| )longest(?: |$)")
+_LONGEST = re.compile(r"(?:^| )[وفب]?(?:ال)?اطول(?: |$)|(?:^| )longest(?: |$)")   # QADFIX31 #1: «وأطول»
 _LONGER = re.compile(r"(?:^| )اطول (?:شوي|شويه|منها|منه|منهم|من كذا|من كذي|من هذا|من هذي|من هذول|من اللي|بشوي|بعد)(?: |$)"
                      r"|(?:^| )longer(?: |$)")
 
