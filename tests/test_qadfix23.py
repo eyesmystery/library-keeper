@@ -83,7 +83,8 @@ ok("_like_ids" in src and "not any(k and (k in chat_rules.title_key" in src, "50
 ok("لا هو يحب الكوميكس مو القصص" in src, "44.2: «هو يحب…» about a child of known age asks no «للطفل ولا للكبار؟»")
 ok("and b[\"book_id\"] not in topic_ids else 0" in src and "_topic_en" in src, "13.1: an English copy whose summary names the subject stays")
 ok("[x for x in scored if _is_en(x[2]) and _on(x[2])]" in src
-   and src.index("_on = (lambda b") < src.index('candidates = [] if similar_author else [(b, reason_text(r, language), "direct")'),
+   # (QADFIX35: «_on = ((lambda b: … or b["book_id"] in _parkeep35)», a parent reader's parenting books count as on the subject)
+   and src.index("_on = ((lambda b") < src.index('candidates = [] if similar_author else [(b, reason_text(r, language), "direct")'),
    "13.1 (replay): an English copy on the subject comes before Arabic copies on no subject, before the six are cut")
 
 # 25.3: a book with no age range is offered to a child under 8 neither for its cartoon nor its young edition

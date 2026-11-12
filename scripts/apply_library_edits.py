@@ -145,6 +145,22 @@ def reviews_to_mirror(items, conn):
     return out
 
 
+def confirm_like_library(conn, book_id, by, at, now, name, n):
+    """SYNCSTATUS (Ibrahim 2026-11-11 «اذا وصلنا ملف من المكتبة لازم تاخذ بعين الاعتبار وتعدل ملفاتنا»): at the library a staff
+    «تمت مراجعة الكتاب» on a book that needs identity confirmation marks it matched (app.py admin_book_reviewed); the mirror
+    does the same here, with the same note, so «تحتاج تأكيد هوية» counts the same on both sides. -> True when it changed."""
+    row = conn.execute("SELECT research_status, research_note_ar FROM books WHERE book_id = ?", (book_id,)).fetchone()
+    if not row or row[0] != "needs_confirmation":
+        return False
+    note = f"أكّد {by} هوية الكتاب عند مراجعته في المكتبة ({str(at)[:10]})"
+    conn.execute("UPDATE books SET research_status = 'matched', research_note_ar = ? WHERE book_id = ?", (note, book_id))
+    conn.execute("INSERT INTO audit_log (at, username, action, target, details) VALUES (?, ?, ?, ?, ?)",
+                 (now, "MGR (Claude)", "library.identity_confirmed", str(book_id),
+                  json.dumps({"research_status": ["needs_confirmation", "matched"], "research_note_ar": [row[1], note],
+                              "by_at_library": by, "at_library": at, "source": f"inbox {name} §5.{n}"}, ensure_ascii=False)))
+    return True
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("inbox_md")
@@ -196,12 +212,15 @@ def main():
                              (now, "MGR (Claude)", "library.edit_applied", str(bid),
                               json.dumps({field: [here, p["now"]], "source": f"inbox {name} §5." + ",".join(str(r["n"]) for r in p["refs"]),
                                           "by_at_library": last["by"], "at_library": last["at"]}, ensure_ascii=False)))
+            confirmed = 0
             for bid, act, by, at, n in reviews:
                 conn.execute("INSERT INTO audit_log (at, username, action, target, details) VALUES (?, ?, ?, ?, ?)",
                              (now, "MGR (Claude)", act, str(bid),
                               json.dumps({"by": f"{by} (المكتبة)", "library_ref": f"{by} {at}",
                                           "source": f"inbox {name} §5.{n}"}, ensure_ascii=False)))
-        print(f"applied {len(apply_)} field changes · {len(reviews)} reviews mirrored")
+                if act == "book.reviewed":
+                    confirmed += confirm_like_library(conn, bid, by, at, now, name, n)
+        print(f"applied {len(apply_)} field changes · {len(reviews)} reviews mirrored · {confirmed} identities confirmed like at the library")
         if any(f in ("author", "translator") for _, f, _, _ in apply_):
             import authors
             authors.sync()

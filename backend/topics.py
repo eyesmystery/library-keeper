@@ -119,6 +119,17 @@ _SAME = [("تاريخ", "اصل", "نشاه", "نشوء", "تطور"),
           "افتراضي", "الافتراضي", "افتراضيه", "الافتراضيه", "gaming", "gamer", "gamers", "videogame", "videogames", "minecraft", "fortnite", "virtual"),
          # QADFIX7 #6 (QAD 2026-10-19, case 11.1): «أحب الرعب بس مو مرعب مرة» at 15 — «كتاب المقبرة» speaks of ghosts, not «رعب»
          ("رعب", "الرعب", "مرعب", "مرعبه", "مخيف", "مخيفه", "اشباح", "الاشباح", "شبح", "مسكون", "مسكونه", "horror", "ghost", "ghosts", "scary", "haunted"),
+         # QADFIX33 #1 (QAD 2026-11-10 case 5.1, grave): «يموت على قصص التنانين والسحر» → «ما لقيت هنا كتابًا واضحًا إنه عن التنانين»
+         # while «التنين الأبيض وشخصيات منسية أخرى» (732) is in stock and «جيم الزر» (3221) / «جم الزر» (3223) speak of «مدينة
+         # التنانين» / «تنين»: the broken plural «تنانين» is not a stem of «تنين» (stems() gives «تنان»), so each finds the other here
+         ("تنين", "التنين", "تنانين", "التنانين", "بالتنانين", "والتنانين", "تنينه", "dragon", "dragons"),
+         # QADFIX33 #2 (QAD 2026-11-10 case 25.1, grave): «تحب الجرايم الغامضة وتحليل الأدلة» — a crime or a mystery is written «جريمة /
+         # جرائم / جرايم / غموض / محقق / بوليسي / من القاتل» in our summaries and "Mystery / Murder" in the keywords of the English
+         # young-adult novels. Before the riddle group below, so that «لغز» keeps that group (a crime word leads to «لغز», not back).
+         # («تحقيق» is left out: «تحقيق الأهداف» is achieving, not an inquiry)
+         ("جريمه", "الجريمه", "جرائم", "الجرائم", "جرايم", "الجرايم", "جنائي", "جنائيه", "بوليسي", "البوليسي", "بوليسيه",
+          "البوليسيه", "غموض", "الغموض", "محقق", "المحقق", "القاتل", "لغز", "اللغز",
+          "mystery", "mysteries", "murder", "detective", "whodunit", "crime"),
          # QADFIX7 #7 (case 12): «تحب الألغاز» — the children's books are «لغز كرة القدم»، «لغز المدرسة»
          ("الغاز", "لغز", "اللغز", "لغزا", "الالغاز", "احجيه", "احاجي", "puzzle", "puzzles", "riddle", "riddles"),
          # QADFIX9 (QAD 2026-10-20, case 34.1): «الإدمان على الجوال والسوشال ميديا» — the books say «الإنترنت»، «وسائل
@@ -173,15 +184,44 @@ for _group in _SAME:
         _SAME_AS[_k] = {normalize(x) for x in _group if _k in _ONE_WAY or normalize(x) not in _ONE_WAY or normalize(x) == _k}
 
 
+# QADFIX34 #2 (QAD 2026-11-11 case 29.1, grave): «رواية تدور في زمن العثمانيين بدون حروب» → «ما عندي حاليًا رواية…» while «الدرويش
+# والموت» («البوسنة في العهد العثماني») and «الفتى المتيم والمعلم» are in stock: «العصر العثماني» needed the word «العصر» in the book
+# too, and only «عذراء قريش» («مقتل عثمان») had both. The word naming a span of time («عصر / عهد / زمن / أيام / حقبة / فترة») before
+# the name of that time is the frame, not the subject: with another word in the subject it is not required
+_TIME_FRAME = {normalize(w) for w in ("عصر العصر عهد العهد زمن الزمن زمان الزمان ايام الايام حقبه الحقبه فتره الفتره era period times "
+                                      "age days reign").split()}
+# QADFIX35 #2 (QAD 2026-11-12 case 12.2, grave): «رواية لي عن الريف والفلاحين» → the subject «حياة الفلاحين» needed «حياة» in the book too
+# («الأرض» says «الفلاحين» and «الريف», not «حياة»): «حياة / عيشة / معيشة» before a plural of people («الفلاحين / الصيادين / المهاجرين») is
+# the frame, not the subject
+_LIFE_FRAME35 = {normalize(w) for w in "حياه الحياه عيشه معيشه life lives".split()}
+
+
+# QADFIX35 (QAD 2026-11-12 case 47.1, medium): «أبا كتاب أتعلم منه كتابة خط الرقعة بروحي» → chess and Go novels («تعلّم لعبة») while
+# «رؤية فنية معاصرة للخط العربي» is in stock: a style of Arabic calligraphy («خط الرقعة / النسخ / الثلث / الديواني / الكوفي») is looked
+# for as Arabic calligraphy itself («الخط العربي»)
+_CALLI35 = re.compile(r"^(?:ال)?خط (?:ال)?(?:رقعه|نسخ|ثلث|ديواني|كوفي|فارسي|مغربي|تعليق)$")
+
+
 def content_words(phrase):
     """Every word of a subject that carries meaning, each as its accepted forms."""
+    if _CALLI35.search(" ".join(normalize(phrase or "").split())):
+        phrase = "الخط العربي"   # QADFIX35 (case 47.1)
     out = []
+    _all34 = [w for w in normalize(phrase).split()
+              if len(w) >= 3 and w not in _STOP and strip_al(w) not in _STOP and not w.isdigit()]
+    # (only before the adjective of a dynasty or an age — «العثماني / العثمانيين / العباسي / الفيكتوري»; «عصر النهضة» keeps both words)
+    _framed34 = len(_all34) >= 2 and any(w not in _TIME_FRAME and re.search(r"(?:ي|يه|يين|يون|ian|an)$", w) for w in _all34)
     for w in normalize(phrase).split():
         if _is_year(w):
             out.append({w})
             continue
         if len(w) < 3 or w in _STOP or strip_al(w) in _STOP or w.isdigit():
             continue
+        if _framed34 and w in _TIME_FRAME:
+            continue
+        if (w in _LIFE_FRAME35 and len(_all34) == 2 and _all34[0] == w
+                and re.search(r"(?:ين|ون|ers|men)$", _all34[1]) and _all34[1] not in _LIFE_FRAME35):
+            continue   # QADFIX35 #2: «حياة الفلاحين» = «الفلاحين»
         forms = stems(w)
         for f in list(forms):
             for alt in _SAME_AS.get(f, ()):

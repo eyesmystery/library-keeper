@@ -32,7 +32,7 @@ ok("def women_award_counts(all_books, prefs, genres=None):" in src and 'q7["wome
    "8 / 1: the prize counts among the books our author records give to a woman")
 ok("if _n_people > 1 and not _women27:" in src and "and _n_people > 1 and not _women27:" in src,
    "8.3: the general counts («٢٦ كتابًا فاز مؤلفه») are not given for a women wish")
-ok("elif women_wish(user_messages[-1]) and not author_only and not _wa27:" in src,
+ok("elif women_wish(user_messages[-1], _ttl35) and not author_only and not _wa27:" in src,   # (QADFIX35: the titles named are passed)
    "1.2: no «جنس المؤلف غير مسجل عندنا» when the women's prize counts are given")
 ok("فأجب بصراحة بنعم أو لا منها" in src and '"unknown_won"' in src, "8.3 / 1.2: «is it the only one?» answered yes/no; unrecorded gender said as such")
 

@@ -37,7 +37,7 @@ ok(bool(A._SAME_YEAR.search(normalize("عطني غيرها من نفس السن�
 # ج6 the copy language from facts only; women authors kept
 ok("copy_language" in open(second_look.__file__, encoding="utf-8").read(), "11.3 second look: the language of a copy from copy_language only")
 ok(A.note_gender("روائية سعودية من أعمالها «بنت عطشة»") == "f", "11.3 «روائية سعودية» → a woman")
-ok('any(women_wish(t) for t in user_messages[-3:])' in _src and "_named" in _src,
+ok('any(women_wish(t, _ttl35) for t in user_messages[-3:])' in _src and "_named" in _src,   # (QADFIX35: the titles named are passed)
    "11.2/11.3 women authors kept through «أخف وأقصر من …» and «لا، قصدي لروائية …»")
 # medium
 ok(A._routine_topics(["السهر"]) == ["النوم"], "1.1 «أبطل السهر» → «النوم»")

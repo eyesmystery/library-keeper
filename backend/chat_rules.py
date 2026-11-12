@@ -194,7 +194,10 @@ def latin_titles(message, all_books, limit=2):
 def series_books(mention, all_books):
     mw = {w for w in (strip_al(x) for x in title_key(mention).split()) if w not in _T_STOP}
     if len(mw) < 2:
-        return []
+        # QADFIX32 #1 (QAD 2026-11-09 case 46.1, grave): «عندكم كل أجزاء ميلينيوم؟» → «سلسلة ميلينيوم غير متوفرة» while its four parts
+        # are in stock (series_name «ميلينيوم», 2829 / 2823 / 4231 / 4209): a one-word name is the series when it is that series' WHOLE
+        # name (5 letters or more, two parts or more in our records) — never one word of a longer series name
+        return _series_one_word32(mw, all_books)
     out = []
     for b in all_books.values():
         s = b.get("series_name")
@@ -203,6 +206,28 @@ def series_books(mention, all_books):
         sw = {strip_al(w) for w in title_key(s).split()}
         if mw == sw or mw <= sw:
             out.append(b)
+    if not out and mw & _SERIES_WORDS32:
+        # QADFIX32 #1: «سلسلة ميلينيوم»، «كل أجزاء ميلينيوم»، "the Millennium series" — the word «series» is not part of its name
+        rest = mw - _SERIES_WORDS32
+        return series_books(" ".join(sorted(rest)), all_books) if rest else []
+    out.sort(key=lambda b: (b.get("series_position") or 99, b["book_id"]))
+    return out
+
+
+_SERIES_WORDS32 = {"سلسله", "سلسلة", "سلاسل", "اجزاء", "اجزا", "جميع", "كل", "كامله", "كامل", "series", "saga", "books", "all"}
+
+
+def _series_one_word32(mw, all_books):
+    """QADFIX32 #1: {"ميلينيوم"} -> the parts of the series named exactly «ميلينيوم», in order; [] otherwise."""
+    if len(mw) != 1:
+        return []
+    w = next(iter(mw))
+    if len(w) < 5:
+        return []
+    out = [b for b in all_books.values() if b.get("series_name")
+           and [strip_al(x) for x in title_key(b["series_name"]).split()] == [w]]
+    if len(out) < 2:
+        return []
     out.sort(key=lambda b: (b.get("series_position") or 99, b["book_id"]))
     return out
 
@@ -320,6 +345,14 @@ def is_price_phrase(phrase):
 
 _SHORTEST = re.compile(r"(?:^| )[وفب]?(?:ال)?اقصر(?: |$)|(?:^| )(?:shortest|shorter)(?: |$)")   # QADFIX31 #1: «وأقصر»
 _SUPERLATIVE = re.compile(r"الاقصر|اقصر (?:كتاب|روايه|قصه|شي|واحد|وحده|عمل|ديوان)|shortest")
+# QADFIX32 #2 (QAD 2026-11-09 case 1.1, the other side of «أضخم»): «أنحف كتاب»، «أصغر رواية حجمًا»، «أقل عدد صفحات»، "thinnest" — the
+# shortest («أصغر» alone is not: «أصغر قارئ»، «للأصغر سنًا»; «أقل من ١٠٠ صفحة» is a page limit)
+_SHORTEST32 = re.compile(r"(?:^| )[وفب]?(?:ال)?(?:انحف|انحفها|انحفهم)(?: |$)"
+                         r"|(?:^| )[وفب]?(?:ال)?(?:انحف|اصغر) (?:كتاب|روايه|مجلد|ديوان|عمل|قصه|واحد|وحده|شي)(?: |$)(?!.*(?<!\S)(?:سن|سنا|عمر|عمرا|عمره|عمرها)(?!\S))"
+                         r"|(?:^| )[وفب]?(?:ال)?(?:اصغر|اصغرها|اصغرهم) (?:\S+ )?(?:حجما|حجم|من حيث الحجم|من ناحيه الحجم)(?: |$)"
+                         r"|(?:^| )[وفب]?(?:ال)?(?:اقل|اقلها|اقلهم) (?:\S+ )?(?:\S+ )?(?:عدد (?:ال)?صفحات|صفحات|بالصفحات"
+                         r"|من (?:حيث|ناحيه) (?:عدد )?(?:ال)?صفحات)(?: |$)"
+                         r"|(?:^| )(?:thinnest|smallest (?:book|novel|one|volume)|fewest pages|least pages)(?: |$)")
 
 
 # QADFIX29 #2 (QAD 2026-11-06 case 4.2, grave): «وش أقصر رواية عندكم أصلاً؟» after «بين ٨٠ و١٥٠ صفحة» → «حارس ذكريات» 144 pages,
@@ -331,11 +364,151 @@ _ABSOLUTE29 = re.compile(r"(?:^| )(?:اصلا|اصلن|علي الاطلاق|ب�
                          r"|not (?:just )?(?:from )?(?:the ones|these|those) (?:you )?(?:shown|showed))(?: |$)")
 
 
+# QADFIX33 #3 (QAD 2026-11-10 cases 33.1–33.2, grave): «الغونكور، وش أحدث رواية فائزة فيها عندكم؟» → «حديثة (من ٢٠٢١)» and «عندنا كتابان»
+# while seven winners are in stock: «أحدث / الأحدث / آخر فائزة / latest / newest» is an order (the newest first), not the wish «a recent
+# prize» («حديثة / مؤخرًا / جديدة / السنوات الأخيرة / recent / recently»), and «كلها / كل الفائزة / سمّها كلها / all of them» asks for the
+# whole list
+_NEWEST33 = re.compile(r"(?:^| )[وفب]?(?:ال)?احدث(?:ها|هم|هن)?(?: |$)"
+                       r"|(?:^| )[وفب]?(?:اخر|الاخير|الاخيره) (?:روايه|كتاب|واحده|واحد|فائز|فائزه|فايز|فايزه|الفائزين|الفائزات|فوز|من فاز|وحده)(?: |$)"
+                       r"|latest|newest|most recent")
+_RECENT_FILTER33 = re.compile(r"(?:^| )[وفب]?(?:ال)?(?:حديث|حديثه|حديثا|حديثاً|مؤخرا|مؤخراً|جديد|جديده|الجديد|الجديده)(?: |$)"
+                              r"|السنوات الاخيره|السنين الاخيره|اخر (?:\S+ )?(?:سنوات|سنين|سنتين)|(?:^| )recent(?:ly)?(?: |$)|in recent years|last few years")
+_LIST_ALL33 = re.compile(r"(?:^| )[وب]?(?:كلها|كلهم|كلهن|جميعها|جميعهم|بالكامل|كامله)(?: |$)"
+                         r"|(?:^| )كل (?:ال)?(?:فائز|فايز|فائزه|فايزه|الفائزه|الفايزه|الفائزين|الفايزين|اللي فاز|اللي فازت|الكتب|الروايات)"
+                         r"|all of them|them all|the whole list|full list|complete list|every one of them|all the (?:winners|books|novels)"
+                         # QADFIX34 #3 (case 25.2 «سمّ لي الباقي» → two of four and «أذكر لك المزيد؟»): the rest is the whole list too
+                         r"|(?:^| )[وب]?(?:الباقي|الباقيه|البقيه|باقيها|باقيهم|الباقين)(?: |$)|the rest(?: of them)?|the others")
+
+
+def newest_asked33(text):
+    """«وش أحدث رواية فائزة؟»، «آخر فائزة»، "the latest winner" -> True (an order, the newest first)."""
+    return bool(_NEWEST33.search(" ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split()).lower()))
+
+
+def recent_filter_said33(text):
+    """«فازت حديثًا»، «جوائز جديدة»، «السنوات الأخيرة»، "recently" -> True (a span of recent years); «أحدث» alone -> False."""
+    return bool(_RECENT_FILTER33.search(" ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split()).lower()))
+
+
+def list_all_asked33(text):
+    """«لا أبيها كلها، كل الفائزة بالغونكور عندكم»، «سمّها كلها»، "list them all" -> True."""
+    return bool(_LIST_ALL33.search(" ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split()).lower()))
+
+
+# QADFIX35 #1 (QAD 2026-11-12 cases 28.1–28.3, grave; the mirror of QADFIX33 #3): «عندكم كتب فازت بجائزة غونكور؟ ابي أقدمها» → no cards, then
+# «من أقدمها العاشق (١٩٨٤)» and «العاشق طبعتنا ٢٠١٧» while «بؤساء بلفيل» won in 1975: «أقدم / الأقدم / أقدمها / أول فائزة / oldest / earliest»
+# on a prize is an order by the year of the prize, oldest first, over every winner in stock
+_OLDEST35 = re.compile(r"(?:^| )[وفب]?(?:ال)?اقدم(?:ها|هم|هن)?(?: |$)"
+                       r"|(?:^| )[وفب]?(?:اول|الاول|الاولي) (?:روايه|كتاب|واحده|واحد|فائز|فائزه|فايز|فايزه|الفائزين|الفائزات|فوز|من فاز|وحده)(?: |$)"
+                       r"|oldest|earliest|first (?:winner|one to win|book to win|novel to win)")
+_PRIZE_WORD35 = re.compile(r"فاز|فايز|فوز|جائز|جايز|جوايز|جوائز|won|winner|winning|prize|award")
+_OTHER_ORDER35 = re.compile(r"(?:^| )[وفب]?(?:ال)?(?:احدث|ارخص|اغلي|اقصر|اطول|انحف|اسمك)(?:ها|هم|هن)?(?: |$)|latest|newest|cheapest|shortest|longest|most expensive|dearest")
+
+
+def oldest_asked35(text):
+    """«ابي أقدمها»، «وش أقدم رواية فائزة؟»، «أول فائزة»، "the oldest winner" -> True (an order, the oldest first)."""
+    return bool(_OLDEST35.search(" ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split()).lower()))
+
+
+def oldest_prize_kept35(user_messages):
+    """«ابي أقدمها» then «يعني ما عندكم ولا وحدة فازت بالغونكور؟»: the oldest asked in the message before still holds when the latest one
+    speaks of the prize again and asks no other order (QADFIX35 #1, case 28.2)."""
+    if len(user_messages) < 2 or not oldest_asked35(user_messages[-2]):
+        return False
+    t = " ".join(normalize(re.sub(r"[؟?!.،,]", " ", user_messages[-1] or "")).split()).lower()
+    return bool(_PRIZE_WORD35.search(t)) and not _OTHER_ORDER35.search(t)
+
+
+# QADFIX35 #2 (QAD 2026-11-12 case 12.2, grave; the reverse of 11-11 17.2): «حفيدي بالرابع ابتدائي…» then «طيب وأنا جده، ابي رواية لي عن الريف
+# والفلاحين» kept the reader at 9 (a children's book and «ما لقيت»): «وأنا + his kin to the child (جده / أبوه / أمها / خالته …)» and a wish
+# «… لي / لنفسي» is the visitor himself as the reader
+_KIN35 = ("جد", "جده", "جدته", "جدتها", "جدها", "جدهم", "جدتهم", "ابوه", "ابوها", "ابوهم", "امه", "امها", "امهم", "خاله", "خالته", "خالها",
+          "خالتها", "عمه", "عمته", "عمها", "عمتها", "اخوه", "اخته", "اخوها", "اختها", "ابوي", "والده", "والدته", "والدها", "والدتها")
+_KIN_START35 = re.compile(r"^(?:طيب |زين |اوكي |ok |okay |بس |اما )?و?انا (?:" + "|".join(_KIN35) + r")(?: |$)")
+
+
+def kin_self_said35(text):
+    """«طيب وأنا جده، ابي رواية لي عن الريف»، «وأنا أمها، ودي بكتاب لنفسي» -> True; «وأنا جده، ابي له رواية»، «وأنا جده، رشّحي لي شي له» -> False."""
+    words = normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split()
+    t = " ".join(words)
+    if not _KIN_START35.search(t):
+        return False
+    if re.search(r"(?:^| )(?:له|لها|لهم|لهن|لحفيدي|لحفيدتي|لولدي|لبنتي|لاحفادي|يناسبه|يناسبها|تناسبه|تناسبها|عمره|عمرها)(?: |$)", t):
+        return False
+    if re.search(r"(?:^| )(?:لنفسي|لي انا|انا اقراه|انا اقراها|for myself|for me)(?: |$)", t):
+        return True
+    return any(w == "لي" and k >= 1 and (words[k - 1] not in _TELL or k + 1 < len(words) and words[k + 1] not in ("شي", "شيء"))
+               for k, w in enumerate(words))
+
+
+# QADFIX33 (QAD 2026-11-10 case 31.1, minor): «ناشر الكرمة، وش أحدث ثلاث كتب منه عندكم؟» → two books: the number of books asked
+_NUM_WORDS33 = {"كتابين": 2, "روايتين": 2, "قصتين": 2, "ديوانين": 2, "اثنين": 2, "ثنتين": 2, "two": 2, "ثلاث": 3, "ثلاثه": 3, "three": 3,
+                "اربع": 4, "اربعه": 4, "four": 4,
+                # QADFIX34 #4 (QAD 2026-11-11 case 8, medium): "List five classic novels" → two, then two more: five is a number of books too
+                # (a complete list of five gets five cards, QADFIX32b)
+                "خمس": 5, "خمسه": 5, "five": 5}
+_COUNT_NOUN33 = r"(?:كتب|كتاب|روايات|روايه|قصص|قصه|دواوين|عناوين|اصدارات|books|novels|titles|stories)"
+
+
+def books_count_asked33(text):
+    """«أحدث ثلاث كتب»، «٣ روايات»، «رشّح لي كتابين»، "three books" -> 3 / 3 / 2 / 3; None when no number of books is asked
+    (2 to 4: the cards hold four)."""
+    t = " ".join(num_canon(normalize(re.sub(r"[؟?!.،,]", " ", text or ""))).split()).lower()
+    for w in ("كتابين", "روايتين", "قصتين", "ديوانين"):
+        if re.search(r"(?:^| )[ول]?" + w + r"(?: |$)", t):
+            return 2
+    m = re.search(r"(?:^| )(اثنين|ثنتين|two|ثلاث|ثلاثه|three|اربع|اربعه|four|خمس|خمسه|five|[2-5]) (?:\S+ )?" + _COUNT_NOUN33 + r"(?: |$)", t)
+    if not m:
+        # QADFIX34 #4: "That's only two, I asked for five", "Just name five", «قلت لك خمس», «سمّ لي خمس»
+        m = re.search(r"(?:^| )(?:asked for|name|list|give me|i said|طلبت|قلت لك|قلت|سم لي|سمي لي|سم|سمي|عطني|اعطني)"
+                      r" (?:only |just |me |لي )?(اثنين|ثنتين|two|ثلاث|ثلاثه|three|اربع|اربعه|four|خمس|خمسه|five|[2-5])(?: |$)", t)
+    if not m:
+        return None
+    w = m.group(1)
+    return int(w) if w.isdigit() else _NUM_WORDS33.get(w)
+
+
+# QADFIX33 #4 (QAD 2026-11-10 case 49.2, grave; 11-08 1.3 class): «وش أرخص ديوان شعر عندكم؟» → «وأغلى واحد؟» → «الأغلى ضمن طلبك هو «فن
+# الرباعي» ٦٫٥٧ ريال»: the model read «واحد» as one of the two shown and the order ran among the cheapest poetry. A superlative points at
+# the books just shown only when the message says so: «أيهم / أيها / منهم / فيهم / بينهم / من هذول / which / of these», or the
+# superlative itself carries «ـها / ـهم» («أرخصها»، «أطولهم»)
+_AMONG_SHOWN33 = re.compile(
+    r"(?:^| )(?:اي|ايه|ايهم|ايها|ايهما|ايهن|مين|منو|منهم|منها|منهما|منهن|فيهم|فيها|فيهما|فيهن|بينهم|بينها|بينهما|بينهن|هذول|هذولا|هذولي"
+    r"|هذا|هذي|هذه|ذول|ذولا|الاثنين|الاثنتين|الثنتين|الكتابين|الروايتين|الديوانين|المعروض|المعروضه|المعروضين|اللي عرضتي|اللي عرضتيها"
+    r"|اللي عرضتها|اللي عرضتهم|اللي فوق|which|these|those|them|either|both|among|between)(?: |$)"
+    r"|(?:^| )[وفب]?(?:ال)?(?:ارخص|اغلا|اغلي|اقصر|اطول|اضخم|انحف|اسمك|اقدم|احدث)(?:ها|هم|هما|هن)(?: |$)"
+    r"|of (?:the|these|those) (?:two|three|four|ones)|(?:the )?(?:first|second|third) one")
+
+
+def among_shown_said(text):
+    """«أيهم أغلى؟»، «مين فيهم أقصر؟»، «أرخصها»، "which of these is cheaper" -> True; «وأغلى واحد؟»، «وأغلى ديوان؟» -> False."""
+    t = " ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split()).lower()
+    return bool(_AMONG_SHOWN33.search(t))
+
+
+def stock_order_asked(text):
+    """«وش أرخص ديوان شعر عندكم؟»، «أغلى كتاب فنون»، «وش أطول رواية؟»، «أنحف كتاب» -> the order over the stock asked
+    ("cheapest" / "dearest" / "shortest" / "longest"), or None («أقصر شوي» is "shorter", no order over the stock) (QADFIX33 #4)."""
+    if among_shown_said(text):
+        return None
+    t = " ".join(normalize(text or "").split())
+    if _CHEAPEST.search(t):
+        return "cheapest"
+    if dearest_asked(text):
+        return "dearest"
+    if shortest_asked(text) == "shortest":
+        return "shortest"
+    if longest_asked(text) == "longest":
+        return "longest"
+    return None
+
+
 def absolute_asked(text):
     """«وش أقصر رواية عندكم أصلاً؟» -> True: a superlative over the whole stock, not within the wishes said before."""
     t = " ".join(normalize(re.sub(r"[؟?!.،,]", " ", text or "")).split())
     return bool(_ABSOLUTE29.search(t)) and bool(_SHORTEST.search(t) or _DEAREST.search(t)   # QADFIX30 #1: «أغلى … على الإطلاق»
-                                                or re.search(r"(?:^| )[وفب]?(?:ال)?(?:اطول|ارخص|اقدم|احدث)(?: |$)|longest|cheapest|oldest|newest", t))
+                                                or re.search(r"(?:^| )[وفب]?(?:ال)?(?:اطول|ارخص|اقدم|احدث)(?: |$)|longest|cheapest|oldest|newest", t)
+                                                or _LONGEST.search(t) or _SHORTEST32.search(t))   # QADFIX32 #2: «أضخم … أصلاً»
 
 
 # QADFIX30 #4 (QAD 2026-11-07 case 45.1, grave): «… بس مو العادات الذرية لأني قريته» → «الزائر طلب «العادات الذرية» لـاني» (آني إرنو):
@@ -401,6 +574,9 @@ def shortest_asked(text):
     """-> "shortest" («وش أقصر كتاب له؟»), "shorter" («أقصر» after some books), or None."""
     t = " ".join(normalize(text).split())
     if not _SHORTEST.search(t):
+        if _SHORTEST32.search(" ".join(num_canon(re.sub(r"[؟?!.،,]", " ", t)).split())) and not re.search(
+                r"(?:^| )(?:اقل|اصغر|انحف) من \d|(?:fewer|less|smaller) than \d", num_canon(t)):
+            return "shortest"   # QADFIX32 #2: «أنحف كتاب»، «أقل عدد صفحات»
         return None
     return "shortest" if _SUPERLATIVE.search(t) else "shorter"
 
@@ -521,8 +697,27 @@ _KID_NUM = re.compile(r"((?:^| )[وف]?ل?(?:بنتي|ابنتي|ولدي|ابن
                       + r")(?= |$)")
 
 
+# QADFIX34 #1 (QAD 2026-11-11 case 17, grave): "I'm 15 and I loved The Hunger Games" / "less adult please, I'm only 15" — the visitor's
+# own age said in English («i m 15» after normalize) was not read, so the young readers' path never ran (Fire & Blood, then «For an
+# adult reader»): "I'm 15", "I am only 15", "im 15" are an age, like «عمري ١٥»; not "I'm 15 minutes away" / "I'm 15 pages in"
+_SELF_AGE_EN = re.compile(r"(?:^| )(?:i m|im|i am)(?: only| just| almost| nearly| turning)? (\d{1,2}|" + "|".join(
+    ("two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+     "sixteen", "seventeen")) + r")(?= |$)(?! (?:minutes?|mins?|hours?|pages?|books?|km|miles?|chapters?|percent|dollars?|riyals?))")
+
+
+def self_age_en(text):
+    """QADFIX34 #1: the visitor's own age said in English ("I'm 15") -> 15, else None."""
+    m = _SELF_AGE_EN.search(" ".join(normalize(text).split()))
+    if not m:
+        return None
+    v = m.group(1)
+    return int(v) if v.isdigit() else _NUM_WORDS.get(v)
+
+
 def _num_words(t):
     """Digits for an age written in words; «سنتين» alone is two years."""
+    # QADFIX34 #1: "i m 15" is "age 15"
+    t = _SELF_AGE_EN.sub(lambda m: " age " + m.group(1), t)
     t = re.sub(r"(?:^| )(?:عمره|عمرها|عمري)?\s*سنتين(?= |$)", lambda m: m.group(0).replace("سنتين", "2 سنين"), t)
     for rx in (_NUM_AFTER, _NUM_BEFORE, _KID_NUM):
         t = rx.sub(lambda m: m.group(1) + str(_NUM_WORDS[m.group(2)]), t)
@@ -565,8 +760,15 @@ _PARENT = re.compile(r"(?:^| )(?:انا |لي )?(?:كام|كاب|كوالد|كو
                      # QADFIX9 (QAD 2026-10-20, case 4.1): «أبي كتاب أقرأه أنا يفهمني نفسيتها»
                      r"|(?:^| )(?:اقراه|اقراها|اقرأه) (?:انا|بنفسي)(?: |$)|(?:^| )(?:يفهمني|يخليني افهم|يعرفني) (?:نفسيتها|نفسيته|نفسيه|بنتي|ولدي|ابني|طفلي)"
                      r"|(?:^| )(?:افهم|افهمها|افهمه) (?:نفسيتها|نفسيته|نفسيه|طبعها|طبعه)(?: |$)")
-_KID_WORD = re.compile(r"(?:^| )(?:ولدي|ابني|بنتي|ابنتي|طفلي|طفلتي|اولادي|عيالي|اطفالي|بناتي|ولدنا|بنتنا|my son|my daughter|my kid)(?: |$)")
-_FOR_ME = re.compile(r"(?:^| )(?:كتاب|كتب|شي|شيء|روايه) (?:لي|لنفسي)(?: انا)?(?: |$)|(?:^| )(?:a book|something) for (?:me|myself)")
+# (QADFIX35, case 7.1: «عيالنا / اولادنا / ابننا / بناتنا / our son» too)
+_KID_WORD = re.compile(r"(?:^| )(?:ولدي|ابني|بنتي|ابنتي|طفلي|طفلتي|اولادي|عيالي|اطفالي|بناتي|ولدنا|بنتنا|عيالنا|اولادنا|ابننا|بناتنا|my son|my daughter|my kid|our son|our daughter|our kid)(?: |$)")
+_FOR_ME = re.compile(r"(?:^| )(?:كتاب|كتب|شي|شيء|روايه) (?:لي|لنفسي)(?: انا)?(?: |$)|(?:^| )(?:a book|something) for (?:me|myself)"
+                     # QADFIX35 (QAD 2026-11-12 case 7.1, medium): «ولدنا اللي بالمتوسط صاير يرد علينا بقلة أدب، نبي كتاب نقراه احنا الاثنين»
+                     # → «ما لقيت كتابًا واضحًا» while «200 خطوة نحو التربية برفق» is in stock: the two parents read it themselves
+                     # (not «نقراه مع ولدنا / سوا»: a family reading together)
+                     r"|(?:^| )(?:نقراه|نقراها|نقرا) (?:احنا|انا وزوجتي|انا وامه|انا وابوه|انا وامها|انا وابوها|انا وام العيال)(?: |$)"
+                     r"|(?:^| )(?:لنا|لي) (?:احنا|انا) (?:الاثنين|الثنين|الاتنين)(?: |$)|(?:^| )احنا الاثنين(?: |$)"
+                     r"|(?:^| )(?:a book|something) for both of us|(?:^| )(?:my wife and i|my husband and i|both of us) (?:can |could |want to |would )?read")
 
 
 # QADFIX17 (QAD 2026-10-24, case 45.2): «تقدرين تسألين موظف المكتبة» to a visitor who never said she is a woman — the
@@ -720,6 +922,8 @@ def self_said(text):
     t = " ".join(words)
     if re.search(r"(?:^| )(?:لنفسي|لي انا|for myself)(?: |$)", t) or _SELF_START.search(t):
         return True
+    if kin_self_said35(text):   # QADFIX35 #2 (case 12.2): «طيب وأنا جده، ابي رواية لي عن الريف والفلاحين»
+        return True
     return words[-1] == "لي" and len(words) >= 3 and words[-2] not in _TELL
 
 
@@ -729,6 +933,9 @@ def minor_self(user_messages):
         t = " ".join(normalize(text).split())
         m = re.search(r"عمري (\d{1,2})", t)
         if (m and int(m.group(1)) < 18) or _MINOR_SELF.search(t):
+            return True
+        _en34 = self_age_en(text)   # QADFIX34 #1: "I'm 15"
+        if _en34 is not None and _en34 < 18:
             return True
     return False
 
@@ -887,7 +1094,17 @@ def _pages_al(text):
 
 # QADFIX27 (QAD 2026-11-05 case 15.3, grave): «وش أطول رواية عندكم؟» — the longest, ordered from page_count like «الأقصر»;
 # «أطول منها / أطول شوي» is longer than the books shown
-_LONGEST = re.compile(r"(?:^| )[وفب]?(?:ال)?اطول(?: |$)|(?:^| )longest(?: |$)")   # QADFIX31 #1: «وأطول»
+_LONGEST = re.compile(r"(?:^| )[وفب]?(?:ال)?اطول(?: |$)|(?:^| )longest(?: |$)"   # QADFIX31 #1: «وأطول»
+                      # QADFIX32 #2 (QAD 2026-11-09 case 1.1, grave): «كم صفحة أضخم كتاب تاريخ عندكم؟» → «تاريخ البشرية» 640 pages
+                      # «من الخيارات المتاحة لي» while «الأنوار والمراقب» has 2,120: «أضخم / أسمك / أكبر كتاب / أكثر صفحات» is the longest too
+                      # («أكبر» and «أسمك» alone are not: «أكبر كاتب»، «وش اسمك؟» — only with a book word, the size or the pages)
+                      r"|(?:^| )[وفب]?(?:ال)?(?:اضخم|اضخمها|اضخمهم)(?: |$)|(?:^| )[وفب]?ال(?:اسمك|اكبر حجما|اكبر حجم)(?: |$)"
+                      r"|(?:^| )[وفب]?(?:ال)?اسمك (?:كتاب|روايه|مجلد|ديوان|عمل|موسوعه|واحد|وحده|شي)(?: |$)"
+                      r"|(?:^| )[وفب]?(?:ال)?اكبر (?:كتاب|مجلد|موسوعه)(?: |$)(?!.*(?:مبيع|مبيعا|شهره|قيمه|سعر|اثر|تاثير))"   # «أكبر رواية عربية» may be the greatest
+                      r"|(?:^| )[وفب]?(?:ال)?(?:اكبر|اكبرها|اكبرهم|اسمكها) (?:\S+ )?(?:حجما|حجم|من حيث الحجم|من ناحيه الحجم)(?: |$)"
+                      r"|(?:^| )[وفب]?(?:ال)?(?:اكبر|اكثر|اكثرها|اكثرهم|اكبرها) (?:\S+ )?(?:\S+ )?(?:عدد (?:ال)?صفحات|صفحات|بالصفحات"
+                      r"|من (?:حيث|ناحيه) (?:عدد )?(?:ال)?صفحات)(?: |$)"
+                      r"|(?:^| )(?:thickest|biggest (?:book|novel|one|volume)|largest (?:book|novel|one|volume)|most pages)(?: |$)")
 _LONGER = re.compile(r"(?:^| )اطول (?:شوي|شويه|منها|منه|منهم|من كذا|من كذي|من هذا|من هذي|من هذول|من اللي|بشوي|بعد)(?: |$)"
                      r"|(?:^| )longer(?: |$)")
 
@@ -895,8 +1112,8 @@ _LONGER = re.compile(r"(?:^| )اطول (?:شوي|شويه|منها|منه|منه
 def longest_asked(text):
     """-> "longest" («وش أطول رواية عندكم؟»), "longer" («أطول منها شوي») or None."""
     t = " ".join(num_canon(_pages_al(re.sub(r"[؟?!.،,]", " ", text or ""))).split())
-    if re.search(r"(?:^| )اطول من \d|longer than \d", t):
-        return None   # «أطول من ٥٠٠ صفحة»: a page limit (page_limit), not an order
+    if re.search(r"(?:^| )(?:اطول|اكثر|اكبر|اضخم) من \d|(?:longer|more|bigger) than \d", t):
+        return None   # «أطول من ٥٠٠ صفحة»، «أكثر من ٣٠٠ صفحات» (QADFIX32 #2): a page limit (page_limit), not an order
     if _LONGER.search(t):
         return "longer"
     return "longest" if _LONGEST.search(t) else None

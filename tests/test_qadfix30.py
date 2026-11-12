@@ -94,8 +94,9 @@ ok("or (f[\"id\"] in {x[2][\"book_id\"] for x in ya_added30}" in src and "_real3
    "replay 17.2: a shelf book offered is not dropped for a subgenre its record lacks; no fantasy from the shelf for «واقعية»")
 ok(R.ya_shelf_said("هي عمرها ١٣ وما تحب العنف، ابي شي من رف اليافعين") and R.ya_shelf_said("وش عندكم في قسم اليافعين؟")
    and R.ya_shelf_said("anything from the young adult shelf?") and not R.ya_shelf_said("رواية للكبار"), "17.3: the shelf named, fresh wording too")
-ok("ya_added30.append((0.5," in src and "(_yas30 or reader_age is None or 12 <= reader_age <= 15))" in src,
-   "the shelf's books are offered for 12–15, a young reader of unsaid age, or when it is named")
+# (QADFIX33 #2, QAD 2026-11-10 case 25.1: the young-reader path now runs to 17)
+ok("ya_added30.append((0.5," in src and "(_yas30 or reader_age is None or 12 <= reader_age <= 17))" in src,
+   "the shelf's books are offered for 12–17, a young reader of unsaid age, or when it is named")
 # --- QADFIX30b (Ibrahim 2026-11-07 «ب»): with ≥2 fitting shelf books, adult books with no content record are left out entirely
 def _bk(i, shelf=False, known=False, kid=False):
     return {"book_id": i, "shelf": shelf, "known": known, "kid": kid}

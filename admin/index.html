@@ -1888,7 +1888,11 @@
       : String(b.origin || 'مترجم').split('،')[0];
     const completeness = b => (b.cover_url ? 1 : 0) + (b.has_summary ? 1 : 0) + (b.research_status === 'matched' ? 2 : 0)
       + (b.genre ? 1 : 0) + Math.min(3, b.counts.confirmed + b.counts.impression * .5);
-    const needsReview = b => b.research_status === 'needs_confirmation' || b.status === 'needs_review' || b.counts.conflict > 0;
+    // NOCONFIRM (Ibrahim 2026-11-11 «الكتب اللي تحتاج تاكيد هوية رح نقلل اهميتها.. ما رح نعتبرها مطلوبة خلاص... يكفي الكتب اللي تحتاج مراجعة»):
+    // an identity still to confirm no longer puts a book in «تحتاج مراجعة»; the «يحتاج تأكيد» chip still lists them
+    // NOCONFIRM b (Ibrahim 2026-11-11 «حتى اختلف القراء على صفاتها ما نحتاجها خلاص»): reader conflicts no longer count either;
+    // the «صفات اختلف فيها القرّاء» chip still lists them
+    const needsReview = b => b.status === 'needs_review';
     const BOOK_CHIPS = [
       ['البحث', [['matched', 'مبحوث', b => b.research_status === 'matched'], ['needs_confirmation', 'يحتاج تأكيد', b => b.research_status === 'needs_confirmation'],
                  ['unresearched', 'غير مبحوث', b => !b.research_status], ['review', 'تحتاج مراجعة', b => b.status === 'needs_review']]],
@@ -2072,7 +2076,7 @@
         <span class="catalog-stat">متوفر للزوار <b>${num(catalog.filter(inStock).length)}</b></span>
         <span class="catalog-stat">نافد <b>${num(catalog.filter(b => b.active && !(b.quantity > 0)).length)}</b></span>
         <span class="catalog-stat" title="كتب متوفرة ما لها موقع على الرف">بدون موقع <b>${num(catalog.filter(b => inStock(b) && !locOf(b)).length)}</b></span>
-        <button type="button" class="catalog-stat stat-link${attention ? ' warn' : ''}" data-chip="toreview" aria-pressed="${lib.chips.size === 1 && lib.chips.has('toreview')}" title="اضغط تعرض الكتب اللي تحتاج مراجعة (هوية تحتاج تأكيدًا أو بطاقة تحتاج مراجعة أو صفات متعارضة)">تحتاج مراجعة <b>${num(attention)}</b></button>
+        <button type="button" class="catalog-stat stat-link${attention ? ' warn' : ''}" data-chip="toreview" aria-pressed="${lib.chips.size === 1 && lib.chips.has('toreview')}" title="اضغط تعرض الكتب اللي تحتاج مراجعة (بطاقة تحتاج مراجعة)">تحتاج مراجعة <b>${num(attention)}</b></button>
         <button type="button" class="catalog-stat stat-link" data-chip="requeue" aria-pressed="${lib.chips.size === 1 && lib.chips.has('requeue')}" title="اضغط تعرض الكتب اللي عُدّلت بياناتها أو غلافها وتنتظر أن يعيد المطوّر البحث عنها">بانتظار إعادة البحث <b>${num(catalog.filter(b => b.requeue).length)}</b></button>`;
       // BKREV (Ibrahim 2026-10-29 «كيف يدخل الموظف عالكتب اللي تحتاج مراجعة؟»): one tap on the count shows that list; a second tap shows all
       $('stats').querySelectorAll('[data-chip]').forEach(btn => btn.addEventListener('click', () => {

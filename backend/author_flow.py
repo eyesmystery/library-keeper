@@ -102,7 +102,10 @@ def _picked_by_record(reply, options):
     """«الكاتب المصري، ابي شي له عن الإيمان والعلم» after «تقصد مصطفى محمود ولا مصطفى محمود عواض؟»: the one
     whose record fits what the visitor said — its country, what it is known for — or, for «المعروف», the one
     with clearly more of our books (QAD 2026-10-13, case 27: the same question came back twice)."""
-    if not re.search(r'(?:^| )(?:ال)?(?:كاتب|كاتبه|مؤلف|مؤلفه|اديب|شاعر|دكتور)(?: |$)|اقصد|قصدي|writer|author|mean', reply) \
+    # QADFIX35 (QAD 2026-11-12 case 20.1, minor): «وش عندكم للروائي الكولومبي ماركس؟ صاحب العزلة» → «تقصد مين: ماركيز، كارل ماركس ولا كارل
+    # مارسي؟» — «الروائي / صاحب …» introduce the clue too (his country, his known work)
+    if not re.search(r'(?:^| )(?:ال)?(?:كاتب|كاتبه|مؤلف|مؤلفه|اديب|شاعر|شاعره|دكتور|روائي|روائيه|فيلسوف|مفكر)(?: |$)|(?:^| )صاحب(?:ه)? '
+                     r'|اقصد|قصدي|writer|author|mean|novelist|poet', reply) \
             and not _KNOWN.search(reply):
         return None   # a new request after the question («رواية رعب») is not an answer to it
     try:
@@ -229,7 +232,10 @@ def near_authors(written, by_display, books):
         try:
             import authors as _ar
             w = _bare(_ar.key(words[0]))
-            one = {d for d in by_display if len(key(d).split()) >= 2
+            # INBOX1112 (inbox 2026-11-11 §3, item 24 «علي عزت بيغوفيتش»): «بيجوفيتش» → «ما عندنا مؤلف باسم بيجوفيتش، تقصد «دافيد
+            # ب»؟» — a catalog family name of one letter (David B., co-author of 5265) is an initial, and _same_word lets an initial
+            # stand for any word with its first letter; it is never the one name the visitor wrote misspelt
+            one = {d for d in by_display if len(key(d).split()) >= 2 and len(_bare(_ar.key(d).split()[-1])) > 1
                    and (_bare(key(d).split()[-1]) == w or _ar._same_word(w, _bare(_ar.key(d).split()[-1])))}
         except Exception:
             one = set()
@@ -560,6 +566,11 @@ def resolve(request, conversation, books, english=False):
     if len(options) >= 2:
         # «الكاتب المصري، ابي شي له عن الإيمان والعلم»: the message itself says which one (QAD 2026-10-13, case 27.2)
         said_one = _picked_by_record(last, options[:5])
+        if not said_one and written:
+            # QADFIX35 (replay of QAD 2026-11-12 case 20.2): «ماركيز طبعا» right after the reply named «غابرييل غارسيا ماركيز» and showed his
+            # books asked «تقصد مين: …» again: the one the reply itself named in full, whose family name the visitor writes now, is the one
+            _sp35 = [o for o in options[:5] if _spoken_of(o, written, conversation[:-1], None)]
+            said_one = _sp35[0] if len(_sp35) == 1 else None
         if said_one:
             request.update(name_as_written=said_one, full_name=said_one, aliases=[])
             if mode in ('similar', 'both'):
@@ -653,6 +664,17 @@ def resolve(request, conversation, books, english=False):
     confirmed = confirmed or bool(proposal and _spoken_of(proposal, written, conversation[:-1], question))
     if previous == question and last in NO:
         return ('What is the author’s full name?' if english else 'وش اسم المؤلف كامل؟'), None, mode == 'works'
+    # INBOX1112 (inbox 2026-11-11 §3, item 24 «علي عزت بيغوفيتش»; test conversation 8.13): «بيجوفيتش» → «تقصد «علي عزت بيجوفيتش»؟» →
+    # «هروبي إلى الحرية» (his own book: the visitor's way of saying yes) → the same «تقصد …؟» again, and again. The question is not
+    # asked twice for one person: an answer that is not «no» while the model still reads that author is taken as yes, then and
+    # later in the conversation (the «نعم» to «تبغى أقترح لك كتبًا قريبة؟» after it brought the question back)
+    for _i, _c in enumerate(conversation[:-1] if (proposal and not confirmed) else []):
+        _pq = re.fullmatch(r'(?:تقصد «([^»]+)»؟|Do you mean «([^»]+)»\?)', (_c.get('content') or '').strip()) if _c['role'] == 'assistant' else None
+        _pn = (_pq.group(1) or _pq.group(2)) if _pq else None
+        _ans = key(conversation[_i + 1].get('content') or '') if (_pn and conversation[_i + 1]['role'] == 'user') else ''
+        if (_pn and _ans and _ans not in NO and (_ans.split() or [''])[0] not in {'لا', 'مو', 'مش', 'no', 'not', 'nope'}
+                and (key(_pn) == key(proposal) or same_name_spelling(_pn, proposal))):
+            confirmed = True
     ambiguous = len(key(written).split()) < 2 or (proposal and key(written) != key(proposal) and not exact
                                                    # "Nizar Qabbani" is a stored spelling of «نزار قباني»: no «Do you mean …?» (2026-10-12)
                                                    and key(written) not in record_keys)
