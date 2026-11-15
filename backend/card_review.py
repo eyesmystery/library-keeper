@@ -120,7 +120,13 @@ def recompute_card(conn, book_id):
     # reader_level: staff decision wins; otherwise re-derive from the card
     staff_level = any(r["human_verified"] for r in by_attr.get("reader_level", []) if r["source_site"] != "derived")
     if not staff_level:
-        derived = _derive_reader_level(card["language_difficulty"], card["perceived_length"],
+        # SETS (Ibrahim 2026-11-13): a record of several books has no one book's length, so its length says nothing of the level
+        try:
+            _vol = conn.execute("SELECT volumes FROM books WHERE book_id = ?", (book_id,)).fetchone()
+        except Exception:  # noqa: BLE001 - a database without the column
+            _vol = None
+        _length = None if (_vol and (_vol[0] or 0) > 1) else card["perceived_length"]
+        derived = _derive_reader_level(card["language_difficulty"], _length,
                                        card["pace"], card["emotional_weight"])
         card["reader_level"] = derived
         conn.execute("""UPDATE attribute_evidence SET attribute_value = ?
@@ -148,6 +154,31 @@ def recompute_card(conn, book_id):
          json.dumps(card["sensitive_content"]), status, book_id))
     conn.execute(f"UPDATE book_profiles SET {', '.join(a + ' = ?' for a in V2_SINGLE)} WHERE book_id = ?",
                  (*[card[a] if card[a] != "unknown" else None for a in V2_SINGLE], book_id))
+
+
+def refresh_reader_level(conn, book_id):
+    """SETS (2026-11-13): re-derive only the DERIVED reader level of a book from its stored card, its length left out when the record
+    holds several books; nothing else of the card is rebuilt (recompute_card rebuilds the whole card from the evidence, which would
+    also reset values the importers wrote: the status, the age, a length with no evidence row). -> the new level, or None (no change)."""
+    if conn.execute("""SELECT 1 FROM attribute_evidence WHERE book_id = ? AND attribute_name = 'reader_level' AND source_site <> 'derived'
+                       AND human_verified = 1 AND COALESCE(rejected, 0) = 0""", (book_id,)).fetchone():
+        return None   # staff decided the level
+    p = conn.execute("SELECT language_difficulty, perceived_length, pace, emotional_weight, reader_level FROM book_profiles WHERE book_id = ?",
+                     (book_id,)).fetchone()
+    if p is None:
+        return None
+    try:
+        vol = conn.execute("SELECT volumes FROM books WHERE book_id = ?", (book_id,)).fetchone()
+    except Exception:  # noqa: BLE001 - a database without the column
+        vol = None
+    length = None if (vol and (vol[0] or 0) > 1) else p[1]
+    level = _derive_reader_level(p[0], length, p[2], p[3])
+    if level == (p[4] or "unknown"):
+        return None
+    conn.execute("UPDATE book_profiles SET reader_level = ? WHERE book_id = ?", (level, book_id))
+    conn.execute("""UPDATE attribute_evidence SET attribute_value = ? WHERE book_id = ? AND attribute_name = 'reader_level'
+                    AND source_site = 'derived' AND COALESCE(rejected, 0) = 0""", (level, book_id))
+    return level
 
 
 def _insert_staff_row(conn, book_id, attr, value, reviewer, now):

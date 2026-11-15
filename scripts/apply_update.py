@@ -923,7 +923,8 @@ def inbox_matches(con, item):
     if table not in tables_of(con):
         return []
     cols = columns_of(con, table)
-    where = "status = 'open'" + (f" AND {cond}" if cond else "")
+    # ADMINWISH 2026-11-13: «قيد المتابعة» (following) is still open, so a solved item being followed closes too
+    where = "status IN ('open', 'following')" + (f" AND {cond}" if cond else "")
     cur = con.execute(f"SELECT * FROM {q(table)} WHERE {where}")
     names = [d[0] for d in cur.description]
     rows = [dict(zip(names, r)) for r in cur.fetchall()]
@@ -999,7 +1000,8 @@ def apply_resolutions(db, upd, version, dry_run=False):
 CORRECTABLE = {"title", "author", "translator", "publisher", "genre", "page_count", "publication_year", "isbn",
                "language", "original_language", "original_year", "original_year_source", "original_year_ref",
                "original_year_checked_at", "summary", "summary_source", "shelf_location", "age_min", "age_max",
-               "goodreads_url", "goodreads_url_source"}
+               "goodreads_url", "goodreads_url_source",
+               "volumes", "set_kind", "volumes_source"}   # SETS 2026-11-13: books sold together under one record
 
 
 def apply_corrections(db, upd, version, dry_run=False):

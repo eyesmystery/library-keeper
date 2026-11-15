@@ -18,8 +18,20 @@ from models import get_connection
 import integrity
 
 RIYADH = timezone(timedelta(hours=3))
-STATUS_AR = {"open": "مفتوح", "done": "تمت معالجته"}
+# ADMINWISH 2026-11-13: «قيد المتابعة» (still open) and «مرفوض» (handled) from «طلبات واقتراحات الزوار»; «المفتوحة» in the
+# file are open + following, «التي تمت معالجتها» done + declined (the modules' status groups)
+STATUS_AR = {"open": "مفتوح", "following": "قيد المتابعة", "done": "تمت معالجته", "declined": "مرفوض"}
 SCOPE_AR = {"open": "المفتوحة فقط", "done": "التي تمت معالجتها فقط", "all": "كل البنود (المفتوحة والمعالجة)"}
+
+
+def _handled(n, verb="عالجه"):
+    """« (عالجه X 2026-…)» for an item staff moved on from «مفتوح», and its staff note when there is one."""
+    out = ""
+    if n.get("status") not in (None, "open") and (n.get("handled_by") or n.get("handled_at")):
+        out += f" ({verb} {_md(n.get('handled_by'))} {_when(n.get('handled_at'))})"
+    if n.get("staff_note"):
+        out += f" · ملاحظة الموظف: {_md(n['staff_note'])}"
+    return out
 
 
 def _when(value):
@@ -77,8 +89,9 @@ FIELD_AR = {
     "aliases": "أسماء أخرى", "origin": "البلد", "staff_verified": "تأكيد الموظف",
     "title": "العنوان", "author": "المؤلف", "publisher": "الناشر", "genre": "التصنيف", "page_count": "عدد الصفحات",
     "publication_year": "سنة النشر", "isbn": "ISBN", "goodreads_url": "رابط Goodreads",
+    "volumes": "عدد الأجزاء أو الكتب في السجل", "set_kind": "نوع المجموعة",   # SETS 2026-11-13
 }
-SKIP_FIELDS = {"summary_source", "summary_updated_at", "age_source", "goodreads_url_source"}
+SKIP_FIELDS = {"summary_source", "summary_updated_at", "age_source", "goodreads_url_source", "volumes_source"}
 ACTION_AR = {
     "book.update": "تعديل بيانات كتاب", "book.reviewed": "تمت مراجعة الكتاب", "book.unreviewed": "إلغاء مراجعة الكتاب",
     "book.confirmation": "رد على «تأكيد هوية الكتاب»",
@@ -376,14 +389,15 @@ def build(status="open", generated_by=None):
         out += ["لا يوجد.", ""]
     for i, n in enumerate(suggestions, 1):
         out.append(f"{i}. {_md(n.get('note'))} — {_when(n.get('created_at'))} · رقم البند: {n.get('note_id')} · {STATUS_AR.get(n.get('status'), n.get('status'))}"
-                   + (f" (عالجه {_md(n.get('handled_by'))} {_when(n.get('handled_at'))})" if n.get("status") == "done" else ""))
+                   + _handled(n))
     out.append("")
 
     out += [f"## 3. أسئلة بلا جواب ({len(questions)})", "",
             "| # | رقم البند | العبارة | النوع | عن كتاب | عدد المرات | آخر مرة | الحالة |", "|---|---|---|---|---|---|---|---|"]
     for i, q in enumerate(questions, 1):
         out.append(f"| {i} | {q.get('q_id')} | {_md(q.get('phrase'))} | {_md(q.get('kind_label'))} | {_md(q.get('book_title')) or '—'} | "
-                   f"{q.get('times')} | {_when(q.get('last_at'))} | {STATUS_AR.get(q.get('status'), q.get('status'))} |")
+                   f"{q.get('times')} | {_when(q.get('last_at'))} | {STATUS_AR.get(q.get('status'), q.get('status'))}"
+                   + (f" — ملاحظة الموظف: {_md(q['staff_note'])}" if q.get("staff_note") else "") + " |")
     if not questions:
         out.append("| — | | لا يوجد | | | | | |")
     out.append("")
@@ -506,7 +520,7 @@ def build(status="open", generated_by=None):
         cand = _all(lambda o: (shelf_suggestions.list_candidates(rv_status, 300, o), shelf_suggestions.total(rv_status)))
     except Exception:  # never break the export over this section
         cand = []
-    cd_ar = {"open": "مرشّح", "added": "تم توفيره", "declined": "لن نوفره"}
+    cd_ar = {"open": "مرشّح", "following": "قيد المتابعة", "added": "تم توفيره", "declined": "مرفوض (لن نوفره)"}
     out += [f"## 12. كتب رشّحها الزوار للرفوف ({len(cand)})", "",
             "> **لـ Claude:** كتب طلب الزوار أن تكون في المكتبة. «من الخارج» = بحث منار عنه (ويكي بيانات، Open Library، "
             "ويكيبيديا، Goodreads) وأكّد الزائر أنه هو الكتاب؛ «من الكتالوج» = كتاب عندنا نفد.", ""]
@@ -517,7 +531,8 @@ def build(status="open", generated_by=None):
                 f"- {'من الكتالوج (نافد، book_id ' + str(c.get('book_id')) + ')' if c.get('source') == 'catalog' else 'من الخارج'}"
                 f" · طلبه {c.get('times_suggested')} زائر · أول مرة {_when(c.get('first_at'))} · آخر مرة {_when(c.get('last_at'))}"
                 f" · رقم البند: {c.get('candidate_id')} · {cd_ar.get(c.get('status'), c.get('status'))}"
-                + (f" ({_md(c.get('handled_by'))})" if c.get("status") != "open" else "")]
+                + (f" ({_md(c.get('handled_by'))})" if c.get("status") != "open" else "")
+                + (f" · ملاحظة الموظف: {_md(c['staff_note'])}" if c.get("staff_note") else "")]
         if c.get("asked_as") and c.get("asked_as") != c.get("title"):
             out.append(f"- كتبه الزائر: {_md(c['asked_as'])}")
         if c.get("isbn") or c.get("publisher"):

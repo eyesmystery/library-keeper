@@ -189,6 +189,12 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         "goodreads_ratings_count": "INTEGER",
         "goodreads_rating_source": "TEXT",
         "goodreads_rating_at": "TEXT",
+        # SETS (Ibrahim 2026-11-13 «بعض الكتب في المكتبة مسجلة كمجموعة تنباع مع بعض…»): how many books / parts one record
+        # holds (empty or 1 = one book), what kind of set (one_work = one work in parts, collection = different books) and
+        # where the count came from (title | summary | staff). See backend/book_sets.py.
+        "volumes": "INTEGER",
+        "set_kind": "TEXT",
+        "volumes_source": "TEXT",
     }
     existing_books = {row["name"] for row in conn.execute("PRAGMA table_info(books)")}
     for column, column_type in book_additions.items():
@@ -661,7 +667,8 @@ def update_book(book_id: int, fields: dict) -> None:
                "title", "author", "publisher", "genre", "page_count", "publication_year", "isbn",
                "original_year", "original_year_source", "original_year_ref", "original_year_checked_at",
                "goodreads_url", "goodreads_url_source",
-               "goodreads_rating", "goodreads_ratings_count", "goodreads_rating_source", "goodreads_rating_at"}
+               "goodreads_rating", "goodreads_ratings_count", "goodreads_rating_source", "goodreads_rating_at",
+               "volumes", "set_kind", "volumes_source"}
     updates = {k: v for k, v in fields.items() if k in allowed}
     if not updates:
         return

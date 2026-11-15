@@ -12,6 +12,7 @@ import json
 import re
 from datetime import datetime, timezone
 
+import book_sets
 from models import get_connection
 
 LENGTH = ["very_short", "short", "medium", "long", "very_long"]
@@ -113,6 +114,8 @@ def compute(books, profiles):
                 if sw is not None and tw is not None and tw < sw:
                     out.append((sb["book_id"], tb["book_id"], "lighter_alternative", f"أخف عاطفيًا ({WEIGHT_AR[tp['emotional_weight']]} بدل {WEIGHT_AR[sp['emotional_weight']]})؛ {link}", 0.7))
                 sl, tl = _order(LENGTH, sp.get("perceived_length")), _order(LENGTH, tp.get("perceived_length"))
+                if book_sets.is_set(sb) or book_sets.is_set(tb):
+                    sl = tl = None   # SETS (2026-11-13): a record of several books is no shorter or longer alternative
                 if sl is not None and tl is not None and tl < sl:
                     out.append((sb["book_id"], tb["book_id"], "shorter_alternative", f"أقصر ({LENGTH_AR[tp['perceived_length']]} بدل {LENGTH_AR[sp['perceived_length']]})؛ {link}", 0.7))
                 sd, td = _order(LANG, sp.get("language_difficulty")), _order(LANG, tp.get("language_difficulty"))
@@ -213,8 +216,11 @@ def for_books(book_ids):
                     WHERE r.source_book_id IN ({','.join('?' * len(ids))}) ORDER BY r.confidence DESC""", ids).fetchall()
         except Exception:  # table missing on a database that was never migrated
             return {}
+        sets = book_sets.set_ids(conn)
         out = {}
         for r in rows:
+            if r["relation_type"] == "shorter_alternative" and (r["source_book_id"] in sets or r["target_book_id"] in sets):
+                continue   # SETS: a relation stored before the record was known as a set
             out.setdefault(r["source_book_id"], []).append(dict(r))
         return out
     finally:
@@ -225,9 +231,11 @@ def for_book(book_id, conn=None):
     own = conn is None
     conn = conn or get_connection()
     try:
+        sets = book_sets.set_ids(conn)
         return [dict(r) for r in conn.execute(
             """SELECT r.*, b.title AS target_title FROM book_relations r JOIN books b ON b.book_id = r.target_book_id
-               WHERE r.source_book_id = ? ORDER BY r.relation_type, r.confidence DESC""", (book_id,))]
+               WHERE r.source_book_id = ? ORDER BY r.relation_type, r.confidence DESC""", (book_id,))
+                if not (r["relation_type"] == "shorter_alternative" and (book_id in sets or r["target_book_id"] in sets))]
     finally:
         if own:
             conn.close()

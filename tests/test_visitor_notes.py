@@ -52,7 +52,9 @@ ok(visitor.post("/api/suggestion", json={"note": ""}).status_code == 400 and vis
 
 # ---- anonymous
 cols = [r[1] for r in con.execute("pragma table_info(visitor_notes)")]
-ok(cols == ["note_id", "kind", "book_id", "book_title", "reason", "note", "language", "created_at", "status", "handled_by", "handled_at"],
+# staff_note (ADMINWISH 2026-11-13) is what staff write about a suggestion, never visitor data
+ok(cols == ["note_id", "kind", "book_id", "book_title", "reason", "note", "language", "created_at", "status", "handled_by", "handled_at",
+            "staff_note"],
    "stored columns hold no visitor name, address or conversation id")
 
 # ---- access

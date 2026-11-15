@@ -9,6 +9,15 @@ sys.path.insert(0, os.getcwd())
 os.environ["LIBRARY_KEEPER_LLM"] = "off"
 import models; models.init_db()
 import app as A, embeddings as E
+_run_chat = A.run_chat
+def _answer_after_note(*a, **k):
+    """QADKWFIX2 (a): a model-free answer opens with A.MODEL_DOWN_NOTE (checked in test_qadkwfix2.py); here, the answer after it."""
+    r = _run_chat(*a, **k)
+    for n in getattr(A, "MODEL_DOWN_NOTE", {}).values():
+        if isinstance(r.get("reply"), str) and r["reply"].startswith(n):
+            r["reply"] = r["reply"][len(n):]
+    return r
+A.run_chat = _answer_after_note
 P = F = 0
 def ok(cond, msg):
     global P, F

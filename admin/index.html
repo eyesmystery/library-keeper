@@ -53,6 +53,7 @@
     .status.approved,.status.enriched{background:var(--primary-soft);color:var(--primary)}
     .status.pending{background:var(--weak-soft);color:var(--weak)}
     .status.off{background:var(--danger-soft);color:var(--danger)}
+    .status.set{background:var(--accent-soft);color:#7a4c32}
     .book>span:not(.cover){display:block;min-width:0}
     .chips{display:flex;flex-wrap:wrap;gap:5px}
     .chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:650;border:1px solid transparent}
@@ -406,6 +407,28 @@
     .note-row .nr-text{margin:8px 0 0;font-size:16px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
     .note-row .nr-actions{display:flex;flex-direction:column;gap:8px}
     @media(max-width:640px){.note-row{grid-template-columns:1fr}.note-row .nr-actions{flex-direction:row;flex-wrap:wrap}}
+    /* «طلبات واقتراحات الزوار» (ADMINWISH 2026-11-13): one row per book or author, its sources as tags */
+    .wish-kind{margin:0 0 12px;width:max-content;max-width:100%}
+    .wish-tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+    .wtag{display:inline-flex;align-items:center;min-height:26px;padding:2px 10px;border-radius:999px;background:var(--weak-soft);color:var(--ink);font-size:13px;font-weight:700}
+    .wtag.kind{background:var(--sage-soft);color:var(--brown)}
+    .wtag.src-direct{background:var(--accent-soft);color:#7a2f1e}
+    .wtag.src-chat{background:var(--info-soft);color:var(--info)}
+    .wtag.src-outside{background:var(--weak-soft);color:#4d4a47;border:1px dashed #b9b2aa}
+    .wtag.st-new{background:var(--coral);color:#fff}.wtag.st-following{background:#F3E6C4;color:#6b4f12}
+    .wtag.st-provided{background:#DCEBD5;color:#2f5a27}.wtag.st-declined{background:var(--line);color:var(--muted)}
+    .note-row .wish-found{display:block;margin-top:4px;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+    .wish-stock{margin:10px 0 0;padding:8px 12px;border-radius:12px;background:#E6F0E1;color:#2f5a27;font-size:14px}
+    .wish-stock button{min-height:44px;margin:6px 0 0;margin-inline-end:6px;padding:4px 12px;border:1px solid #9DBB91;border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;text-align:start;cursor:pointer}
+    .wish-st{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid var(--line);border-radius:16px;background:var(--surface);min-width:210px}
+    .wish-st button{min-height:44px;padding:4px 10px;border:0;border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+    .wish-st button[aria-pressed="true"]{background:var(--brown);color:var(--surface)}
+    .wish-note{margin-top:8px}
+    .wish-note summary{display:flex;align-items:center;min-height:44px;cursor:pointer;font-size:14px;color:var(--muted)}
+    .wish-note textarea{display:block;width:100%;box-sizing:border-box;min-height:64px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:16px;color:var(--ink)}
+    .wish-note .nr-actions{flex-direction:row;margin-top:6px}
+    .wish-sub{margin:26px 0 2px;font-size:20px}
+    @media(max-width:640px){.wish-st{width:100%;min-width:0}.wish-kind{width:100%}}
     /* statistics */
     .st-head{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between;margin:4px 0 16px}
     .st-head h2{margin:0;font-size:26px}.st-head .diff{margin:2px 0 0;max-width:620px}
@@ -828,29 +851,50 @@
       <div id="alertsList" class="del-list"></div>
       <div class="settings-tabs lib-tabs sub-tabs" id="alertsSub" role="tablist" aria-label="مصدر التنبيه">
         <button class="settings-tab" role="tab" id="subVisitors" aria-selected="true" aria-controls="inboxPane">من الزوار <span class="tab-n" id="subNVisitors"></span></button>
+        <button class="settings-tab" role="tab" id="subWishes" aria-selected="false" aria-controls="wishPane" tabindex="-1">طلبات واقتراحات الزوار <span class="tab-n" id="subNWishes"></span></button>
         <button class="settings-tab" role="tab" id="subStaff" aria-selected="false" aria-controls="inboxPane" tabindex="-1">من الموظفين <span class="tab-n" id="subNStaff"></span></button>
         <button class="settings-tab" role="tab" id="subDevNotes" aria-selected="false" aria-controls="devPane" tabindex="-1">من المطوّر <span class="tab-n" id="subNDev"></span></button>
         <button class="settings-tab dev-only dev-tab" role="tab" id="subQuestions" aria-selected="false" aria-controls="inboxPane" tabindex="-1">أسئلة بلا جواب <span class="tab-n" id="inboxNQuestions"></span></button>
       </div>
       <div id="inboxPane" role="tabpanel" aria-labelledby="subVisitors">
       <div class="st-head">
-        <div><h2>بلاغات الزوار واقتراحاتهم</h2>
-          <p class="diff">الزائر يبلّغ من صفحة الكتاب إذا شاف معلومة غلط، ويرسل اقتراحه من المحادثة. مجهولة: ما نحفظ اسم الزائر ولا محادثته. البلاغ ما يغيّر الكتاب؛ صحّح البطاقة ثم اضغط «تمت المعالجة».</p></div>
+        <div><h2>بلاغات الزوار ومراجعاتهم</h2>
+          <p class="diff">الزائر يبلّغ من صفحة الكتاب إذا شاف معلومة غلط، ويكتب رأيه في كتاب قرأه. مجهولة: ما نحفظ اسم الزائر ولا محادثته. البلاغ ما يغيّر الكتاب؛ صحّح البطاقة ثم اضغط «تمت المعالجة». الكتب اللي يطلبها الزوار واقتراحاتهم صارت في «طلبات واقتراحات الزوار».</p></div>
         <div class="seg" id="inboxStatus" role="group" aria-label="الحالة">
           <button type="button" data-status="open" aria-pressed="true">مفتوحة</button><button type="button" data-status="done">تمت معالجتها</button><button type="button" data-status="all">الكل</button>
         </div>
       </div>
       <div class="settings-tabs lib-tabs kind-tabs" id="inboxKinds" role="tablist" aria-label="نوع الرسائل">
         <button class="settings-tab" role="tab" id="inboxTabReport" aria-selected="true" aria-controls="inboxList">بلاغات الكتب <span class="tab-n" id="inboxNReport"></span></button>
-        <button class="settings-tab" role="tab" id="inboxTabSuggestion" aria-selected="false" aria-controls="inboxList" tabindex="-1">الاقتراحات <span class="tab-n" id="inboxNSuggestion"></span></button>
+        <!-- «الاقتراحات» and «كتب مرشّحة» moved into «طلبات واقتراحات الزوار» (ADMINWISH 2026-11-13) -->
         <button class="settings-tab" role="tab" id="inboxTabReviews" aria-selected="false" aria-controls="inboxList" tabindex="-1">مراجعات القرّاء <span class="tab-n" id="inboxNReviews"></span></button>
-        <button class="settings-tab" role="tab" id="inboxTabCandidates" aria-selected="false" aria-controls="inboxList" tabindex="-1">كتب مرشّحة <span class="tab-n" id="inboxNCandidates"></span></button>
         <button class="settings-tab" role="tab" id="inboxTabQuestions" aria-selected="false" aria-controls="inboxList" tabindex="-1" hidden>أسئلة بلا جواب</button>
         <button class="settings-tab" role="tab" id="inboxTabStaff" aria-selected="false" aria-controls="inboxList" tabindex="-1" hidden>تعديلات الموظفين <span class="tab-n" id="inboxNStaff"></span></button>
         <button class="settings-tab" role="tab" id="inboxTabIdeas" aria-selected="false" aria-controls="inboxList" tabindex="-1">اقتراحات الموظفين <span class="tab-n" id="inboxNIdeas"></span></button>
       </div>
       <p id="inboxState" class="count" role="status"></p>
       <div id="inboxList" class="del-list" role="tabpanel"></div>
+      </div>
+      <!-- «طلبات واقتراحات الزوار» (ADMINWISH, Ibrahim 2026-11-13 «نبغى نخلي اقتراحات الزوار اوضح في الادارة»): one row per
+           book or author, whatever way the visitor asked (backend/visitor_wishes.py). Replaces «الاقتراحات», «كتب مرشّحة»
+           and «القرّاء ← طلبات القرّاء». -->
+      <div id="wishPane" role="tabpanel" aria-labelledby="subWishes" hidden>
+      <div class="st-head">
+        <div><h2>طلبات واقتراحات الزوار</h2>
+          <p class="diff">كل كتاب أو مؤلف طلبه الزوار وما كان عندنا، في سطر واحد مهما كان طريقه: اقتراح مباشر من «اقترح كتابًا لرفوفنا»، أو سؤال في المحادثة، ومعه كم مرة بحثت عنه منار خارج المكتبة. الحالة اللي تختارها تنطبق على كل طلباته. «متوفر الآن» يُفحص في المخزون كل مرة تفتح الصفحة.</p></div>
+        <div class="seg" id="wishStatus" role="group" aria-label="الحالة">
+          <button type="button" data-status="open" aria-pressed="true">المفتوحة</button><button type="button" data-status="new" aria-pressed="false">جديد</button><button type="button" data-status="following" aria-pressed="false">قيد المتابعة</button><button type="button" data-status="provided" aria-pressed="false">تم توفيره</button><button type="button" data-status="declined" aria-pressed="false">مرفوض</button><button type="button" data-status="all" aria-pressed="false">الكل</button>
+        </div>
+      </div>
+      <div class="seg wish-kind" id="wishKind" role="group" aria-label="النوع">
+        <button type="button" data-kind="all" aria-pressed="true">كتب ومؤلفون</button><button type="button" data-kind="book" aria-pressed="false">كتب</button><button type="button" data-kind="author" aria-pressed="false">مؤلفون</button>
+      </div>
+      <p id="wishState" class="count" role="status"></p>
+      <div id="wishList" class="del-list"></div>
+      <h3 class="wish-sub" id="wishGenHead">اقتراحات عامة من الزوار</h3>
+      <p class="state" style="margin:0 0 10px">اقتراحات ما هي عن كتاب بعينه، كتبها الزوار من «عندك اقتراح؟».</p>
+      <p id="wishGenState" class="count" role="status"></p>
+      <div id="wishGeneral" class="del-list" aria-labelledby="wishGenHead"></div>
       </div>
       <div id="devPane" role="tabpanel" aria-labelledby="subDevNotes" hidden>
       <div class="st-head" id="devHead">
@@ -884,16 +928,17 @@
       <div id="stBody"></div>
     </div>
 
-    <!-- «الكتب المطلوبة» (Ibrahim, 2026-10-24): what visitors asked for and we did not have, with how many times -->
+    <!-- «الكتب المطلوبة» (Ibrahim, 2026-10-24): what visitors asked for and we did not have, with how many times.
+         ADMINWISH (2026-11-13): the list itself moved to «التنبيهات ← طلبات واقتراحات الزوار», merged with the suggestions
+         and the candidate books; this tab only points there, so a staff member who looks for it here finds the way. -->
     <div id="requestedView" role="tabpanel" aria-labelledby="subRequests" hidden>
       <section class="panel" aria-labelledby="rqTitle">
         <div class="pk-head">
-          <div><h2 id="rqTitle">طلبات القرّاء: كتب ومؤلفون ما كانت عندنا</h2>
-            <p class="hint">كتب ومؤلفون سأل عنهم الزوار في المحادثة وما كانت عندنا، مرتّبة حسب عدد مرات الطلب. يساعدكم تقررون وش توفّرون. إذا وفّرتم الكتاب أو قررتم ما توفّرونه اضغط «تم».</p></div>
-          <div class="seg" role="group" aria-label="الحالة"><button type="button" id="rqOpen" aria-pressed="true">مفتوحة</button><button type="button" id="rqDone" aria-pressed="false">تم</button></div>
+          <div><h2 id="rqTitle">طلبات القرّاء انتقلت إلى «التنبيهات»</h2>
+            <p class="hint">الكتب والمؤلفون اللي سأل عنهم الزوار في المحادثة صارت مع الكتب المرشّحة واقتراحات الزوار في شاشة وحدة: «التنبيهات ← طلبات واقتراحات الزوار». هناك كل كتاب في سطر واحد، مع عدد مرات طلبه، وهل صار متوفر الآن، وحالته.</p></div>
         </div>
         <p id="rqState" class="state" role="status"></p>
-        <div id="rqList"></div>
+        <div id="rqList"><button type="button" class="btn" id="rqGo">افتح «طلبات واقتراحات الزوار»</button></div>
       </section>
     </div>
 
@@ -1271,7 +1316,7 @@
     // The active section supplies the page heading.
     // ADMSTF (Ibrahim 2026-10-24): six sections. Old names still work for links inside the page (inbox → alerts …).
     const HEADS = { books: 'المكتبة', alerts: 'التنبيهات', readers: 'القرّاء', organize: 'تنظيم منار', import: 'الاستيراد', settings: 'الإعدادات' };
-    const OLD_SECTION = { inbox: ['alerts', 'visitors'], stats: ['readers', 'stats'], requested: ['readers', 'requests'], picks: ['organize', 'picks'], events: ['organize', 'events'] };
+    const OLD_SECTION = { inbox: ['alerts', 'visitors'], stats: ['readers', 'stats'], requested: ['alerts', 'wishes'], wishes: ['alerts', 'wishes'], picks: ['organize', 'picks'], events: ['organize', 'events'] };
     const isMgr = () => !!ME && (ME.role === 'manager' || ME.role === 'developer');
     const isDev = () => !!ME && ME.role === 'developer';
     function setHead(which) { if (HEADS[which]) $('phTitle').textContent = HEADS[which]; }
@@ -1304,13 +1349,14 @@
     }
     // sub-sections inside a main section (ADMSTF 2026-10-24)
     const SUBS = {
-      alerts: { cur: 'visitors', tabs: { visitors: ['subVisitors', 'inboxPane'], staff: ['subStaff', 'inboxPane'], dev: ['subDevNotes', 'devPane'], questions: ['subQuestions', 'inboxPane'] } },
+      alerts: { cur: 'visitors', tabs: { visitors: ['subVisitors', 'inboxPane'], wishes: ['subWishes', 'wishPane'], staff: ['subStaff', 'inboxPane'], dev: ['subDevNotes', 'devPane'], questions: ['subQuestions', 'inboxPane'] } },
       readers: { cur: 'stats', tabs: { stats: ['subStats', 'statsView'], requests: ['subRequests', 'requestedView'] } },
       organize: { cur: 'picks', tabs: { picks: ['subPicks', 'picksView'], events: ['subEvents', 'eventsView'] } },
       import: { cur: 'rewaa', tabs: { rewaa: ['subRewaa', 'impRewaa'], sheet: ['subSheet', 'impSheet'], hist: ['subHist', 'impHist'] } }
     };
-    const INBOX_GROUPS = { visitors: ['report', 'suggestion', 'reviews', 'candidates'], staff: ['staff', 'ideas'], questions: ['questions'] };
-    const KIND_TAB = { report: 'inboxTabReport', suggestion: 'inboxTabSuggestion', reviews: 'inboxTabReviews', candidates: 'inboxTabCandidates', questions: 'inboxTabQuestions', staff: 'inboxTabStaff', ideas: 'inboxTabIdeas' };
+    // ADMINWISH (2026-11-13): «الاقتراحات» and «كتب مرشّحة» left «من الزوار» for «طلبات واقتراحات الزوار» (wishPane)
+    const INBOX_GROUPS = { visitors: ['report', 'reviews'], staff: ['staff', 'ideas'], questions: ['questions'] };
+    const KIND_TAB = { report: 'inboxTabReport', reviews: 'inboxTabReviews', questions: 'inboxTabQuestions', staff: 'inboxTabStaff', ideas: 'inboxTabIdeas' };
     const shown = id => !$(id).hidden && getComputedStyle($(id)).display !== 'none';
     function selectSub(main, key, focus = false) {
       const g = SUBS[main];
@@ -1321,7 +1367,8 @@
       new Set(Object.values(g.tabs).map(([, p]) => p)).forEach(p => { $(p).hidden = p !== pane; });
       $(pane).setAttribute('aria-labelledby', tabId);
       if (focus) $(tabId).focus();
-      if (main === 'alerts' && key !== 'dev') {
+      if (main === 'alerts' && key === 'wishes') loadWishes();
+      if (main === 'alerts' && key !== 'dev' && key !== 'wishes') {
         const kinds = INBOX_GROUPS[key];
         Object.entries(KIND_TAB).forEach(([k, id]) => $(id).classList.toggle('kind-off', !kinds.includes(k)));
         $('inboxKinds').hidden = kinds.length < 2;
@@ -1367,32 +1414,18 @@
       });
       window.addEventListener('scroll', () => hide(), { passive: true });
     })();
-    // «الكتب المطلوبة» (Ibrahim 2026-10-24)
-    let rqStatus = 'open';
+    // «الكتب المطلوبة» (Ibrahim 2026-10-24) moved to «التنبيهات ← طلبات واقتراحات الزوار» (ADMINWISH 2026-11-13): the old tab
+    // says how many are open there and opens it
     const rqDate = s => { try { return new Date(s).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { year: 'numeric', month: 'short', day: 'numeric' }); } catch (e) { return String(s || '').slice(0, 10); } };
     async function loadRequested() {
-      $('rqState').textContent = 'جاري التحميل…';
-      let d;
-      try { const r = await fetch('/api/admin/inbox/requested?status=' + rqStatus); if (!r.ok) throw new Error(r.status); d = await r.json(); }
-      catch (e) { $('rqState').textContent = 'تعذر تحميل القائمة'; return; }
-      const n = d.counts || {};
-      $('requestedN').textContent = n.open || ''; $('requestedN').hidden = !n.open; $('subNRequests').textContent = n.open ? num(n.open) : '';
-      $('rqState').textContent = d.items.length ? '' : (rqStatus === 'open' ? 'ما فيه طلبات مفتوحة.' : 'ما فيه شي معلّم «تم».');
-      if (!d.items.length) { $('rqList').innerHTML = ''; return; }
-      $('rqList').innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>المطلوب</th><th>النوع</th><th>مرات الطلب</th><th>أول مرة</th><th>آخر مرة</th><th></th></tr></thead><tbody>'
-        + d.items.map(x => `<tr><td>${esc(x.phrase)}${(x.in_stock_now || []).length ? ' <span class="pill ok" title="عنوان بنفس الاسم متوفر الآن">متوفر الآن</span>' : ''}</td>`
-          + `<td>${x.kind === 'missing_author' ? 'مؤلف' : 'كتاب'}</td><td><b>${x.times}</b></td><td>${esc(rqDate(x.first_at))}</td><td>${esc(rqDate(x.last_at))}</td>`
-          + `<td>${rqStatus === 'open' ? `<button class="btn secondary small" type="button" data-rq="${x.q_id}">تم</button>` : esc(x.handled_by || '')}</td></tr>`).join('')
-        + '</tbody></table></div>';
-      $('rqList').querySelectorAll('[data-rq]').forEach(b => b.addEventListener('click', async () => {
-        b.disabled = true;
-        const r = await fetch('/api/admin/inbox/questions/' + b.dataset.rq, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'done' }) });
-        if (r.ok) loadRequested(); else { b.disabled = false; $('rqState').textContent = 'تعذر الحفظ'; }
-      }));
+      $('rqState').textContent = '';
+      try {
+        const r = await fetch('/api/admin/inbox/count'); if (!r.ok) throw new Error(r.status);
+        const c = await r.json(), n = c.wishes_open || 0;
+        $('rqState').textContent = n ? `فيها الآن ${num(n)} ${n === 1 ? 'كتاب أو مؤلف مطلوب مفتوح' : 'كتب ومؤلفين مطلوبين مفتوحة'}.` : 'ما فيه طلبات مفتوحة الآن.';
+      } catch (e) { /* the button still opens it */ }
     }
-    const rqSwitch = s => { rqStatus = s; $('rqOpen').setAttribute('aria-pressed', String(s === 'open')); $('rqDone').setAttribute('aria-pressed', String(s === 'done')); loadRequested(); };
-    $('rqOpen').addEventListener('click', () => rqSwitch('open'));
-    $('rqDone').addEventListener('click', () => rqSwitch('done'));
+    $('rqGo').addEventListener('click', () => goAlert('inbox:wishes'));
     $('adminNav').querySelectorAll('[role=tab]').forEach(tab => {
       tab.tabIndex = tab.getAttribute('aria-selected') === 'true' ? 0 : -1;
       tab.addEventListener('keydown', e => {
@@ -1423,7 +1456,11 @@
     }
     function goAlert(go) {
       const [view, sub] = go.split(':');
-      if (view === 'inbox') {
+      if (view === 'inbox' && ['wishes', 'suggestion', 'candidates', 'requested'].includes(sub)) {
+        // ADMINWISH (2026-11-13): visitors' book requests and suggestions have one screen
+        selectTab('alerts'); selectSub('alerts', 'wishes');
+        $('alertsSub').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (view === 'inbox') {
         selectTab('alerts'); selectSub('alerts', sub === 'staff' || sub === 'ideas' ? 'staff' : 'visitors');
         if (KIND_TAB[sub] && !$(KIND_TAB[sub]).hidden) setInboxKind(sub);
         $('alertsSub').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1905,6 +1942,8 @@
       // BKREV (Ibrahim 2026-10-29): «نأكد انها تم مراجعتها عشان نصفي اللي تحتاج مراجعة» + «قائمة مستقلة يعيد البحث عنها»
       ['المراجعة', [['toreview', 'تحتاج مراجعة', b => !b.reviewed_at && needsReview(b)], ['reviewed', 'تمت مراجعته', b => !!b.reviewed_at],
                     ['requeue', 'بانتظار إعادة البحث', b => !!b.requeue]]],
+      // SETS (Ibrahim 2026-11-13): records that hold several books sold together
+      ['السجل', [['sets', 'مجموعة (أكثر من كتاب)', b => b.volumes > 1]]],
       ['اللغة', [['arabic', 'عربي أصلي', b => b.original_language === 'ar' && b.language === 'ar'],
                 ['translated', 'مترجم', b => b.language === 'ar' && b.original_language && b.original_language !== 'ar'],
                 ['foreign', 'بلغة أجنبية', b => b.language && b.language !== 'ar']]]
@@ -2151,6 +2190,10 @@
       if (focusedKey) [...$('bookChips').querySelectorAll('.fchip')].find(b => b.dataset.k === focusedKey)?.focus({ preventScroll: true });
     }
 
+    // SETS (Ibrahim 2026-11-13): several books sold under one record
+    const SET_KIND_AR = { one_work: 'عمل واحد مقسوم على أجزاء', collection: 'مجموعة كتب مختلفة' };
+    const setText = b => !(b.volumes > 1) ? null : (b.set_kind === 'one_work' ? `في ${num(b.volumes)} أجزاء (عمل واحد)` : `مجموعة من ${num(b.volumes)} كتب مختلفة`);
+    const setBadge = b => b.volumes > 1 ? `<span class="status set" title="${esc(setText(b))}">مجموعة · ${num(b.volumes)}</span>` : '';
     const rsBadge = b => `<span class="rs ${esc(b.research_status || '')}">${esc(RS_AR[b.research_status || ''] || b.research_status)}</span>${b.confirmation_answered ? ' <span class="okflag">ردّ الموظف</span>' : ''}`;
     function bookCard(b) {
       const off = !inStock(b);
@@ -2162,7 +2205,8 @@
           <span class="author">${esc(b.author)}${b.publisher ? `، <span class="pub">${esc(b.publisher)}</span>` : ''}</span>
           <span class="meta">
             <span class="m">${esc(b.genre || 'بدون تصنيف')}</span>
-            ${b.page_count ? `<span class="m">${num(b.page_count)} ص</span>` : ''}
+            ${setBadge(b)}
+            ${b.page_count ? `<span class="m">${num(b.page_count)} ص${b.volumes > 1 ? ' (للسجل)' : ''}</span>` : ''}
             ${locOf(b) ? `<span class="m">${esc(locOf(b))}</span>` : ''}
             <span class="m">${num(b.quantity || 0)} نسخ، ${num(b.price || 0)} ر.س</span>
             ${!b.active ? '<span class="status off">موقوف</span>' : (!(b.quantity > 0) ? '<span class="status off">نافد</span>' : '')}
@@ -2182,7 +2226,7 @@
     }
     function bookRow(b) {
       return `<tr class="${inStock(b) ? '' : 'off'}" data-bid="${b.book_id}">
-        <td class="bk-cell"><div class="book-name">${cover(b)}<div><button type="button" class="ttl" data-bid="${b.book_id}">${esc(b.title)}</button><span class="sub">${esc(b.author)}${b.publisher ? ' · ' + esc(b.publisher) : ''}</span></div></div></td>
+        <td class="bk-cell"><div class="book-name">${cover(b)}<div><button type="button" class="ttl" data-bid="${b.book_id}">${esc(b.title)}</button><span class="sub">${esc(b.author)}${b.publisher ? ' · ' + esc(b.publisher) : ''}</span>${setBadge(b)}</div></div></td>
         <td class="loc-cell">${locCell(b)}</td>
         <td class="hide-sm">${esc(b.genre || '—')}</td>
         <td class="stock-cell">${!b.active ? '<span class="status off">موقوف</span>' : b.quantity > 0 ? `${num(b.quantity)} <span class="qty-label">نسخ متوفرة</span>` : '<span class="status off">نافد</span>'}<span class="mobile-price"><bdi>${num(b.price || 0)}</bdi> ر.س</span></td>
@@ -2195,7 +2239,7 @@
       const face = b.cover_url ? `<img src="${esc(b.cover_url)}" alt="" loading="lazy" />`
         : `<span class="ph"><b>${esc(b.title)}</b><small>${esc(b.author && b.author !== 'غير معروف' ? b.author : (b.publisher || ''))}</small></span>`;
       return `<button type="button" class="spine ${inStock(b) ? '' : 'off'}" data-bid="${b.book_id}" aria-label="فتح بطاقة ${esc(b.title)}">
-        <span class="face" style="--c:${COLORS[b.book_id % COLORS.length]}">${face}${!b.active ? '<span class="tag">موقوف</span>' : !(b.quantity > 0) ? '<span class="tag">نافد</span>' : ''}</span>
+        <span class="face" style="--c:${COLORS[b.book_id % COLORS.length]}">${face}${!b.active ? '<span class="tag">موقوف</span>' : !(b.quantity > 0) ? '<span class="tag">نافد</span>' : b.volumes > 1 ? '<span class="tag">مجموعة</span>' : ''}</span>
         <span class="st">${esc(b.title)}</span><span class="sa">${esc(b.author)}</span>
       </button>`;
     }
@@ -2772,6 +2816,9 @@
                 <div><label for="bOrigYear">سنة الصدور الأصلية</label><input id="bOrigYear" type="number" min="1000" max="2100" step="1" inputmode="numeric" value="${b.original_year || ''}" aria-describedby="bOrigYearHint" /><span id="bOrigYearHint" class="diff">أول نشر للعمل (للمترجم: سنة الأصل)</span></div>
                 <div><label for="bPages">عدد الصفحات</label><input id="bPages" type="number" min="1" max="20000" step="1" inputmode="numeric" value="${b.page_count || ''}" /></div>
                 <div><label for="bIsbn">ISBN</label><input id="bIsbn" type="text" maxlength="20" dir="ltr" inputmode="numeric" value="${esc(b.isbn || '')}" /></div>
+                <!-- SETS (Ibrahim 2026-11-13): a record that holds several books sold together -->
+                <div><label for="bVolumes">عدد الأجزاء/الكتب في السجل</label><input id="bVolumes" type="number" min="1" max="99" step="1" inputmode="numeric" value="${b.volumes || ''}" aria-describedby="bVolumesHint" /><span id="bVolumesHint" class="diff">فاضي أو ١ = كتاب واحد. اكتب العدد إذا السجل يُباع كمجموعة (مثل جزأين تحت رقم واحد)</span></div>
+                <div><label for="bSetKind">نوعها</label><select id="bSetKind" aria-describedby="bSetKindHint"><option value="">—</option>${Object.entries(SET_KIND_AR).map(([k, v]) => `<option value="${k}" ${b.set_kind === k ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select><span id="bSetKindHint" class="diff">عمل واحد مقسوم (مثل «ذهب مع الريح» في جزأين) أو كتب مختلفة (مثل سلسلة من ٥ قصص)</span></div>
               </div>
               <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">
                 <button id="basicSave" class="btn" type="button">حفظ التعديلات</button>
@@ -2781,7 +2828,8 @@
               <p id="basicState" class="state" role="status"></p>
             </div>
             <div class="facts" id="basicFacts">
-            ${factBox('التصنيف', b.genre)}${factBox('عدد الصفحات (تقريبي)', b.page_count ? num(b.page_count) : null)}
+            ${factBox('التصنيف', b.genre)}${factBox(b.volumes > 1 ? 'عدد الصفحات المسجل (للسجل كله أو جزء منه)' : 'عدد الصفحات (تقريبي)', b.page_count ? num(b.page_count) : null)}
+            ${b.volumes > 1 ? factBox('مجموعة', setText(b) + (b.volumes_source ? ` · المصدر: ${esc({ title: 'العنوان', summary: 'النبذة', staff: 'موظف' }[b.volumes_source] || b.volumes_source)}` : '')) : ''}
             ${factBox('الناشر', b.publisher)}${factBox('سنة طبعتنا', b.publication_year)}
             ${factBox('سنة الصدور الأصلية', origYearText(b), 'غير معروفة بعد')}
             ${factBox('ISBN', b.isbn)}${factBox('الأصل واللغة', b.origin, 'غير معروف بعد')}
@@ -3123,12 +3171,15 @@
       const st = $('basicState');
       const now = { title: $('bTitle').value.trim(), author: $('bAuthor').value.trim(), publisher: $('bPublisher').value.trim(),
         genre: $('bGenre').value, publication_year: $('bYear').value.trim(), original_year: $('bOrigYear').value.trim(), page_count: $('bPages').value.trim(),
-        isbn: $('bIsbn').value.replace(/[\s-]/g, '').toUpperCase() };
+        isbn: $('bIsbn').value.replace(/[\s-]/g, '').toUpperCase(), volumes: $('bVolumes').value.trim(), set_kind: $('bSetKind').value };
       const was = { title: b.title || '', author: b.author || '', publisher: b.publisher || '', genre: b.genre || '',
-        publication_year: b.publication_year ? String(b.publication_year) : '', original_year: b.original_year ? String(b.original_year) : '', page_count: b.page_count ? String(b.page_count) : '', isbn: b.isbn || '' };
+        publication_year: b.publication_year ? String(b.publication_year) : '', original_year: b.original_year ? String(b.original_year) : '', page_count: b.page_count ? String(b.page_count) : '', isbn: b.isbn || '',
+        volumes: b.volumes ? String(b.volumes) : '', set_kind: b.set_kind || '' };
       const body = {};
-      Object.keys(now).forEach(k => { if (now[k] !== was[k]) body[k] = (k === 'publication_year' || k === 'original_year' || k === 'page_count') ? (now[k] === '' ? null : Number(now[k])) : now[k]; });
+      Object.keys(now).forEach(k => { if (now[k] !== was[k]) body[k] = (k === 'publication_year' || k === 'original_year' || k === 'page_count' || k === 'volumes') ? (now[k] === '' ? null : Number(now[k])) : now[k]; });
       if (!now.title || !now.author) { st.textContent = 'العنوان والمؤلف ما يصير يكونون فاضيين (اكتب «غير معروف» للمؤلف إذا ما هو مكتوب).'; return; }
+      // SETS: a set of several books needs its kind
+      if (Number(now.volumes) > 1 && !now.set_kind) { st.textContent = 'اختر نوع المجموعة: عمل واحد مقسوم على أجزاء، أو كتب مختلفة.'; $('bSetKind').focus(); return; }
       if (!Object.keys(body).length) { st.textContent = 'ما فيه تغيير.'; return; }
       st.textContent = 'جاري الحفظ…'; $('basicSave').disabled = true;
       try {
@@ -3781,14 +3832,14 @@
       if (!c) return;
       if (typeof c.staff_open === 'number') { $('inboxTabStaff').hidden = false; staffOpen = c.staff_open; $('inboxNStaff').textContent = staffOpen ? num(staffOpen) : ''; }
       if (typeof c.ideas_open === 'number') { ideasOpen = c.ideas_open; $('inboxNIdeas').textContent = ideasOpen ? num(ideasOpen) : ''; }
-      // «ماذا تقرأ الآن؟» (2026-10-27): reviews waiting for approval and open candidate books count with the visitors' notes
-      const rv = c.reviews_open || 0, cd = c.candidates_open || 0;
+      // «ماذا تقرأ الآن؟» (2026-10-27): reviews waiting for approval count with the visitors' reports; ADMINWISH (2026-11-13):
+      // suggestions, candidate books and the chat's missing books / authors are counted once per title in «طلبات واقتراحات الزوار»
+      const rv = c.reviews_open || 0, rp = (c.report && c.report.open) || 0;
       $('inboxNReviews').textContent = rv ? num(rv) : '';
-      $('inboxNCandidates').textContent = cd ? num(cd) : '';
-      $('subNVisitors').textContent = (c.open || 0) + rv + cd ? num((c.open || 0) + rv + cd) : '';
+      $('subNVisitors').textContent = rp + rv ? num(rp + rv) : '';
+      if (typeof c.wishes_attention === 'number') $('subNWishes').textContent = c.wishes_attention ? num(c.wishes_attention) : '';
       $('subNStaff').textContent = staffOpen + ideasOpen ? num(staffOpen + ideasOpen) : '';
-      $('inboxNReport').textContent = c.report.open ? num(c.report.open) : '';
-      $('inboxNSuggestion').textContent = c.suggestion.open ? num(c.suggestion.open) : '';
+      $('inboxNReport').textContent = rp ? num(rp) : '';
     }
     async function loadInboxCount() {
       if (!ME) return;
@@ -3809,7 +3860,6 @@
       if (inbox.kind === 'staff') return loadStaffNotes(msg, more, offset);
       if (inbox.kind === 'ideas') return loadIdeas(msg, more, offset);
       if (inbox.kind === 'reviews') return loadReviews(msg, more, offset);
-      if (inbox.kind === 'candidates') return loadCandidates(msg, more, offset);
       try {
         const res = await fetch(`/api/admin/inbox?kind=${inbox.kind}&status=${inbox.status}&offset=${offset}`);
         if (!res.ok) throw new Error(res.status);
@@ -3968,45 +4018,115 @@
         }));
       } catch (e) { $('inboxState').textContent = 'تعذر تحميل المراجعات.'; if (!more) $('inboxList').innerHTML = ''; }
     }
-    // «كتب مرشّحة» (Ibrahim 2026-10-27): books visitors want on the shelves; one we do not have was looked up and confirmed by the visitor
-    const CAND_STATUS = { open: 'مرشّح', added: 'تم توفيره', declined: 'لن نوفره' };
-    async function loadCandidates(msg, more, offset) {
-      try {
-        const res = await fetch(`/api/admin/inbox/candidates?status=${inbox.status}&offset=${offset}`);
-        if (!res.ok) throw new Error(res.status);
-        const d = await res.json();
-        inbox.items = more ? inbox.items.concat(d.items) : d.items;
-        inbox.total = d.total;
-        $('inboxNCandidates').textContent = d.counts.open ? num(d.counts.open) : '';
-        loadInboxCount();
-        const rest = Math.max(0, inbox.total - inbox.items.length);
-        $('inboxState').textContent = msg || (inbox.items.length ? `عدد الكتب: ${num(inbox.total)}${rest ? ` · المعروض ${num(inbox.items.length)}` : ''}` : '');
-        $('inboxList').innerHTML = inbox.items.length ? `<p class="state" style="margin:0 0 8px">كتب طلب الزوار أن تكون في المكتبة. «من خارج المكتبة»: منار بحثت عنه وأكّد الزائر أنه هو الكتاب. «من الكتالوج»: كتاب عندنا نفدت نسخه. الأكثر طلبًا أولًا.</p>`
-          + inbox.items.map(c => {
-            const open = c.status === 'open';
-            return `<div class="note-row${open ? '' : ' done'}"><div>
-              <p class="nr-text" dir="auto" style="margin-top:0"><b>${esc(c.title)}</b>${c.author ? ` — ${esc(c.author)}` : ''}${c.year ? ` (${esc(String(c.year))})` : ''}</p>
-              <span class="nr-reason">${c.source === 'catalog' ? 'من الكتالوج (نافد)' : 'من خارج المكتبة'} · طلبه ${num(c.times_suggested)} ${c.times_suggested === 1 ? 'زائر' : 'زوار'}</span>
-              ${c.asked_as && c.asked_as !== c.title ? `<span class="nr-meta">كتبه الزائر: ${esc(c.asked_as)}</span>` : ''}
-              ${c.isbn || c.publisher ? `<span class="nr-meta">${c.isbn ? 'ISBN ' + esc(c.isbn) : ''}${c.isbn && c.publisher ? ' · ' : ''}${esc(c.publisher || '')}</span>` : ''}
-              ${c.summary ? `<p class="nr-text" dir="auto" style="font-size:13px">${esc(c.summary.slice(0, 300))}${c.summary.length > 300 ? '…' : ''}</p>` : ''}
-              ${(c.sources || []).length ? `<span class="nr-meta">المصادر: ${(c.sources || []).slice(0, 4).map(u => /^https?:/.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, '').split('/')[0])}</a>` : esc(u)).join(' · ')}</span>` : ''}
-              ${(c.notes || []).map(n => `<p class="nr-text" dir="auto">ملاحظة زائر: ${esc(n)}</p>`).join('')}
-              <span class="nr-meta">أول مرة ${when(c.first_at)} · آخر مرة ${when(c.last_at)} · ${CAND_STATUS[c.status] || c.status}${open ? '' : ` · ${esc(c.handled_by || '—')} ${when(c.handled_at)}`}</span></div>
-              <div class="nr-actions">${c.source === 'catalog' && c.book_id ? `<button type="button" class="btn secondary" data-open-book="${c.book_id}">افتح بطاقة الكتاب</button>` : ''}
-              ${open ? `<button type="button" class="btn" data-cd="${c.candidate_id}" data-to="added">تم توفيره</button><button type="button" class="btn secondary" data-cd="${c.candidate_id}" data-to="declined">لن نوفره</button>`
-                : `<button type="button" class="btn secondary" data-cd="${c.candidate_id}" data-to="open">إعادة فتح</button>`}</div></div>`;
-          }).join('') + (rest ? `<div class="nr-actions" style="justify-content:center"><button type="button" class="btn secondary" id="candMore">عرض الباقي (${num(rest)})</button></div>` : '')
-          : `<div class="empty-note">${inbox.status === 'open' ? 'ما فيه كتب مرشّحة مفتوحة.' : 'ما فيه كتب مرشّحة.'}</div>`;
-        if ($('candMore')) $('candMore').addEventListener('click', () => { $('candMore').disabled = true; loadInbox(null, true); });
-        $('inboxList').querySelectorAll('[data-open-book]').forEach(b => b.addEventListener('click', () => openCard(Number(b.dataset.openBook))));
-        $('inboxList').querySelectorAll('[data-cd]').forEach(b => b.addEventListener('click', async () => {
-          b.disabled = true;
-          const r = await fetch(`/api/admin/inbox/candidates/${b.dataset.cd}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: b.dataset.to }) });
-          if (r.ok) loadInbox(); else { b.disabled = false; $('inboxState').textContent = 'تعذر الحفظ. حاول مرة ثانية.'; }
-        }));
-      } catch (e) { $('inboxState').textContent = 'تعذر تحميل الكتب المرشّحة.'; if (!more) $('inboxList').innerHTML = ''; }
+    // ---------------- «طلبات واقتراحات الزوار» (ADMINWISH, Ibrahim 2026-11-13 «نبغى نخلي اقتراحات الزوار اوضح في الادارة»).
+    // One row per book or author, whatever way it reached us (backend/visitor_wishes.py); before: «الاقتراحات», «كتب مرشّحة»
+    // (candidate books, Ibrahim 2026-10-27) and «القرّاء ← طلبات القرّاء» (2026-10-24), four lists under two tabs.
+    const wish = { status: 'open', kind: 'all', items: [], general: [], total: 0 };
+    const WISH_ST = { new: 'جديد', following: 'قيد المتابعة', provided: 'تم توفيره', declined: 'مرفوض' };
+    const WISH_GEN_ST = { ...WISH_ST, provided: 'تمت المعالجة' };
+    const WISH_EMPTY = { open: 'ما فيه طلبات مفتوحة.', new: 'ما فيه طلبات جديدة.', following: 'ما فيه شيء قيد المتابعة.', provided: 'ما فيه شيء معلّم «تم توفيره».', declined: 'ما فيه شيء مرفوض.', all: 'ما فيه طلبات من الزوار بعد.' };
+    const wishTimes = n => n === 1 ? 'مرة' : n === 2 ? 'مرتين' : `${num(n)} ${n <= 10 ? 'مرات' : 'مرة'}`;
+    function wishStatusButtons(i, cur, labels, gen) {
+      return `<div class="wish-st" role="group" aria-label="الحالة">${Object.keys(labels).map(s =>
+        `<button type="button" data-w${gen ? 'g' : ''}="${i}" data-to="${s}" aria-pressed="${s === cur}">${labels[s]}</button>`).join('')}</div>`;
     }
+    function wishNote(i, note, gen) {
+      return `<details class="wish-note"${note ? ' open' : ''}><summary>ملاحظة الموظف${note ? '' : ' (اختياري، يشوفها زملاؤك)'}</summary>
+        <label class="sr" for="wn${gen ? 'g' : ''}${i}">ملاحظة الموظف</label>
+        <textarea id="wn${gen ? 'g' : ''}${i}" maxlength="500" dir="auto" rows="2" placeholder="مثلًا: طلبناه من الموزّع، يوصل الأسبوع الجاي">${esc(note || '')}</textarea>
+        <div class="nr-actions"><button type="button" class="btn secondary" data-wn${gen ? 'g' : ''}="${i}">حفظ الملاحظة</button></div></details>`;
+    }
+    function wishRow(w, i) {
+      const open = w.status === 'new' || w.status === 'following';
+      const src = (w.sources || []).map(s => `<span class="wtag src-${esc(s.key)}">${esc(s.label)}${s.key === 'outside' ? ` · بحثت عنه منار ${wishTimes(s.times)}` : ` ×${num(s.times)}`}</span>`).join('');
+      const facts = [w.author && (w.kind === 'book' ? 'تأليف ' + w.author : ''), w.year, w.publisher, w.isbn && 'ISBN ' + w.isbn].filter(Boolean).map(esc).join(' · ');
+      const out = w.outside_title || '';
+      const stock = (w.in_stock_now || []).length ? `<div class="wish-stock"><b>متوفر الآن في المكتبة${w.in_stock_count > 1 ? ` (${num(w.in_stock_count)})` : ''}:</b><br>${w.in_stock_now.map(b =>
+        `<button type="button" data-open-book="${b.book_id}">«${esc(b.title)}»${b.author ? ' — ' + esc(b.author) : ''}</button>`).join('')}</div>` : '';
+      const handled = w.status !== 'new' && (w.handled_by || w.handled_at) ? ` · ${esc(w.handled_by || '—')} ${esc(rqDate(w.handled_at))}` : '';
+      return `<div class="note-row${open ? '' : ' done'}"><div>
+          <p class="nr-text" dir="auto" style="margin-top:0"><b>${esc(w.title)}</b></p>
+          ${w.found_title ? `<span class="wish-found" dir="auto">عنوانه كاملًا: ${esc(w.found_title)}</span>` : ''}
+          ${out ? `<span class="wish-found" dir="auto">وجدته منار باسم: ${esc(out)}</span>` : ''}
+          ${facts ? `<span class="wish-found" dir="auto">${facts}${(w.info_sources || []).length ? ` · المصدر: ${esc(w.info_sources.slice(0, 3).join('، '))}` : ''}</span>` : ''}
+          <div class="wish-tags"><span class="wtag kind">${esc(w.kind_label)}</span>${src}<span class="wtag st-${esc(w.status)}">${esc(WISH_ST[w.status] || w.status)}</span></div>
+          <span class="nr-meta">مجموع الطلبات: <b style="display:inline;font-size:inherit">${num(w.total)}</b> · أول مرة ${esc(rqDate(w.first_at))}${w.last_at && w.last_at !== w.first_at ? ` · آخر مرة ${esc(rqDate(w.last_at))}` : ''}${handled}</span>
+          ${(w.asked_as || []).length ? `<span class="nr-meta" dir="auto">كتبه الزوار أيضًا: ${esc(w.asked_as.join('، '))}</span>` : ''}
+          ${(w.visitor_notes || []).map(n => `<p class="nr-text" dir="auto">ملاحظة زائر: ${esc(n)}</p>`).join('')}
+          ${stock}
+          ${wishNote(i, w.staff_note, false)}</div>
+        <div class="nr-actions">${w.suggest_provided ? `<button type="button" class="btn" data-w="${i}" data-to="provided">متوفر الآن: علّمه «تم توفيره»</button>` : ''}
+          ${wishStatusButtons(i, w.status, WISH_ST, false)}
+          ${w.catalog_book_id && !(w.in_stock_now || []).some(b => b.book_id === w.catalog_book_id) ? `<button type="button" class="btn secondary" data-open-book="${w.catalog_book_id}">بطاقته في الكتالوج (نافد)</button>` : ''}</div></div>`;
+    }
+    function wishGeneralRow(g, i) {
+      const open = g.status === 'new' || g.status === 'following';
+      const handled = g.status !== 'new' && (g.handled_by || g.handled_at) ? ` · ${esc(g.handled_by || '—')} ${esc(rqDate(g.handled_at))}` : '';
+      return `<div class="note-row${open ? '' : ' done'}"><div><p class="nr-text" dir="auto" style="margin-top:0">${esc(g.note)}</p>
+          <div class="wish-tags"><span class="wtag st-${esc(g.status)}">${esc(WISH_GEN_ST[g.status] || g.status)}</span></div>
+          <span class="nr-meta">${when(g.created_at)}${g.language === 'en' ? ' · من الواجهة الإنجليزية' : ''}${handled}</span>
+          ${wishNote(i, g.staff_note, true)}</div>
+        <div class="nr-actions">${wishStatusButtons(i, g.status, WISH_GEN_ST, true)}</div></div>`;
+    }
+    async function wishSave(item, body, stateId) {
+      try {
+        const r = await fetch('/api/admin/inbox/wishes', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refs: item.refs || [item.ref], title: item.title || (item.note || '').slice(0, 80), ...body }) });
+        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.status);
+        loadAlertsCount(); loadInboxCount();
+        return true;
+      } catch (e) { $(stateId).textContent = 'تعذر الحفظ. حاول مرة ثانية.'; return false; }
+    }
+    async function loadWishes(msg) {
+      $('wishState').textContent = msg || 'جاري التحميل…';
+      let d;
+      try {
+        const r = await fetch(`/api/admin/inbox/wishes?status=${wish.status}&kind=${wish.kind}`);
+        if (!r.ok) throw new Error(r.status);
+        d = await r.json();
+      } catch (e) { $('wishState').textContent = 'تعذر تحميل الطلبات.'; $('wishList').innerHTML = ''; return; }
+      wish.items = d.items; wish.general = d.general; wish.total = d.total;
+      const c = d.counts || {}, gc = d.general_counts || {};
+      $('subNWishes').textContent = (c.open || 0) + (gc.open || 0) ? num((c.open || 0) + (gc.open || 0)) : '';
+      const ready = wish.items.filter(w => w.suggest_provided).length;
+      $('wishState').textContent = msg || (wish.total ? `${num(wish.total)} ${wish.total === 1 ? 'كتاب أو مؤلف' : 'كتب ومؤلفين'} · جديد ${num(c.new || 0)} · قيد المتابعة ${num(c.following || 0)} · تم توفيره ${num(c.provided || 0)} · مرفوض ${num(c.declined || 0)}`
+        + (ready ? ` · ${num(ready)} ${ready === 1 ? 'صار متوفر الآن' : 'صارت متوفرة الآن'}` : '') + (d.has_more ? ` · المعروض ${num(wish.items.length)}` : '') : '');
+      $('wishList').innerHTML = wish.items.length ? wish.items.map(wishRow).join('') : `<div class="empty-note">${WISH_EMPTY[wish.status] || WISH_EMPTY.open}</div>`;
+      $('wishGenState').textContent = wish.general.length ? '' : (wish.status === 'open' ? 'ما فيه اقتراحات عامة مفتوحة.' : 'ما فيه اقتراحات عامة هنا.');
+      $('wishGeneral').innerHTML = wish.general.map(wishGeneralRow).join('');
+      const pane = $('wishPane');
+      pane.querySelectorAll('[data-open-book]').forEach(b => b.addEventListener('click', () => openCard(Number(b.dataset.openBook))));
+      pane.querySelectorAll('[data-w]').forEach(b => b.addEventListener('click', async () => {
+        const w = wish.items[Number(b.dataset.w)];
+        if (!w || b.getAttribute('aria-pressed') === 'true') return;
+        b.disabled = true;
+        if (await wishSave(w, { status: b.dataset.to }, 'wishState')) loadWishes(`«${w.title}»: ${WISH_ST[b.dataset.to]}.`); else b.disabled = false;
+      }));
+      pane.querySelectorAll('[data-wg]').forEach(b => b.addEventListener('click', async () => {
+        const g = wish.general[Number(b.dataset.wg)];
+        if (!g || b.getAttribute('aria-pressed') === 'true') return;
+        b.disabled = true;
+        if (await wishSave(g, { status: b.dataset.to }, 'wishGenState')) loadWishes(`الاقتراح: ${WISH_GEN_ST[b.dataset.to]}.`); else b.disabled = false;
+      }));
+      pane.querySelectorAll('[data-wn]').forEach(b => b.addEventListener('click', async () => {
+        const w = wish.items[Number(b.dataset.wn)];
+        b.disabled = true;
+        if (await wishSave(w, { note: $('wn' + b.dataset.wn).value }, 'wishState')) loadWishes(`حُفظت ملاحظتك على «${w.title}».`); else b.disabled = false;
+      }));
+      pane.querySelectorAll('[data-wng]').forEach(b => b.addEventListener('click', async () => {
+        const g = wish.general[Number(b.dataset.wng)];
+        b.disabled = true;
+        if (await wishSave(g, { note: $('wng' + b.dataset.wng).value }, 'wishGenState')) loadWishes('حُفظت ملاحظتك على الاقتراح.'); else b.disabled = false;
+      }));
+    }
+    document.querySelectorAll('#wishStatus button').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('#wishStatus button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      wish.status = btn.dataset.status; loadWishes();
+    }));
+    document.querySelectorAll('#wishKind button').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('#wishKind button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      wish.kind = btn.dataset.kind; loadWishes();
+    }));
     function renderInbox(items, msg) {
       const report = inbox.kind === 'report';
       const what = report ? 'عدد البلاغات' : 'عدد الاقتراحات';
@@ -4046,7 +4166,7 @@
       inbox.kind = kind; const id = KIND_TAB[kind];
       Object.values(KIND_TAB).forEach(other => { $(other).setAttribute('aria-selected', String(other === id)); $(other).tabIndex = other === id ? 0 : -1; });
       $('inboxList').setAttribute('aria-labelledby', $('inboxKinds').hidden ? SUBS.alerts.tabs[SUBS.alerts.cur][0] : id);
-      const heads = { visitors: 'بلاغات الزوار واقتراحاتهم', staff: 'من الموظفين: تعديلات مطلوبة على الكتب واقتراحاتهم', questions: 'أسئلة بلا جواب' };
+      const heads = { visitors: 'بلاغات الزوار ومراجعاتهم', staff: 'من الموظفين: تعديلات مطلوبة على الكتب واقتراحاتهم', questions: 'أسئلة بلا جواب' };
       $('inboxPane').querySelector('.st-head h2').textContent = heads[SUBS.alerts.cur] || heads.visitors;
       $('inboxPane').querySelector('.st-head .diff').hidden = SUBS.alerts.cur !== 'visitors';
       loadInbox();

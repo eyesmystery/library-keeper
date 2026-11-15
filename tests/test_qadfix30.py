@@ -30,7 +30,8 @@ ok(R.is_price_phrase("أغلى كتاب") and R.is_price_phrase("الأعلى س
 ok('_dear30 = chat_rules.dearest_asked(_last_msg) and not cheapest and not _short' in src
    and '("dearest" if _dear30 else "cheapest" if cheapest else _short)' in src and 'elif order_by == "dearest":' in src,
    "the price order turned round, with its own guidance")
-ok('and order_by != "dearest"):' in src and 'not it.get("copy_language") and not _dear30:' in src,
+ok('and order_by != "dearest"' in src and   # (QADFIX38: «and not _prize_order38» after it)
+    'not it.get("copy_language") and not _dear30:' in src,
    "«The Cosmic Script» (English, 700) is not pushed after the Arabic copies")
 ok("_base = _base + [(1, [], b) for b in pool if b[\"book_id\"] not in _ids30" in src, "every book the request allows, not only the scored ones")
 

@@ -27,10 +27,11 @@ import models  # noqa: E402
 LABEL_FIELD = {v: k for k, v in IE.FIELD_AR.items()}
 LANG_CODE = {v: k for k, v in IE.LANG_AR.items()}
 SKIP = {"price", "quantity", "active", "name_ar", "name_latin", "aliases", "origin", "staff_verified"}
-INTS = {"page_count", "publication_year", "original_year", "age_min", "age_max"}
+INTS = {"page_count", "publication_year", "original_year", "age_min", "age_max", "volumes"}
 BOOK_FIELDS = {"title", "author", "publisher", "genre", "page_count", "publication_year", "isbn", "translator", "language",
                "original_language", "shelf_location", "summary", "age_min", "age_max", "original_year",
-               "original_year_source", "original_year_ref", "original_year_checked_at", "goodreads_url"}
+               "original_year_source", "original_year_ref", "original_year_checked_at", "goodreads_url",
+               "volumes", "set_kind"}   # SETS 2026-11-13: typed by the library's staff (volumes_source = staff)
 HEAD = re.compile(r"^### 5\.(\d+) (?:★ )?(.+?) — .*\(book_id (\d+)\)\s*$")
 BY = re.compile(r"^- بواسطة: (.+?) · (\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s*$")
 CHANGE = re.compile(r"^- (.+?): كان (.*?) · صار (.*)$")
@@ -112,6 +113,36 @@ def plan(items, conn):
     return apply_, conflicts, already, covers
 
 
+CORRECTIONS = os.path.join(ROOT, "release", "library_corrections.json")
+
+
+def load_corrections(path=CORRECTIONS):
+    """{(book_id, field): item} of release/library_corrections.json (the values decided here over the library's own change); {} when the
+    file is missing or unreadable."""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            items = json.load(fh).get("items") or []
+    except (OSError, ValueError, AttributeError):
+        return {}
+    return {(int(i["book_id"]), i["field"]): i for i in items if isinstance(i, dict) and "book_id" in i and "field" in i}
+
+
+def split_decided(apply_, conflicts, corrections):
+    """DECIDE1115 (MGR 2026-11-13 / 11-14: 614 original year, 1061 original year, 920 ISBN came back every day as «to apply» and were put
+    back by hand): a field this computer decided over the library's value (library_corrections: the library still holds «expect», this
+    catalog holds «value») is no edit to bring here — neither an APPLY nor a CONFLICT. -> (apply_, conflicts, decided)."""
+    decided, a2, c2 = [], [], []
+    for rows, out in ((apply_, a2), (conflicts, c2)):
+        for row in rows:
+            bid, field, here, p = row
+            c = corrections.get((bid, field))
+            if c is not None and same(p["now"], c.get("expect")) and same(here, c.get("value")):
+                decided.append((bid, field, here, p, c))
+            else:
+                out.append(row)
+    return a2, c2, decided
+
+
 REVIEW_ACTIONS = {"تمت مراجعة الكتاب": "book.reviewed", "إلغاء مراجعة الكتاب": "book.unreviewed"}
 
 
@@ -165,17 +196,22 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("inbox_md")
     ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--corrections", default=CORRECTIONS, help="release/library_corrections.json (the values decided here)")
     a = ap.parse_args()
     name = os.path.basename(a.inbox_md)
     items = parse(a.inbox_md)
     conn = sqlite3.connect(models.DB_PATH)
     apply_, conflicts, already, covers = plan(items, conn)
+    apply_, conflicts, decided = split_decided(apply_, conflicts, load_corrections(a.corrections))
     titles = {r[0]: r[1] for r in conn.execute("SELECT book_id, title FROM books")}
     print(f"{name}: {len(items)} items in §5, {sum(len(i['changes']) for i in items)} field changes")
     reviews = reviews_to_mirror(items, conn)
-    print(f"to apply: {len(apply_)} · already the same here: {len(already)} · conflicts: {len(conflicts)} · covers (not in the file): {len(covers)} · reviews to mirror: {len(reviews)}")
+    print(f"to apply: {len(apply_)} · already the same here: {len(already)} · conflicts: {len(conflicts)} · decided here: {len(decided)} · covers (not in the file): {len(covers)} · reviews to mirror: {len(reviews)}")
     for bid, act, by, at, n in reviews:
         print(f"  REVIEW {bid} «{titles.get(bid, '?')}» {act} by {by} {at} (§5.{n})")
+    for bid, field, here, p, c in decided:
+        print(f"  DECIDED HERE (library_corrections) {bid} «{titles.get(bid, '?')}» {field}: here {str(here)[:60]!r} · library {str(p['now'])[:60]!r}"
+              f" — kept, not applied (§5.{','.join(str(r['n']) for r in p['refs'])})")
     for bid, field, here, p in apply_:
         print(f"  APPLY {bid} «{titles.get(bid, '?')}» {field}: {str(here)[:60]!r} → {str(p['now'])[:80]!r}  (§5.{','.join(str(r['n']) for r in p['refs'])} {p['refs'][-1]['by']})")
     for bid, field, here, p in conflicts:
@@ -204,6 +240,9 @@ def main():
                                  (f"library:{last['by']} {last['at']} ({name})" if p["now"] else None, now, bid))
                 if field == "genre":
                     sync_format(conn, bid, p["now"])
+                if field in ("volumes", "set_kind"):   # SETS: the count's source is the library's staff
+                    conn.execute("UPDATE books SET volumes_source = ? WHERE book_id = ?",
+                                 ("staff" if p["now"] not in (None, "") or field == "set_kind" else None, bid))
                 if field == "goodreads_url":
                     conn.execute("UPDATE books SET goodreads_url_source = ?, goodreads_rating = NULL, goodreads_ratings_count = NULL, "
                                  "goodreads_rating_source = NULL, goodreads_rating_at = NULL WHERE book_id = ?",   # AUDIT 2026-10-31 P2

@@ -24,7 +24,10 @@ REASONS = {
     "location": "المكان أو التوفر",
     "other": "شيء آخر",
 }
-STATUSES = ("open", "done")
+# ADMINWISH (Ibrahim 2026-11-13): a suggestion may also be «قيد المتابعة» (following) or «مرفوض» (declined) in
+# «طلبات واقتراحات الزوار» (backend/visitor_wishes.py); «following» still counts as open, «declined» as handled.
+STATUSES = ("open", "following", "done", "declined")
+GROUPS = {"open": ("open", "following"), "done": ("done", "declined")}
 MAX_TEXT = 500
 MIN_SUGGESTION = 3
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
@@ -44,11 +47,24 @@ def ensure_table(conn):
             created_at TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'open',
             handled_by TEXT,
-            handled_at TEXT
+            handled_at TEXT,
+            staff_note TEXT
         )
         """
     )
+    # ADMINWISH 2026-11-13: «ملاحظة الموظف» on a suggestion; library data, an update keeps it
+    if "staff_note" not in {c[1] for c in conn.execute("PRAGMA table_info(visitor_notes)")}:
+        import models
+        models._add_column(conn, "visitor_notes", "staff_note", "TEXT")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_visitor_notes_status ON visitor_notes(status, kind)")
+
+
+def _status_sql(status, col="status"):
+    """-> (sql, args): «open» = open + following, «done» = done + declined, one status, or nothing (all)."""
+    vals = GROUPS.get(status) or ((status,) if status in STATUSES else ())
+    if not vals:
+        return "", []
+    return f" AND {col} IN ({', '.join('?' for _ in vals)})", list(vals)
 
 
 def _now():
@@ -115,9 +131,9 @@ def total(kind="report", status="open"):
     if kind not in KINDS:
         kind = "report"
     q, args = "SELECT COUNT(*) FROM visitor_notes WHERE kind = ?", [kind]
-    if status in STATUSES:
-        q += " AND status = ?"
-        args.append(status)
+    sql, sargs = _status_sql(status)
+    q += sql
+    args += sargs
     conn = get_connection()
     try:
         return conn.execute(q, args).fetchone()[0]
@@ -131,11 +147,11 @@ def list_notes(kind="report", status="open", limit=PAGE, offset=0):
     q = """SELECT n.*, b.title AS current_title, b.author AS book_author, b.cover_url
            FROM visitor_notes n LEFT JOIN books b ON b.book_id = n.book_id WHERE n.kind = ?"""
     args = [kind]
-    if status in STATUSES:
-        q += " AND n.status = ?"
-        args.append(status)
+    sql, sargs = _status_sql(status, "n.status")
+    q += sql
+    args += sargs
     # open ones oldest first is not useful on a phone: newest first, open before handled
-    q += " ORDER BY (n.status = 'open') DESC, n.note_id DESC LIMIT ? OFFSET ?"
+    q += " ORDER BY (n.status IN ('open', 'following')) DESC, n.note_id DESC LIMIT ? OFFSET ?"
     args += [max(1, min(int(limit), 300)), max(0, int(offset))]
     conn = get_connection()
     try:
@@ -160,7 +176,7 @@ def set_status(note_id, status, username=None):
         row = conn.execute("SELECT note_id FROM visitor_notes WHERE note_id = ?", (int(note_id),)).fetchone()
         if row is None:
             return None
-        done = status == "done"
+        done = status != "open"
         conn.execute("UPDATE visitor_notes SET status = ?, handled_by = ?, handled_at = ? WHERE note_id = ?",
                      (status, username if done else None, _now() if done else None, int(note_id)))
         conn.commit()

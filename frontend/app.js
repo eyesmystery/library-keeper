@@ -23,6 +23,9 @@ const COPY = {
     startChips: ['أدوّر كتاب معيّن', 'رشّحي لي كتاب يناسب ذوقي أو مزاجي', 'أبغى كتاب هدية', 'أبغى أبدأ قراءة', 'فاجئيني بكتب جديدة'],
     detailsAria: (title, author) => `عرض تفاصيل كتاب ${title} للكاتب ${author}`,
     pages: n => `${n} صفحة`, unknownLength: 'الطول غير معروف', shelf: value => `الرف ${value}`,
+    // SETS (2026-11-13): several books sold under one record — the set, never a page count as one book's length
+    setOf: (n, kind, f) => kind === 'one_work' ? (n === 2 ? 'في جزأين' : n <= 10 ? `في ${f} أجزاء` : `في ${f} جزءًا`)
+      : (n === 2 ? 'مجموعة من كتابين' : n <= 10 ? `مجموعة من ${f} كتب` : `مجموعة من ${f} كتابًا`),
     askStaff: 'موقعه عند الموظف', available: 'متوفر', fallbackReply: 'هذي خيارات متوفرة الآن.',
     fallbackChips: ['ورّني غيرها', 'شي أخف', 'شي أقصر', 'رشّحي لي رواية', 'فاجئيني بكتاب'], typing: 'منار تكتب',
     connectionError: 'تعذر الوصول لمنار الآن. تأكد من الاتصال وجرّب مرة ثانية.',
@@ -99,6 +102,7 @@ const COPY = {
     startChips: ['Find a specific book', 'Recommend something for my taste or mood', 'I want a gift book', 'I want to start reading', 'Surprise me with new books'],
     detailsAria: (title, author) => `View details for ${title} by ${author}`,
     pages: n => `${n} pages`, unknownLength: 'Length unknown', shelf: value => `Shelf ${value}`,
+    setOf: (n, kind, f) => kind === 'one_work' ? `In ${f} volumes` : `A set of ${f} books`,
     askStaff: 'Ask a bookseller for its location', available: 'Available', fallbackReply: 'Here are a few books available now.',
     fallbackChips: ['Show me others', 'Something lighter', 'Something shorter', 'Suggest a novel', 'Surprise me'], typing: 'Manar is typing',
     connectionError: 'Manar is unavailable right now. Check your connection and try again.',
@@ -286,6 +290,13 @@ function locationText(book) {
   return book.location_kind === 'shelf' && /^[A-Za-z]?\d+[A-Za-z]?$/.test(book.location) ? t('shelf')(book.location) : book.location;
 }
 
+// SETS (2026-11-13): «في جزأين» / «مجموعة من ٥ كتب» for several books under one record (its page count is no book's length)
+function lengthText(book) {
+  const n = Number(book && book.volumes) || 0;
+  if (n > 1) return t('setOf')(n, book.set_kind === 'one_work' ? 'one_work' : 'collection', formatNumber(n));
+  return book && book.page_count ? t('pages')(formatNumber(book.page_count)) : '';
+}
+
 function bookCard(book, index) {
   const card = document.createElement('button');
   card.type = 'button';
@@ -293,7 +304,7 @@ function bookCard(book, index) {
   card.style.animationDelay = `${index * 45}ms`;
   const initial = [...String(book.title || (currentLanguage === 'ar' ? 'ك' : 'B')).trim()][0] || 'B';
   // an unknown detail is left out, not written as «غير معروف» (Ibrahim, 2026-10-08)
-  const pages = book.page_count ? t('pages')(formatNumber(book.page_count)) : '';
+  const pages = lengthText(book);
   // the chat card says «متوفر» without the count, and shows the price (Ibrahim, 2026-10-11)
   const price = Number(book.price) > 0 ? t('currency')(formatNumber(book.price)) : '';
   const shelf = locationText(book) || t('askStaff');
@@ -653,7 +664,7 @@ function showBook(book) {
   $('dStock').textContent = stockLabel(book.quantity, true);
   $('dShelf').textContent = locationText(book) || t('shelfUnknown');
   $('findLabel').textContent = locationText(book) ? t('findAt') : t('whereLabel');
-  $('dPages').textContent = book.page_count ? t('pages')(formatNumber(book.page_count)) : '';
+  $('dPages').textContent = lengthText(book);
   $('dOrigin').textContent = book.origin || '';
   $('dOriginBox').hidden = !book.origin;
   // the year of publication of this edition, left out when unknown (Ibrahim, 2026-10-09)

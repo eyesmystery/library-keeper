@@ -12,7 +12,8 @@ From «ماذا تقرأ الآن؟» a visitor writes the title of a book (and 
     on «لا» — or when nothing was found — the visitor's words are kept as a suggestion («البلاغات ← الاقتراحات»).
 A book suggested again is not a new row: times_suggested grows.
 
-Staff see the candidates in «التنبيهات ← من الزوار ← كتب مرشّحة» and mark each «تم توفيره» or «لن نوفره».
+Staff see the candidates in «التنبيهات ← طلبات واقتراحات الزوار» (ADMINWISH 2026-11-13; before: «من الزوار ← كتب مرشّحة»),
+merged with the chat's questions about the same book, and mark each «قيد المتابعة», «تم توفيره» or «مرفوض».
 Library data, never in a release package (scripts/make_release.py EMPTY_TABLES); an update keeps it.
 No visitor detail is stored (only the book and an optional short note).
 """
@@ -21,7 +22,10 @@ from datetime import datetime, timezone
 
 from models import get_connection
 
-STATUSES = ("open", "added", "declined")
+# ADMINWISH (Ibrahim 2026-11-13): «following» = «قيد المتابعة» in «طلبات واقتراحات الزوار» (backend/visitor_wishes.py);
+# it still counts as open. open = جديد, added = تم توفيره, declined = مرفوض (was «لن نوفره»).
+STATUSES = ("open", "following", "added", "declined")
+OPEN_STATUSES = ("open", "following")
 PAGE = 100
 MAX_NOTE = 300
 
@@ -51,10 +55,15 @@ def ensure_table(conn):
             last_at TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'open',
             handled_by TEXT,
-            handled_at TEXT
+            handled_at TEXT,
+            staff_note TEXT
         )
         """
     )
+    # ADMINWISH 2026-11-13: «ملاحظة الموظف» on a candidate book; library data, an update keeps it
+    if "staff_note" not in {c[1] for c in conn.execute("PRAGMA table_info(candidate_books)")}:
+        import models
+        models._add_column(conn, "candidate_books", "staff_note", "TEXT")
     conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_candidate_outside ON candidate_books(outside_key) WHERE outside_key IS NOT NULL")
     conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_candidate_book ON candidate_books(book_id) WHERE book_id IS NOT NULL")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_candidate_status ON candidate_books(status)")
@@ -93,11 +102,11 @@ def _upsert(where, value, fields, note):
             notes = json.loads(old["notes"] or "[]")
             if note:
                 notes = (notes + [note])[-20:]
-            # suggested again after staff closed it: open again, so it is seen
+            # suggested again after staff closed it: open again, so it is seen (one declined or being followed keeps its state)
             conn.execute("""UPDATE candidate_books SET times_suggested = times_suggested + 1, last_at = ?, notes = ?,
-                            status = CASE WHEN status = 'declined' THEN status ELSE 'open' END,
-                            handled_by = CASE WHEN status = 'declined' THEN handled_by ELSE NULL END,
-                            handled_at = CASE WHEN status = 'declined' THEN handled_at ELSE NULL END
+                            status = CASE WHEN status IN ('declined', 'following') THEN status ELSE 'open' END,
+                            handled_by = CASE WHEN status IN ('declined', 'following') THEN handled_by ELSE NULL END,
+                            handled_at = CASE WHEN status IN ('declined', 'following') THEN handled_at ELSE NULL END
                             WHERE candidate_id = ?""", (now, json.dumps(notes, ensure_ascii=False), old["candidate_id"]))
             conn.commit()
             return old["candidate_id"], False
@@ -134,9 +143,9 @@ def add_catalog(book, asked_as="", note=""):
 # ---------------------------------------------------------------- staff
 def _where(status):
     if status == "open":
-        return " WHERE status = 'open'", []
+        return " WHERE status IN ('open', 'following')", []
     if status == "done":
-        return " WHERE status != 'open'", []
+        return " WHERE status NOT IN ('open', 'following')", []
     if status in STATUSES:
         return " WHERE status = ?", [status]
     return "", []
@@ -172,7 +181,7 @@ def list_candidates(status="open", limit=PAGE, offset=0):
         ensure_table(conn)
         rows = []
         for r in conn.execute("SELECT * FROM candidate_books" + w +
-                              " ORDER BY (status = 'open') DESC, times_suggested DESC, last_at DESC LIMIT ? OFFSET ?",
+                              " ORDER BY (status IN ('open', 'following')) DESC, times_suggested DESC, last_at DESC LIMIT ? OFFSET ?",
                               args + [max(1, min(int(limit), 300)), max(0, int(offset))]):
             d = dict(r)
             for f in ("genres", "sources", "notes"):

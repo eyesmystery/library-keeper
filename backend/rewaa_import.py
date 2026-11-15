@@ -25,6 +25,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
+import book_sets
 import deleted_books
 from models import get_connection
 
@@ -424,8 +425,15 @@ def build_plan(upload_id, mapping, missing_mode="zero"):
             if len(cands) == 1:
                 match, how = cands[0], "الاسم"
         if match is None:
-            new.append({"row": n, **{k: v[k] for k in ("title", "author", "publisher", "barcode", "sku", "price", "quantity", "shelf")},
-                        "isbn": v["barcode"] if is_isbn(v["barcode"]) else "", "language": guess_language(v["title"], v["barcode"] if is_isbn(v["barcode"]) else "")})
+            item = {"row": n, **{k: v[k] for k in ("title", "author", "publisher", "barcode", "sku", "price", "quantity", "shelf")},
+                    "isbn": v["barcode"] if is_isbn(v["barcode"]) else "", "language": guess_language(v["title"], v["barcode"] if is_isbn(v["barcode"]) else "")}
+            # DECIDE1115 (Ibrahim 2026-11-15 «موافق عالتوصيات» on SETS question 2): a new record whose title says plainly that it holds
+            # several books / parts («(جزءان)»، «(3 أجزاء)»، «(1-3)»، «2/1»، "2 volumes"، "1-4 Boxed Set") is marked a set (volumes_source
+            # title); any other title is not marked (staff set it in «البيانات الأساسية»)
+            st = book_sets.clear_from_title(v["title"])
+            if st:
+                item["set"] = st
+            new.append(item)
             continue
         if match["book_id"] in seen_ids:
             invalid.append({"row": n, "title": v["title"], "problems": [f"يطابق نفس كتاب سطر سابق ({match['title']})"]})
@@ -470,7 +478,7 @@ def apply_plan(upload_id, mapping, missing_mode="zero", applied_by=None):
     plan = build_plan(upload_id, mapping, missing_mode)
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     conn = get_connection()
-    zeroed = 0
+    zeroed = sets_marked = 0
     added_rows, zeroed_rows = [], []
     try:
         conn.execute("BEGIN")
@@ -488,6 +496,11 @@ def apply_plan(upload_id, mapping, missing_mode="zero", applied_by=None):
                          (cur.lastrowid,))
             added_rows.append({"book_id": cur.lastrowid, "title": item["title"], "author": item["author"] or "",
                                "publisher": item.get("publisher") or "", "quantity": item["quantity"], "price": item["price"]})
+            if item.get("set"):   # DECIDE1115: a set said plainly by its title (SETS columns, volumes_source title)
+                conn.execute("UPDATE books SET volumes = ?, set_kind = ?, volumes_source = 'title' WHERE book_id = ?",
+                             (item["set"]["volumes"], item["set"]["kind"], cur.lastrowid))
+                added_rows[-1]["set"] = item["set"]
+                sets_marked += 1
         for item in plan["updated"] + plan["unchanged"]:
             sets = {k: v[1] for k, v in item["changes"].items()}
             sets["last_synced_at"] = now
@@ -522,7 +535,8 @@ def apply_plan(upload_id, mapping, missing_mode="zero", applied_by=None):
     _uploads.pop(upload_id, None)
     return {"applied_at": now, "added": len(plan["new"]), "updated": len(plan["updated"]),
             "unchanged": len(plan["unchanged"]), "missing": len(plan["missing"]),
-            "marked_out_of_stock": zeroed, "invalid": len(plan["invalid"]), "excluded": len(plan["excluded"])}
+            "marked_out_of_stock": zeroed, "invalid": len(plan["invalid"]), "excluded": len(plan["excluded"]),
+            "sets_marked": sets_marked}
 
 
 def history(limit=10):

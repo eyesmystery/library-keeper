@@ -50,7 +50,7 @@ _af = open(os.path.join(os.path.dirname(A.__file__), "author_flow.py"), encoding
 ok('and not _respelt_by_visitor(written, conversation)' in _af, "28.2: no family-name question then")
 ok("if ambiguous and not options and known_record and full" in _af, "26.1: no «Do you mean …?» for an author we have none of")
 ok('facts[-1]["pages_approx_other_edition"]' in _src, "40.1: the page count of another edition of the work")
-ok("_prize_phrases" in _src and "topics.searchable([u for u in unsupported if u not in _prize_phrases]" in _src,
+ok("_prize_phrases" in _src and "topics.searchable([u for u in unsupported if u not in _prize_phrases" in _src,   # (QADFIX38: and no style wish)
    "33.1: an unlisted prize name is not searched as a subject")
 ok("_relaxed_said = [x for x in relaxed_subgenres if x not in topics_found]" in _src, "21.3: a label found by subject is not «unconfirmed»")
 ok("_unsup_said = [u for u in unsupported if u not in (relaxed_subgenres or ())]" in _src, "21.3: nor «I found nothing about it»")

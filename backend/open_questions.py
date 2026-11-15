@@ -21,9 +21,22 @@ KINDS = {"topic": "موضوع ما لقينا عنه كتابًا", "award": "ج
          "adaptation": "فيلم أو مسلسل ما عندنا بياناته", "missing_book": "كتاب طُلب وليس عندنا",
          "wish": "رغبة لا نقدر نبحث بها", "question": "سؤال عن كتاب ما عرفنا نجاوبه",
          "missing_author": "مؤلف طُلب وما عندنا من كتبه"}
-STATUSES = ("open", "done")
+# ADMINWISH (Ibrahim 2026-11-13): «قيد المتابعة» and «مرفوض» join «open» (جديد) and «done» (تم توفيره / تمت المعالجة) for
+# the books and authors visitors asked for (backend/visitor_wishes.py). «following» still counts as open, «declined» as handled.
+STATUSES = ("open", "following", "done", "declined")
+GROUPS = {"open": ("open", "following"), "done": ("done", "declined")}
 PAGE = 100
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def _status_where(status, col="status"):
+    """-> (sql, args) for a status filter: «open» = open + following, «done» = done + declined, one status, or none."""
+    if status in GROUPS:
+        vals = GROUPS[status]
+        return f"{col} IN ({', '.join('?' for _ in vals)})", list(vals)
+    if status in STATUSES:
+        return f"{col} = ?", [status]
+    return "", []
 
 
 def ensure_table(conn):
@@ -31,7 +44,11 @@ def ensure_table(conn):
         q_id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, phrase TEXT NOT NULL,
         phrase_key TEXT NOT NULL, book_title TEXT, times INTEGER NOT NULL DEFAULT 1,
         first_at TEXT NOT NULL, last_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'open',
-        handled_by TEXT, handled_at TEXT, UNIQUE (kind, phrase_key))""")
+        handled_by TEXT, handled_at TEXT, staff_note TEXT, UNIQUE (kind, phrase_key))""")
+    # ADMINWISH 2026-11-13: what staff wrote about a request («ملاحظة الموظف»); library data, an update keeps it
+    if "staff_note" not in {c[1] for c in conn.execute("PRAGMA table_info(open_questions)")}:
+        import models
+        models._add_column(conn, "open_questions", "staff_note", "TEXT")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_open_questions_status ON open_questions(status, kind)")
 
 
@@ -56,7 +73,8 @@ def record(kind, phrase, book_title=None):
             conn.execute("""INSERT INTO open_questions (kind, phrase, phrase_key, book_title, first_at, last_at)
                             VALUES (?, ?, ?, ?, ?, ?)
                             ON CONFLICT(kind, phrase_key) DO UPDATE SET times = times + 1, last_at = excluded.last_at,
-                            status = 'open', book_title = COALESCE(excluded.book_title, book_title)""",
+                            status = CASE WHEN status IN ('following', 'declined') THEN status ELSE 'open' END,
+                            book_title = COALESCE(excluded.book_title, book_title)""",
                          (kind, phrase, key, title, now, now))
             conn.commit()
         finally:
@@ -69,7 +87,8 @@ def list_rows(status="open", offset=0):
     conn = get_connection()
     try:
         ensure_table(conn)
-        where, args = ("WHERE status=?", [status]) if status in STATUSES else ("", [])
+        sql, args = _status_where(status)
+        where = "WHERE " + sql if sql else ""
         rows = [dict(r) for r in conn.execute(
             f"SELECT * FROM open_questions {where} ORDER BY times DESC, last_at DESC LIMIT ? OFFSET ?",
             args + [PAGE, max(0, int(offset or 0))])]
@@ -88,9 +107,10 @@ def requested(status="open", limit=500):
     try:
         ensure_table(conn)
         where, args = "WHERE kind IN ('missing_book', 'missing_author')", []
-        if status in STATUSES:
-            where += " AND status=?"
-            args.append(status)
+        sql, sargs = _status_where(status)
+        if sql:
+            where += " AND " + sql
+            args += sargs
         rows = [dict(r) for r in conn.execute(
             f"SELECT * FROM open_questions {where} ORDER BY times DESC, last_at DESC LIMIT ?", args + [int(limit)])]
         n = {k: conn.execute(f"SELECT COUNT(*) FROM open_questions WHERE kind IN ('missing_book', 'missing_author') AND status=?",
@@ -106,7 +126,7 @@ def counts():
     conn = get_connection()
     try:
         ensure_table(conn)
-        return {"open": conn.execute("SELECT COUNT(*) FROM open_questions WHERE status='open'").fetchone()[0],
+        return {"open": conn.execute("SELECT COUNT(*) FROM open_questions WHERE status IN ('open', 'following')").fetchone()[0],
                 "all": conn.execute("SELECT COUNT(*) FROM open_questions").fetchone()[0]}
     finally:
         conn.close()
@@ -120,8 +140,9 @@ def set_status(q_id, status, by=None):
         ensure_table(conn)
         if conn.execute("SELECT 1 FROM open_questions WHERE q_id=?", (q_id,)).fetchone() is None:
             return None
+        handled = status != "open"
         conn.execute("UPDATE open_questions SET status=?, handled_by=?, handled_at=? WHERE q_id=?",
-                     (status, by if status == "done" else None, _now() if status == "done" else None, q_id))
+                     (status, by if handled else None, _now() if handled else None, q_id))
         conn.commit()
         return dict(conn.execute("SELECT * FROM open_questions WHERE q_id=?", (q_id,)).fetchone())
     finally:

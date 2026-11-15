@@ -11,6 +11,7 @@ anything else is kept under the key "other" with its own name.
 import re
 from datetime import datetime, timezone
 
+import book_sets
 from models import get_connection
 
 AWARDS = {   # key -> Arabic name shown to staff and visitors
@@ -161,6 +162,14 @@ def load(max_age=60):
                         if work and _work_key(work) == tk and (r["award_key"], r.get("year"), r["result"]) not in own:
                             own.add((r["award_key"], r.get("year"), r["result"]))
                             data["book"].setdefault(bid, []).append(dict(r, book_id=bid, category=None, derived_from="author_awards"))
+        # SETS (Ibrahim 2026-11-13): a collection (different books sold under one record) won no prize and was adapted as
+        # nothing as a whole: its rows stay for the admin card (book_all / adapt_all) and are left out of everything the
+        # visitor is told or matched on; a work in parts keeps its own
+        coll = book_sets.collection_ids(conn)
+        data["book_all"], data["adapt_all"] = dict(data["book"]), dict(data["adapt"])
+        if coll:
+            data["book"] = {k: v for k, v in data["book"].items() if k not in coll}
+            data["adapt"] = {k: v for k, v in data["adapt"].items() if k not in coll}
     finally:
         conn.close()
     _cache.update(at=time.time(), data=data)
@@ -512,8 +521,8 @@ def delete(table, row_id, owner_id=None):
 def rows_for_book(book_id):
     """Rows for the admin book card (with ids, sources and labels)."""
     d = load(0)
-    aw = [dict(r, label=award_label(r)) for r in d["book"].get(book_id, [])]
-    ad = [dict(r, label=adaptation_label(r)) for r in d["adapt"].get(book_id, [])]
+    aw = [dict(r, label=award_label(r)) for r in d.get("book_all", d["book"]).get(book_id, [])]
+    ad = [dict(r, label=adaptation_label(r)) for r in d.get("adapt_all", d["adapt"]).get(book_id, [])]
     auth = [dict(r, label=award_label(r, True)) for aid in d["book_authors"].get(book_id, []) for r in d["author"].get(aid, [])]
     return {"awards": aw, "adaptations": ad, "author_awards": auth}
 

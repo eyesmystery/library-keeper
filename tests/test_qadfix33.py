@@ -86,7 +86,8 @@ ok("الزائر سأل عن الأحدث: الكتب المتوفرة اللي 
 ok('"result") == "winner"' in src and "def own_win_year33(book_id, keys):" in src, "the year is the book's own win, not its author's prize")
 ok("هذا هو العدد الصحيح للقائمة كلها" in src and "and own_win_year33(b[\"book_id\"], prefs[\"awards\"])):" in src,
    "replay 33.2: the whole list counts the winners shown the turn before too (seven, not five)")
-ok('_skip33 = bool(it.get("list_all33") and len(it.get("own_winners33") or ()) >= len(_lib_won))' in src
+ok(('_skip33 = bool(it.get("list_all33") and len(it.get("own_winners33") or ()) >= len(_lib_won))' in src
+    or '_skip33 = bool(prize_order_asked39(it) and it.get("own_winners33") is not None and len(it.get("own_winners33") or ()) >= len(_lib_won))' in src)   # (QADFIX39 #1)
    and 'if len(_lib_won) > len(_kinds["book"]) and not _skip33 and _n_people > 1 and not _women27:' in src,
    "replay 3 of fresh 333.2: no second «within your wishes» count beside the whole list")
 ok("الأحدث فوزًا هو «" in src and "لكنه فاز بالجائزة نفسها فهو جواب سؤاله" in src,

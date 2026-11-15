@@ -16,7 +16,10 @@ COMMON_SHARE = 0.06                      # a word in more than this share of boo
 _STOP = {normalize(w) for w in (
     "عن في من الى على مع او و كتاب كتب روايه روايات قصه قصص ادب شي شيء موضوع يتكلم يتحدث تتكلم حول بدون غير "
     "مو ما لا اللي الذي التي هذا هذه كل بعض اكثر اقل جدا مره كثير نوع انواع ممتع ممتعه جميل حلو زين "
-    "سرد اسلوب كلام طريقه عملي عمليه سهل بسيط book books about the a an of and or on in for with").split()}
+    "سرد اسلوب كلام طريقه عملي عمليه سهل بسيط book books about the a an of and or on in for with "
+    # QADFIX39 #7 (QAD 2026-11-14 case 46.2): «أبي شي عملي عن خطوات تأسيس شركة ناشئة» → the subject «تاسيس، خطوات» → «ما لقيت»: the steps,
+    # stages or basics of a thing say how the book teaches it, never what it is about
+    "خطوات خطوه الخطوات مراحل المراحل اساسيات الاساسيات steps").split()}
 # «حائزة على نوبل»، «أخذ جائزة»: the award words only say «a prize»; the prize's name is the subject
 # (library trial, 2026-10-08)
 AWARD_WORDS = {normalize(w) for w in (
@@ -29,15 +32,19 @@ _IPAF = "الجائزه العالميه للروايه العربيه"
 _cache = {"key": None, "at": 0.0, "index": None}
 
 
-def stems(word):
+def stems(word, kaf=True):
     """Forms a word may take in the catalog: without «ال», one attached prefix letter, or a short
-    possessive/feminine/plural ending («وقتي» ~ «الوقت», «للتسويف» ~ «التسويف», «اندلسي» ~ «اندلس»)."""
+    possessive/feminine/plural ending («وقتي» ~ «الوقت», «للتسويف» ~ «التسويف», «اندلسي» ~ «اندلس»).
+    kaf=False (a summary's words, QADFIX39 #4): «كحيوان» / «كالحيوان» is a likeness («يُعامل كحيوان»), not the word itself."""
     w = normalize(word).strip()
     out = {w, strip_al(w)}
     for pre in ("وال", "بال", "فال", "كال", "لل"):
+        if pre == "كال" and not kaf:
+            continue
         if w.startswith(pre) and len(w) > len(pre) + 2:
             out.add(w[len(pre):])
-    if len(w) > 4 and w[0] in "وفبلك":
+    # (QADFIX39 #5: the «ف» of «فروسية» is the root's own letter — not «روسية», Russian)
+    if len(w) > 4 and w[0] in ("وفبلك" if kaf else "وفبل") and not w.startswith("فروسي"):
         out.add(strip_al(w[1:]))
     for v in list(out):
         for suf in ("يه", "يات", "ات", "ين", "ون", "ها", "هم", "ي"):  # not «ه»: «الغربة» is not «الغرب»
@@ -56,8 +63,49 @@ def _is_year(w):
     return w.isdigit() and len(w) == 4 and 1800 <= int(w) <= 2099
 
 
-def _tokens(text):
+# QADFIX38 #4 (QAD 2026-11-13 case 2.2, medium): «ودي برواية لي عن الحرب العالمية» → «ما لقيت هنا رواية واضحة عن الحرب العالمية» while
+# «وقت للحب ووقت للموت» (subjects «الحرب العالمية الثانية»)، «الجندي الطيب شفيك… في الحرب العالمية»، «العندليب» are in stock: «الحرب» and
+# «العالمية» are each too common to be a subject, so the phrase was never searched. A world war is one name: it is read as one word
+# (with its order, first / second, when said) in our records and in the visitor's words, Arabic or English
+WW_TOKEN = "حربعالميه"
+_WW_AR38 = re.compile(r"(?:^| )(?:[وبلفك]|وال|بال|فال|كال|لل|ال)?(?:ال)?حرب (?:ال)?(?:عالميه|كونيه)(?: (?:ال)?(اولي|اولى|اول|ثانيه|ثاني))?(?= |$)"
+                      r"|(?:^| )(?:[وبلفك]|وال|بال|لل|ال)?(?:ال)?حربين (?:ال)?(?:عالميتين|كونيتين)(?= |$)")
+_WW_EN38 = re.compile(r"(?:^| )(first|second) world war(?= |$)|(?:^| )world war(?: (one|two|i|ii|1|2))?(?= |$)|(?:^| )ww ?(i|ii|1|2)(?= |$)")
+_WW_ORD38 = {"اولي": "1", "اولى": "1", "اول": "1", "ثانيه": "2", "ثاني": "2", "first": "1", "second": "2", "one": "1", "two": "2",
+             "i": "1", "ii": "2", "1": "1", "2": "2"}
+
+
+def ww_spans(norm_text):
+    """«… خلال الحرب العالمية الثانية …» (normalized) -> [(start, end, "2")]; no order said -> ""; «wwii» -> "2" (QADFIX38 #4)."""
+    out = []
+    t = norm_text or ""
+    for m in _WW_AR38.finditer(t):
+        out.append((m.start(), m.end(), _WW_ORD38.get(m.group(1) or "", "")))
+    for m in _WW_EN38.finditer(t.lower()):
+        g = m.group(1) or m.group(2) or m.group(3)
+        out.append((m.start(), m.end(), _WW_ORD38.get((g or "").lower(), "")))
+    return out
+
+
+def ww_tokens(norm_text):
+    """The world-war words of a normalized text: {WW_TOKEN} and, with its order, WW_TOKEN + "1" / "2" (QADFIX38 #4)."""
     out = set()
+    for _s, _e, o in ww_spans(norm_text):
+        out.add(WW_TOKEN)
+        if o:
+            out.add(WW_TOKEN + o)
+    return out
+
+
+# QADFIX39 #5 (QAD 2026-11-14 case 26.1, medium): «كتاب عن تاريخ الخيل العربية وأنسابها» → «أبا الخيل .. النسب- التسمية- الفروع» first
+# (a family's genealogy, «يتناول الأنساب»): in «أبا الخيل» / «آل سعود» the word after «أبا» / «آل» is a family's name, not a subject
+_FAMILY39 = re.compile(r"(?<![^\s«(\"'])(?:أبا|ابا|آل)\s+[^\s.،,:؛\-–—()«»]+")
+
+
+def _tokens(text, kaf=True):
+    out = set()
+    text = _FAMILY39.sub(" ", str(text or ""))   # QADFIX39 #5
+    out |= ww_tokens(normalize(str(text or "")))   # QADFIX38 #4
     # «آلموت» (a castle) is not «الموت»: a name written with «آل» keeps a mark so the normalizing of «آ» does
     # not turn it into the article + «موت» (QAD 2026-10-14, case 45)
     text = re.sub(r"(?<![^\s«(\"'])آل(?=[^\s]{3,})", "ءال", str(text or ""))
@@ -65,7 +113,7 @@ def _tokens(text):
         if _is_year(w):
             out.add(w)              # «البوكر ٢٠٢٢»: the year is part of the subject
         elif len(w) >= 3 and not w.isdigit():
-            out |= stems(w)
+            out |= stems(w, kaf)
     return out
 
 
@@ -89,7 +137,9 @@ def index(all_books):
         # + the library sheet's keywords (SHELF 2026-10-11, Ibrahim «اعتمد الكلمات المفتاحية للبحث والربط»)
         subj = _tokens(_json_words(b.get("subjects")) + " " + _json_words(b.get("subgenres")) + " " + str(b.get("setting") or "")
                        + " " + _json_words(b.get("keywords")))
-        text = _tokens(str(b.get("summary") or "") + " " + str(b.get("hook") or "") + " " + _json_words(b.get("learning_outcomes")))
+        # QADFIX39 #4 (QAD 2026-11-14 case 12.3): «بيت العقرب» («يكبر وهو يُعامل كحيوان») was a book «about» animals: in a summary a word
+        # with the likeness «ك» in front is not that word
+        text = _tokens(str(b.get("summary") or "") + " " + str(b.get("hook") or "") + " " + _json_words(b.get("learning_outcomes")), kaf=False)
         books[bid] = (title, subj, text)
         for w in title | subj | text:
             counts[w] = counts.get(w, 0) + 1
@@ -161,6 +211,15 @@ _SAME = [("تاريخ", "اصل", "نشاه", "نشوء", "تطور"),
          # its cities lead to al-Andalus, not the other way round (one way, below)
          ("اندلس", "الاندلس", "اندلسي", "الاندلسي", "اندلسيه", "الاندلسيه", "غرناطه", "قرطبه", "اشبيليه", "طليطله", "andalus",
           "andalusia", "granada"),
+         # QADFIX39 #2 (QAD 2026-11-14 case 7.2, medium): «رواية تاريخية عن مصر أيام الرهبان والكنيسة القديمة» → «ما لقيت هنا رواية واضحة
+         # عن هالموضوع» while «خالتي صفية والدير» (subjects «ثأر في صعيد مصر ودير قبطي»)، «سيرة القبطية» and «البشموري» (الأقباط، الكنيسة) are
+         # in stock: monks, a monastery, a church and the Copts are one subject in our records (the Christian monastic / church life)
+         ("رهبان", "الرهبان", "راهب", "الراهب", "راهبه", "الراهبه", "راهبات", "الراهبات", "رهبنه", "الرهبنه", "رهبانيه", "الرهبانيه",
+          "دير", "الدير", "اديره", "الاديره", "اديار", "الاديار", "كنيسه", "الكنيسه", "كنائس", "الكنائس", "قبطي", "القبطي", "قبطيه",
+          "القبطيه", "اقباط", "الاقباط", "monk", "monks", "monastery", "monasteries", "nun", "nuns", "church", "coptic", "copts"),
+         # QADFIX39 #5 (QAD 2026-11-14 case 26.1): «تاريخ الخيل العربية وأنسابها» — «The Arabian Horse» says «الحصان العربي», «فروسية» says
+         # «الخيل»: horses are one subject («الفرس» is left out: it is also the Persians; «فروسية» keeps its «ف», see stems())
+         ("خيل", "الخيل", "خيول", "الخيول", "حصان", "الحصان", "احصنه", "الاحصنه", "فروسيه", "الفروسيه", "horse", "horses", "equine"),
          # QADFIX29 #3 (QAD 2026-11-06 case 8.2, grave): «وعن الحيوانات البحرية؟» for a boy of 5 → «ما لقيت كتابًا متوفرًا عن الحيوانات
          # البحرية» while «سمكة قوس قزح» («أسماك المحيط»)، «كلماتي الأولى - البحر» and «رحلة حص البحر» are in stock: «البحرية» has no
          # stem «بحر» (a three-letter root keeps its «يه»), and the books say the sea, the ocean, a fish. The fish words lead to the sea,
@@ -207,6 +266,15 @@ def content_words(phrase):
     if _CALLI35.search(" ".join(normalize(phrase or "").split())):
         phrase = "الخط العربي"   # QADFIX35 (case 47.1)
     out = []
+    _ww = ww_spans(normalize(phrase or ""))
+    if _ww:
+        # QADFIX38 #4: «الحرب العالمية (الثانية)» is one word of the subject (with its order when said); the rest is read as before
+        _np, _cut = normalize(phrase or ""), []
+        for s, e, o in sorted(_ww, reverse=True):
+            _np = _np[:s] + " " + _np[e:]
+            _cut.append({WW_TOKEN + o} if o else {WW_TOKEN})
+        out += list(reversed(_cut))
+        phrase = _np
     _all34 = [w for w in normalize(phrase).split()
               if len(w) >= 3 and w not in _STOP and strip_al(w) not in _STOP and not w.isdigit()]
     # (only before the adjective of a dynasty or an age — «العثماني / العثمانيين / العباسي / الفيكتوري»; «عصر النهضة» keeps both words)
@@ -430,6 +498,10 @@ def core_word(phrase, idx):
     """The rarest specific word of a subject of two words or more («سقوط غرناطة» -> «غرناطة»), used
     only when no book in stock has the whole subject (QA 2026-10-08), else None."""
     _, counts, total = idx
+    _ww = ww_spans(normalize(phrase or ""))
+    if _ww:
+        # QADFIX38 #4: a world war is never cut to «العالمية» or «الحرب»; with its order asked and none found, the war itself
+        return "الحرب العالميه" if any(o for _s, _e, o in _ww) else None
     best = None
     words = [w for w in normalize(phrase).split() if len(w) >= 3 and w not in _STOP and strip_al(w) not in _STOP and not w.isdigit()]
     if len(words) < 2:
